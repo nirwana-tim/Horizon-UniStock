@@ -31,6 +31,26 @@
 
 ---
 
+## Executive Summary
+
+Project ini merupakan pengembangan sistem berbasis web untuk membantu Finance dalam mengelola proses distribusi seragam mahasiswa. Dibangun untuk menggantikan proses manual yang sebelumnya menggunakan Google Form, Google Sheet, barcode manual, checklist manual, dan rekap Excel.
+
+Permasalahan utama dari sistem lama adalah: data tersebar di banyak file, sulit tracking siapa menerima barang apa, risiko double submit, risiko salah ukuran, proses hari-H lambat, report membutuhkan rekap manual, dan data stok belum terhubung dengan distribusi.
+
+Solusi yang dirancang adalah sistem terintegrasi yang mencakup: Student Data → Size Management → QR Identity → Staff Distribution → Inventory Movement → Finance Report. MVP difokuskan pada distribusi Freshman dengan target implementasi **20 Juli 2026**.
+
+### Poin Utama MVP
+
+1. Mahasiswa input ukuran → Sistem generate QR → Staff scan QR → Distribusi tercatat
+2. Stock management: Stock Receive (IN) → Distribution (OUT) → Stock Balance
+3. **Stock Opname Bulanan**: Upload hasil opname → Hitung variance → Adjustment journal
+4. **GPM / Cost Analysis**: Tracking HPP, harga jual, laporan laba/rugi per item
+5. Report tersedia untuk distribusi, inventory, dan GPM
+
+> **Keputusan utama:** Jangan membangun ERP inventory penuh pada MVP. Bangun proses distribusi Freshman yang stabil terlebih dahulu, lalu kembangkan fitur inventory dan Finance secara bertahap.
+
+---
+
 ## 1. Tentang
 
 **Horizon-UniStock** adalah sistem berbasis web untuk mengelola proses distribusi seragam mahasiswa. Dibangun untuk menggantikan proses manual yang sebelumnya menggunakan:
@@ -99,6 +119,8 @@ MVP tidak memprioritaskan seluruh sistem inventory enterprise.
 4. Staff melakukan distribusi
 5. Sistem mencatat transaksi
 6. Report tersedia
+7. **Stock Opname Bulanan** (opname fisik, variance tracking, adjustment)
+8. **GPM / Cost Analysis** (HPP tracking, harga jual, laba/rugi)
 
 ---
 
@@ -145,10 +167,9 @@ Tidak termasuk dalam MVP:
 
 - Continuing full system
 - POS eceran
-- FIFO
-- VIVO
-- Cost revenue
-- Stock opname kompleks
+- FIFO / VIVO cost method
+- Advanced Stock Opname (multi-lokasi, cycle counting)
+- Advanced Cost Analytics (FIFO/VIVO)
 - Email automation penuh
 - Integrasi SIS
 - Mobile app native
@@ -701,6 +722,8 @@ erDiagram
         string code
         int category_id FK
         string unit
+        decimal selling_price
+        decimal hpp
     }
 
     ITEM_VARIANTS {
@@ -837,6 +860,7 @@ erDiagram
         int variant_id FK
         int quantity
         decimal unit_price
+        decimal hpp
     }
 
     STOCK_MOVEMENTS {
@@ -855,6 +879,7 @@ erDiagram
         int variant_id FK
         int quantity
         int reserved
+        decimal last_hpp
     }
 
     IMPORT_BATCHES {
@@ -884,6 +909,39 @@ erDiagram
         string model_type
         int model_id
         string ip_address
+    }
+
+    STOCK_OPNAMES {
+        int id PK
+        string reference_number UK
+        date opname_date
+        string period
+        string notes
+        string status
+        int created_by FK
+        datetime created_at
+    }
+
+    STOCK_OPNAME_ITEMS {
+        int id PK
+        int stock_opname_id FK
+        int item_id FK
+        int variant_id FK
+        int system_quantity
+        int physical_quantity
+        int variance
+        string notes
+    }
+
+    STOCK_OPNAME_ADJUSTMENTS {
+        int id PK
+        int stock_opname_id FK
+        int stock_movement_id FK
+        string type
+        int quantity
+        string reason
+        int approved_by FK
+        datetime approved_at
     }
 
     USERS ||--|| STUDENTS : "fk.user_id → id"
@@ -931,6 +989,12 @@ erDiagram
     STOCK_MOVEMENTS }o--|| ITEM_VARIANTS : "fk.variant_id → id"
     STOCK_BALANCES }o--|| ITEMS : "fk.item_id → id"
     STOCK_BALANCES }o--|| ITEM_VARIANTS : "fk.variant_id → id"
+
+    STOCK_OPNAMES ||--o{ STOCK_OPNAME_ITEMS : "fk.stock_opname_id → id"
+    STOCK_OPNAME_ITEMS }o--|| ITEMS : "fk.item_id → id"
+    STOCK_OPNAME_ITEMS }o--|| ITEM_VARIANTS : "fk.variant_id → id"
+    STOCK_OPNAMES ||--o{ STOCK_OPNAME_ADJUSTMENTS : "fk.stock_opname_id → id"
+    STOCK_OPNAME_ADJUSTMENTS }o--|| STOCK_MOVEMENTS : "fk.stock_movement_id → id"
 
     IMPORT_BATCHES }o--|| USERS : "fk.imported_by → id"
     AUDIT_LOGS }o--|| USERS : "fk.user_id → id"
@@ -1031,6 +1095,8 @@ erDiagram
 | `code` | string | Kode item |
 | `category_id` | int (FK → item_categories.id) | Kategori item |
 | `unit` | string | Satuan (pcs, pasang, set) |
+| `selling_price` | decimal | Harga jual per item |
+| `hpp` | decimal | Standard/average Harga Pokok Pembelian per item |
 | `created_at` | datetime | Waktu data dibuat |
 
 ---
@@ -1250,6 +1316,7 @@ erDiagram
 | `variant_id` | int (FK → item_variants.id) | Varian/ukuran item |
 | `quantity` | int | Jumlah yang diterima |
 | `unit_price` | decimal | Harga satuan |
+| `hpp` | decimal | Harga Pokok Pembelian per batch |
 | `created_at` | datetime | Waktu data dibuat |
 
 ---
@@ -1279,7 +1346,55 @@ erDiagram
 | `variant_id` | int (FK → item_variants.id) | Varian/ukuran |
 | `quantity` | int | Saldo stok tersedia |
 | `reserved` | int | Jumlah stok yang di-reserve |
+| `last_hpp` | decimal | Harga Pokok Pembelian terakhir |
 | `updated_at` | datetime | Waktu terakhir diperbarui |
+
+---
+
+#### `stock_opnames`
+
+| Kolom | Tipe | Keterangan |
+|-------|------|-----------|
+| `id` | int (PK) | Identifier unik batch opname |
+| `reference_number` | string (UK) | Nomor referensi opname |
+| `opname_date` | date | Tanggal opname |
+| `period` | string | Periode opname (contoh: "Agustus 2026") |
+| `notes` | text | Catatan opname |
+| `status` | string | Status: draft / completed / adjusted |
+| `created_by` | int (FK → users.id) | User yang membuat batch |
+| `created_at` | datetime | Waktu data dibuat |
+
+---
+
+#### `stock_opname_items`
+
+| Kolom | Tipe | Keterangan |
+|-------|------|-----------|
+| `id` | int (PK) | Identifier unik item opname |
+| `stock_opname_id` | int (FK → stock_opnames.id) | Batch opname induk |
+| `item_id` | int (FK → items.id) | Item yang diopname |
+| `variant_id` | int (FK → item_variants.id) | Varian/ukuran |
+| `system_quantity` | int | Stok menurut sistem |
+| `physical_quantity` | int | Stok menurut hasil hitung fisik |
+| `variance` | int | Selisih (physical - system) |
+| `notes` | text | Catatan per item |
+| `created_at` | datetime | Waktu data dibuat |
+
+---
+
+#### `stock_opname_adjustments`
+
+| Kolom | Tipe | Keterangan |
+|-------|------|-----------|
+| `id` | int (PK) | Identifier unik adjustment |
+| `stock_opname_id` | int (FK → stock_opnames.id) | Batch opname terkait |
+| `stock_movement_id` | int (FK → stock_movements.id) | Stock movement yang dihasilkan |
+| `type` | string | Jenis: surplus / shortage |
+| `quantity` | int | Jumlah penyesuaian |
+| `reason` | text | Alasan penyesuaian |
+| `approved_by` | int (FK → users.id) | User yang menyetujui |
+| `approved_at` | datetime | Waktu persetujuan |
+| `created_at` | datetime | Waktu data dibuat |
 
 ---
 
@@ -1328,6 +1443,59 @@ erDiagram
 | `new_values` | json | Data setelah perubahan |
 | `ip_address` | string | IP address user |
 | `created_at` | datetime | Waktu aksi tercatat |
+
+---
+
+## 7A. Item Code System
+
+### Format
+
+```
+KATEGORI-GENDER-TIPE-NOMOR
+```
+
+### Komponen
+
+| Komponen | Kode | Arti |
+|----------|------|------|
+| **KATEGORI** | UNF | Uniform |
+| | SHO | Shoes |
+| | KTM | Kartu Mahasiswa |
+| | KIT | Kit (Nursing/Midwifery) |
+| **GENDER** | L | Laki-laki |
+| | P | Perempuan |
+| | U | Unisex |
+| **TIPE** | SCB | Scrub Suit |
+| | CLC | Clinical Uniform |
+| | ALM | Almamater |
+| | CLG | College Uniform |
+| | COM | Community Uniform |
+| | LAB | Laboratory Gown |
+| | YDH | Lanyard & Holder |
+| | NUR | Nursing Kit |
+| | MID | Midwifery Kit |
+| **NOMOR** | 01, 02, 03... | Variasi ukuran |
+
+### Contoh
+
+| Kode | Deskripsi |
+|------|-----------|
+| `UNF-L-SCB-02-03` | Uniform Scrub Laki-Laki STIK ukuran 03 |
+| `UNF-P-SCB-02-05` | Uniform Scrub Perempuan STIKES ukuran 05 |
+| `SHO-P-CLC-02-41` | Shoes Clinical Perempuan STIKES ukuran 41 |
+| `UNF-U-ALM-01-03` | Uniform Almamater Unisex Horizon ukuran 03 |
+| `KTM-U-KTM-01-01` | KTM Kartu Mahasiswa Unisex |
+| `KIT-U-NUR` | Kit Nursing Unisex |
+| `KIT-U-MID` | Kit Midwifery Unisex |
+| `SHO-L-CLG-01-03` | Shoes College Laki-Laki Horizon ukuran 03 |
+
+### Aturan Penulisan
+
+1. Semua kode menggunakan **UPPERCASE**
+2. Dipisahkan dengan **tanda hubung** (`-`)
+3. Nomor ukuran **2 digit** (01, 02, ... 09, 10, dst)
+4. Kode harus **konsisten** di seluruh sistem
+5. Kode yang sudah dibuat tidak boleh diubah (immutable)
 
 ---
 
@@ -1411,6 +1579,8 @@ Simpan Import Log (siapa, kapan, hasil)
 | Data Mahasiswa | `students` | NIM, nama, prodi, level, email |
 | Eligible Payment | `eligibility_records` | Status bayar per mahasiswa |
 | Item & Stock | `items`, `stock_receives` | Data barang & stok awal |
+| **Stock Opname** | `stock_opnames`, `stock_opname_items` | Hasil opname fisik bulanan |
+| **Item Master + Harga** | `items`, `item_variants` | Data barang dengan harga jual |
 
 ### 10.2 Report MVP
 
@@ -1426,6 +1596,15 @@ Simpan Import Log (siapa, kapan, hasil)
 - Stock balance per item
 - Barang keluar (distribution)
 - Movement history (IN/OUT)
+- **Stock Opname report** (variance per item)
+
+#### GPM / Cost Report
+
+- **HPP per item per batch**
+- **Harga jual per item**
+- **Laba/Rugi per item** = (Harga Jual - HPP) × Qty Terjual
+- **Laba/Rugi per kategori**
+- **Laba/Rugi per periode**
 
 **Format Export:** Excel (.xlsx)
 
@@ -1494,6 +1673,10 @@ Jika sistem bermasalah saat hari distribusi:
 | 10 | Import Excel format salah | Error handling, tampilkan pesan jelas |
 | 11 | Update ukuran kedua kalinya | Tolak, maksimal 1 kali |
 | 12 | Jadwal distribusi - email duplikat | Hanya dikirim 1x per mahasiswa per jadwal |
+| 13 | **Stock opname - variance positif** | Surplus tercatat, adjustment journal dibuat |
+| 14 | **Stock opname - variance negatif** | Shortage tercatat, adjustment journal dibuat |
+| 15 | **GPM calculation** | (Harga Jual - HPP) × Qty Terjual = Laba/Rugi |
+| 16 | **Import stock opname** | Variance dihitung otomatis per item |
 
 ---
 
@@ -1541,8 +1724,8 @@ Tambahan setelah MVP:
 - POS pembelian tambahan
 - Dashboard Finance (real-time)
 - Email notification otomatis
-- Stock opname penuh
-- Cost tracking
+- **Advanced Stock Opname** (multi-lokasi, cycle counting, real-time)
+- **Advanced Cost Analytics** (FIFO/VIVO, cost allocation, profit center)
 - Revenue dashboard
 - Multi warehouse
 - Integrasi SIS (Sistem Informasi Student)
