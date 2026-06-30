@@ -1,0 +1,59 @@
+<?php
+
+namespace App\Imports;
+
+use App\Models\Item;
+use App\Models\ItemVariant;
+use App\Models\StockBalance;
+use App\Models\StockOpnameItem;
+use Maatwebsite\Excel\Concerns\ToCollection;
+use Maatwebsite\Excel\Concerns\WithHeadingRow;
+use Maatwebsite\Excel\Concerns\WithValidation;
+use Illuminate\Support\Collection;
+
+class StockOpnameImport implements ToCollection, WithHeadingRow, WithValidation
+{
+    protected int $stockOpnameId;
+
+    public function __construct(int $stockOpnameId)
+    {
+        $this->stockOpnameId = $stockOpnameId;
+    }
+
+    public function collection(Collection $rows): void
+    {
+        foreach ($rows as $row) {
+            $item = Item::where('code', $row['kode_item'])->first();
+            $variant = $item
+                ? $item->variants()->where('size', $row['varian_ukuran'])->first()
+                : null;
+
+            $systemQuantity = 0;
+            if ($item && $variant) {
+                $stockBalance = StockBalance::where('item_id', $item->id)
+                    ->where('variant_id', $variant->id)
+                    ->first();
+                $systemQuantity = $stockBalance?->quantity ?? 0;
+            }
+
+            $physicalQuantity = (int) $row['quantity_fisik'];
+
+            StockOpnameItem::create([
+                'stock_opname_id' => $this->stockOpnameId,
+                'item_id' => $item?->id,
+                'variant_id' => $variant?->id,
+                'system_quantity' => $systemQuantity,
+                'physical_quantity' => $physicalQuantity,
+            ]);
+        }
+    }
+
+    public function rules(): array
+    {
+        return [
+            'kode_item' => ['required', 'string', 'exists:items,code'],
+            'varian_ukuran' => ['required', 'string'],
+            'quantity_fisik' => ['required', 'integer', 'min:0'],
+        ];
+    }
+}
