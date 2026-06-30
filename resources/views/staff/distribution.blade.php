@@ -1,0 +1,232 @@
+<x-app-layout>
+    <x-slot name="header">
+        <div class="flex items-center justify-between">
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ __('Distribusi Barang') }}</h2>
+            <a href="{{ route('staff.scan.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                {{ __('Kembali') }}
+            </a>
+        </div>
+    </x-slot>
+
+    <div class="py-12">
+        <div class="max-w-5xl mx-auto sm:px-6 lg:px-8">
+            @if(session('success'))
+                <div class="mb-4 px-4 py-3 bg-green-100 border border-green-300 text-green-700 rounded-md">
+                    {{ session('success') }}
+                </div>
+            @endif
+
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
+                <div class="p-6">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Informasi Mahasiswa</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-sm text-gray-500">Nama</p>
+                            <p class="font-medium text-gray-900">{{ $student->name }}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">NIM</p>
+                            <p class="font-medium text-gray-900">{{ $student->nim }}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Program Studi</p>
+                            <p class="font-medium text-gray-900">{{ $student->studyProgram->name ?? '-' }}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Level / Angkatan</p>
+                            <p class="font-medium text-gray-900">{{ $student->programLevel->name ?? '-' }}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Jenis Mahasiswa</p>
+                            <p class="font-medium text-gray-900">{{ ucfirst($student->student_type) }}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Email Kampus</p>
+                            <p class="font-medium text-gray-900">{{ $student->email_kampus ?? '-' }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            @if(!$activeSchedule)
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                    <div class="p-6 text-center">
+                        <p class="text-gray-500">Tidak ada jadwal distribusi aktif untuk hari ini.</p>
+                    </div>
+                </div>
+            @elseif(!$entitlement)
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                    <div class="p-6 text-center">
+                        <p class="text-gray-500">Mahasiswa ini tidak memiliki hak barang untuk tahap distribusi saat ini.</p>
+                    </div>
+                </div>
+            @else
+                <form action="{{ route('staff.scan.process') }}" method="POST">
+                    @csrf
+                    <input type="hidden" name="student_id" value="{{ $student->id }}">
+                    <input type="hidden" name="schedule_id" value="{{ $activeSchedule->id }}">
+
+                    <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
+                        <div class="p-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-lg font-medium text-gray-900">Item yang Berhak Diterima</h3>
+                                <div class="text-sm text-gray-500">
+                                    {{ $activeSchedule->stage->name ?? '-' }} | {{ $activeSchedule->date->format('d M Y') }}
+                                </div>
+                            </div>
+
+                            @if($scheduleItems->isEmpty())
+                                <p class="text-gray-500">Tidak ada item untuk jadwal ini.</p>
+                            @else
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full divide-y divide-gray-200">
+                                        <thead class="bg-gray-50">
+                                            <tr>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                    Centang
+                                                </th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                    Item
+                                                </th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                    Kode
+                                                </th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                    Ukuran Input
+                                                </th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                    Ukuran Aktual
+                                                </th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                    Qty
+                                                </th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                    Stok
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="bg-white divide-y divide-gray-200">
+                                            @foreach($scheduleItems as $index => $item)
+                                                @php
+                                                    $sizeInfo = $studentSizes[$item->id] ?? null;
+                                                    $expectedSize = $sizeInfo['size'] ?? '-';
+                                                    $availableStock = $stockInfo[$item->id][$expectedSize] ?? 0;
+                                                @endphp
+                                                <tr>
+                                                    <td class="px-6 py-4 whitespace-nowrap">
+                                                        <input type="checkbox"
+                                                            name="items[{{ $index }}][item_id]"
+                                                            value="{{ $item->id }}"
+                                                            class="item-check rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                                                            data-index="{{ $index }}">
+                                                        <input type="hidden" name="items[{{ $index }}][expected_size]" value="{{ $expectedSize }}">
+                                                    </td>
+                                                    <td class="px-6 py-4 whitespace-nowrap">
+                                                        <div class="text-sm font-medium text-gray-900">{{ $item->name }}</div>
+                                                    </td>
+                                                    <td class="px-6 py-4 whitespace-nowrap">
+                                                        <div class="text-sm text-gray-500">{{ $item->code }}</div>
+                                                    </td>
+                                                    <td class="px-6 py-4 whitespace-nowrap">
+                                                        <div class="text-sm text-gray-900">{{ $expectedSize }}</div>
+                                                    </td>
+                                                    <td class="px-6 py-4 whitespace-nowrap">
+                                                        <select name="items[{{ $index }}][actual_size]"
+                                                            class="block w-24 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm item-size"
+                                                            data-index="{{ $index }}">
+                                                            @if(strpos($expectedSize, '3') === 0 || in_array((int)$expectedSize, range(38, 46)))
+                                                                @foreach(range(38, 46) as $size)
+                                                                    <option value="{{ $size }}" {{ $expectedSize == $size ? 'selected' : '' }}>{{ $size }}</option>
+                                                                @endforeach
+                                                            @else
+                                                                @foreach(['S', 'M', 'L', 'XL', 'XXL'] as $size)
+                                                                    <option value="{{ $size }}" {{ $expectedSize == $size ? 'selected' : '' }}>{{ $size }}</option>
+                                                                @endforeach
+                                                            @endif
+                                                        </select>
+                                                    </td>
+                                                    <td class="px-6 py-4 whitespace-nowrap">
+                                                        <input type="number" name="items[{{ $index }}][quantity]"
+                                                            value="1" min="1" max="10"
+                                                            class="block w-20 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm item-qty"
+                                                            data-index="{{ $index }}">
+                                                    </td>
+                                                    <td class="px-6 py-4 whitespace-nowrap">
+                                                        @php
+                                                            $stockQty = $stockInfo[$item->id][$expectedSize] ?? 0;
+                                                        @endphp
+                                                        <span class="text-sm {{ $stockQty > 0 ? 'text-green-600' : 'text-red-600' }}">
+                                                            {{ $stockQty }} pcs
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+
+                    @error('items')
+                        <div class="mb-4 px-4 py-3 bg-red-100 border border-red-300 text-red-700 rounded-md">
+                            {{ $message }}
+                        </div>
+                    @enderror
+
+                    <div class="flex items-center gap-4">
+                        <button type="submit" id="submit-btn"
+                            class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-700 focus:bg-green-700 active:bg-green-800 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition ease-in-out duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
+                            disabled>
+                            {{ __('Konfirmasi Distribusi') }}
+                        </button>
+                        <a href="{{ route('staff.scan.index') }}"
+                            class="inline-flex items-center px-4 py-2 bg-gray-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                            {{ __('Batal') }}
+                        </a>
+                    </div>
+                </form>
+            @endif
+        </div>
+    </div>
+
+    @push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const checkboxes = document.querySelectorAll('.item-check');
+            const submitBtn = document.getElementById('submit-btn');
+
+            function updateSubmitState() {
+                const anyChecked = Array.from(checkboxes).some(cb => cb.checked);
+                submitBtn.disabled = !anyChecked;
+            }
+
+            checkboxes.forEach(function (cb) {
+                cb.addEventListener('change', function () {
+                    const index = this.dataset.index;
+                    const sizeSelect = document.querySelector(`.item-size[data-index="${index}"]`);
+                    const qtyInput = document.querySelector(`.item-qty[data-index="${index}"]`);
+
+                    if (sizeSelect) {
+                        sizeSelect.disabled = !this.checked;
+                    }
+                    if (qtyInput) {
+                        qtyInput.disabled = !this.checked;
+                    }
+
+                    updateSubmitState();
+                });
+
+                const index = cb.dataset.index;
+                const sizeSelect = document.querySelector(`.item-size[data-index="${index}"]`);
+                const qtyInput = document.querySelector(`.item-qty[data-index="${index}"]`);
+
+                if (sizeSelect) sizeSelect.disabled = true;
+                if (qtyInput) qtyInput.disabled = true;
+            });
+
+            updateSubmitState();
+        });
+    </script>
+    @endpush
+</x-app-layout>

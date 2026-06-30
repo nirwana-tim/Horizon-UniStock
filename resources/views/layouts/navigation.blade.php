@@ -15,11 +15,49 @@
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
+
+                    @hasanyrole(['super_admin', 'finance'])
+                    <x-nav-link :href="route('master.faculty.index')" :active="request()->routeIs('master.*')">
+                        {{ __('Master Data') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('import.index')" :active="request()->routeIs('import.*')">
+                        {{ __('Import') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('finance.stock-opname.index')" :active="request()->routeIs('finance.stock-opname.*')">
+                        {{ __('Stock Opname') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('finance.gpm.index')" :active="request()->routeIs('finance.gpm.*')">
+                        {{ __('GPM') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('reports.index')" :active="request()->routeIs('reports.*')">
+                        {{ __('Reports') }}
+                    </x-nav-link>
+                    @endhasanyrole
+
+                    @hasanyrole(['staff', 'finance'])
+                    <x-nav-link :href="route('staff.scan.index')" :active="request()->routeIs('staff.*')">
+                        {{ __('Scan & Distribusi') }}
+                    </x-nav-link>
+                    @endhasanyrole
+
+                    @role('student')
+                    <x-nav-link :href="route('student.sizes.index')" :active="request()->routeIs('student.*')">
+                        {{ __('Input Ukuran') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('student.qr')" :active="request()->routeIs('student.qr')">
+                        {{ __('QR Saya') }}
+                    </x-nav-link>
+                    @endrole
                 </div>
             </div>
 
             <!-- Settings Dropdown -->
             <div class="hidden sm:flex sm:items-center sm:ms-6">
+                <!-- Role Badge -->
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 me-3">
+                    {{ ucfirst(Auth::user()->getRoleNames()->first() ?? 'user') }}
+                </span>
+
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
                         <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
@@ -70,6 +108,39 @@
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
+
+            @hasanyrole(['super_admin', 'finance'])
+            <x-responsive-nav-link :href="route('master.faculty.index')" :active="request()->routeIs('master.*')">
+                {{ __('Master Data') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('import.index')" :active="request()->routeIs('import.*')">
+                {{ __('Import') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('finance.stock-opname.index')" :active="request()->routeIs('finance.stock-opname.*')">
+                {{ __('Stock Opname') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('finance.gpm.index')" :active="request()->routeIs('finance.gpm.*')">
+                {{ __('GPM') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('reports.index')" :active="request()->routeIs('reports.*')">
+                {{ __('Reports') }}
+            </x-responsive-nav-link>
+            @endhasanyrole
+
+            @hasanyrole(['staff', 'finance'])
+            <x-responsive-nav-link :href="route('staff.scan.index')" :active="request()->routeIs('staff.*')">
+                {{ __('Scan & Distribusi') }}
+            </x-responsive-nav-link>
+            @endhasanyrole
+
+            @role('student')
+            <x-responsive-nav-link :href="route('student.sizes.index')" :active="request()->routeIs('student.*')">
+                {{ __('Input Ukuran') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('student.qr')" :active="request()->routeIs('student.qr')">
+                {{ __('QR Saya') }}
+            </x-responsive-nav-link>
+            @endrole
         </div>
 
         <!-- Responsive Settings Options -->
