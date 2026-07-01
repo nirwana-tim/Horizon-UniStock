@@ -51,7 +51,7 @@ Sebelum mengerjakan task apa pun di project ini, AI **WAJIB** membaca dokumentas
 | Role | Permissions | Keterangan |
 |------|-------------|-----------|
 | `super_admin` | Semua permission | Akses penuh ke seluruh sistem |
-| `finance` | `manage-finance`, `manage-distributions` | Import data, entitlement, stock receive, stock opname, GPM, report |
+| `admin` | `manage-finance`, `manage-distributions` | Import data, entitlement, stock receive, stock opname, GPM, report |
 | `staff` | `manage-students` | Scan QR, distribusi barang, validasi stok |
 | `student` | (tanpa permission) | Login, input ukuran, lihat jadwal |
 
