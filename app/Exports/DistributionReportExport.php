@@ -3,18 +3,15 @@
 namespace App\Exports;
 
 use App\Models\DistributionItem;
-use App\Models\DistributionPeriod;
-use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Concerns\FromCollection;
-use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class DistributionReportExport implements FromCollection, WithHeadings, WithMapping, WithStyles
+class DistributionReportExport extends BaseExport implements FromCollection, WithHeadings, WithMapping, WithStyles
 {
-    use Exportable;
+    use \Maatwebsite\Excel\Concerns\Exportable;
 
     private int $row = 0;
 
@@ -29,27 +26,29 @@ class DistributionReportExport implements FromCollection, WithHeadings, WithMapp
             ->join('distribution_schedules', 'distribution_transactions.schedule_id', '=', 'distribution_schedules.id')
             ->select(
                 'distribution_items.*',
-                'distribution_schedules.period',
                 'distribution_transactions.student_id',
                 'distribution_transactions.status as transaction_status',
                 'distribution_transactions.pickup_time'
             );
 
         if ($this->period) {
-            $query->where('distribution_schedules.period', $this->period);
+            $query->whereHas('transaction.schedule', function ($q) {
+                $q->where('period', $this->period);
+            });
         }
 
-        return $query->orderBy('distribution_schedules.period')->get();
+        return $query->orderBy('distribution_transactions.created_at')->get();
     }
 
     public function headings(): array
     {
         return [
             'No',
-            'Periode',
-            'Mahasiswa',
+            'Nama Mahasiswa',
+            'Prodi',
             'Item',
-            'Ukuran',
+            'Ukuran Diharapkan',
+            'Ukuran Diberikan',
             'Jumlah',
             'Status',
             'Waktu Ambil',
@@ -62,20 +61,36 @@ class DistributionReportExport implements FromCollection, WithHeadings, WithMapp
 
         return [
             $this->row,
-            $item->period,
             $item->transaction->student->name ?? '-',
+            $item->transaction->student->studyProgram->name ?? '-',
             $item->item->name ?? '-',
-            $item->actual_size ?? $item->expected_size ?? '-',
+            $item->expected_size ?? '-',
+            $item->actual_size ?? '-',
             $item->quantity,
             $item->transaction_status,
             $item->pickup_time ? $item->pickup_time->format('d/m/Y H:i') : '-',
         ];
     }
 
-    public function styles(Worksheet $sheet): array
+    public function styles(Worksheet $sheet): void
     {
-        return [
-            1 => ['font' => ['bold' => true, 'size' => 12]],
-        ];
+        $colCount = 9;
+        $headerRow = $this->headerRow();
+        $dataStart = $this->dataStartRow();
+        $lastRow = $dataStart + $this->row - 1;
+
+        $this->setTitle($sheet, 'LAPORAN REKAP PEMBAGIAN', $colCount);
+        $filterText = $this->period ? 'Periode: ' . $this->period : 'Semua Periode';
+        $this->setSubtitle($sheet, $filterText, $colCount);
+
+        $this->applyHeaderStyle($sheet, $headerRow, $colCount);
+        $this->applyDataStyle($sheet, $dataStart, $lastRow, $colCount);
+
+        $this->setColumnWidths($sheet, [
+            'A' => 5, 'B' => 30, 'C' => 22, 'D' => 35,
+            'E' => 18, 'F' => 18, 'G' => 10, 'H' => 14, 'I' => 18,
+        ]);
+
+        $sheet->freezePane('A' . ($headerRow + 1));
     }
 }

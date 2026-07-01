@@ -3,7 +3,9 @@
 namespace App\Services;
 
 use App\Imports\EligibilityImport;
+use App\Imports\EntitlementImport;
 use App\Imports\ItemImport;
+use App\Imports\ItemPriceImport;
 use App\Imports\StockOpnameImport;
 use App\Imports\StudentImport;
 use App\Models\ImportBatch;
@@ -75,6 +77,8 @@ class ImportService
             'eligibility' => new EligibilityImport(),
             'item' => new ItemImport(),
             'stock_opname' => $this->resolveStockOpnameImporter($filePath),
+            'item_price' => new ItemPriceImport(),
+            'entitlement' => new EntitlementImport(),
             default => throw new \InvalidArgumentException("Import type '{$type}' is not supported."),
         };
     }

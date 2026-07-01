@@ -11,6 +11,7 @@ use App\Http\Controllers\Master\ItemVariantController;
 use App\Http\Controllers\ImportController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\TemplateController;
 use App\Http\Controllers\Staff\ScanController;
 use App\Http\Controllers\Student\SizeController;
 use Illuminate\Support\Facades\Route;
@@ -40,6 +41,10 @@ Route::middleware(['auth', 'role:super_admin,finance'])->prefix('master')->name(
     Route::delete('item/{item}/variant/{variant}', [ItemVariantController::class, 'destroy'])->name('item.variant.destroy');
 });
 
+Route::middleware(['auth', 'role:super_admin,finance'])->group(function () {
+    Route::get('/templates/{type}/download', [TemplateController::class, 'download'])->name('templates.download');
+});
+
 Route::middleware(['auth', 'role:super_admin,finance'])->prefix('import')->name('import.')->group(function () {
     Route::get('/', [ImportController::class, 'index'])->name('index');
     Route::post('/', [ImportController::class, 'store'])->name('store');
@@ -58,6 +63,10 @@ Route::middleware(['auth', 'role:super_admin,finance'])->prefix('reports')->name
     Route::get('distribution', [ReportController::class, 'distribution'])->name('distribution');
     Route::get('inventory', [ReportController::class, 'inventory'])->name('inventory');
     Route::get('gpm', [ReportController::class, 'gpm'])->name('gpm');
+    Route::get('stock', [ReportController::class, 'stock'])->name('stock');
+    Route::get('stock-opname', [ReportController::class, 'stockOpname'])->name('stock-opname');
+    Route::get('stock-card', [ReportController::class, 'stockCard'])->name('stock-card');
+    Route::get('loss', [ReportController::class, 'loss'])->name('loss');
 });
 
 Route::middleware(['auth', 'role:student'])->prefix('student')->name('student.')->group(function () {
