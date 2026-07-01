@@ -51,7 +51,7 @@ Sebelum mengerjakan task apa pun di project ini, AI **WAJIB** membaca dokumentas
 | Role | Permissions | Keterangan |
 |------|-------------|-----------|
 | `super_admin` | Semua permission | Akses penuh ke seluruh sistem |
-| `finance` | `manage-finance` | Import data, entitlement, stock receive, stock opname, GPM, report |
+| `finance` | `manage-finance`, `manage-distributions` | Import data, entitlement, stock receive, stock opname, GPM, report |
 | `staff` | `manage-students` | Scan QR, distribusi barang, validasi stok |
 | `student` | (tanpa permission) | Login, input ukuran, lihat jadwal |
 
@@ -66,6 +66,7 @@ Sebelum mengerjakan task apa pun di project ini, AI **WAJIB** membaca dokumentas
 - `item_categories` — Kategori Barang
 - `items` — Barang
 - `item_variants` — Varian Ukuran Barang
+- `item_prices` — Harga Barang Per Periode
 - `vendors` — Vendor/Supplier
 
 ### Student Process

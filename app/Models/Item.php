@@ -74,4 +74,14 @@ class Item extends Model
     {
         return $this->hasMany(StockOpnameItem::class);
     }
+
+    public function prices(): HasMany
+    {
+        return $this->hasMany(ItemPrice::class);
+    }
+
+    public function currentPrice(): ?ItemPrice
+    {
+        return $this->prices()->whereNull('period_id')->latest('id')->first();
+    }
 }

@@ -674,7 +674,6 @@ erDiagram
         string name
         string email UK
         string password
-        string role
     }
 
     FACULTIES {
@@ -731,6 +730,15 @@ erDiagram
         int item_id FK
         string size
         string sku
+    }
+
+    ITEM_PRICES {
+        int id PK
+        int item_id FK
+        int period_id FK
+        decimal selling_price
+        decimal hpp
+        date effective_date
     }
 
     VENDORS {
@@ -795,7 +803,6 @@ erDiagram
 
     ENTITLEMENTS {
         int id PK
-        int stage_id FK
         int study_program_id FK
         int program_level_id FK
         int period_id FK
@@ -950,6 +957,8 @@ erDiagram
     PROGRAM_LEVELS ||--o{ STUDENTS : "fk.program_level_id → id"
     ITEM_CATEGORIES ||--o{ ITEMS : "fk.category_id → id"
     ITEMS ||--o{ ITEM_VARIANTS : "fk.item_id → id"
+    ITEMS ||--o{ ITEM_PRICES : "fk.item_id → id"
+    ITEM_PRICES }o--|| DISTRIBUTION_PERIODS : "fk.period_id → id"
     VENDORS ||--o{ STOCK_RECEIVES : "fk.vendor_id → id"
 
     STUDENTS ||--o{ ELIGIBILITY_RECORDS : "fk.student_id → id"
@@ -962,7 +971,6 @@ erDiagram
     DISTRIBUTION_PERIODS ||--o{ STUDENT_SIZE_PROFILES : "fk.period_id → id"
     DISTRIBUTION_PERIODS ||--o{ DISTRIBUTION_STAGES : "fk.period_id → id"
 
-    DISTRIBUTION_STAGES ||--o{ ENTITLEMENTS : "fk.stage_id → id"
     ENTITLEMENTS }o--|| STUDY_PROGRAMS : "fk.study_program_id → id"
     ENTITLEMENTS }o--|| PROGRAM_LEVELS : "fk.program_level_id → id"
     ENTITLEMENTS }o--|| DISTRIBUTION_PERIODS : "fk.period_id → id"
@@ -1014,7 +1022,6 @@ erDiagram
 | `name` | string | Nama lengkap pengguna |
 | `email` | string (UK) | Email login, harus unik |
 | `password` | string | Password ter-hash (bcrypt) |
-| `role` | string | Peran: super_admin, finance, staff, student |
 | `email_verified_at` | datetime | Waktu email terverifikasi |
 | `created_at` | datetime | Waktu akun dibuat |
 | `updated_at` | datetime | Waktu terakhir diperbarui |
@@ -1111,6 +1118,22 @@ erDiagram
 | `sku` | string | Stock Keeping Unit (kode unik varian) |
 | `weight` | decimal | Berat item (opsional) |
 | `created_at` | datetime | Waktu data dibuat |
+
+---
+
+#### `item_prices`
+
+| Kolom | Tipe | Keterangan |
+|-------|------|-----------|
+| `id` | int (PK) | Identifier unik harga item per periode |
+| `item_id` | int (FK → items.id) | Item terkait |
+| `period_id` | int (FK → distribution_periods.id, nullable) | Periode harga (null = harga current) |
+| `selling_price` | decimal | Harga jual pada periode ini |
+| `hpp` | decimal | Harga Pokok Pembelian pada periode ini |
+| `effective_date` | date | Tanggal efektif harga mulai berlaku |
+| `created_at` | datetime | Waktu data dibuat |
+
+> **Catatan:** Tabel ini menyediakan riwayat harga per periode. Setiap kali harga berubah (misal tahun ajaran baru), buat record baru dengan `period_id` yang sesuai. Ini memungkinkan perhitungan GPM akurat untuk periode sebelumnya.
 
 ---
 

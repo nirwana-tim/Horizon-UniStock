@@ -19,7 +19,7 @@ class RolePermissionSeeder extends Seeder
         $superAdmin->givePermissionTo(Permission::all());
 
         $finance = Role::create(['name' => 'finance']);
-        $finance->givePermissionTo('manage-finance');
+        $finance->givePermissionTo(['manage-finance', 'manage-distributions']);
 
         $staff = Role::create(['name' => 'staff']);
         $staff->givePermissionTo('manage-students');

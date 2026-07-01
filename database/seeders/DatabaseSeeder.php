@@ -12,14 +12,20 @@ class DatabaseSeeder extends Seeder
 
     public function run(): void
     {
-        User::create([
-            'name' => 'Super Admin',
-            'email' => 'superadmin@horizon-unistock.test',
-            'password' => bcrypt('password'),
-        ]);
+        User::firstOrCreate(
+            ['email' => 'superadmin@horizon-unistock.test'],
+            [
+                'name' => 'Super Admin',
+                'password' => bcrypt('password'),
+            ]
+        );
 
         $this->call([
             RolePermissionSeeder::class,
+            FacultySeeder::class,
+            StudyProgramSeeder::class,
+            ProgramLevelSeeder::class,
+            ItemCategorySeeder::class,
         ]);
     }
 }
