@@ -32,41 +32,28 @@ class User extends Authenticatable
 
 ## 2. Buat Role & Permission
 
-**`database/seeders/RolePermissionSeeder.php`**
+**Contoh generic (mirip official docs):**
 ```php
-<?php
-
-namespace Database\Seeders;
-
-use App\Models\User;
-use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 
-class RolePermissionSeeder extends Seeder
-{
-    public function run(): void
-    {
-        Permission::create(['name' => 'manage-students']);
-        Permission::create(['name' => 'manage-distributions']);
-        Permission::create(['name' => 'manage-finance']);
+// Buat permission
+Permission::create(['name' => 'edit articles']);
+Permission::create(['name' => 'publish articles']);
 
-        $superAdmin = Role::create(['name' => 'super_admin']);
-        $superAdmin->givePermissionTo(Permission::all());
+// Buat role dan assign permission
+$role = Role::create(['name' => 'writer']);
+$role->givePermissionTo('edit articles');
 
-        $finance = Role::create(['name' => 'finance']);
-        $finance->givePermissionTo('manage-finance');
+$admin = Role::create(['name' => 'admin']);
+$admin->givePermissionTo(Permission::all());
 
-        $staff = Role::create(['name' => 'staff']);
-        $staff->givePermissionTo('manage-students');
-
-        Role::create(['name' => 'student']);
-
-        $user = User::find(1);
-        $user->assignRole('super_admin');
-    }
-}
+// Assign role ke user
+$user = User::find(1);
+$user->assignRole('admin');
 ```
+
+> **Untuk implementasi project ini**, lihat `database/seeders/RolePermissionSeeder.php` yang berisi role & permission spesifik Horizon-UniStock (super_admin, finance, staff, student).
 
 ## 3. Middleware di Route
 

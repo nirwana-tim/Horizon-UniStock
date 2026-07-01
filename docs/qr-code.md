@@ -38,19 +38,20 @@ Package untuk generate QR Code di Laravel. Fork dari `simplesoftwareio/simple-qr
 
 > **Note:** `QrCode::generate()` return HTML/SVG — harus pake `{!! !!}` (raw), bukan `{{ }}` (escaped).
 
-## 2. Generate & Simpan PNG
+## 2. Generate QR Token (Identity)
 
 ```php
+use Illuminate\Support\Str;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
-// Simpan ke public/storage
-$qrPath = 'qrcodes/' . $student->student_id . '.png';
-QrCode::format('png')
-    ->size(300)
-    ->generate($student->student_id, storage_path("app/public/{$qrPath}"));
+// Generate token unik untuk mahasiswa (1x seumur hidup)
+$student->update([
+    'qr_token' => Str::uuid(),
+    'qr_generated_at' => now(),
+]);
 
-// Simpan path ke database
-$student->update(['qr_code_path' => $qrPath]);
+// Generate SVG dari token
+$qrSvg = QrCode::size(200)->generate($student->qr_token);
 ```
 
 ## 3. Generate dengan Logo di Tengah
@@ -88,29 +89,33 @@ QrCode::errorCorrection('H') // 30% -> ukuran paling besar, perlu buat logo
 
 ## 6. Contoh Implementasi: QR Identity Mahasiswa
 
-**Di controller:**
+**Di Service:**
 ```php
-public function generateQr(Student $student)
+use Illuminate\Support\Str;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
+
+public function generateQrToken(Student $student): void
 {
-    $qrPath = "qrcodes/{$student->student_id}.png";
-
-    if (!Storage::disk('public')->exists($qrPath)) {
-        QrCode::format('png')
-            ->size(300)
-            ->color(38, 38, 128)
-            ->generate($student->student_id, storage_path("app/public/{$qrPath}"));
-
-        $student->update(['qr_code_path' => $qrPath]);
+    if ($student->qr_token) {
+        return; // QR sudah ada, tidak regenerate
     }
 
-    return redirect()->back()->with('success', 'QR Code generated');
+    $student->update([
+        'qr_token' => Str::uuid()->toString(),
+        'qr_generated_at' => now(),
+    ]);
+}
+
+public function getQrSvg(Student $student): string
+{
+    return QrCode::size(200)->generate($student->qr_token);
 }
 ```
 
 **Di Blade:**
 ```blade
-@if ($student->qr_code_path)
-    <img src="{{ Storage::url($student->qr_code_path) }}" alt="QR {{ $student->student_id }}" width="200">
+@if ($student->qr_token)
+    {!! QrCode::size(200)->generate($student->qr_token) !!}
 @else
     <form action="{{ route('students.generate-qr', $student) }}" method="POST">
         @csrf
@@ -128,7 +133,7 @@ use Illuminate\Support\Facades\Cache;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 $qrSvg = Cache::remember("qr_{$student->id}", 86400, function () use ($student) {
-    return QrCode::size(200)->generate($student->student_id);
+    return QrCode::size(200)->generate($student->qr_token);
 });
 ```
 
