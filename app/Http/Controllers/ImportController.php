@@ -21,7 +21,7 @@ class ImportController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'import_type' => ['required', 'string', 'in:student,eligibility,item,stock_opname'],
+            'import_type' => ['required', 'string', 'in:student,eligibility,item,stock_opname,item_price,entitlement'],
             'file' => ['required', 'file', 'mimes:xlsx,xls,csv', 'max:10240'],
             'stock_opname_id' => ['required_if:import_type,stock_opname', 'nullable', 'integer', 'exists:stock_opnames,id'],
         ]);
@@ -51,7 +51,7 @@ class ImportController extends Controller
     {
         $validated = $request->validate([
             'file' => ['required', 'file', 'mimes:xlsx,xls,csv', 'max:10240'],
-            'import_type' => ['required', 'string', 'in:student,eligibility,item,stock_opname'],
+            'import_type' => ['required', 'string', 'in:student,eligibility,item,stock_opname,item_price,entitlement'],
         ]);
 
         $file = $request->file('file');

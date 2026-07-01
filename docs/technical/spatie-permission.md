@@ -61,7 +61,7 @@ $user->assignRole('admin');
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'role:super_admin|finance'])->group(function () {
-    Route::get('/finance/reports', [FinanceController::class, 'index']);
+    Route::get('/finance/reports', [AdminController::class, 'index']);
 });
 
 Route::middleware(['auth', 'permission:manage-students'])->group(function () {

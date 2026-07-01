@@ -1,52 +1,50 @@
 # AGENTS.md — Pedoman untuk AI Assistant
 
+> **Full version available at:** [`docs/guides/ai-agents.md`](docs/guides/ai-agents.md)
+
+## Workflow AI WAJIB
+
+Sebelum mengerjakan **task apa pun**, AI WAJIB mengikuti urutan ini:
+
+1. **Baca docs/** — Semua file relevan di `docs/project/*`, `docs/technical/*`, `docs/guides/*`
+2. **Cek kode existing** — Model, Controller, Service, Routes yang sudah ada
+3. **Cek dokumentasi online** — Framework/package terkait (laravel.com, docs.laravel-excel.com, spatie.be, dll)
+4. **Kerjakan** — Jika sudah jelas dari langkah 1-3, kerjakan dengan Laravel 13 + Blade best practices
+5. **Buat baru** — Jika tidak ditemukan di dokumentasi manapun, buat solusi sendiri dengan best practices
+
 ## Dokumentasi yang WAJIB Dibaca
 
-Sebelum mengerjakan task apa pun di project ini, AI **WAJIB** membaca dokumentasi berikut:
-
-### Dokumentasi Project
-
-| No | File | Keterangan |
-|----|------|-----------|
-| 1 | `/SEMENTARA_HORIZON_README.md` | Dokumentasi utama sistem — tujuan, scope, database design (ERD), flowchart, arsitektur, testing, timeline |
-| 2 | `/docs/PRD.md` | Product Requirements Document — semua fitur, requirement per role, non-functional requirements |
-
-### Dokumentasi Teknis Framework & Library
-
-| No | File | Keterangan |
-|----|------|-----------|
-| 3 | `/docs/laravel-13-blade.md` | Blade template, component, directive, Vite integration |
-| 4 | `/docs/breeze.md` | Auth scaffolding, routes, middleware, 2FA |
-| 5 | `/docs/spatie-permission.md` | Role & permission, seeder, middleware, blade directive |
-| 6 | `/docs/maatwebsite-excel.md` | Export/import Excel, styling, queue |
-| 7 | `/docs/qr-code.md` | Generate QR Code (SVG/PNG), logo, error correction |
-| 8 | `/docs/html5-qrcode.md` | Scan QR via kamera browser |
-| 9 | `/docs/mail-smtp.md` | SMTP Mail, Mailable, queue, attachment |
-
-## Workflow AI
-
-1. **Baca kedua dokumen project** (SEMENTARA_HORIZON_README.md + docs/PRD.md) untuk memahami konteks
-2. **Baca dokumentasi teknis** yang relevan dengan task yang akan dikerjakan
-3. **Ikuti aturan kode** di bawah ini
-4. **Eksekusi task** sesuai urutan yang sudah ditentukan
-5. **Verifikasi** hasil kerja sebelum menyerahkan
+| # | File | Keterangan |
+|---|------|-----------|
+| 1 | `docs/project/overview.md` | Gambaran umum, tujuan, scope MVP, fitur per role |
+| 2 | `docs/project/prd.md` | Product Requirements Document |
+| 3 | `docs/project/erd.md` | ERD + detail kolom semua tabel |
+| 4 | `docs/project/flowchart.md` | Flowchart lengkap semua role |
+| 5 | `docs/project/architecture.md` | Arsitektur, service layer, tech stack |
+| 6 | `docs/project/security.md` | Security design |
+| 7 | `docs/project/item-code.md` | Item code system |
+| 8 | `docs/technical/import-export.md` | Template import, export laporan, BaseExport styling |
+| 9 | `docs/technical/laravel-blade.md` | Blade template, component, Vite |
+| 10 | `docs/technical/breeze.md` | Auth scaffolding |
+| 11 | `docs/technical/spatie-permission.md` | Role & permission |
+| 12 | `docs/technical/maatwebsite-excel.md` | Export/import Excel |
+| 13 | `docs/technical/qr-code.md` | Generate QR Code |
+| 14 | `docs/technical/html5-qrcode.md` | Scan QR via kamera |
+| 15 | `docs/technical/mail-smtp.md` | SMTP Mail |
 
 ## Aturan Kode
 
-- Gunakan **Laravel 13** style (PHP 8 attributes, Enums, typed properties)
-- Blade views menggunakan **Tailwind CSS**
-- Semua logic bisnis di **Service Layer** (bukan di Controller)
+- **Laravel 13** style (PHP 8 attributes, Enums, typed properties)
+- Logic bisnis di **Service Layer**, bukan Controller
 - Setiap perubahan data tercatat di **Audit Log**
-- Migration harus **idempotent** (bisa dijalankan ulang tanpa error)
-- Seeder harus bisa dijalankan berulang (gunakan `firstOrCreate`)
-- Gunakan **Spatie Permission** untuk role-based access control
-- Format kode barang: **KATEGORI-GENDER-TIPE-NOMOR** (contoh: `UNF-L-SCB-02-03`)
-- Password harus di-hash dengan **bcrypt**
-- Gunakan **Form Request** untuk validasi input
-- Gunakan **Resource** untuk JSON response
-- Gunakan **Route Model Binding** jika memungkinkan
+- Migration **idempotent**, Seeder pake `firstOrCreate`
+- **Spatie Permission** untuk RBAC
+- Format kode barang: `KATEGORI-GENDER-TIPE-NOMOR`
+- Password **bcrypt**, validasi pake **Form Request**
+- JSON response pake **Resource**
+- **Route Model Binding** jika memungkinkan
 
-## Role Definitions
+## Role & Permission
 
 | Role | Permissions | Keterangan |
 |------|-------------|-----------|
@@ -101,13 +99,4 @@ Sebelum mengerjakan task apa pun di project ini, AI **WAJIB** membaca dokumentas
 
 ## Prioritas Pengerjaan
 
-1. **Database & Migration** — Buat semua tabel sesuai ERD
-2. **Model & Relationship** — Buat Eloquent Model dengan relationship
-3. **Import Service** — Import Excel mahasiswa, eligible, items
-4. **Master Data CRUD** — Fakultas, Prodi, Level, Item, Size
-5. **Student Flow** — Login, input ukuran, QR
-6. **Staff Flow** — Scan QR, distribusi, stock OUT
-7. **Stock Opname** — Batch opname, variance, adjustment
-8. **GPM / Cost** — HPP tracking, harga jual, laporan
-9. **Report** — Export distribusi, inventory, GPM
-10. **Testing** — Semua skenario di PRD
+1. Database & Migration → 2. Model & Relationship → 3. Import Service → 4. Master Data CRUD → 5. Student Flow → 6. Staff Flow → 7. Stock Opname → 8. GPM / Cost → 9. Report → 10. Testing
