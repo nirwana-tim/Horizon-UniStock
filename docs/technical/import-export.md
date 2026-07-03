@@ -100,7 +100,7 @@ Template adalah file Excel kosong yang didownload Admin, diisi, lalu diupload ke
 
 | Kolom | Tipe | Required | Validasi | Contoh |
 |-------|------|----------|----------|--------|
-| Kode Barang | String (Auto) | Auto | Format: KATEGORI-GENDER-TIPE-DEPT-URUTAN | UNF-L-SCB-02-03 |
+| Kode Barang | String (Auto) | Auto | Format: KATEGORI-GENDER-TIPE-VARIANT-SIZE | UNF-L-SCB-02-03 |
 | Kategori* | String | Ya | Dropdown: UNF / SHO / KTM / KIT / MRC | UNF |
 | Gender* | String | Ya | Dropdown: L / P / U | L |
 | Nama Item* | String (255) | Ya | - | Uniform Scrub Laki-Laki STIKES |
@@ -108,7 +108,7 @@ Template adalah file Excel kosong yang didownload Admin, diisi, lalu diupload ke
 | Ukuran* | String | Ya | Dropdown: S / M / L / XL / 2XL / ... / All Size | S |
 | Satuan* | String | Ya | Dropdown: Pcs / Pasang / Set / Pack | Pcs |
 
-**Kode Barang Otomatis:** Format `KATEGORI-GENDER-TIPE-URUTAN`
+**Kode Barang Otomatis:** Format `KATEGORI-GENDER-TIPE-VARIANT-SIZE`
 - Kategori: UNF (Uniform), SHO (Shoes), KTM (Kartu), KIT (Kit), MRC (Merchandise)
 - Gender: L (Laki-laki), P (Perempuan), U (Unisex)
 - TIPE: CLG (College), SCB (Scrub), COM (Community), LAB (Lab), CLN (Clinical), ALM (Almamater)

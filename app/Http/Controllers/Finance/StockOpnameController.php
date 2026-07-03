@@ -3,13 +3,12 @@
 namespace App\Http\Controllers\Finance;
 
 use App\Http\Controllers\Controller;
-use App\Models\Item;
-use App\Models\ItemCategory;
-use App\Models\StockBalance;
+use App\Imports\StockOpnameImport;
 use App\Models\StockOpname;
 use App\Services\StockOpnameService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\View\View;
 
 class StockOpnameController extends Controller
@@ -62,32 +61,18 @@ class StockOpnameController extends Controller
         ]);
 
         $file = $request->file('opname_file');
-        $rows = \Maatwebsite\Excel\Facades\Excel::toArray([], $file);
+        $import = new StockOpnameImport($stockOpname->id);
+        Excel::import($import, $file);
 
-        $items = [];
-        if (isset($rows[0])) {
-            foreach ($rows[0] as $index => $row) {
-                if ($index === 0) continue;
-
-                $items[] = [
-                    'item_id' => $row[0] ?? null,
-                    'variant_id' => $row[1] ?? null,
-                    'physical_quantity' => $row[2] ?? 0,
-                    'notes' => $row[3] ?? null,
-                ];
-            }
-        }
-
-        $this->service->processUpload($stockOpname, $items);
+        $stockOpname->update(['status' => 'counted']);
 
         return redirect()->route('finance.stock-opname.show', $stockOpname)
-            ->with('success', 'Data stock opname berhasil diupload.');
+            ->with('success', 'Data stock opname berhasil diupload.')
+            ->with('total_imported', $import->getImportedRows());
     }
 
     public function approve(Request $request, StockOpname $stockOpname)
     {
-        $stockOpname->update(['status' => 'approved']);
-
         $this->service->createAdjustments($stockOpname, Auth::user());
 
         return redirect()->route('finance.stock-opname.show', $stockOpname)

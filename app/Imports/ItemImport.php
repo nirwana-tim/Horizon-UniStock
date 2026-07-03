@@ -32,7 +32,7 @@ class ItemImport implements ToModel, WithHeadingRow, WithValidation
     {
         return [
             'nama' => ['required', 'string', 'max:255'],
-            'kode' => ['required', 'string', 'max:50', 'unique:items,code'],
+            'kode' => ['required', 'string', 'max:50', 'unique:items,code', 'regex:/^[A-Z]{3}-[LPU]-[A-Z]{3}-\d{2}$/'],
             'kategori' => ['required', 'string', 'max:255'],
             'satuan' => ['required', 'string', 'max:50'],
             'harga_jual' => ['required', 'numeric', 'min:0'],

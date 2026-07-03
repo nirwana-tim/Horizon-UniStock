@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('items', function (Blueprint $table) {
             $table->id();
             $table->string('name')->comment('Nama item');
-            $table->string('code')->unique()->comment('Kode item (format: KATEGORI-GENDER-TIPE-NOMOR)');
+            $table->string('code')->unique()->comment('Kode item (format: KATEGORI-GENDER-TIPE-VARIANT)');
             $table->foreignId('category_id')->constrained('item_categories')->comment('Kategori item');
             $table->string('unit')->default('pcs')->comment('Satuan (pcs, pasang, set)');
             $table->decimal('selling_price', 15, 2)->default(0)->comment('Harga jual per item');

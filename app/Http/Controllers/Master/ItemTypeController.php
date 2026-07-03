@@ -1,0 +1,60 @@
+<?php
+
+namespace App\Http\Controllers\Master;
+
+use App\Http\Controllers\Controller;
+use App\Http\Requests\ItemTypeRequest;
+use App\Models\ItemType;
+use App\Services\Master\ItemTypeService;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\View\View;
+
+class ItemTypeController extends Controller
+{
+    public function __construct(
+        protected ItemTypeService $typeService
+    ) {}
+
+    public function index(): View
+    {
+        $types = ItemType::withCount('items')->orderBy('code')->paginate(15);
+
+        return view('master.item-type.index', compact('types'));
+    }
+
+    public function create(): View
+    {
+        return view('master.item-type.create');
+    }
+
+    public function store(ItemTypeRequest $request): RedirectResponse
+    {
+        $this->typeService->store($request->validated());
+
+        return redirect()->route('master.item-type.index')->with('success', 'Tipe item berhasil ditambahkan.');
+    }
+
+    public function show(ItemType $itemType): View
+    {
+        return view('master.item-type.show', compact('itemType'));
+    }
+
+    public function edit(ItemType $itemType): View
+    {
+        return view('master.item-type.edit', compact('itemType'));
+    }
+
+    public function update(ItemTypeRequest $request, ItemType $itemType): RedirectResponse
+    {
+        $this->typeService->update($itemType, $request->validated());
+
+        return redirect()->route('master.item-type.index')->with('success', 'Tipe item berhasil diperbarui.');
+    }
+
+    public function destroy(ItemType $itemType): RedirectResponse
+    {
+        $this->typeService->destroy($itemType);
+
+        return redirect()->route('master.item-type.index')->with('success', 'Tipe item berhasil dihapus.');
+    }
+}

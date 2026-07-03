@@ -16,17 +16,78 @@
                         {{ __('Dashboard') }}
                     </x-nav-link>
 
-                    @hasanyrole(['super_admin', 'finance'])
-                    <x-nav-link :href="route('master.faculty.index')" :active="request()->routeIs('master.*')">
-                        {{ __('Master Data') }}
+                    @hasanyrole(['super_admin', 'admin'])
+                    <x-dropdown align="left" width="48">
+                        <x-slot name="trigger">
+                            <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
+                                <div>{{ __('Master Data') }}</div>
+                                <div class="ms-1">
+                                    <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+                            </button>
+                        </x-slot>
+                        <x-slot name="content">
+                            <x-dropdown-link :href="route('master.faculty.index')" :active="request()->routeIs('master.faculty.*')">
+                                {{ __('Fakultas') }}
+                            </x-dropdown-link>
+                            <x-dropdown-link :href="route('master.study-program.index')" :active="request()->routeIs('master.study-program.*')">
+                                {{ __('Program Studi') }}
+                            </x-dropdown-link>
+                            <x-dropdown-link :href="route('master.program-level.index')" :active="request()->routeIs('master.program-level.*')">
+                                {{ __('Level Program') }}
+                            </x-dropdown-link>
+                            <hr class="my-1 border-gray-200">
+                            <x-dropdown-link :href="route('master.item-category.index')" :active="request()->routeIs('master.item-category.*')">
+                                {{ __('Kategori Item') }}
+                            </x-dropdown-link>
+                            <x-dropdown-link :href="route('master.item-type.index')" :active="request()->routeIs('master.item-type.*')">
+                                {{ __('Tipe Item') }}
+                            </x-dropdown-link>
+                            <x-dropdown-link :href="route('master.item-department.index')" :active="request()->routeIs('master.item-department.*')">
+                                {{ __('Departemen Item') }}
+                            </x-dropdown-link>
+                            <x-dropdown-link :href="route('master.item-size.index')" :active="request()->routeIs('master.item-size.*')">
+                                {{ __('Ukuran Item') }}
+                            </x-dropdown-link>
+                            <hr class="my-1 border-gray-200">
+                            <x-dropdown-link :href="route('master.item.index')" :active="request()->routeIs('master.item.*')">
+                                {{ __('Item / SKU') }}
+                            </x-dropdown-link>
+                            <x-dropdown-link :href="route('master.vendor.index')" :active="request()->routeIs('master.vendor.*')">
+                                {{ __('Vendor') }}
+                            </x-dropdown-link>
+                            <x-dropdown-link :href="route('master.distribution-period.index')" :active="request()->routeIs('master.distribution-period.*')">
+                                {{ __('Periode Distribusi') }}
+                            </x-dropdown-link>
+                            <x-dropdown-link :href="route('master.distribution-stage.index')" :active="request()->routeIs('master.distribution-stage.*')">
+                                {{ __('Tahap Distribusi') }}
+                            </x-dropdown-link>
+                            <x-dropdown-link :href="route('master.distribution-schedule.index')" :active="request()->routeIs('master.distribution-schedule.*')">
+                                {{ __('Jadwal Distribusi') }}
+                            </x-dropdown-link>
+                            <x-dropdown-link :href="route('master.entitlement.index')" :active="request()->routeIs('master.entitlement.*')">
+                                {{ __('Entitlement') }}
+                            </x-dropdown-link>
+                            <x-dropdown-link :href="route('master.stock-receive.index')" :active="request()->routeIs('master.stock-receive.*')">
+                                {{ __('Penerimaan Stok') }}
+                            </x-dropdown-link>
+                        </x-slot>
+                    </x-dropdown>
+                    <x-nav-link :href="route('master.student-account.index')" :active="request()->routeIs('master.student-account.*')">
+                        {{ __('Generate Akun') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('master.size-monitor.index')" :active="request()->routeIs('master.size-monitor.*')">
+                        {{ __('Monitor Ukuran') }}
                     </x-nav-link>
                     <x-nav-link :href="route('import.index')" :active="request()->routeIs('import.*')">
                         {{ __('Import') }}
                     </x-nav-link>
-                    <x-nav-link :href="route('finance.stock-opname.index')" :active="request()->routeIs('finance.stock-opname.*')">
+                    <x-nav-link :href="route('admin.stock-opname.index')" :active="request()->routeIs('admin.stock-opname.*')">
                         {{ __('Stock Opname') }}
                     </x-nav-link>
-                    <x-nav-link :href="route('finance.gpm.index')" :active="request()->routeIs('finance.gpm.*')">
+                    <x-nav-link :href="route('admin.gpm.index')" :active="request()->routeIs('admin.gpm.*')">
                         {{ __('GPM') }}
                     </x-nav-link>
                     <x-nav-link :href="route('reports.index')" :active="request()->routeIs('reports.*')">
@@ -34,7 +95,7 @@
                     </x-nav-link>
                     @endhasanyrole
 
-                    @hasanyrole(['staff', 'finance'])
+                    @hasanyrole(['staff', 'admin'])
                     <x-nav-link :href="route('staff.scan.index')" :active="request()->routeIs('staff.*')">
                         {{ __('Scan & Distribusi') }}
                     </x-nav-link>
@@ -109,25 +170,67 @@
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
 
-            @hasanyrole(['super_admin', 'finance'])
-            <x-responsive-nav-link :href="route('master.faculty.index')" :active="request()->routeIs('master.*')">
-                {{ __('Master Data') }}
-            </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('import.index')" :active="request()->routeIs('import.*')">
-                {{ __('Import') }}
-            </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('finance.stock-opname.index')" :active="request()->routeIs('finance.stock-opname.*')">
-                {{ __('Stock Opname') }}
-            </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('finance.gpm.index')" :active="request()->routeIs('finance.gpm.*')">
-                {{ __('GPM') }}
-            </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('reports.index')" :active="request()->routeIs('reports.*')">
-                {{ __('Reports') }}
-            </x-responsive-nav-link>
-            @endhasanyrole
+                    @hasanyrole(['super_admin', 'admin'])
+                    <x-responsive-nav-link :href="route('master.faculty.index')" :active="request()->routeIs('master.faculty.*')">
+                        {{ __('Fakultas') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('master.study-program.index')" :active="request()->routeIs('master.study-program.*')">
+                        {{ __('Program Studi') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('master.item-category.index')" :active="request()->routeIs('master.item-category.*')">
+                        {{ __('Kategori Item') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('master.item-type.index')" :active="request()->routeIs('master.item-type.*')">
+                        {{ __('Tipe Item') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('master.item-department.index')" :active="request()->routeIs('master.item-department.*')">
+                        {{ __('Departemen Item') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('master.item-size.index')" :active="request()->routeIs('master.item-size.*')">
+                        {{ __('Ukuran Item') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('master.item.index')" :active="request()->routeIs('master.item.*')">
+                        {{ __('Item / SKU') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('master.vendor.index')" :active="request()->routeIs('master.vendor.*')">
+                        {{ __('Vendor') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('master.distribution-period.index')" :active="request()->routeIs('master.distribution-period.*')">
+                        {{ __('Periode Distribusi') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('master.distribution-stage.index')" :active="request()->routeIs('master.distribution-stage.*')">
+                        {{ __('Tahap Distribusi') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('master.distribution-schedule.index')" :active="request()->routeIs('master.distribution-schedule.*')">
+                        {{ __('Jadwal Distribusi') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('master.entitlement.index')" :active="request()->routeIs('master.entitlement.*')">
+                        {{ __('Entitlement') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('master.stock-receive.index')" :active="request()->routeIs('master.stock-receive.*')">
+                        {{ __('Penerimaan Stok') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('master.student-account.index')" :active="request()->routeIs('master.student-account.*')">
+                        {{ __('Generate Akun') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('master.size-monitor.index')" :active="request()->routeIs('master.size-monitor.*')">
+                        {{ __('Monitor Ukuran') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('import.index')" :active="request()->routeIs('import.*')">
+                        {{ __('Import') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('admin.stock-opname.index')" :active="request()->routeIs('admin.stock-opname.*')">
+                        {{ __('Stock Opname') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('admin.gpm.index')" :active="request()->routeIs('admin.gpm.*')">
+                        {{ __('GPM') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('reports.index')" :active="request()->routeIs('reports.*')">
+                        {{ __('Reports') }}
+                    </x-responsive-nav-link>
+                    @endhasanyrole
 
-            @hasanyrole(['staff', 'finance'])
+            @hasanyrole(['staff', 'admin'])
             <x-responsive-nav-link :href="route('staff.scan.index')" :active="request()->routeIs('staff.*')">
                 {{ __('Scan & Distribusi') }}
             </x-responsive-nav-link>

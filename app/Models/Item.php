@@ -3,15 +3,26 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Item extends Model
 {
+    use SoftDeletes;
+
+    public function getRouteKeyName(): string
+    {
+        return 'code';
+    }
+
     protected $fillable = [
         'name',
         'code',
+        'gender',
         'category_id',
+        'type_id',
+        'department_id',
         'unit',
         'selling_price',
         'hpp',
@@ -28,6 +39,16 @@ class Item extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(ItemCategory::class, 'category_id');
+    }
+
+    public function type(): BelongsTo
+    {
+        return $this->belongsTo(ItemType::class, 'type_id');
+    }
+
+    public function department(): BelongsTo
+    {
+        return $this->belongsTo(ItemDepartment::class, 'department_id');
     }
 
     public function variants(): HasMany

@@ -11,6 +11,7 @@ use App\Exports\Reports\StockOpnameReport;
 use App\Exports\Reports\StockReport;
 use App\Models\DistributionPeriod;
 use App\Models\Item;
+use App\Models\ItemCategory;
 use App\Models\StockOpname;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
@@ -23,8 +24,9 @@ class ReportController extends Controller
         $periods = DistributionPeriod::orderBy('name', 'desc')->pluck('name', 'name');
         $stockOpnames = StockOpname::orderBy('created_at', 'desc')->pluck('period', 'id');
         $items = Item::orderBy('name')->pluck('code', 'code');
+        $categories = ItemCategory::orderBy('code')->get(['code', 'name']);
 
-        return view('reports.index', compact('periods', 'stockOpnames', 'items'));
+        return view('reports.index', compact('periods', 'stockOpnames', 'items', 'categories'));
     }
 
     public function distribution(Request $request)

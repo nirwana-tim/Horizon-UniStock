@@ -20,15 +20,22 @@ class ImportController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        $validated = $request->validate([
+        $rules = [
             'import_type' => ['required', 'string', 'in:student,eligibility,item,stock_opname,item_price,entitlement'],
-            'file' => ['required', 'file', 'mimes:xlsx,xls,csv', 'max:10240'],
             'stock_opname_id' => ['required_if:import_type,stock_opname', 'nullable', 'integer', 'exists:stock_opnames,id'],
-        ]);
+        ];
 
-        $file = $request->file('file');
-        $fileName = time() . '_' . $file->getClientOriginalName();
-        $filePath = $file->storeAs('imports', $fileName, 'local');
+        if ($request->has('file_path')) {
+            $rules['file_path'] = ['required', 'string'];
+            $validated = $request->validate($rules);
+            $filePath = $validated['file_path'];
+        } else {
+            $rules['file'] = ['required', 'file', 'mimes:xlsx,xls,csv', 'max:10240'];
+            $validated = $request->validate($rules);
+            $file = $request->file('file');
+            $fileName = time() . '_' . $file->getClientOriginalName();
+            $filePath = $file->storeAs('imports', $fileName, 'local');
+        }
 
         $batch = $this->importService->processImport(
             $validated['import_type'],

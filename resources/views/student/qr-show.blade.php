@@ -37,11 +37,11 @@
                         <div class="flex items-center justify-center gap-4">
                             <a href="data:image/svg+xml;base64,{{ base64_encode(QrCode::size(500)->color(38,38,38)->generate($student->qr_token)) }}"
                                download="qr-{{ $student->nim }}.svg"
-                               class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 focus:bg-indigo-700 active:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                               class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition ease-in-out duration-150">
                                 {{ __('Download QR (SVG)') }}
                             </a>
-                            <a href="{{ route('student.size.index') }}"
-                               class="inline-flex items-center px-4 py-2 bg-gray-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                            <a href="{{ route('student.sizes.index') }}"
+                               class="inline-flex items-center px-4 py-2 bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-300 focus:bg-gray-300 active:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition ease-in-out duration-150">
                                 {{ __('Kembali') }}
                             </a>
                         </div>
@@ -56,6 +56,23 @@
                                 <li>Jangan bagikan QR Code Anda kepada orang lain.</li>
                             </ul>
                         </div>
+
+                        @if(isset($activeSchedules) && $activeSchedules->count())
+                        <div class="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-md text-left">
+                            <p class="text-sm text-blue-700 font-semibold mb-3">Jadwal Distribusi Aktif</p>
+                            <div class="space-y-2">
+                                @foreach($activeSchedules as $schedule)
+                                <div class="flex items-center justify-between p-2 bg-white rounded border border-blue-100">
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-900">{{ $schedule->name }}</p>
+                                        <p class="text-xs text-gray-500">{{ $schedule->stage?->name ?? '-' }} | {{ $schedule->location }}</p>
+                                    </div>
+                                    <span class="text-xs text-gray-500">{{ \Carbon\Carbon::parse($schedule->date)->format('d/m/Y') }}</span>
+                                </div>
+                                @endforeach
+                            </div>
+                        </div>
+                        @endif
                     </div>
                 </div>
             </div>

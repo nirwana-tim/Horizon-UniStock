@@ -2,7 +2,7 @@
     <x-slot name="header">
         <div class="flex items-center justify-between">
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ __('Detail Stock Opname') }}</h2>
-            <a href="{{ route('finance.stock-opname.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition ease-in-out duration-150">
+            <a href="{{ route('admin.stock-opname.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition ease-in-out duration-150">
                 {{ __('Kembali') }}
             </a>
         </div>
@@ -13,6 +13,9 @@
             @if(session('success'))
                 <div class="mb-4 px-4 py-3 bg-green-100 border border-green-300 text-green-700 rounded-md">
                     {{ session('success') }}
+                    @if(session('total_imported'))
+                        <span class="font-semibold">({{ session('total_imported') }} item berhasil diimport)</span>
+                    @endif
                 </div>
             @endif
 
@@ -59,15 +62,15 @@
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
                     <div class="p-6 text-gray-900">
                         <h3 class="text-lg font-semibold mb-4">Upload Data Stock Opname</h3>
-                        <form action="{{ route('finance.stock-opname.upload', $batch) }}" method="POST" enctype="multipart/form-data">
+                        <form action="{{ route('admin.stock-opname.upload', $batch) }}" method="POST" enctype="multipart/form-data">
                             @csrf
                             <div class="mb-4">
                                 <label class="block text-sm font-medium text-gray-700 mb-2">File Excel (xlsx/xls/csv)</label>
                                 <input type="file" name="opname_file" accept=".xlsx,.xls,.csv" required
                                     class="block w-full text-sm text-gray-900 border border-gray-300 rounded-md cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                                <p class="mt-1 text-sm text-gray-500">Format: item_id | variant_id | physical_quantity | notes</p>
+                                <p class="mt-1 text-sm text-gray-500">Format: kode_item | varian_ukuran | quantity_fisik</p>
                             </div>
-                            <button type="submit" class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 focus:bg-indigo-700 active:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                            <button type="submit" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition ease-in-out duration-150">
                                 Upload
                             </button>
                         </form>
@@ -81,7 +84,7 @@
                         <div class="flex items-center justify-between mb-4">
                             <h3 class="text-lg font-semibold">Detail Items & Variance</h3>
                             @if($batch->status === 'counted')
-                                <form action="{{ route('finance.stock-opname.approve', $batch) }}" method="POST" onsubmit="return confirm('Yakin ingin menyetujui stock opname ini? Adjustment akan dibuat otomatis.')">
+                                <form action="{{ route('admin.stock-opname.approve', $batch) }}" method="POST" onsubmit="return confirm('Yakin ingin menyetujui stock opname ini? Adjustment akan dibuat otomatis.')">
                                     @csrf
                                     <button type="submit" class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-700 focus:bg-green-700 active:bg-green-800 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition ease-in-out duration-150">
                                         Setujui & Buat Adjustment

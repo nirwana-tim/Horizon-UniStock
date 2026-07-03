@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
 use App\Models\DistributionPeriod;
+use App\Models\DistributionSchedule;
 use App\Models\Student;
 use App\Services\StudentSizeService;
 use Illuminate\Http\RedirectResponse;
@@ -73,6 +74,13 @@ class SizeController extends Controller
             $this->sizeService->generateQr($student);
         }
 
-        return view('student.qr-show', compact('student'));
+        $activeSchedules = DistributionSchedule::with('stage')
+            ->where('is_active', true)
+            ->where('date', '>=', now()->format('Y-m-d'))
+            ->orderBy('date')
+            ->take(5)
+            ->get();
+
+        return view('student.qr-show', compact('student', 'activeSchedules'));
     }
 }

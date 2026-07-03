@@ -15,9 +15,16 @@ class StockOpnameImport implements ToCollection, WithHeadingRow, WithValidation
 {
     protected int $stockOpnameId;
 
+    private int $importedCount = 0;
+
     public function __construct(int $stockOpnameId)
     {
         $this->stockOpnameId = $stockOpnameId;
+    }
+
+    public function getImportedRows(): int
+    {
+        return $this->importedCount;
     }
 
     public function collection(Collection $rows): void
@@ -28,23 +35,26 @@ class StockOpnameImport implements ToCollection, WithHeadingRow, WithValidation
                 ? $item->variants()->where('size', $row['varian_ukuran'])->first()
                 : null;
 
-            $systemQuantity = 0;
-            if ($item && $variant) {
-                $stockBalance = StockBalance::where('item_id', $item->id)
-                    ->where('variant_id', $variant->id)
-                    ->first();
-                $systemQuantity = $stockBalance?->quantity ?? 0;
+            if (!$item || !$variant) {
+                continue;
             }
 
+            $stockBalance = StockBalance::where('item_id', $item->id)
+                ->where('variant_id', $variant->id)
+                ->first();
+
+            $systemQuantity = $stockBalance?->quantity ?? 0;
             $physicalQuantity = (int) $row['quantity_fisik'];
 
             StockOpnameItem::create([
                 'stock_opname_id' => $this->stockOpnameId,
-                'item_id' => $item?->id,
-                'variant_id' => $variant?->id,
+                'item_id' => $item->id,
+                'variant_id' => $variant->id,
                 'system_quantity' => $systemQuantity,
                 'physical_quantity' => $physicalQuantity,
             ]);
+
+            $this->importedCount++;
         }
     }
 

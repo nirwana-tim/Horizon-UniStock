@@ -46,7 +46,7 @@ Sebelum mengerjakan **task apa pun**, AI WAJIB mengikuti urutan ini:
 - Migration harus **idempotent** (bisa dijalankan ulang tanpa error)
 - Seeder harus bisa dijalankan berulang (gunakan `firstOrCreate`)
 - Gunakan **Spatie Permission** untuk role-based access control
-- Format kode barang: **KATEGORI-GENDER-TIPE-NOMOR** (contoh: `UNF-L-SCB-02-03`)
+- Format kode barang: **KATEGORI-GENDER-TIPE-VARIANT-SIZE** (contoh: `UNF-L-SCB-02-03`)
 - Password harus di-hash dengan **bcrypt**
 - Gunakan **Form Request** untuk validasi input
 - Gunakan **Resource** untuk JSON response

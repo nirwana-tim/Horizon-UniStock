@@ -16,14 +16,16 @@ class ItemRequest extends FormRequest
         $itemId = $this->route('item')?->id;
 
         return [
-            'name' => 'required|string|max:255',
-            'code' => 'required|string|max:50|unique:items,code,' . $itemId,
+            'code' => ['nullable', 'string', 'max:50', 'unique:items,code,' . $itemId],
+            'name' => 'nullable|string|max:255',
             'category_id' => 'required|exists:item_categories,id',
+            'type_id' => 'nullable|exists:item_types,id',
+            'department_id' => 'nullable|exists:item_departments,id',
+            'gender' => 'required|in:L,P,U',
             'unit' => 'required|string|max:20',
-            'selling_price' => 'required|numeric|min:0',
-            'hpp' => 'required|numeric|min:0',
-            'sizes' => 'nullable|array',
-            'sizes.*.size' => 'nullable|string|max:10',
+            'selling_price' => 'nullable|numeric|min:0',
+            'hpp' => 'nullable|numeric|min:0',
+            'size_id' => 'required|exists:item_sizes,id',
         ];
     }
 }

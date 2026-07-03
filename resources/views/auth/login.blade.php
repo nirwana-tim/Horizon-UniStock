@@ -5,10 +5,11 @@
     <form method="POST" action="{{ route('login') }}">
         @csrf
 
-        <!-- Email Address -->
+        <!-- Email / NIM -->
         <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" />
+            <x-input-label for="email" :value="__('Email / NIM')" />
+            <x-text-input id="email" class="block mt-1 w-full" type="text" name="email" :value="old('email')" required autofocus autocomplete="username" />
+            <p class="mt-1 text-xs text-gray-500">Mahasiswa: gunakan NIM. Staff/Admin: gunakan email.</p>
             <x-input-error :messages="$errors->get('email')" class="mt-2" />
         </div>
 
@@ -32,12 +33,21 @@
             </label>
         </div>
 
-        <div class="flex items-center justify-end mt-4">
-            @if (Route::has('password.request'))
-                <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('password.request') }}">
-                    {{ __('Forgot your password?') }}
-                </a>
-            @endif
+        <div class="flex items-center justify-between mt-4">
+            <div class="text-sm">
+                @if (Route::has('password.request') || Route::has('password.student.forgot'))
+                    <span class="text-gray-500">Lupa password? </span>
+                    @if (Route::has('password.request'))
+                        <a href="{{ route('password.request') }}" class="text-indigo-600 hover:text-indigo-800 font-medium">Staff/Admin</a>
+                    @endif
+                    @if (Route::has('password.request') && Route::has('password.student.forgot'))
+                        <span class="text-gray-300 mx-1">|</span>
+                    @endif
+                    @if (Route::has('password.student.forgot'))
+                        <a href="{{ route('password.student.forgot') }}" class="text-indigo-600 hover:text-indigo-800 font-medium">Mahasiswa</a>
+                    @endif
+                @endif
+            </div>
 
             <x-primary-button class="ms-3">
                 {{ __('Log in') }}

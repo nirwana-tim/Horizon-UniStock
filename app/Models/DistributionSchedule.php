@@ -11,6 +11,7 @@ class DistributionSchedule extends Model
     protected $fillable = [
         'stage_id',
         'name',
+        'period',
         'date',
         'location',
         'session',

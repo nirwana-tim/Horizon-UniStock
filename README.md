@@ -83,6 +83,9 @@ Buka http://127.0.0.1:8000
 | Role | Email | Password |
 |------|-------|----------|
 | Super Admin | `superadmin@horizon-unistock.test` | `password` |
+| Finance | `finance@horizon-unistock.test` | `password` |
+| Staff | `staff@horizon-unistock.test` | `password` |
+| Mahasiswa | `1234567890123456` (NIM) | `password` |
 
 ## Dokumentasi
 
