@@ -19,7 +19,7 @@ class StudentSizeService
             ->where('program_level_id', $student->program_level_id)
             ->where('period_id', $period->id)
             ->where('student_type', $student->student_type)
-            ->with('item')
+            ->with('items.item.variants')
             ->first();
 
         if (!$entitlement) {
@@ -93,7 +93,7 @@ class StudentSizeService
             return $student->qr_token;
         }
 
-        $token = Str::random(40);
+        $token = (string) Str::uuid();
 
         $student->update([
             'qr_token' => $token,

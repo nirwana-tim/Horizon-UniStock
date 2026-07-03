@@ -41,14 +41,12 @@
                             </p>
                         </div>
                     @else
-                        <form action="{{ route('student.size.store') }}" method="POST">
+                        <form action="{{ route('student.sizes.store') }}" method="POST">
                             @csrf
 
                             <div class="space-y-6">
                                 @foreach($entitlementItems as $item)
                                     @php
-                                        $isClothing = in_array($item->category->name ?? '', ['Seragam', 'Uniform', 'Clothing']);
-                                        $isShoes = in_array($item->category->name ?? '', ['Sepatu', 'Shoes']);
                                         $currentSize = $existingSizes[$item->id] ?? '';
                                         $sizeItem = $student->activeSizeProfile
                                             ? $student->activeSizeProfile->sizeItems->where('item_id', $item->id)->first()
@@ -64,10 +62,14 @@
                                                 <p class="text-sm text-gray-500">Satuan: {{ $item->unit }}</p>
                                             </div>
                                             <div class="w-48">
-                                                @if($hasChanged && !$canUpdate)
-                                                    <div class="mt-1 block w-full border-gray-300 rounded-md shadow-sm bg-gray-100 sm:text-sm p-2">
-                                                        {{ $currentSize }}
-                                                    </div>
+@if($hasChanged && !$canUpdate)
+    @php
+        $currentVariant = $item->variants->firstWhere('size', $currentSize);
+        $sizeDisplay = $currentVariant ? $currentVariant->size_label : $currentSize;
+    @endphp
+    <div class="mt-1 block w-full border-gray-300 rounded-md shadow-sm bg-gray-100 sm:text-sm p-2">
+        {{ $sizeDisplay }}
+    </div>
                                                     <input type="hidden" name="sizes[{{ $item->id }}]" value="{{ $currentSize }}">
                                                     <p class="mt-1 text-xs text-amber-500">Sudah diubah</p>
                                                 @else
@@ -77,19 +79,13 @@
                                                     <select name="sizes[{{ $item->id }}]" id="size_{{ $item->id }}" required
                                                         class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                                                         <option value="">-- Pilih Ukuran --</option>
-                                                        @if($isShoes)
-                                                            @foreach(range(38, 46) as $size)
-                                                                <option value="{{ $size }}" {{ $currentSize == $size ? 'selected' : '' }}>
-                                                                    {{ $size }}
-                                                                </option>
-                                                            @endforeach
-                                                        @else
-                                                            @foreach(['S', 'M', 'L', 'XL', 'XXL'] as $size)
-                                                                <option value="{{ $size }}" {{ $currentSize == $size ? 'selected' : '' }}>
-                                                                    {{ $size }}
-                                                                </option>
-                                                            @endforeach
-                                                        @endif
+                                                        @forelse($item->variants as $variant)
+                                                            <option value="{{ $variant->size }}" {{ $currentSize == $variant->size ? 'selected' : '' }}>
+                                                                {{ $variant->size_label }}
+                                                            </option>
+                                                        @empty
+                                                            <option value="">Tidak ada varian tersedia</option>
+                                                        @endforelse
                                                     </select>
                                                 @endif
                                                 @error("sizes.{$item->id}")
@@ -102,7 +98,7 @@
                             </div>
 
                             <div class="mt-8 flex items-center gap-4">
-                                <button type="submit" class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 focus:bg-indigo-700 active:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                                <button type="submit" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition ease-in-out duration-150">
                                     {{ __('Simpan Ukuran') }}
                                 </button>
                             </div>

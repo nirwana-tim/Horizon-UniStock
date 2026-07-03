@@ -36,13 +36,14 @@ class StockReport extends BaseExport implements FromCollection, WithHeadings, Wi
                 'items.hpp',
                 'items.unit',
                 'item_categories.name as category_name',
+                'item_categories.code as category_code',
                 'item_variants.size as variant_size'
             )
-            ->orderBy('item_categories.name')
+            ->orderBy('item_categories.code')
             ->orderBy('items.name');
 
         if ($this->category) {
-            $query->where('item_categories.name', $this->category);
+            $query->where('item_categories.code', $this->category);
         }
 
         return $query->get();

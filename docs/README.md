@@ -13,7 +13,7 @@ Seluruh dokumentasi project ini diorganisir dalam 3 kategori.
 | [erd.md](project/erd.md) | ERD lengkap + detail kolom semua tabel (26 tabel) |
 | [flowchart.md](project/flowchart.md) | Diagram Mermaid untuk semua role (5 flowchart) |
 | [architecture.md](project/architecture.md) | Arsitektur Laravel, Service Layer, tech stack |
-| [item-code.md](project/item-code.md) | Item code system (KATEGORI-GENDER-TIPE-NOMOR) |
+| [item-code.md](project/item-code.md) | Item code system (KATEGORI-GENDER-TIPE-VARIANT-SIZE) |
 | [security.md](project/security.md) | Security design, autentikasi, otorisasi, audit |
 | [risks.md](project/risks.md) | Risiko & mitigasi, import flow, report MVP, fallback |
 | [timeline.md](project/timeline.md) | Timeline 6 minggu, fase lanjutan, jobdesk tim |

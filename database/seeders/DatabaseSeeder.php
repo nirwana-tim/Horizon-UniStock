@@ -25,7 +25,15 @@ class DatabaseSeeder extends Seeder
             FacultySeeder::class,
             StudyProgramSeeder::class,
             ProgramLevelSeeder::class,
+            UserTestSeeder::class,
             ItemCategorySeeder::class,
+            ItemTypeSeeder::class,
+            ItemDepartmentSeeder::class,
+            ItemSizeSeeder::class,
+            ItemSeeder::class,
+            DistributionPeriodSeeder::class,
+            ItemPriceSeeder::class,
+            EntitlementSeeder::class,
         ]);
     }
 }

@@ -14,12 +14,17 @@ class GpmService
     public function calculateGpm(?string $period = null): Collection
     {
         $query = DistributionItem::select(
-            'item_id',
-            DB::raw('SUM(quantity) as qty_sold'),
-            DB::raw('SUM(quantity * (SELECT hpp FROM items WHERE items.id = distribution_items.item_id)) as total_hpp'),
-            DB::raw('SUM(quantity * (SELECT selling_price FROM items WHERE items.id = distribution_items.item_id)) as total_selling_price')
+            'distribution_items.item_id',
+            'items.code as item_code',
+            'items.name as item_name_raw',
+            'items.hpp',
+            'items.selling_price',
+            DB::raw('SUM(distribution_items.quantity) as qty_sold'),
+            DB::raw('SUM(distribution_items.quantity * items.hpp) as total_hpp'),
+            DB::raw('SUM(distribution_items.quantity * items.selling_price) as total_selling_price')
         )
-            ->groupBy('item_id');
+            ->join('items', 'distribution_items.item_id', '=', 'items.id')
+            ->groupBy('distribution_items.item_id', 'items.code', 'items.name', 'items.hpp', 'items.selling_price');
 
         if ($period) {
             $query->whereHas('transaction', function ($q) use ($period) {
@@ -30,18 +35,21 @@ class GpmService
         }
 
         $results = $query->get();
+        $itemIds = $results->pluck('item_id');
+        $categories = Item::with('category')->whereIn('id', $itemIds)->get()->keyBy('id');
 
-        return $results->map(function ($item) {
-            $itemModel = Item::with('category')->find($item->item_id);
+        return $results->map(function ($item) use ($categories) {
+            $itemModel = $categories->get($item->item_id);
             $labaRugi = $item->total_selling_price - $item->total_hpp;
 
             return [
                 'item_id' => $item->item_id,
-                'item_name' => $itemModel->name ?? '-',
-                'category_name' => $itemModel->category->name ?? '-',
+                'item_code' => $item->item_code ?? '',
+                'item_name' => $item->item_name_raw ?? '-',
+                'category_name' => $itemModel?->category?->name ?? '-',
                 'qty_sold' => $item->qty_sold,
-                'hpp' => $itemModel->hpp ?? 0,
-                'selling_price' => $itemModel->selling_price ?? 0,
+                'hpp' => $item->hpp ?? 0,
+                'selling_price' => $item->selling_price ?? 0,
                 'total_hpp' => $item->total_hpp,
                 'total_selling_price' => $item->total_selling_price,
                 'laba_rugi' => $labaRugi,

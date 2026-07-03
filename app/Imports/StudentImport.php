@@ -24,6 +24,7 @@ class StudentImport implements ToModel, WithHeadingRow, WithValidation
             'email_pribadi' => $row['email_pribadi'] ?? null,
             'study_program_id' => $studyProgram?->id,
             'program_level_id' => $programLevel?->id,
+            'student_type' => $row['student_type'] ?? 'freshman',
             'qr_token' => Str::uuid(),
         ]);
     }

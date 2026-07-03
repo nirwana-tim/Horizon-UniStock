@@ -42,7 +42,7 @@
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6">
                         <h3 class="text-lg font-medium text-gray-900 mb-4">Cari Manual (NIM)</h3>
-                        <form action="{{ route('staff.scan.search') }}" method="GET">
+                        <form action="{{ route('staff.search') }}" method="POST">
                             @csrf
                             <div>
                                 <label for="query" class="block text-sm font-medium text-gray-700">NIM Mahasiswa</label>
@@ -54,7 +54,7 @@
                                 @enderror
                             </div>
                             <div class="mt-4">
-                                <button type="submit" class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 focus:bg-indigo-700 active:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                                <button type="submit" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition ease-in-out duration-150">
                                     {{ __('Cari Mahasiswa') }}
                                 </button>
                             </div>
@@ -103,8 +103,8 @@
 
                     html5QrCode.stop().then(() => {
                         const form = document.createElement('form');
-                        form.method = 'GET';
-                        form.action = '{{ route("staff.scan.search") }}';
+                        form.method = 'POST';
+                        form.action = '{{ route("staff.search") }}';
 
                         const input = document.createElement('input');
                         input.type = 'hidden';
@@ -122,7 +122,7 @@
                         form.submit();
                     }).catch(err => {
                         console.error('Failed to stop scanner:', err);
-                        window.location.href = `{{ route("staff.scan.search") }}?query=${encodeURIComponent(decodedText)}`;
+                        window.location.href = `{{ route("staff.search") }}?query=${encodeURIComponent(decodedText)}`;
                     });
                 },
                 function onScanFailure(error) {

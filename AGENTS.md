@@ -39,7 +39,7 @@ Sebelum mengerjakan **task apa pun**, AI WAJIB mengikuti urutan ini:
 - Setiap perubahan data tercatat di **Audit Log**
 - Migration **idempotent**, Seeder pake `firstOrCreate`
 - **Spatie Permission** untuk RBAC
-- Format kode barang: `KATEGORI-GENDER-TIPE-NOMOR`
+- Format kode barang: `KATEGORI-GENDER-TIPE-VARIANT-SIZE` (contoh: `UNF-L-SCB-02-03`)
 - Password **bcrypt**, validasi pake **Form Request**
 - JSON response pake **Resource**
 - **Route Model Binding** jika memungkinkan
