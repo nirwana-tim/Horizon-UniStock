@@ -16,8 +16,8 @@ class EntitlementRequest extends FormRequest
         return [
             'study_program_id' => 'required|integer|exists:study_programs,id',
             'program_level_id' => 'required|integer|exists:program_levels,id',
-            'period_id' => 'required|integer|exists:distribution_periods,id',
             'student_type' => 'required|string|in:freshman,continuing',
+            'semester' => 'required|string|in:ganjil,genap',
             'description' => 'nullable|string|max:500',
             'items' => 'required|array|min:1',
             'items.*.item_id' => 'required|integer|exists:items,id',

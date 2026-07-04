@@ -19,7 +19,7 @@
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Program Studi</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Level</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Periode</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Semester</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipe</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
@@ -31,7 +31,7 @@
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $loop->iteration + ($entitlements->currentPage() - 1) * $entitlements->perPage() }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap"><a href="{{ route('master.entitlement.show', $entitlement) }}" class="text-sm font-medium text-indigo-600 hover:text-indigo-900">{{ $entitlement->studyProgram?->name ?? '-' }}</a></td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $entitlement->programLevel?->name ?? '-' }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $entitlement->period?->name ?? '-' }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $entitlement->semester === 'ganjil' ? 'bg-blue-100 text-blue-800' : 'bg-orange-100 text-orange-800' }}">{{ ucfirst($entitlement->semester) }}</span></td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $entitlement->student_type }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $entitlement->items->count() }} item</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">

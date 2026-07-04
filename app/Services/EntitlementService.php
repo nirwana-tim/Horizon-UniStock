@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Models\AuditLog;
-use App\Models\DistributionPeriod;
 use App\Models\Entitlement;
 use App\Models\EntitlementItem;
 use App\Models\Student;
@@ -13,30 +12,25 @@ use Illuminate\Support\Facades\DB;
 
 class EntitlementService
 {
-    public function getEntitlement(Student $student, DistributionPeriod $period): ?Entitlement
+    public function getEntitlement(Student $student, ?string $semester = null): ?Entitlement
     {
-        return Entitlement::where('study_program_id', $student->study_program_id)
+        $query = Entitlement::where('study_program_id', $student->study_program_id)
             ->where('program_level_id', $student->program_level_id)
-            ->where('period_id', $period->id)
             ->where('student_type', $student->student_type)
-            ->with('items.item')
-            ->first();
+            ->with('items.item');
+
+        if ($semester) {
+            $query->where('semester', $semester);
+        }
+
+        return $query->first();
     }
 
-    public function validateEligibility(Student $student, DistributionPeriod $period): bool
+    public function validateEligibility(Student $student): bool
     {
-        $eligibility = $student->eligibilityRecords()
-            ->where('period_id', $period->id)
-            ->first();
+        $eligibility = $student->eligibilityRecords()->first();
 
         return $eligibility && $eligibility->is_eligible;
-    }
-
-    public function getAllForPeriod(DistributionPeriod $period): Collection
-    {
-        return Entitlement::with(['studyProgram', 'programLevel', 'items.item'])
-            ->where('period_id', $period->id)
-            ->get();
     }
 
     public function createEntitlement(array $data): Entitlement
@@ -45,8 +39,8 @@ class EntitlementService
             $entitlement = Entitlement::create([
                 'study_program_id' => $data['study_program_id'],
                 'program_level_id' => $data['program_level_id'],
-                'period_id' => $data['period_id'],
                 'student_type' => $data['student_type'],
+                'semester' => $data['semester'],
                 'description' => $data['description'] ?? null,
             ]);
 
@@ -82,6 +76,7 @@ class EntitlementService
                 'study_program_id' => $data['study_program_id'] ?? $entitlement->study_program_id,
                 'program_level_id' => $data['program_level_id'] ?? $entitlement->program_level_id,
                 'student_type' => $data['student_type'] ?? $entitlement->student_type,
+                'semester' => $data['semester'] ?? $entitlement->semester,
                 'description' => $data['description'] ?? $entitlement->description,
             ]);
 

@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use App\Models\Item;
 use App\Models\ItemPrice;
-use App\Models\DistributionPeriod;
 use Illuminate\Database\Seeder;
 
 class ItemPriceSeeder extends Seeder
@@ -33,13 +32,6 @@ class ItemPriceSeeder extends Seeder
 
     public function run(): void
     {
-        $periods = DistributionPeriod::all()->keyBy(fn ($p) => $p->name);
-
-        $periodMap = [
-            24 => 'Tahun Akademik 2024/2025',
-            25 => 'Tahun Akademik 2025/2026',
-        ];
-
         $created = 0;
         $skipped = 0;
         $itemsUpdated = 0;
@@ -55,29 +47,21 @@ class ItemPriceSeeder extends Seeder
             $latestPrice = $pricesByYear[25] ?? $pricesByYear[24] ?? 0;
 
             foreach ($items as $item) {
-                foreach ($pricesByYear as $year => $price) {
-                    $periodName = $periodMap[$year] ?? null;
-                    if (!$periodName || !isset($periods[$periodName])) {
-                        continue;
-                    }
+                $result = ItemPrice::firstOrCreate(
+                    [
+                        'item_id' => $item->id,
+                    ],
+                    [
+                        'selling_price' => $latestPrice,
+                        'hpp' => 0,
+                        'effective_date' => '2025-09-01',
+                    ]
+                );
 
-                    $result = ItemPrice::firstOrCreate(
-                        [
-                            'item_id' => $item->id,
-                            'period_id' => $periods[$periodName]->id,
-                        ],
-                        [
-                            'selling_price' => $price,
-                            'hpp' => 0,
-                            'effective_date' => "{$year}-09-01",
-                        ]
-                    );
-
-                    if ($result->wasRecentlyCreated) {
-                        $created++;
-                    } else {
-                        $skipped++;
-                    }
+                if ($result->wasRecentlyCreated) {
+                    $created++;
+                } else {
+                    $skipped++;
                 }
 
                 if ($item->selling_price != $latestPrice) {

@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Models\DistributionPeriod;
 use App\Models\Entitlement;
 use App\Models\Student;
 use App\Models\StudentSizeHistory;
@@ -13,11 +12,10 @@ use Illuminate\Support\Str;
 
 class StudentSizeService
 {
-    public function getEntitlementItems(Student $student, DistributionPeriod $period): Collection
+    public function getEntitlementItems(Student $student): Collection
     {
         $entitlement = Entitlement::where('study_program_id', $student->study_program_id)
             ->where('program_level_id', $student->program_level_id)
-            ->where('period_id', $period->id)
             ->where('student_type', $student->student_type)
             ->with('items.item.variants')
             ->first();
@@ -31,12 +29,9 @@ class StudentSizeService
 
     public function saveSizes(Student $student, array $sizes): void
     {
-        $activePeriod = DistributionPeriod::where('is_active', true)->firstOrFail();
-
         $profile = StudentSizeProfile::firstOrCreate(
             [
                 'student_id' => $student->id,
-                'period_id' => $activePeriod->id,
             ],
             [
                 'is_filled' => false,

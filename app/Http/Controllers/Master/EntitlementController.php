@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Master;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\EntitlementRequest;
-use App\Models\DistributionPeriod;
 use App\Models\Entitlement;
+use App\Models\Faculty;
 use App\Models\Item;
 use App\Models\ProgramLevel;
 use App\Models\StudyProgram;
@@ -21,7 +21,7 @@ class EntitlementController extends Controller
 
     public function index(): View
     {
-        $entitlements = Entitlement::with(['studyProgram', 'programLevel', 'period', 'items.item'])
+        $entitlements = Entitlement::with(['studyProgram', 'programLevel', 'items.item'])
             ->latest()
             ->paginate(15);
 
@@ -30,12 +30,12 @@ class EntitlementController extends Controller
 
     public function create(): View
     {
+        $faculties = Faculty::orderBy('name')->get();
         $studyPrograms = StudyProgram::with('faculty')->orderBy('name')->get();
         $programLevels = ProgramLevel::orderBy('name')->get();
-        $periods = DistributionPeriod::orderBy('name', 'desc')->get();
         $items = Item::with('category', 'variants')->orderBy('name')->get();
 
-        return view('master.entitlement.create', compact('studyPrograms', 'programLevels', 'periods', 'items'));
+        return view('master.entitlement.create', compact('faculties', 'studyPrograms', 'programLevels', 'items'));
     }
 
     public function store(EntitlementRequest $request): RedirectResponse
@@ -47,7 +47,7 @@ class EntitlementController extends Controller
 
     public function show(Entitlement $entitlement): View
     {
-        $entitlement->load(['studyProgram', 'programLevel', 'period', 'items.item']);
+        $entitlement->load(['studyProgram', 'programLevel', 'items.item']);
 
         return view('master.entitlement.show', compact('entitlement'));
     }
@@ -55,12 +55,12 @@ class EntitlementController extends Controller
     public function edit(Entitlement $entitlement): View
     {
         $entitlement->load('items');
+        $faculties = Faculty::orderBy('name')->get();
         $studyPrograms = StudyProgram::with('faculty')->orderBy('name')->get();
         $programLevels = ProgramLevel::orderBy('name')->get();
-        $periods = DistributionPeriod::orderBy('name', 'desc')->get();
         $items = Item::with('category', 'variants')->orderBy('name')->get();
 
-        return view('master.entitlement.edit', compact('entitlement', 'studyPrograms', 'programLevels', 'periods', 'items'));
+        return view('master.entitlement.edit', compact('entitlement', 'faculties', 'studyPrograms', 'programLevels', 'items'));
     }
 
     public function update(EntitlementRequest $request, Entitlement $entitlement): RedirectResponse

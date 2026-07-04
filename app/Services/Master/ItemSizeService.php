@@ -9,7 +9,12 @@ class ItemSizeService
 {
     public function store(array $data): ItemSize
     {
+        $categoryIds = $data['categories'] ?? [];
+        unset($data['categories']);
+
         $size = ItemSize::create($data);
+        $size->categories()->sync($categoryIds);
+
         AuditService::log('create', 'item_size', $size->id, null, $data);
         return $size;
     }
@@ -17,7 +22,12 @@ class ItemSizeService
     public function update(ItemSize $itemSize, array $data): ItemSize
     {
         $old = $itemSize->toArray();
+        $categoryIds = $data['categories'] ?? [];
+        unset($data['categories']);
+
         $itemSize->update($data);
+        $itemSize->categories()->sync($categoryIds);
+
         AuditService::log('update', 'item_size', $itemSize->id, $old, $data);
         return $itemSize;
     }

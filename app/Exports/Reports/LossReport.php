@@ -27,7 +27,7 @@ class LossReport extends BaseExport implements FromCollection, WithHeadings, Wit
     {
         $query = StockOpnameItem::select(
                 'items.name as item_name',
-                'item_categories.name as category_name',
+                'item_categories.label as category_name',
                 'item_categories.code as category_code',
                 DB::raw('SUM(CASE WHEN stock_opname_items.variance < 0 THEN ABS(stock_opname_items.variance) ELSE 0 END) as qty_loss'),
                 DB::raw('SUM(CASE WHEN stock_opname_items.variance > 0 THEN stock_opname_items.variance ELSE 0 END) as qty_surplus'),
@@ -35,7 +35,7 @@ class LossReport extends BaseExport implements FromCollection, WithHeadings, Wit
             )
             ->join('items', 'stock_opname_items.item_id', '=', 'items.id')
             ->leftJoin('item_categories', 'items.category_id', '=', 'item_categories.id')
-            ->groupBy('items.id', 'items.name', 'item_categories.name', 'item_categories.code')
+            ->groupBy('items.id', 'items.name', 'item_categories.label', 'item_categories.code')
             ->orderBy('item_categories.code')
             ->orderBy('items.name');
 

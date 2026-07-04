@@ -38,7 +38,7 @@
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $variants->firstItem() + $loop->index }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-900">{{ $variant->sku }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            {{ $variant->item_name }}, Size {{ $variant->itemSize?->name ?? $variant->size_label ?? $variant->size }}
+                                            {{ $variant->item_name }}, Size {{ $variant->itemSize?->label ?? $variant->size_label ?? $variant->size }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                             {{ $variant->category_code ?? '' }} - {{ $variant->category_name ?? '-' }}

@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Models\DistributionItem;
-use App\Models\DistributionPeriod;
 use App\Models\DistributionTransaction;
 use App\Models\Item;
 use App\Models\StockBalance;
@@ -15,13 +14,13 @@ use Illuminate\Support\Facades\DB;
 
 class ReportService
 {
-    public function getDistributionReportData(?int $periodId = null, ?int $studyProgramId = null): Collection
+    public function getDistributionReportData(?string $period = null, ?int $studyProgramId = null): Collection
     {
         $query = DistributionTransaction::with(['student.studyProgram', 'student.programLevel', 'items.item', 'schedule']);
 
-        if ($periodId) {
-            $query->whereHas('schedule.stage', function ($q) use ($periodId) {
-                $q->where('period_id', $periodId);
+        if ($period) {
+            $query->whereHas('schedule', function ($q) use ($period) {
+                $q->where('period', $period);
             });
         }
 
@@ -34,7 +33,7 @@ class ReportService
         return $query->latest()->get();
     }
 
-    public function getDistributionSummary(?int $periodId = null): Collection
+    public function getDistributionSummary(?string $period = null): Collection
     {
         $query = DistributionTransaction::select(
             'students.study_program_id',
@@ -48,9 +47,9 @@ class ReportService
             ->join('study_programs', 'students.study_program_id', '=', 'study_programs.id')
             ->groupBy('students.study_program_id', 'study_programs.name');
 
-        if ($periodId) {
-            $query->whereHas('schedule.stage', function ($q) use ($periodId) {
-                $q->where('period_id', $periodId);
+        if ($period) {
+            $query->whereHas('schedule', function ($q) use ($period) {
+                $q->where('period', $period);
             });
         }
 
@@ -79,7 +78,7 @@ class ReportService
             ->get();
     }
 
-    public function getGpmReportData(?int $periodId = null, ?int $categoryId = null): Collection
+    public function getGpmReportData(?string $period = null, ?int $categoryId = null): Collection
     {
         $query = DistributionItem::select(
             'distribution_items.item_id',
@@ -94,20 +93,19 @@ class ReportService
             $query->where('items.category_id', $categoryId);
         }
 
-        if ($periodId) {
-            $query->whereHas('transaction.schedule.stage', function ($q) use ($periodId) {
-                $q->where('period_id', $periodId);
+        if ($period) {
+            $query->whereHas('transaction.schedule', function ($q) use ($period) {
+                $q->where('period', $period);
             });
         }
 
         return $query->get();
     }
 
-    public function getSizeDistributionData(?int $periodId = null): Collection
+    public function getSizeDistributionData(): Collection
     {
-        $query = DB::table('student_size_items')
+        return DB::table('student_size_items')
             ->join('items', 'student_size_items.item_id', '=', 'items.id')
-            ->join('student_size_profiles', 'student_size_items.size_profile_id', '=', 'student_size_profiles.id')
             ->select(
                 'items.name as item_name',
                 'student_size_items.size',
@@ -115,18 +113,8 @@ class ReportService
             )
             ->groupBy('items.name', 'student_size_items.size')
             ->orderBy('items.name')
-            ->orderBy('student_size_items.size');
-
-        if ($periodId) {
-            $query->where('student_size_profiles.period_id', $periodId);
-        }
-
-        return $query->get();
-    }
-
-    public function getPeriods(): Collection
-    {
-        return DistributionPeriod::orderBy('name', 'desc')->get();
+            ->orderBy('student_size_items.size')
+            ->get();
     }
 
     public function getStockCardData(string $itemCode, ?string $startDate = null, ?string $endDate = null): Collection
@@ -157,7 +145,7 @@ class ReportService
     {
         $query = StockOpnameItem::select(
             'items.name as item_name',
-            'item_categories.name as category_name',
+            'item_categories.label as category_name',
             'item_categories.code as category_code',
             'items.hpp',
             DB::raw('SUM(CASE WHEN stock_opname_items.variance < 0 THEN ABS(stock_opname_items.variance) ELSE 0 END) as qty_loss'),
@@ -165,7 +153,7 @@ class ReportService
         )
             ->join('items', 'stock_opname_items.item_id', '=', 'items.id')
             ->leftJoin('item_categories', 'items.category_id', '=', 'item_categories.id')
-            ->groupBy('items.id', 'items.name', 'item_categories.name', 'item_categories.code', 'items.hpp')
+            ->groupBy('items.id', 'items.name', 'item_categories.label', 'item_categories.code', 'items.hpp')
             ->orderBy('items.name');
 
         if ($period) {

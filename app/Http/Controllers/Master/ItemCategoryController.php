@@ -34,27 +34,32 @@ class ItemCategoryController extends Controller
         return redirect()->route('master.item-category.index')->with('success', 'Kategori item berhasil ditambahkan.');
     }
 
-    public function show(ItemCategory $category): View
+    public function show(int $item_category): View
     {
+        $category = ItemCategory::findOrFail($item_category);
         $category->load('items');
 
         return view('master.item-category.show', compact('category'));
     }
 
-    public function edit(ItemCategory $category): View
+    public function edit(int $item_category): View
     {
+        $category = ItemCategory::findOrFail($item_category);
+
         return view('master.item-category.edit', compact('category'));
     }
 
-    public function update(ItemCategoryRequest $request, ItemCategory $category): RedirectResponse
+    public function update(ItemCategoryRequest $request, int $item_category): RedirectResponse
     {
+        $category = ItemCategory::findOrFail($item_category);
         $this->categoryService->update($category, $request->validated());
 
         return redirect()->route('master.item-category.index')->with('success', 'Kategori item berhasil diperbarui.');
     }
 
-    public function destroy(ItemCategory $category): RedirectResponse
+    public function destroy(int $item_category): RedirectResponse
     {
+        $category = ItemCategory::findOrFail($item_category);
         $this->categoryService->destroy($category);
 
         return redirect()->route('master.item-category.index')->with('success', 'Kategori item berhasil dihapus.');

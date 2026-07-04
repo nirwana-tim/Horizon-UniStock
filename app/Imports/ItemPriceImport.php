@@ -2,7 +2,6 @@
 
 namespace App\Imports;
 
-use App\Models\DistributionPeriod;
 use App\Models\Item;
 use App\Models\ItemPrice;
 use Maatwebsite\Excel\Concerns\ToModel;
@@ -19,21 +18,14 @@ class ItemPriceImport implements ToModel, WithHeadingRow, WithValidation
             return null;
         }
 
-        $periodId = null;
-        if (!empty($row['tahun_akademik'])) {
-            $period = DistributionPeriod::where('name', $row['tahun_akademik'])->first();
-            $periodId = $period?->id;
-        }
-
         return ItemPrice::updateOrCreate(
             [
                 'item_id' => $item->id,
-                'period_id' => $periodId,
-                'effective_date' => $row['tahun_akademik'] ?? now()->startOfYear(),
             ],
             [
                 'selling_price' => $row['harga_jual'],
                 'hpp' => $row['hpp'],
+                'effective_date' => $row['tahun_akademik'] ?? now()->startOfYear(),
             ]
         );
     }

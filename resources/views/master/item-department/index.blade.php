@@ -24,7 +24,8 @@
                                 <tr>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Kode') }}</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Nama') }}</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Label') }}</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Prodi') }}</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Aksi') }}</th>
                                 </tr>
                             </thead>
@@ -33,7 +34,15 @@
                                     <tr>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $loop->iteration }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-900">{{ $department->code }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $department->name }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $department->label }}</td>
+                                        <td class="px-6 py-4 text-sm text-gray-500">
+                                            @if($department->studyPrograms->count())
+                                                <span class="text-xs font-semibold text-indigo-600">{{ $department->studyPrograms->count() }} prodi</span>
+                                                <span class="text-xs text-gray-400 ml-1">({{ $department->studyPrograms->pluck('name')->take(2)->implode(', ') }}{{ $department->studyPrograms->count() > 2 ? '...' : '' }})</span>
+                                            @else
+                                                <span class="text-xs text-gray-400">-</span>
+                                            @endif
+                                        </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm space-x-2">
                                             <a href="{{ route('master.item-department.edit', $department) }}" class="text-yellow-600 hover:text-yellow-900">Edit</a>
                                             <form action="{{ route('master.item-department.destroy', $department) }}" method="POST" class="inline" onsubmit="return confirm('Yakin ingin menghapus?')">
@@ -45,7 +54,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="4" class="px-6 py-4 text-center text-sm text-gray-500">Tidak ada data.</td>
+                                        <td colspan="5" class="px-6 py-4 text-center text-sm text-gray-500">Tidak ada data.</td>
                                     </tr>
                                 @endforelse
                             </tbody>

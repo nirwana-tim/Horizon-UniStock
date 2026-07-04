@@ -2,9 +2,7 @@
 
 use App\Http\Controllers\Finance\StockOpnameController;
 use App\Http\Controllers\Finance\GpmController;
-use App\Http\Controllers\Master\DistributionPeriodController;
 use App\Http\Controllers\Master\DistributionScheduleController;
-use App\Http\Controllers\Master\DistributionStageController;
 use App\Http\Controllers\Master\EntitlementController;
 use App\Http\Controllers\Master\FacultyController;
 use App\Http\Controllers\Master\ItemCategoryController;
@@ -58,8 +56,6 @@ Route::middleware(['auth', 'password.changed', 'role:super_admin|admin'])->prefi
     // Route::delete('item/{item}/variant/{variant}', [ItemVariantController::class, 'destroy'])->name('item.variant.destroy');
 
     Route::resource('vendor', VendorController::class);
-    Route::resource('distribution-period', DistributionPeriodController::class);
-    Route::resource('distribution-stage', DistributionStageController::class);
     Route::resource('distribution-schedule', DistributionScheduleController::class);
     Route::resource('entitlement', EntitlementController::class);
 

@@ -28,7 +28,7 @@
                         </div>
                         <div>
                             <h3 class="text-sm font-medium text-gray-500">Kategori</h3>
-                            <p class="mt-1 text-sm text-gray-900">{{ $item->category->code ?? '' }} - {{ $item->category->name ?? '-' }}</p>
+                            <p class="mt-1 text-sm text-gray-900">{{ $item->category->code ?? '' }} - {{ $item->category->label ?? '-' }}</p>
                         </div>
                         <div>
                             <h3 class="text-sm font-medium text-gray-500">Gender</h3>
@@ -36,11 +36,11 @@
                         </div>
                         <div>
                             <h3 class="text-sm font-medium text-gray-500">Tipe</h3>
-                            <p class="mt-1 text-sm text-gray-900">{{ $item->type?->code ?? '-' }} - {{ $item->type?->name ?? '-' }}</p>
+                            <p class="mt-1 text-sm text-gray-900">{{ $item->type?->code ?? '-' }} - {{ $item->type?->label ?? '-' }}</p>
                         </div>
                         <div>
                             <h3 class="text-sm font-medium text-gray-500">Departemen</h3>
-                            <p class="mt-1 text-sm text-gray-900">{{ $item->department?->code ?? '-' }} - {{ $item->department?->name ?? '-' }}</p>
+                            <p class="mt-1 text-sm text-gray-900">{{ $item->department?->code ?? '-' }} - {{ $item->department?->label ?? '-' }}</p>
                         </div>
                         <div>
                             <h3 class="text-sm font-medium text-gray-500">Satuan</h3>

@@ -17,7 +17,7 @@ class ItemTypeRequest extends FormRequest
         $typeId = $this->route('item_type')?->id;
 
         return [
-            'name' => 'required|string|max:255',
+            'label' => 'required|string|max:255',
             'code' => ['required', 'string', 'max:3', Rule::unique('item_types', 'code')->ignore($typeId)],
         ];
     }

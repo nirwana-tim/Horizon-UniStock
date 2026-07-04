@@ -17,9 +17,9 @@
                         </div>
 
                         <div class="mb-4">
-                            <x-input-label for="name" :value="__('Nama')" />
-                            <x-text-input id="name" name="name" type="text" class="mt-1 block w-full" :value="old('name')" required placeholder="Contoh: College, Clinical, Scrub" />
-                            <x-input-error :messages="$errors->get('name')" class="mt-2" />
+                            <x-input-label for="label" :value="__('Label')" />
+                            <x-text-input id="label" name="label" type="text" class="mt-1 block w-full" :value="old('label')" required placeholder="Contoh: College, Clinical, Scrub" />
+                            <x-input-error :messages="$errors->get('label')" class="mt-2" />
                         </div>
 
                         <div class="flex items-center gap-2 mt-6">

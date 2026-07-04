@@ -32,7 +32,7 @@ class InventoryReportExport extends BaseExport implements FromCollection, WithHe
                 'items.name as item_name',
                 'items.code as item_code',
                 'items.unit',
-                'item_categories.name as category_name',
+                'item_categories.label as category_name',
                 'item_categories.code as category_code',
                 'item_variants.size as variant_size'
             )

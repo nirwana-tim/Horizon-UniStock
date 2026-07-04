@@ -17,8 +17,10 @@ class ItemDepartmentRequest extends FormRequest
         $deptId = $this->route('item_department')?->id;
 
         return [
-            'name' => 'required|string|max:255',
+            'label' => 'required|string|max:255',
             'code' => ['required', 'string', 'max:2', Rule::unique('item_departments', 'code')->ignore($deptId)],
+            'study_program_ids' => 'nullable|array',
+            'study_program_ids.*' => 'integer|exists:study_programs,id',
         ];
     }
 }

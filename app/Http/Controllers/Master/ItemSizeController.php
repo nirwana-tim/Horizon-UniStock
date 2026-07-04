@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Master;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ItemSizeRequest;
+use App\Models\ItemCategory;
 use App\Models\ItemSize;
 use App\Services\Master\ItemSizeService;
 use Illuminate\Http\RedirectResponse;
@@ -17,14 +18,16 @@ class ItemSizeController extends Controller
 
     public function index(): View
     {
-        $sizes = ItemSize::orderBy('sort_order')->paginate(15);
+        $sizes = ItemSize::with('categories')->orderBy('code')->paginate(15);
 
         return view('master.item-size.index', compact('sizes'));
     }
 
     public function create(): View
     {
-        return view('master.item-size.create');
+        $categories = ItemCategory::orderBy('code')->get();
+
+        return view('master.item-size.create', compact('categories'));
     }
 
     public function store(ItemSizeRequest $request): RedirectResponse
@@ -36,12 +39,17 @@ class ItemSizeController extends Controller
 
     public function show(ItemSize $itemSize): View
     {
+        $itemSize->load('categories');
+
         return view('master.item-size.show', compact('itemSize'));
     }
 
     public function edit(ItemSize $itemSize): View
     {
-        return view('master.item-size.edit', compact('itemSize'));
+        $itemSize->load('categories');
+        $categories = ItemCategory::orderBy('code')->get();
+
+        return view('master.item-size.edit', compact('itemSize', 'categories'));
     }
 
     public function update(ItemSizeRequest $request, ItemSize $itemSize): RedirectResponse

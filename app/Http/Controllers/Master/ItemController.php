@@ -30,7 +30,7 @@ class ItemController extends Controller
                 'items.selling_price',
                 'items.hpp',
                 'items.category_id',
-                'item_categories.name as category_name',
+                'item_categories.label as category_name',
                 'item_categories.code as category_code'
             )
             ->orderBy('item_categories.code')
@@ -43,12 +43,13 @@ class ItemController extends Controller
 
     public function create(): View
     {
-        $categories = ItemCategory::orderBy('code')->get();
+        $categories = ItemCategory::with('sizes')->orderBy('code')->get();
         $types = ItemType::orderBy('code')->get();
         $departments = ItemDepartment::orderBy('code')->get();
-        $sizes = ItemSize::orderBy('sort_order')->get();
 
-        return view('master.item.create', compact('categories', 'types', 'departments', 'sizes'));
+        $sizesByCategory = $categories->mapWithKeys(fn ($cat) => [$cat->id => $cat->sizes]);
+
+        return view('master.item.create', compact('categories', 'types', 'departments', 'sizesByCategory'));
     }
 
     public function store(ItemRequest $request): RedirectResponse
@@ -61,7 +62,7 @@ class ItemController extends Controller
         $genderLabels = ['L' => 'Laki - Laki', 'P' => 'Perempuan', 'U' => 'Unisex'];
 
         $code = $category->code . '-' . $request->gender . '-' . ($type?->code ?? 'XX') . '-' . ($department?->code ?? '00') . '-' . $size->code;
-        $name = $category->name . ' ' . ($genderLabels[$request->gender] ?? '') . ' ' . ($type?->name ?? '') . ' ' . ($department?->name ?? '');
+        $name = $category->label . ' ' . ($genderLabels[$request->gender] ?? '') . ' ' . ($type?->label ?? '') . ' ' . ($department?->label ?? '');
 
         if (Item::where('code', $code)->exists()) {
             throw ValidationException::withMessages([
@@ -84,7 +85,7 @@ class ItemController extends Controller
         $item->variants()->create([
             'size_id' => $size->id,
             'size' => $size->code,
-            'size_label' => $size->name,
+            'size_label' => $size->label,
             'sku' => $code,
         ]);
 
@@ -105,12 +106,13 @@ class ItemController extends Controller
     public function edit(Item $item): View
     {
         $item->load('variants');
-        $categories = ItemCategory::orderBy('code')->get();
+        $categories = ItemCategory::with('sizes')->orderBy('code')->get();
         $types = ItemType::orderBy('code')->get();
         $departments = ItemDepartment::orderBy('code')->get();
-        $sizes = ItemSize::orderBy('sort_order')->get();
 
-        return view('master.item.edit', compact('item', 'categories', 'types', 'departments', 'sizes'));
+        $sizesByCategory = $categories->mapWithKeys(fn ($cat) => [$cat->id => $cat->sizes]);
+
+        return view('master.item.edit', compact('item', 'categories', 'types', 'departments', 'sizesByCategory'));
     }
 
     public function update(ItemRequest $request, Item $item): RedirectResponse
@@ -125,7 +127,7 @@ class ItemController extends Controller
         $genderLabels = ['L' => 'Laki - Laki', 'P' => 'Perempuan', 'U' => 'Unisex'];
 
         $newCode = $category->code . '-' . $request->gender . '-' . ($type?->code ?? 'XX') . '-' . ($department?->code ?? '00') . '-' . $size->code;
-        $newName = trim($category->name . ' ' . ($genderLabels[$request->gender] ?? '') . ' ' . ($type?->name ?? '') . ' ' . ($department?->name ?? ''));
+        $newName = trim($category->label . ' ' . ($genderLabels[$request->gender] ?? '') . ' ' . ($type?->label ?? '') . ' ' . ($department?->label ?? ''));
 
         $data = $request->validated();
         $data['code'] = $newCode;
@@ -146,14 +148,14 @@ class ItemController extends Controller
         if ($variant) {
             $variant->update([
                 'size' => $size->code,
-                'size_label' => $size->name,
+                'size_label' => $size->label,
                 'sku' => $newCode,
             ]);
         } else {
             $item->variants()->create([
                 'size_id' => $size->id,
                 'size' => $size->code,
-                'size_label' => $size->name,
+                'size_label' => $size->label,
                 'sku' => $newCode,
             ]);
         }

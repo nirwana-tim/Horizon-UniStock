@@ -58,12 +58,6 @@
                             <x-dropdown-link :href="route('master.vendor.index')" :active="request()->routeIs('master.vendor.*')">
                                 {{ __('Vendor') }}
                             </x-dropdown-link>
-                            <x-dropdown-link :href="route('master.distribution-period.index')" :active="request()->routeIs('master.distribution-period.*')">
-                                {{ __('Periode Distribusi') }}
-                            </x-dropdown-link>
-                            <x-dropdown-link :href="route('master.distribution-stage.index')" :active="request()->routeIs('master.distribution-stage.*')">
-                                {{ __('Tahap Distribusi') }}
-                            </x-dropdown-link>
                             <x-dropdown-link :href="route('master.distribution-schedule.index')" :active="request()->routeIs('master.distribution-schedule.*')">
                                 {{ __('Jadwal Distribusi') }}
                             </x-dropdown-link>
@@ -194,12 +188,6 @@
                     </x-responsive-nav-link>
                     <x-responsive-nav-link :href="route('master.vendor.index')" :active="request()->routeIs('master.vendor.*')">
                         {{ __('Vendor') }}
-                    </x-responsive-nav-link>
-                    <x-responsive-nav-link :href="route('master.distribution-period.index')" :active="request()->routeIs('master.distribution-period.*')">
-                        {{ __('Periode Distribusi') }}
-                    </x-responsive-nav-link>
-                    <x-responsive-nav-link :href="route('master.distribution-stage.index')" :active="request()->routeIs('master.distribution-stage.*')">
-                        {{ __('Tahap Distribusi') }}
                     </x-responsive-nav-link>
                     <x-responsive-nav-link :href="route('master.distribution-schedule.index')" :active="request()->routeIs('master.distribution-schedule.*')">
                         {{ __('Jadwal Distribusi') }}

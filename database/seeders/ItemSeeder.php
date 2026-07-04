@@ -4,295 +4,166 @@ namespace Database\Seeders;
 
 use App\Models\Item;
 use App\Models\ItemCategory;
+use App\Models\ItemType;
+use App\Models\ItemDepartment;
 use App\Models\ItemVariant;
+use App\Models\ItemSize;
 use Illuminate\Database\Seeder;
 
 class ItemSeeder extends Seeder
 {
+    private array $categories = [];
+    private array $types = [];
+    private array $departments = [];
+    private array $sizes = [];
+
     public function run(): void
     {
-        $categories = [
-            'Almamater' => ItemCategory::where('name', 'Almamater')->first(),
-            'Jas Lab' => ItemCategory::where('name', 'Jas Lab')->first(),
-            'KTM' => ItemCategory::where('name', 'KTM')->first(),
-            'Lanyard & Holder' => ItemCategory::where('name', 'Lanyard & Holder')->first(),
-            'Merchandise' => ItemCategory::where('name', 'Merchandise')->first(),
-            'Midwifery Kit' => ItemCategory::where('name', 'Midwifery Kit')->first(),
-            'Name Tag' => ItemCategory::where('name', 'Name Tag')->first(),
-            'Nursing Kit' => ItemCategory::where('name', 'Nursing Kit')->first(),
-            'Scrub Suit' => ItemCategory::where('name', 'Scrub Suit')->first(),
-            'Seragam Komunitas' => ItemCategory::where('name', 'Seragam Komunitas')->first(),
-            'Seragam Kuliah' => ItemCategory::where('name', 'Seragam Kuliah')->first(),
-            'Seragam Praktek' => ItemCategory::where('name', 'Seragam Praktek')->first(),
+        $this->categories = [
+            'KIT' => ItemCategory::where('code', 'KIT')->first(),
+            'KTM' => ItemCategory::where('code', 'KTM')->first(),
+            'UNF' => ItemCategory::where('code', 'UNF')->first(),
+            'SHO' => ItemCategory::where('code', 'SHO')->first(),
+            'MRC' => ItemCategory::where('code', 'MRC')->first(),
         ];
 
-        // Kits (single size)
-        $KIT_U_MID_02 = Item::firstOrCreate(
-            ['code' => 'KIT-U-MID-02-01'],
-            ['name' => 'Kit Midwifery Unisex STIKES', 'category_id' => $categories['Midwifery Kit']->id, 'unit' => 'set', 'selling_price' => 0, 'hpp' => 0]
-        );
-        ItemVariant::firstOrCreate(['sku' => 'KIT-U-MID-02-01'], ['item_id' => $KIT_U_MID_02->id, 'size' => '01', 'size_label' => 'All Size']);
+        $this->types = [
+            'ALM' => ItemType::where('code', 'ALM')->first(),
+            'CLG' => ItemType::where('code', 'CLG')->first(),
+            'CLC' => ItemType::where('code', 'CLC')->first(),
+            'SCB' => ItemType::where('code', 'SCB')->first(),
+            'LAB' => ItemType::where('code', 'LAB')->first(),
+            'COM' => ItemType::where('code', 'COM')->first(),
+            'YDH' => ItemType::where('code', 'YDH')->first(),
+            'KTM' => ItemType::where('code', 'KTM')->first(),
+            'TAG' => ItemType::where('code', 'TAG')->first(),
+            'NUR' => ItemType::where('code', 'NUR')->first(),
+            'MID' => ItemType::where('code', 'MID')->first(),
+            'TBR' => ItemType::where('code', 'TBR')->first(),
+        ];
 
-        $KIT_U_NUR_02 = Item::firstOrCreate(
-            ['code' => 'KIT-U-NUR-02-01'],
-            ['name' => 'Kit Nursing Unisex STIKES', 'category_id' => $categories['Nursing Kit']->id, 'unit' => 'set', 'selling_price' => 0, 'hpp' => 0]
-        );
-        ItemVariant::firstOrCreate(['sku' => 'KIT-U-NUR-02-01'], ['item_id' => $KIT_U_NUR_02->id, 'size' => '01', 'size_label' => 'All Size']);
+        $this->departments = [
+            '01' => ItemDepartment::where('code', '01')->first(),
+            '02' => ItemDepartment::where('code', '02')->first(),
+            '03' => ItemDepartment::where('code', '03')->first(),
+            '04' => ItemDepartment::where('code', '04')->first(),
+            '05' => ItemDepartment::where('code', '05')->first(),
+            '06' => ItemDepartment::where('code', '06')->first(),
+            '07' => ItemDepartment::where('code', '07')->first(),
+            '09' => ItemDepartment::where('code', '09')->first(),
+            '14' => ItemDepartment::where('code', '14')->first(),
+        ];
 
-        $KIT_U_NUR_05 = Item::firstOrCreate(
-            ['code' => 'KIT-U-NUR-05-01'],
-            ['name' => 'Kit Nursing Unisex S1 KEP', 'category_id' => $categories['Nursing Kit']->id, 'unit' => 'set', 'selling_price' => 0, 'hpp' => 0]
-        );
-        ItemVariant::firstOrCreate(['sku' => 'KIT-U-NUR-05-01'], ['item_id' => $KIT_U_NUR_05->id, 'size' => '01', 'size_label' => 'All Size']);
+        $this->sizes = [
+            '01' => ItemSize::where('code', '01')->first(),
+            '02' => ItemSize::where('code', '02')->first(),
+            '03' => ItemSize::where('code', '03')->first(),
+            '04' => ItemSize::where('code', '04')->first(),
+            '05' => ItemSize::where('code', '05')->first(),
+            '06' => ItemSize::where('code', '06')->first(),
+            '07' => ItemSize::where('code', '07')->first(),
+            '34' => ItemSize::where('code', '34')->first(),
+            '36' => ItemSize::where('code', '36')->first(),
+            '37' => ItemSize::where('code', '37')->first(),
+            '39' => ItemSize::where('code', '39')->first(),
+            'TM' => ItemSize::where('code', 'TM')->first(),
+        ];
 
-        $KIT_U_NUR_06 = Item::firstOrCreate(
-            ['code' => 'KIT-U-NUR-06-01'],
-            ['name' => 'Kit Nursing Unisex D3 KEP', 'category_id' => $categories['Nursing Kit']->id, 'unit' => 'set', 'selling_price' => 0, 'hpp' => 0]
-        );
-        ItemVariant::firstOrCreate(['sku' => 'KIT-U-NUR-06-01'], ['item_id' => $KIT_U_NUR_06->id, 'size' => '01', 'size_label' => 'All Size']);
+        // Kits
+        $this->createItem('KIT-U-MID-02-01', 'Kit Midwifery Unisex STIKES', 'KIT', 'MID', 'U', '02', '01');
+        $this->createItem('KIT-U-NUR-02-01', 'Kit Nursing Unisex STIKES', 'KIT', 'NUR', 'U', '02', '01');
+        $this->createItem('KIT-U-NUR-05-01', 'Kit Nursing Unisex S1 KEP', 'KIT', 'NUR', 'U', '05', '01');
+        $this->createItem('KIT-U-NUR-06-01', 'Kit Nursing Unisex D3 KEP', 'KIT', 'NUR', 'U', '06', '01');
+        $this->createItem('KIT-U-NUR-09-01', 'Kit Nursing Unisex NERS', 'KIT', 'NUR', 'U', '09', '01');
 
-        $KIT_U_NUR_09 = Item::firstOrCreate(
-            ['code' => 'KIT-U-NUR-09-01'],
-            ['name' => 'Kit Nursing Unisex NERS', 'category_id' => $categories['Nursing Kit']->id, 'unit' => 'set', 'selling_price' => 0, 'hpp' => 0]
-        );
-        ItemVariant::firstOrCreate(['sku' => 'KIT-U-NUR-09-01'], ['item_id' => $KIT_U_NUR_09->id, 'size' => '01', 'size_label' => 'All Size']);
-
-        // KTM, Tags, Lanyard (single size)
-        $KTM_U_KTM_01 = Item::firstOrCreate(
-            ['code' => 'KTM-U-KTM-01-01'],
-            ['name' => 'KTM Kartu Mahasiswa Unisex Horizon', 'category_id' => $categories['KTM']->id, 'unit' => 'pcs', 'selling_price' => 0, 'hpp' => 0]
-        );
-        ItemVariant::firstOrCreate(['sku' => 'KTM-U-KTM-01-01'], ['item_id' => $KTM_U_KTM_01->id, 'size' => '01', 'size_label' => 'All Size']);
-
-        $KTM_U_TAG_02 = Item::firstOrCreate(
-            ['code' => 'KTM-U-TAG-02-01'],
-            ['name' => 'KTM Tag Unisex STIKES', 'category_id' => $categories['Name Tag']->id, 'unit' => 'pcs', 'selling_price' => 0, 'hpp' => 0]
-        );
-        ItemVariant::firstOrCreate(['sku' => 'KTM-U-TAG-02-01'], ['item_id' => $KTM_U_TAG_02->id, 'size' => '01', 'size_label' => 'All Size']);
-
-        $KTM_U_YDH_01 = Item::firstOrCreate(
-            ['code' => 'KTM-U-YDH-01-01'],
-            ['name' => 'KTM Lanyard & Holder Unisex Horizon', 'category_id' => $categories['Lanyard & Holder']->id, 'unit' => 'pcs', 'selling_price' => 0, 'hpp' => 0]
-        );
-        ItemVariant::firstOrCreate(['sku' => 'KTM-U-YDH-01-01'], ['item_id' => $KTM_U_YDH_01->id, 'size' => '01', 'size_label' => 'All Size']);
+        // KTM
+        $this->createItem('KTM-U-KTM-01-01', 'KTM Kartu Mahasiswa Unisex Horizon', 'KTM', 'KTM', 'U', '01', '01');
+        $this->createItem('KTM-U-TAG-02-01', 'KTM Tag Unisex STIKES', 'KTM', 'TAG', 'U', '02', '01');
+        $this->createItem('KTM-U-YDH-01-01', 'KTM Lanyard & Holder Unisex Horizon', 'KTM', 'YDH', 'U', '01', '01');
 
         // Merchandise
-        $MRC_U_TBR_01 = Item::firstOrCreate(
-            ['code' => 'MRC-U-TBR-01-TM'],
-            ['name' => 'Merchandise Tumbler Unisex Horizon', 'category_id' => $categories['Merchandise']->id, 'unit' => 'pcs', 'selling_price' => 0, 'hpp' => 0]
-        );
-        ItemVariant::firstOrCreate(['sku' => 'MRC-U-TBR-01-TM'], ['item_id' => $MRC_U_TBR_01->id, 'size' => 'TM', 'size_label' => 'TM']);
+        $this->createItem('MRC-U-TBR-01-TM', 'Merchandise Tumbler Unisex Horizon', 'MRC', 'TBR', 'U', '01', 'TM');
 
         // Shoes Laki-laki
-        $SHO_L_CLC_02 = Item::firstOrCreate(
-            ['code' => 'SHO-L-CLC-02-37'],
-            ['name' => 'Shoes Clinical Laki - Laki STIKES', 'category_id' => $categories['Seragam Praktek']->id, 'unit' => 'pcs', 'selling_price' => 0, 'hpp' => 0]
-        );
-        ItemVariant::firstOrCreate(['sku' => 'SHO-L-CLC-02-37'], ['item_id' => $SHO_L_CLC_02->id, 'size' => '37', 'size_label' => '37']);
-
-        $SHO_L_CLC_14 = Item::firstOrCreate(
-            ['code' => 'SHO-L-CLC-14-39'],
-            ['name' => 'Shoes Clinical Laki - Laki S1 Pariwisata', 'category_id' => $categories['Seragam Praktek']->id, 'unit' => 'pcs', 'selling_price' => 0, 'hpp' => 0]
-        );
-        ItemVariant::firstOrCreate(['sku' => 'SHO-L-CLC-14-39'], ['item_id' => $SHO_L_CLC_14->id, 'size' => '39', 'size_label' => '39']);
-
-        $SHO_L_CLG_02 = Item::firstOrCreate(
-            ['code' => 'SHO-L-CLG-02-37'],
-            ['name' => 'Shoes College Laki - Laki STIKES', 'category_id' => $categories['Seragam Kuliah']->id, 'unit' => 'pcs', 'selling_price' => 0, 'hpp' => 0]
-        );
-        ItemVariant::firstOrCreate(['sku' => 'SHO-L-CLG-02-37'], ['item_id' => $SHO_L_CLG_02->id, 'size' => '37', 'size_label' => '37']);
+        $this->createItem('SHO-L-CLC-02-37', 'Shoes Clinical Laki-Laki STIKES', 'SHO', 'CLC', 'L', '02', '37');
+        $this->createItem('SHO-L-CLC-14-39', 'Shoes Clinical Laki-Laki S1 Pariwisata', 'SHO', 'CLC', 'L', '14', '39');
+        $this->createItem('SHO-L-CLG-02-37', 'Shoes College Laki-Laki STIKES', 'SHO', 'CLG', 'L', '02', '37');
 
         // Shoes Perempuan
-        $SHO_P_CLC_02 = Item::firstOrCreate(
-            ['code' => 'SHO-P-CLC-02-34'],
-            ['name' => 'Shoes Clinical Perempuan STIKES', 'category_id' => $categories['Seragam Praktek']->id, 'unit' => 'pcs', 'selling_price' => 0, 'hpp' => 0]
-        );
-        ItemVariant::firstOrCreate(['sku' => 'SHO-P-CLC-02-34'], ['item_id' => $SHO_P_CLC_02->id, 'size' => '34', 'size_label' => '34']);
-
-        $SHO_P_CLC_14 = Item::firstOrCreate(
-            ['code' => 'SHO-P-CLC-14-36'],
-            ['name' => 'Shoes Clinical Perempuan S1 Pariwisata', 'category_id' => $categories['Seragam Praktek']->id, 'unit' => 'pcs', 'selling_price' => 0, 'hpp' => 0]
-        );
-        ItemVariant::firstOrCreate(['sku' => 'SHO-P-CLC-14-36'], ['item_id' => $SHO_P_CLC_14->id, 'size' => '36', 'size_label' => '36']);
-
-        $SHO_P_CLG_02 = Item::firstOrCreate(
-            ['code' => 'SHO-P-CLG-02-34'],
-            ['name' => 'Shoes College Perempuan STIKES', 'category_id' => $categories['Seragam Kuliah']->id, 'unit' => 'pcs', 'selling_price' => 0, 'hpp' => 0]
-        );
-        ItemVariant::firstOrCreate(['sku' => 'SHO-P-CLG-02-34'], ['item_id' => $SHO_P_CLG_02->id, 'size' => '34', 'size_label' => '34']);
+        $this->createItem('SHO-P-CLC-02-34', 'Shoes Clinical Perempuan STIKES', 'SHO', 'CLC', 'P', '02', '34');
+        $this->createItem('SHO-P-CLC-14-36', 'Shoes Clinical Perempuan S1 Pariwisata', 'SHO', 'CLC', 'P', '14', '36');
+        $this->createItem('SHO-P-CLG-02-34', 'Shoes College Perempuan STIKES', 'SHO', 'CLG', 'P', '02', '34');
 
         // Shoes Unisex Scrub
-        $SHO_U_SCB_02 = Item::firstOrCreate(
-            ['code' => 'SHO-U-SCB-02-34'],
-            ['name' => 'Shoes Scrub Unisex STIKES', 'category_id' => $categories['Scrub Suit']->id, 'unit' => 'pcs', 'selling_price' => 0, 'hpp' => 0]
-        );
-        ItemVariant::firstOrCreate(['sku' => 'SHO-U-SCB-02-34'], ['item_id' => $SHO_U_SCB_02->id, 'size' => '34', 'size_label' => '34']);
+        $this->createItem('SHO-U-SCB-02-34', 'Shoes Scrub Unisex STIKES', 'SHO', 'SCB', 'U', '02', '34');
 
         // Uniforms Laki-laki
-        $UNF_L_CLC_02 = Item::firstOrCreate(
-            ['code' => 'UNF-L-CLC-02-03'],
-            ['name' => 'Uniform Clinical Laki - Laki STIKES', 'category_id' => $categories['Seragam Praktek']->id, 'unit' => 'pcs', 'selling_price' => 0, 'hpp' => 0]
-        );
-        ItemVariant::firstOrCreate(['sku' => 'UNF-L-CLC-02-03'], ['item_id' => $UNF_L_CLC_02->id, 'size' => '03', 'size_label' => 'S']);
-
-        $UNF_L_CLC_03 = Item::firstOrCreate(
-            ['code' => 'UNF-L-CLC-03-03'],
-            ['name' => 'Uniform Clinical Laki - Laki STMIK', 'category_id' => $categories['Seragam Praktek']->id, 'unit' => 'pcs', 'selling_price' => 0, 'hpp' => 0]
-        );
-        ItemVariant::firstOrCreate(['sku' => 'UNF-L-CLC-03-03'], ['item_id' => $UNF_L_CLC_03->id, 'size' => '03', 'size_label' => 'S']);
-
-        $UNF_L_CLC_14 = Item::firstOrCreate(
-            ['code' => 'UNF-L-CLC-14-03'],
-            ['name' => 'Uniform Clinical Laki - Laki S1 Pariwisata', 'category_id' => $categories['Seragam Praktek']->id, 'unit' => 'pcs', 'selling_price' => 0, 'hpp' => 0]
-        );
-        ItemVariant::firstOrCreate(['sku' => 'UNF-L-CLC-14-03'], ['item_id' => $UNF_L_CLC_14->id, 'size' => '03', 'size_label' => 'S']);
-
-        $UNF_L_CLG_01 = Item::firstOrCreate(
-            ['code' => 'UNF-L-CLG-01-03'],
-            ['name' => 'Uniform College Laki - Laki Horizon', 'category_id' => $categories['Seragam Kuliah']->id, 'unit' => 'pcs', 'selling_price' => 0, 'hpp' => 0]
-        );
-        ItemVariant::firstOrCreate(['sku' => 'UNF-L-CLG-01-03'], ['item_id' => $UNF_L_CLG_01->id, 'size' => '03', 'size_label' => 'S']);
-
-        $UNF_L_CLG_02 = Item::firstOrCreate(
-            ['code' => 'UNF-L-CLG-02-03'],
-            ['name' => 'Uniform College Laki - Laki STIKES', 'category_id' => $categories['Seragam Kuliah']->id, 'unit' => 'pcs', 'selling_price' => 0, 'hpp' => 0]
-        );
-        ItemVariant::firstOrCreate(['sku' => 'UNF-L-CLG-02-03'], ['item_id' => $UNF_L_CLG_02->id, 'size' => '03', 'size_label' => 'S']);
-
-        $UNF_L_CLG_03 = Item::firstOrCreate(
-            ['code' => 'UNF-L-CLG-03-03'],
-            ['name' => 'Uniform College Laki - Laki STMIK', 'category_id' => $categories['Seragam Kuliah']->id, 'unit' => 'pcs', 'selling_price' => 0, 'hpp' => 0]
-        );
-        ItemVariant::firstOrCreate(['sku' => 'UNF-L-CLG-03-03'], ['item_id' => $UNF_L_CLG_03->id, 'size' => '03', 'size_label' => 'S']);
-
-        $UNF_L_CLG_04 = Item::firstOrCreate(
-            ['code' => 'UNF-L-CLG-04-03'],
-            ['name' => 'Uniform College Laki - Laki STIE', 'category_id' => $categories['Seragam Kuliah']->id, 'unit' => 'pcs', 'selling_price' => 0, 'hpp' => 0]
-        );
-        ItemVariant::firstOrCreate(['sku' => 'UNF-L-CLG-04-03'], ['item_id' => $UNF_L_CLG_04->id, 'size' => '03', 'size_label' => 'S']);
-
-        $UNF_L_COM_05 = Item::firstOrCreate(
-            ['code' => 'UNF-L-COM-05-03'],
-            ['name' => 'Uniform Community Laki - Laki S1 KEP', 'category_id' => $categories['Seragam Komunitas']->id, 'unit' => 'pcs', 'selling_price' => 0, 'hpp' => 0]
-        );
-        ItemVariant::firstOrCreate(['sku' => 'UNF-L-COM-05-03'], ['item_id' => $UNF_L_COM_05->id, 'size' => '03', 'size_label' => 'S']);
-
-        $UNF_L_COM_06 = Item::firstOrCreate(
-            ['code' => 'UNF-L-COM-06-03'],
-            ['name' => 'Uniform Community Laki - Laki D3 KEP', 'category_id' => $categories['Seragam Komunitas']->id, 'unit' => 'pcs', 'selling_price' => 0, 'hpp' => 0]
-        );
-        ItemVariant::firstOrCreate(['sku' => 'UNF-L-COM-06-03'], ['item_id' => $UNF_L_COM_06->id, 'size' => '03', 'size_label' => 'S']);
-
-        $UNF_L_SCB_02 = Item::firstOrCreate(
-            ['code' => 'UNF-L-SCB-02-03'],
-            ['name' => 'Uniform Scrub Laki - Laki STIKES', 'category_id' => $categories['Scrub Suit']->id, 'unit' => 'pcs', 'selling_price' => 0, 'hpp' => 0]
-        );
-        ItemVariant::firstOrCreate(['sku' => 'UNF-L-SCB-02-03'], ['item_id' => $UNF_L_SCB_02->id, 'size' => '03', 'size_label' => 'S']);
+        $this->createItem('UNF-L-CLC-02-03', 'Uniform Clinical Laki-Laki STIKES', 'UNF', 'CLC', 'L', '02', '03');
+        $this->createItem('UNF-L-CLC-03-03', 'Uniform Clinical Laki-Laki STMIK', 'UNF', 'CLC', 'L', '03', '03');
+        $this->createItem('UNF-L-CLC-14-03', 'Uniform Clinical Laki-Laki S1 Pariwisata', 'UNF', 'CLC', 'L', '14', '03');
+        $this->createItem('UNF-L-CLG-01-03', 'Uniform College Laki-Laki Horizon', 'UNF', 'CLG', 'L', '01', '03');
+        $this->createItem('UNF-L-CLG-02-03', 'Uniform College Laki-Laki STIKES', 'UNF', 'CLG', 'L', '02', '03');
+        $this->createItem('UNF-L-CLG-03-03', 'Uniform College Laki-Laki STMIK', 'UNF', 'CLG', 'L', '03', '03');
+        $this->createItem('UNF-L-CLG-04-03', 'Uniform College Laki-Laki STIE', 'UNF', 'CLG', 'L', '04', '03');
+        $this->createItem('UNF-L-COM-05-03', 'Uniform Community Laki-Laki S1 KEP', 'UNF', 'COM', 'L', '05', '03');
+        $this->createItem('UNF-L-COM-06-03', 'Uniform Community Laki-Laki D3 KEP', 'UNF', 'COM', 'L', '06', '03');
+        $this->createItem('UNF-L-SCB-02-03', 'Uniform Scrub Laki-Laki STIKES', 'UNF', 'SCB', 'L', '02', '03');
 
         // Uniforms Perempuan
-        $UNF_P_CLC_01 = Item::firstOrCreate(
-            ['code' => 'UNF-P-CLC-01-05'],
-            ['name' => 'Uniform Clinical Perempuan Horizon', 'category_id' => $categories['Seragam Praktek']->id, 'unit' => 'pcs', 'selling_price' => 0, 'hpp' => 0]
-        );
-        ItemVariant::firstOrCreate(['sku' => 'UNF-P-CLC-01-05'], ['item_id' => $UNF_P_CLC_01->id, 'size' => '05', 'size_label' => 'L']);
-
-        $UNF_P_CLC_02 = Item::firstOrCreate(
-            ['code' => 'UNF-P-CLC-02-03'],
-            ['name' => 'Uniform Clinical Perempuan STIKES', 'category_id' => $categories['Seragam Praktek']->id, 'unit' => 'pcs', 'selling_price' => 0, 'hpp' => 0]
-        );
-        ItemVariant::firstOrCreate(['sku' => 'UNF-P-CLC-02-03'], ['item_id' => $UNF_P_CLC_02->id, 'size' => '03', 'size_label' => 'S']);
-
-        $UNF_P_CLC_03 = Item::firstOrCreate(
-            ['code' => 'UNF-P-CLC-03-03'],
-            ['name' => 'Uniform Clinical Perempuan STMIK', 'category_id' => $categories['Seragam Praktek']->id, 'unit' => 'pcs', 'selling_price' => 0, 'hpp' => 0]
-        );
-        ItemVariant::firstOrCreate(['sku' => 'UNF-P-CLC-03-03'], ['item_id' => $UNF_P_CLC_03->id, 'size' => '03', 'size_label' => 'S']);
-
-        $UNF_P_CLC_14 = Item::firstOrCreate(
-            ['code' => 'UNF-P-CLC-14-03'],
-            ['name' => 'Uniform Clinical Perempuan S1 Pariwisata', 'category_id' => $categories['Seragam Praktek']->id, 'unit' => 'pcs', 'selling_price' => 0, 'hpp' => 0]
-        );
-        ItemVariant::firstOrCreate(['sku' => 'UNF-P-CLC-14-03'], ['item_id' => $UNF_P_CLC_14->id, 'size' => '03', 'size_label' => 'S']);
-
-        $UNF_P_CLG_01 = Item::firstOrCreate(
-            ['code' => 'UNF-P-CLG-01-03'],
-            ['name' => 'Uniform College Perempuan Horizon', 'category_id' => $categories['Seragam Kuliah']->id, 'unit' => 'pcs', 'selling_price' => 0, 'hpp' => 0]
-        );
-        ItemVariant::firstOrCreate(['sku' => 'UNF-P-CLG-01-03'], ['item_id' => $UNF_P_CLG_01->id, 'size' => '03', 'size_label' => 'S']);
-
-        $UNF_P_CLG_02 = Item::firstOrCreate(
-            ['code' => 'UNF-P-CLG-02-03'],
-            ['name' => 'Uniform College Perempuan STIKES', 'category_id' => $categories['Seragam Kuliah']->id, 'unit' => 'pcs', 'selling_price' => 0, 'hpp' => 0]
-        );
-        ItemVariant::firstOrCreate(['sku' => 'UNF-P-CLG-02-03'], ['item_id' => $UNF_P_CLG_02->id, 'size' => '03', 'size_label' => 'S']);
-
-        $UNF_P_CLG_03 = Item::firstOrCreate(
-            ['code' => 'UNF-P-CLG-03-03'],
-            ['name' => 'Uniform College Perempuan STMIK', 'category_id' => $categories['Seragam Kuliah']->id, 'unit' => 'pcs', 'selling_price' => 0, 'hpp' => 0]
-        );
-        ItemVariant::firstOrCreate(['sku' => 'UNF-P-CLG-03-03'], ['item_id' => $UNF_P_CLG_03->id, 'size' => '03', 'size_label' => 'S']);
-
-        $UNF_P_CLG_04 = Item::firstOrCreate(
-            ['code' => 'UNF-P-CLG-04-03'],
-            ['name' => 'Uniform College Perempuan STIE', 'category_id' => $categories['Seragam Kuliah']->id, 'unit' => 'pcs', 'selling_price' => 0, 'hpp' => 0]
-        );
-        ItemVariant::firstOrCreate(['sku' => 'UNF-P-CLG-04-03'], ['item_id' => $UNF_P_CLG_04->id, 'size' => '03', 'size_label' => 'S']);
-
-        $UNF_P_COM_05 = Item::firstOrCreate(
-            ['code' => 'UNF-P-COM-05-03'],
-            ['name' => 'Uniform Community Perempuan S1 KEP', 'category_id' => $categories['Seragam Komunitas']->id, 'unit' => 'pcs', 'selling_price' => 0, 'hpp' => 0]
-        );
-        ItemVariant::firstOrCreate(['sku' => 'UNF-P-COM-05-03'], ['item_id' => $UNF_P_COM_05->id, 'size' => '03', 'size_label' => 'S']);
-
-        $UNF_P_COM_06 = Item::firstOrCreate(
-            ['code' => 'UNF-P-COM-06-03'],
-            ['name' => 'Uniform Community Perempuan D3 KEP', 'category_id' => $categories['Seragam Komunitas']->id, 'unit' => 'pcs', 'selling_price' => 0, 'hpp' => 0]
-        );
-        ItemVariant::firstOrCreate(['sku' => 'UNF-P-COM-06-03'], ['item_id' => $UNF_P_COM_06->id, 'size' => '03', 'size_label' => 'S']);
-
-        $UNF_P_COM_07 = Item::firstOrCreate(
-            ['code' => 'UNF-P-COM-07-03'],
-            ['name' => 'Uniform Community Perempuan D3 KEB', 'category_id' => $categories['Seragam Komunitas']->id, 'unit' => 'pcs', 'selling_price' => 0, 'hpp' => 0]
-        );
-        ItemVariant::firstOrCreate(['sku' => 'UNF-P-COM-07-03'], ['item_id' => $UNF_P_COM_07->id, 'size' => '03', 'size_label' => 'S']);
-
-        $UNF_P_SCB_02 = Item::firstOrCreate(
-            ['code' => 'UNF-P-SCB-02-03'],
-            ['name' => 'Uniform Scrub Perempuan STIKES', 'category_id' => $categories['Scrub Suit']->id, 'unit' => 'pcs', 'selling_price' => 0, 'hpp' => 0]
-        );
-        ItemVariant::firstOrCreate(['sku' => 'UNF-P-SCB-02-03'], ['item_id' => $UNF_P_SCB_02->id, 'size' => '03', 'size_label' => 'S']);
+        $this->createItem('UNF-P-CLC-01-05', 'Uniform Clinical Perempuan Horizon', 'UNF', 'CLC', 'P', '01', '05');
+        $this->createItem('UNF-P-CLC-02-03', 'Uniform Clinical Perempuan STIKES', 'UNF', 'CLC', 'P', '02', '03');
+        $this->createItem('UNF-P-CLC-03-03', 'Uniform Clinical Perempuan STMIK', 'UNF', 'CLC', 'P', '03', '03');
+        $this->createItem('UNF-P-CLC-14-03', 'Uniform Clinical Perempuan S1 Pariwisata', 'UNF', 'CLC', 'P', '14', '03');
+        $this->createItem('UNF-P-CLG-01-03', 'Uniform College Perempuan Horizon', 'UNF', 'CLG', 'P', '01', '03');
+        $this->createItem('UNF-P-CLG-02-03', 'Uniform College Perempuan STIKES', 'UNF', 'CLG', 'P', '02', '03');
+        $this->createItem('UNF-P-CLG-03-03', 'Uniform College Perempuan STMIK', 'UNF', 'CLG', 'P', '03', '03');
+        $this->createItem('UNF-P-CLG-04-03', 'Uniform College Perempuan STIE', 'UNF', 'CLG', 'P', '04', '03');
+        $this->createItem('UNF-P-COM-05-03', 'Uniform Community Perempuan S1 KEP', 'UNF', 'COM', 'P', '05', '03');
+        $this->createItem('UNF-P-COM-06-03', 'Uniform Community Perempuan D3 KEP', 'UNF', 'COM', 'P', '06', '03');
+        $this->createItem('UNF-P-COM-07-03', 'Uniform Community Perempuan D3 KEB', 'UNF', 'COM', 'P', '07', '03');
+        $this->createItem('UNF-P-SCB-02-03', 'Uniform Scrub Perempuan STIKES', 'UNF', 'SCB', 'P', '02', '03');
 
         // Uniforms Unisex
-        $UNF_U_ALM_01 = Item::firstOrCreate(
-            ['code' => 'UNF-U-ALM-01-03'],
-            ['name' => 'Uniform Almamater Unisex Horizon', 'category_id' => $categories['Almamater']->id, 'unit' => 'pcs', 'selling_price' => 0, 'hpp' => 0]
-        );
-        ItemVariant::firstOrCreate(['sku' => 'UNF-U-ALM-01-03'], ['item_id' => $UNF_U_ALM_01->id, 'size' => '03', 'size_label' => 'S']);
+        $this->createItem('UNF-U-ALM-01-03', 'Uniform Almamater Unisex Horizon', 'UNF', 'ALM', 'U', '01', '03');
+        $this->createItem('UNF-U-ALM-02-03', 'Uniform Almamater Unisex STIKES', 'UNF', 'ALM', 'U', '02', '03');
+        $this->createItem('UNF-U-ALM-03-03', 'Uniform Almamater Unisex STMIK', 'UNF', 'ALM', 'U', '03', '03');
+        $this->createItem('UNF-U-ALM-04-03', 'Uniform Almamater Unisex STIE', 'UNF', 'ALM', 'U', '04', '03');
+        $this->createItem('UNF-U-LAB-02-03', 'Uniform Laboratory Unisex STIKES', 'UNF', 'LAB', 'U', '02', '03');
+    }
 
-        $UNF_U_ALM_02 = Item::firstOrCreate(
-            ['code' => 'UNF-U-ALM-02-03'],
-            ['name' => 'Uniform Almamater Unisex STIKES', 'category_id' => $categories['Almamater']->id, 'unit' => 'pcs', 'selling_price' => 0, 'hpp' => 0]
-        );
-        ItemVariant::firstOrCreate(['sku' => 'UNF-U-ALM-02-03'], ['item_id' => $UNF_U_ALM_02->id, 'size' => '03', 'size_label' => 'S']);
+    private function createItem(string $code, string $name, string $catCode, string $typeCode, string $gender, string $deptCode, string $sizeCode): void
+    {
+        $category = $this->categories[$catCode];
+        $type = $this->types[$typeCode];
+        $department = $this->departments[$deptCode];
+        $size = $this->sizes[$sizeCode];
 
-        $UNF_U_ALM_03 = Item::firstOrCreate(
-            ['code' => 'UNF-U-ALM-03-03'],
-            ['name' => 'Uniform Almamater Unisex STMIK', 'category_id' => $categories['Almamater']->id, 'unit' => 'pcs', 'selling_price' => 0, 'hpp' => 0]
-        );
-        ItemVariant::firstOrCreate(['sku' => 'UNF-U-ALM-03-03'], ['item_id' => $UNF_U_ALM_03->id, 'size' => '03', 'size_label' => 'S']);
+        if (!$category || !$type || !$department || !$size) {
+            return;
+        }
 
-        $UNF_U_ALM_04 = Item::firstOrCreate(
-            ['code' => 'UNF-U-ALM-04-03'],
-            ['name' => 'Uniform Almamater Unisex STIE', 'category_id' => $categories['Almamater']->id, 'unit' => 'pcs', 'selling_price' => 0, 'hpp' => 0]
+        $item = Item::firstOrCreate(
+            ['code' => $code],
+            [
+                'name' => $name,
+                'gender' => $gender,
+                'category_id' => $category->id,
+                'type_id' => $type->id,
+                'department_id' => $department->id,
+                'unit' => $catCode === 'KIT' ? 'set' : 'pcs',
+                'selling_price' => 0,
+                'hpp' => 0,
+            ]
         );
-        ItemVariant::firstOrCreate(['sku' => 'UNF-U-ALM-04-03'], ['item_id' => $UNF_U_ALM_04->id, 'size' => '03', 'size_label' => 'S']);
 
-        $UNF_U_LAB_02 = Item::firstOrCreate(
-            ['code' => 'UNF-U-LAB-02-03'],
-            ['name' => 'Uniform Laboratory Unisex STIKES', 'category_id' => $categories['Jas Lab']->id, 'unit' => 'pcs', 'selling_price' => 0, 'hpp' => 0]
+        ItemVariant::firstOrCreate(
+            ['sku' => $code],
+            [
+                'item_id' => $item->id,
+                'size_id' => $size->id,
+                'size' => $size->code,
+                'size_label' => $size->label,
+            ]
         );
-        ItemVariant::firstOrCreate(['sku' => 'UNF-U-LAB-02-03'], ['item_id' => $UNF_U_LAB_02->id, 'size' => '03', 'size_label' => 'S']);
-
-        // Total: 43 items, 43 variants
     }
 }

@@ -103,6 +103,6 @@ class Item extends Model
 
     public function currentPrice(): ?ItemPrice
     {
-        return $this->prices()->whereNull('period_id')->latest('id')->first();
+        return $this->prices()->latest('id')->first();
     }
 }

@@ -18,12 +18,16 @@
                                 <dd class="mt-1 text-sm text-gray-900 font-semibold">{{ $distributionSchedule->name }}</dd>
                             </div>
                             <div class="bg-gray-50 p-4 rounded-lg">
-                                <dt class="text-sm font-medium text-gray-500">{{ __('Tahap') }}</dt>
-                                <dd class="mt-1 text-sm text-gray-900 font-semibold">{{ $distributionSchedule->stage?->name ?? '-' }}</dd>
+                                <dt class="text-sm font-medium text-gray-500">{{ __('Periode') }}</dt>
+                                <dd class="mt-1 text-sm text-gray-900 font-semibold">{{ $distributionSchedule->period ?? '-' }}</dd>
                             </div>
                             <div class="bg-gray-50 p-4 rounded-lg">
-                                <dt class="text-sm font-medium text-gray-500">{{ __('Periode') }}</dt>
-                                <dd class="mt-1 text-sm text-gray-900 font-semibold">{{ $distributionSchedule->period ?? $distributionSchedule->stage?->period?->name ?? '-' }}</dd>
+                                <dt class="text-sm font-medium text-gray-500">{{ __('Angkatan') }}</dt>
+                                <dd class="mt-1 text-sm text-gray-900 font-semibold">{{ $distributionSchedule->programLevel?->name ?? '-' }}</dd>
+                            </div>
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <dt class="text-sm font-medium text-gray-500">{{ __('Fakultas / Prodi') }}</dt>
+                                <dd class="mt-1 text-sm text-gray-900 font-semibold">{{ $distributionSchedule->faculty?->name ?? '-' }}{{ $distributionSchedule->studyProgram ? ' / ' . $distributionSchedule->studyProgram->name : '' }}</dd>
                             </div>
                             <div class="bg-gray-50 p-4 rounded-lg">
                                 <dt class="text-sm font-medium text-gray-500">{{ __('Tanggal') }}</dt>

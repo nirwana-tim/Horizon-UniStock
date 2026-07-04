@@ -11,7 +11,6 @@ class DistributionTransaction extends Model
     protected $fillable = [
         'student_id',
         'schedule_id',
-        'stage_id',
         'staff_id',
         'status',
         'pickup_time',
@@ -27,17 +26,12 @@ class DistributionTransaction extends Model
 
     public function student(): BelongsTo
     {
-        return $this->belongsTo(Student::class);
+        return $this->belongsTo(Student::class, 'student_id');
     }
 
     public function schedule(): BelongsTo
     {
         return $this->belongsTo(DistributionSchedule::class, 'schedule_id');
-    }
-
-    public function stage(): BelongsTo
-    {
-        return $this->belongsTo(DistributionStage::class, 'stage_id');
     }
 
     public function staff(): BelongsTo

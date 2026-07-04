@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\DistributionPeriod;
 use App\Models\Entitlement;
 use App\Models\EntitlementItem;
 use App\Models\Item;
@@ -17,6 +16,7 @@ class EntitlementSeeder extends Seeder
             'program' => 'D3-KEP',
             'level' => 'ANG-2024',
             'type' => 'freshman',
+            'semester' => 'ganjil',
             'desc' => 'Paket Freshman D3 Keperawatan 2025/2026',
             'items' => [
                 'UNF-U-ALM-02' => 1,
@@ -31,6 +31,7 @@ class EntitlementSeeder extends Seeder
             'program' => 'S1-KEP',
             'level' => 'ANG-2024',
             'type' => 'freshman',
+            'semester' => 'ganjil',
             'desc' => 'Paket Freshman S1 Keperawatan 2025/2026',
             'items' => [
                 'UNF-U-ALM-02' => 1,
@@ -45,6 +46,7 @@ class EntitlementSeeder extends Seeder
             'program' => 'D3-KEB',
             'level' => 'ANG-2024',
             'type' => 'freshman',
+            'semester' => 'ganjil',
             'desc' => 'Paket Freshman D3 Kebidanan 2025/2026',
             'items' => [
                 'UNF-U-ALM-02' => 1,
@@ -59,6 +61,7 @@ class EntitlementSeeder extends Seeder
             'program' => 'PROF-NERS',
             'level' => 'ANG-2024',
             'type' => 'continuing',
+            'semester' => 'ganjil',
             'desc' => 'Paket Profesi Ners 2025/2026',
             'items' => [
                 'UNF-P-CLC-02' => 2,
@@ -72,6 +75,7 @@ class EntitlementSeeder extends Seeder
             'program' => 'S1-INF',
             'level' => 'ANG-2024',
             'type' => 'freshman',
+            'semester' => 'ganjil',
             'desc' => 'Paket Freshman S1 Informatika 2025/2026',
             'items' => [
                 'UNF-U-ALM-03' => 1,
@@ -84,6 +88,7 @@ class EntitlementSeeder extends Seeder
             'program' => 'S1-MNJ',
             'level' => 'ANG-2024',
             'type' => 'freshman',
+            'semester' => 'ganjil',
             'desc' => 'Paket Freshman S1 Manajemen 2025/2026',
             'items' => [
                 'UNF-U-ALM-04' => 1,
@@ -96,12 +101,6 @@ class EntitlementSeeder extends Seeder
 
     public function run(): void
     {
-        $period = DistributionPeriod::where('is_active', true)->first();
-
-        if (!$period) {
-            return;
-        }
-
         $created = 0;
         $skipped = 0;
 
@@ -117,8 +116,8 @@ class EntitlementSeeder extends Seeder
                 [
                     'study_program_id' => $studyProgram->id,
                     'program_level_id' => $programLevel->id,
-                    'period_id' => $period->id,
                     'student_type' => $prog['type'],
+                    'semester' => $prog['semester'],
                 ],
                 ['description' => $prog['desc']]
             );
