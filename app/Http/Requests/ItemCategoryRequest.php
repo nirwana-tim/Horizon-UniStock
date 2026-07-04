@@ -14,7 +14,7 @@ class ItemCategoryRequest extends FormRequest
 
     public function rules(): array
     {
-        $categoryId = $this->route('category')?->id;
+        $categoryId = $this->route('item_category')?->id;
 
         return [
             'label' => 'required|string|max:255',

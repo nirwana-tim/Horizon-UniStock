@@ -3,27 +3,29 @@
 namespace App\Http\Controllers\Master;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\ItemVariantRequest;
 use App\Models\Item;
 use App\Models\ItemVariant;
+use App\Services\AuditService;
 use Illuminate\Http\RedirectResponse;
 
 class ItemVariantController extends Controller
 {
-    public function store(Item $item): RedirectResponse
+    public function store(Item $item, ItemVariantRequest $request): RedirectResponse
     {
-        request()->validate([
-            'size' => 'required|string|max:10',
-            'sku' => 'required|string|max:50|unique:item_variants,sku',
-        ]);
+        $variant = $item->variants()->create($request->validated());
 
-        $item->variants()->create(request()->only('size', 'sku'));
+        AuditService::log('create', ItemVariant::class, $variant->id, null, $variant->toArray());
 
         return back()->with('success', 'Varian berhasil ditambahkan.');
     }
 
     public function destroy(Item $item, ItemVariant $variant): RedirectResponse
     {
+        $oldValues = $variant->toArray();
         $variant->delete();
+
+        AuditService::log('delete', ItemVariant::class, $variant->id, $oldValues, null);
 
         return back()->with('success', 'Varian berhasil dihapus.');
     }

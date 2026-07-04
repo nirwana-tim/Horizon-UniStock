@@ -10,13 +10,16 @@ use App\Models\ItemDepartment;
 use App\Models\ItemSize;
 use App\Models\ItemType;
 use App\Models\ItemVariant;
-use App\Services\AuditService;
-use Illuminate\Validation\ValidationException;
+use App\Services\Master\ItemService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
 class ItemController extends Controller
 {
+    public function __construct(
+        protected ItemService $itemService
+    ) {}
+
     public function index(): View
     {
         $variants = ItemVariant::with(['item.category', 'itemSize'])
@@ -54,44 +57,7 @@ class ItemController extends Controller
 
     public function store(ItemRequest $request): RedirectResponse
     {
-        $category = ItemCategory::findOrFail($request->category_id);
-        $type = $request->type_id ? ItemType::findOrFail($request->type_id) : null;
-        $department = $request->department_id ? ItemDepartment::findOrFail($request->department_id) : null;
-        $size = ItemSize::findOrFail($request->size_id);
-
-        $genderLabels = ['L' => 'Laki - Laki', 'P' => 'Perempuan', 'U' => 'Unisex'];
-
-        $code = $category->code . '-' . $request->gender . '-' . ($type?->code ?? 'XX') . '-' . ($department?->code ?? '00') . '-' . $size->code;
-        $name = $category->label . ' ' . ($genderLabels[$request->gender] ?? '') . ' ' . ($type?->label ?? '') . ' ' . ($department?->label ?? '');
-
-        if (Item::where('code', $code)->exists()) {
-            throw ValidationException::withMessages([
-                'category_id' => "Item dengan kode {$code} sudah ada. Kombinasi Kategori-Gender-Tipe-Departemen harus unik.",
-            ]);
-        }
-
-        $item = Item::create([
-            'code' => $code,
-            'name' => trim($name),
-            'gender' => $request->gender,
-            'category_id' => $request->category_id,
-            'type_id' => $request->type_id,
-            'department_id' => $request->department_id,
-            'unit' => $request->unit ?? 'pcs',
-            'selling_price' => $request->selling_price ?? 0,
-            'hpp' => $request->hpp ?? 0,
-        ]);
-
-        $item->variants()->create([
-            'size_id' => $size->id,
-            'size' => $size->code,
-            'size_label' => $size->label,
-            'sku' => $code,
-        ]);
-
-        $auditData = $request->validated();
-        unset($auditData['size_id']);
-        AuditService::log('create', 'item', $item->id, null, $auditData);
+        $this->itemService->store($request->validated());
 
         return redirect()->route('master.item.index')->with('success', 'Item berhasil ditambahkan.');
     }
@@ -99,8 +65,9 @@ class ItemController extends Controller
     public function show(Item $item): View
     {
         $item->load(['category', 'type', 'department', 'variants.itemSize']);
+        $sizes = ItemSize::orderBy('code')->get();
 
-        return view('master.item.show', compact('item'));
+        return view('master.item.show', compact('item', 'sizes'));
     }
 
     public function edit(Item $item): View
@@ -117,59 +84,14 @@ class ItemController extends Controller
 
     public function update(ItemRequest $request, Item $item): RedirectResponse
     {
-        $old = $item->toArray();
-
-        $category = ItemCategory::findOrFail($request->category_id);
-        $type = $request->type_id ? ItemType::findOrFail($request->type_id) : null;
-        $department = $request->department_id ? ItemDepartment::findOrFail($request->department_id) : null;
-        $size = ItemSize::findOrFail($request->size_id);
-
-        $genderLabels = ['L' => 'Laki - Laki', 'P' => 'Perempuan', 'U' => 'Unisex'];
-
-        $newCode = $category->code . '-' . $request->gender . '-' . ($type?->code ?? 'XX') . '-' . ($department?->code ?? '00') . '-' . $size->code;
-        $newName = trim($category->label . ' ' . ($genderLabels[$request->gender] ?? '') . ' ' . ($type?->label ?? '') . ' ' . ($department?->label ?? ''));
-
-        $data = $request->validated();
-        $data['code'] = $newCode;
-        $data['name'] = $newName;
-        unset($data['size_id']);
-
-        if ($newCode !== $item->code && Item::where('code', $newCode)->where('id', '!=', $item->id)->exists()) {
-            throw ValidationException::withMessages([
-                'category_id' => "Item dengan kode {$newCode} sudah ada. Kombinasi Kategori-Gender-Tipe-Departemen harus unik.",
-            ]);
-        }
-
-        $item->update($data);
-
-        $item->variants()->where('size_id', '!=', $size->id)->delete();
-
-        $variant = $item->variants()->where('size_id', $size->id)->first();
-        if ($variant) {
-            $variant->update([
-                'size' => $size->code,
-                'size_label' => $size->label,
-                'sku' => $newCode,
-            ]);
-        } else {
-            $item->variants()->create([
-                'size_id' => $size->id,
-                'size' => $size->code,
-                'size_label' => $size->label,
-                'sku' => $newCode,
-            ]);
-        }
-
-        AuditService::log('update', 'item', $item->id, $old, $data);
+        $this->itemService->update($item, $request->validated());
 
         return redirect()->route('master.item.index')->with('success', 'Item berhasil diperbarui.');
     }
 
     public function destroy(Item $item): RedirectResponse
     {
-        $item->delete();
-
-        AuditService::log('delete', 'item', $item->id);
+        $this->itemService->destroy($item);
 
         return redirect()->route('master.item.index')->with('success', 'Item berhasil dihapus.');
     }

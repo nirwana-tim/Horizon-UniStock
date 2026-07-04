@@ -7,10 +7,11 @@ use App\Http\Controllers\Master\EntitlementController;
 use App\Http\Controllers\Master\FacultyController;
 use App\Http\Controllers\Master\ItemCategoryController;
 use App\Http\Controllers\Master\ItemController;
+use App\Http\Controllers\Master\ItemPriceController;
 use App\Http\Controllers\Master\ItemDepartmentController;
 use App\Http\Controllers\Master\ItemSizeController;
 use App\Http\Controllers\Master\ItemTypeController;
-// use App\Http\Controllers\Master\ItemVariantController;
+use App\Http\Controllers\Master\ItemVariantController;
 use App\Http\Controllers\Master\ProgramLevelController;
 use App\Http\Controllers\Master\StudyProgramController;
 use App\Http\Controllers\Master\StockReceiveController;
@@ -24,6 +25,7 @@ use App\Http\Controllers\Auth\EmailVerificationOtpController;
 use App\Http\Controllers\Auth\ForgotPasswordStudentController;
 use App\Http\Controllers\Auth\PasswordChangeController;
 use App\Http\Controllers\Master\StudentAccountController;
+use App\Http\Controllers\Master\StudentController;
 use App\Http\Controllers\Master\SizeMonitorController;
 use App\Http\Controllers\Staff\ScanController;
 use App\Http\Controllers\Student\SizeController;
@@ -52,12 +54,14 @@ Route::middleware(['auth', 'password.changed', 'role:super_admin|admin'])->prefi
     Route::resource('item-size', ItemSizeController::class);
 
     Route::resource('item', ItemController::class);
-    // Route::post('item/{item}/variant', [ItemVariantController::class, 'store'])->name('item.variant.store');
-    // Route::delete('item/{item}/variant/{variant}', [ItemVariantController::class, 'destroy'])->name('item.variant.destroy');
+    Route::post('item/{item}/variant', [ItemVariantController::class, 'store'])->name('item.variant.store');
+    Route::delete('item/{item}/variant/{variant}', [ItemVariantController::class, 'destroy'])->name('item.variant.destroy');
 
     Route::resource('vendor', VendorController::class);
+    Route::resource('item-price', ItemPriceController::class);
     Route::resource('distribution-schedule', DistributionScheduleController::class);
     Route::resource('entitlement', EntitlementController::class);
+    Route::resource('student', StudentController::class);
 
     Route::resource('stock-receive', StockReceiveController::class)->except(['edit', 'update']);
     Route::get('student-account', [StudentAccountController::class, 'index'])->name('student-account.index');
