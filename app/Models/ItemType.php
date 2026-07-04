@@ -10,7 +10,7 @@ class ItemType extends Model
 {
     use SoftDeletes;
 
-    protected $fillable = ['code', 'name'];
+    protected $fillable = ['code', 'label'];
 
     public function items(): HasMany
     {

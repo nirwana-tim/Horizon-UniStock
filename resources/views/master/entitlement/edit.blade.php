@@ -15,11 +15,20 @@
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
+                                <x-input-label for="faculty_id" :value="__('Fakultas')" />
+                                <select id="faculty_id" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                    <option value="">-- Pilih Fakultas --</option>
+                                    @foreach($faculties as $faculty)
+                                        <option value="{{ $faculty->id }}" {{ $entitlement->studyProgram?->faculty_id == $faculty->id ? 'selected' : '' }}>{{ $faculty->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div>
                                 <x-input-label for="study_program_id" :value="__('Program Studi')" />
                                 <select id="study_program_id" name="study_program_id" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                     <option value="">-- Pilih Prodi --</option>
                                     @foreach($studyPrograms as $prodi)
-                                        <option value="{{ $prodi->id }}" {{ old('study_program_id', $entitlement->study_program_id) == $prodi->id ? 'selected' : '' }}>{{ $prodi->name }} ({{ $prodi->faculty?->code ?? '-' }})</option>
+                                        <option value="{{ $prodi->id }}" data-faculty="{{ $prodi->faculty_id }}" {{ old('study_program_id', $entitlement->study_program_id) == $prodi->id ? 'selected' : '' }}>{{ $prodi->name }}</option>
                                     @endforeach
                                 </select>
                                 <x-input-error :messages="$errors->get('study_program_id')" class="mt-2" />
@@ -35,14 +44,13 @@
                                 <x-input-error :messages="$errors->get('program_level_id')" class="mt-2" />
                             </div>
                             <div>
-                                <x-input-label for="period_id" :value="__('Periode')" />
-                                <select id="period_id" name="period_id" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                    <option value="">-- Pilih Periode --</option>
-                                    @foreach($periods as $period)
-                                        <option value="{{ $period->id }}" {{ old('period_id', $entitlement->period_id) == $period->id ? 'selected' : '' }}>{{ $period->name }}</option>
-                                    @endforeach
+                                <x-input-label for="semester" :value="__('Semester')" />
+                                <select id="semester" name="semester" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                    <option value="">-- Pilih Semester --</option>
+                                    <option value="ganjil" {{ old('semester', $entitlement->semester) == 'ganjil' ? 'selected' : '' }}>Ganjil</option>
+                                    <option value="genap" {{ old('semester', $entitlement->semester) == 'genap' ? 'selected' : '' }}>Genap</option>
                                 </select>
-                                <x-input-error :messages="$errors->get('period_id')" class="mt-2" />
+                                <x-input-error :messages="$errors->get('semester')" class="mt-2" />
                             </div>
                             <div>
                                 <x-input-label for="student_type" :value="__('Tipe Mahasiswa')" />
@@ -104,6 +112,32 @@
 @push('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function () {
+        const facultySelect = document.getElementById('faculty_id');
+        const prodiSelect = document.getElementById('study_program_id');
+        const allProdiOptions = Array.from(prodiSelect.querySelectorAll('option[data-faculty]'));
+
+        facultySelect.addEventListener('change', function () {
+            const facultyId = this.value;
+            const currentVal = prodiSelect.value;
+
+            prodiSelect.innerHTML = '<option value="">-- Pilih Prodi --</option>';
+
+            allProdiOptions.forEach(function (opt) {
+                if (!facultyId || opt.dataset.faculty === facultyId) {
+                    prodiSelect.appendChild(opt.cloneNode(true));
+                }
+            });
+
+            if (currentVal && prodiSelect.querySelector(`option[value="${currentVal}"]`)) {
+                prodiSelect.value = currentVal;
+            }
+        });
+
+        // Trigger faculty filter on page load
+        if (facultySelect.value) {
+            facultySelect.dispatchEvent(new Event('change'));
+        }
+
         let itemIndex = {{ count($entitlementItems) }};
 
         document.getElementById('add-item').addEventListener('click', function () {

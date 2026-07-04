@@ -17,7 +17,7 @@ class ItemCategoryRequest extends FormRequest
         $categoryId = $this->route('category')?->id;
 
         return [
-            'name' => 'required|string|max:255',
+            'label' => 'required|string|max:255',
             'code' => ['required', 'string', 'max:3', Rule::unique('item_categories', 'code')->ignore($categoryId)],
         ];
     }

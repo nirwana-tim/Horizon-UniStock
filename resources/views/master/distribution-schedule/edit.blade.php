@@ -15,16 +15,6 @@
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <x-input-label for="stage_id" :value="__('Tahap Distribusi')" />
-                                <select id="stage_id" name="stage_id" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                    <option value="">-- Pilih Tahap --</option>
-                                    @foreach($stages as $stage)
-                                        <option value="{{ $stage->id }}" {{ old('stage_id', $distributionSchedule->stage_id) == $stage->id ? 'selected' : '' }}>{{ $stage->name }} ({{ $stage->period?->name ?? '-' }})</option>
-                                    @endforeach
-                                </select>
-                                <x-input-error :messages="$errors->get('stage_id')" class="mt-2" />
-                            </div>
-                            <div>
                                 <x-input-label for="name" :value="__('Nama Jadwal')" />
                                 <x-text-input id="name" name="name" type="text" class="mt-1 block w-full" :value="old('name', $distributionSchedule->name)" required autofocus />
                                 <x-input-error :messages="$errors->get('name')" class="mt-2" />
@@ -33,6 +23,36 @@
                                 <x-input-label for="period" :value="__('Periode')" />
                                 <x-text-input id="period" name="period" type="text" class="mt-1 block w-full" :value="old('period', $distributionSchedule->period)" placeholder="contoh: 2025/2026" />
                                 <x-input-error :messages="$errors->get('period')" class="mt-2" />
+                            </div>
+                            <div>
+                                <x-input-label for="program_level_id" :value="__('Angkatan')" />
+                                <select id="program_level_id" name="program_level_id" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                    <option value="">-- Semua Angkatan --</option>
+                                    @foreach($programLevels as $level)
+                                        <option value="{{ $level->id }}" {{ old('program_level_id', $distributionSchedule->program_level_id) == $level->id ? 'selected' : '' }}>{{ $level->name }}</option>
+                                    @endforeach
+                                </select>
+                                <x-input-error :messages="$errors->get('program_level_id')" class="mt-2" />
+                            </div>
+                            <div>
+                                <x-input-label for="faculty_id" :value="__('Fakultas')" />
+                                <select id="faculty_id" name="faculty_id" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                    <option value="">-- Semua Fakultas --</option>
+                                    @foreach($faculties as $faculty)
+                                        <option value="{{ $faculty->id }}" {{ old('faculty_id', $distributionSchedule->faculty_id) == $faculty->id ? 'selected' : '' }}>{{ $faculty->name }}</option>
+                                    @endforeach
+                                </select>
+                                <x-input-error :messages="$errors->get('faculty_id')" class="mt-2" />
+                            </div>
+                            <div>
+                                <x-input-label for="study_program_id" :value="__('Program Studi')" />
+                                <select id="study_program_id" name="study_program_id" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                    <option value="">-- Semua Prodi --</option>
+                                    @foreach($studyPrograms as $sp)
+                                        <option value="{{ $sp->id }}" {{ old('study_program_id', $distributionSchedule->study_program_id) == $sp->id ? 'selected' : '' }}>{{ $sp->name }} ({{ $sp->faculty->code ?? '-' }})</option>
+                                    @endforeach
+                                </select>
+                                <x-input-error :messages="$errors->get('study_program_id')" class="mt-2" />
                             </div>
                             <div>
                                 <x-input-label for="is_active" :value="__('Status Aktif')" />

@@ -24,7 +24,7 @@
                                 <tr>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Kode') }}</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Nama') }}</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Label') }}</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Aksi') }}</th>
                                 </tr>
                             </thead>
@@ -33,7 +33,7 @@
                                     <tr>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $loop->iteration }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-900">{{ $type->code }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $type->name }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $type->label }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm space-x-2">
                                             <a href="{{ route('master.item-type.edit', $type) }}" class="text-yellow-600 hover:text-yellow-900">Edit</a>
                                             <form action="{{ route('master.item-type.destroy', $type) }}" method="POST" class="inline" onsubmit="return confirm('Yakin ingin menghapus?')">

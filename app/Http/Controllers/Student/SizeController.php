@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
-use App\Models\DistributionPeriod;
 use App\Models\DistributionSchedule;
 use App\Models\Student;
 use App\Services\StudentSizeService;
@@ -21,9 +20,8 @@ class SizeController extends Controller
     {
         $user = auth()->user();
         $student = Student::where('user_id', $user->id)->firstOrFail();
-        $activePeriod = DistributionPeriod::where('is_active', true)->firstOrFail();
 
-        $entitlementItems = $this->sizeService->getEntitlementItems($student, $activePeriod);
+        $entitlementItems = $this->sizeService->getEntitlementItems($student);
 
         $existingSizes = [];
         if ($student->activeSizeProfile) {
@@ -42,7 +40,6 @@ class SizeController extends Controller
 
         return view('student.size-input', compact(
             'student',
-            'activePeriod',
             'entitlementItems',
             'existingSizes',
             'canUpdate'
@@ -74,7 +71,7 @@ class SizeController extends Controller
             $this->sizeService->generateQr($student);
         }
 
-        $activeSchedules = DistributionSchedule::with('stage')
+        $activeSchedules = DistributionSchedule::with('programLevel', 'faculty')
             ->where('is_active', true)
             ->where('date', '>=', now()->format('Y-m-d'))
             ->orderBy('date')

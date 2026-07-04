@@ -54,6 +54,59 @@
                         <p class="text-gray-500">Tidak ada jadwal distribusi aktif untuk hari ini.</p>
                     </div>
                 </div>
+            @elseif($eligibility && !$eligibility->is_eligible)
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                    <div class="p-6">
+                        <div class="flex items-center mb-4">
+                            <div class="flex-shrink-0 w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
+                                <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+                                </svg>
+                            </div>
+                            <h3 class="ml-3 text-lg font-medium text-red-800">Mahasiswa Belum Memenuhi Syarat</h3>
+                        </div>
+                        <div class="ml-12">
+                            <p class="text-sm text-gray-600 mb-3">
+                                Mahasiswa ini <span class="font-semibold text-red-600">belum dapat menerima barang</span> karena belum menyelesaikan pembayaran.
+                            </p>
+                            <div class="bg-red-50 border border-red-200 rounded-md p-4 mb-4">
+                                <div class="flex items-center">
+                                    <span class="text-sm font-medium text-red-800">Status Pembayaran:</span>
+                                    <span class="ml-2 text-sm text-red-600">{{ $eligibility->payment_status ?? 'Belum Diketahui' }}</span>
+                                </div>
+                            </div>
+                            <p class="text-xs text-gray-500 mb-4">
+                                Mohon arahkan mahasiswa untuk menyelesaikan pembayaran terlebih dahulu. Setelah pembayaran lunas, data akan diperbarui oleh admin.
+                            </p>
+                            <a href="{{ route('staff.scan.index') }}"
+                                class="inline-flex items-center px-4 py-2 bg-gray-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                                {{ __('Kembali ke Scan') }}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            @elseif(!$eligibility)
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                    <div class="p-6">
+                        <div class="flex items-center mb-4">
+                            <div class="flex-shrink-0 w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center">
+                                <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+                                </svg>
+                            </div>
+                            <h3 class="ml-3 text-lg font-medium text-yellow-800">Data Kelayakan Belum Tersedia</h3>
+                        </div>
+                        <div class="ml-12">
+                            <p class="text-sm text-gray-600 mb-3">
+                                Data kelayakan distribusi untuk mahasiswa ini belum tersedia di sistem. Mohon pastikan data telah diimport oleh admin.
+                            </p>
+                            <a href="{{ route('staff.scan.index') }}"
+                                class="inline-flex items-center px-4 py-2 bg-gray-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                                {{ __('Kembali ke Scan') }}
+                            </a>
+                        </div>
+                    </div>
+                </div>
             @elseif(!$entitlement)
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6 text-center">

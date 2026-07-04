@@ -22,7 +22,6 @@ class ScanController extends Controller
     {
         $activeSchedule = DistributionSchedule::where('is_active', true)
             ->where('date', today())
-            ->with('stage')
             ->first();
 
         return view('staff.scan', compact('activeSchedule'));
@@ -74,17 +73,19 @@ class ScanController extends Controller
     {
         $activeSchedule = DistributionSchedule::where('is_active', true)
             ->where('date', today())
-            ->with('stage')
             ->first();
 
         $entitlement = null;
         $scheduleItems = collect();
         $studentSizes = [];
+        $eligibility = null;
 
         if ($activeSchedule) {
             $entitlement = $this->distributionService->getEntitlementForStudent($student, $activeSchedule);
             $scheduleItems = $activeSchedule->items->pluck('item')->filter();
         }
+
+        $eligibility = $this->distributionService->getStudentEligibility($student);
 
         $sizeProfile = $student->activeSizeProfile;
         if ($sizeProfile) {
@@ -115,7 +116,8 @@ class ScanController extends Controller
             'entitlement',
             'scheduleItems',
             'studentSizes',
-            'stockInfo'
+            'stockInfo',
+            'eligibility'
         ));
     }
 }

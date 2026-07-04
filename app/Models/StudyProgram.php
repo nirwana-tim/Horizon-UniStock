@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class StudyProgram extends Model
 {
@@ -26,5 +27,10 @@ class StudyProgram extends Model
     public function entitlements(): HasMany
     {
         return $this->hasMany(Entitlement::class);
+    }
+
+    public function departments(): BelongsToMany
+    {
+        return $this->belongsToMany(ItemDepartment::class, 'department_study_program', 'study_program_id', 'department_id');
     }
 }

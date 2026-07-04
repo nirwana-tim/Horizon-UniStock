@@ -22,12 +22,12 @@
                                 <dd class="mt-1 text-sm text-gray-900 font-semibold">{{ $entitlement->programLevel?->name ?? '-' }}</dd>
                             </div>
                             <div class="bg-gray-50 p-4 rounded-lg">
-                                <dt class="text-sm font-medium text-gray-500">{{ __('Periode') }}</dt>
-                                <dd class="mt-1 text-sm text-gray-900 font-semibold">{{ $entitlement->period?->name ?? '-' }}</dd>
-                            </div>
-                            <div class="bg-gray-50 p-4 rounded-lg">
                                 <dt class="text-sm font-medium text-gray-500">{{ __('Tipe Mahasiswa') }}</dt>
                                 <dd class="mt-1"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $entitlement->student_type === 'freshman' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800' }}">{{ $entitlement->student_type }}</span></dd>
+                            </div>
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <dt class="text-sm font-medium text-gray-500">{{ __('Semester') }}</dt>
+                                <dd class="mt-1"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $entitlement->semester === 'ganjil' ? 'bg-blue-100 text-blue-800' : 'bg-orange-100 text-orange-800' }}">{{ ucfirst($entitlement->semester) }}</span></dd>
                             </div>
                             @if($entitlement->description)
                             <div class="bg-gray-50 p-4 rounded-lg md:col-span-2">

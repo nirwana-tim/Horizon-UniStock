@@ -9,7 +9,6 @@ class ItemPrice extends Model
 {
     protected $fillable = [
         'item_id',
-        'period_id',
         'selling_price',
         'hpp',
         'effective_date',
@@ -27,10 +26,5 @@ class ItemPrice extends Model
     public function item(): BelongsTo
     {
         return $this->belongsTo(Item::class);
-    }
-
-    public function period(): BelongsTo
-    {
-        return $this->belongsTo(DistributionPeriod::class);
     }
 }

@@ -9,7 +9,6 @@ class EligibilityRecord extends Model
 {
     protected $fillable = [
         'student_id',
-        'period_id',
         'is_eligible',
         'payment_status',
     ];
@@ -24,10 +23,5 @@ class EligibilityRecord extends Model
     public function student(): BelongsTo
     {
         return $this->belongsTo(Student::class);
-    }
-
-    public function period(): BelongsTo
-    {
-        return $this->belongsTo(DistributionPeriod::class, 'period_id');
     }
 }

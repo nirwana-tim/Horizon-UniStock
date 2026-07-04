@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Master;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\DistributionScheduleRequest;
 use App\Models\DistributionSchedule;
-use App\Models\DistributionStage;
+use App\Models\Faculty;
 use App\Models\Item;
+use App\Models\ProgramLevel;
+use App\Models\StudyProgram;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
@@ -14,17 +16,19 @@ class DistributionScheduleController extends Controller
 {
     public function index(): View
     {
-        $schedules = DistributionSchedule::with('stage.period')->latest()->paginate(15);
+        $schedules = DistributionSchedule::with('programLevel', 'faculty', 'studyProgram')->latest()->paginate(15);
 
         return view('master.distribution-schedule.index', compact('schedules'));
     }
 
     public function create(): View
     {
-        $stages = DistributionStage::with('period')->whereHas('period', fn ($q) => $q->where('is_active', true))->orderBy('stage_order')->get();
+        $programLevels = ProgramLevel::orderBy('name')->get();
+        $faculties = Faculty::orderBy('name')->get();
+        $studyPrograms = StudyProgram::with('faculty')->orderBy('name')->get();
         $items = Item::orderBy('name')->get();
 
-        return view('master.distribution-schedule.create', compact('stages', 'items'));
+        return view('master.distribution-schedule.create', compact('programLevels', 'faculties', 'studyPrograms', 'items'));
     }
 
     public function store(DistributionScheduleRequest $request): RedirectResponse
@@ -42,7 +46,7 @@ class DistributionScheduleController extends Controller
 
     public function show(DistributionSchedule $distributionSchedule): View
     {
-        $distributionSchedule->load(['stage.period', 'items.item', 'transactions.student']);
+        $distributionSchedule->load(['programLevel', 'faculty', 'studyProgram', 'items.item', 'transactions.student']);
 
         return view('master.distribution-schedule.show', compact('distributionSchedule'));
     }
@@ -50,10 +54,12 @@ class DistributionScheduleController extends Controller
     public function edit(DistributionSchedule $distributionSchedule): View
     {
         $distributionSchedule->load('items');
-        $stages = DistributionStage::with('period')->orderBy('stage_order')->get();
+        $programLevels = ProgramLevel::orderBy('name')->get();
+        $faculties = Faculty::orderBy('name')->get();
+        $studyPrograms = StudyProgram::with('faculty')->orderBy('name')->get();
         $items = Item::orderBy('name')->get();
 
-        return view('master.distribution-schedule.edit', compact('distributionSchedule', 'stages', 'items'));
+        return view('master.distribution-schedule.edit', compact('distributionSchedule', 'programLevels', 'faculties', 'studyPrograms', 'items'));
     }
 
     public function update(DistributionScheduleRequest $request, DistributionSchedule $distributionSchedule): RedirectResponse

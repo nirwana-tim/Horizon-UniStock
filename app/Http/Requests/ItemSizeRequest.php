@@ -17,9 +17,10 @@ class ItemSizeRequest extends FormRequest
         $sizeId = $this->route('item_size')?->id;
 
         return [
-            'name' => 'required|string|max:255',
+            'label' => 'required|string|max:255',
             'code' => ['required', 'string', 'max:10', Rule::unique('item_sizes', 'code')->ignore($sizeId)],
-            'sort_order' => 'nullable|integer|min:0',
+            'categories' => 'required|array|min:1',
+            'categories.*' => 'exists:item_categories,id',
         ];
     }
 }

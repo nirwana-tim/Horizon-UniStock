@@ -9,13 +9,15 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class DistributionSchedule extends Model
 {
     protected $fillable = [
-        'stage_id',
         'name',
         'period',
         'date',
         'location',
         'session',
         'is_active',
+        'program_level_id',
+        'faculty_id',
+        'study_program_id',
     ];
 
     protected function casts(): array
@@ -26,9 +28,19 @@ class DistributionSchedule extends Model
         ];
     }
 
-    public function stage(): BelongsTo
+    public function programLevel(): BelongsTo
     {
-        return $this->belongsTo(DistributionStage::class, 'stage_id');
+        return $this->belongsTo(ProgramLevel::class, 'program_level_id');
+    }
+
+    public function faculty(): BelongsTo
+    {
+        return $this->belongsTo(Faculty::class, 'faculty_id');
+    }
+
+    public function studyProgram(): BelongsTo
+    {
+        return $this->belongsTo(StudyProgram::class, 'study_program_id');
     }
 
     public function items(): HasMany

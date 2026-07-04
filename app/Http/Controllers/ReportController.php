@@ -9,7 +9,7 @@ use App\Exports\Reports\LossReport;
 use App\Exports\Reports\StockCardReport;
 use App\Exports\Reports\StockOpnameReport;
 use App\Exports\Reports\StockReport;
-use App\Models\DistributionPeriod;
+use App\Models\DistributionSchedule;
 use App\Models\Item;
 use App\Models\ItemCategory;
 use App\Models\StockOpname;
@@ -21,7 +21,7 @@ class ReportController extends Controller
 {
     public function index(): View
     {
-        $periods = DistributionPeriod::orderBy('name', 'desc')->pluck('name', 'name');
+        $periods = DistributionSchedule::whereNotNull('period')->distinct()->orderBy('period', 'desc')->pluck('period', 'period');
         $stockOpnames = StockOpname::orderBy('created_at', 'desc')->pluck('period', 'id');
         $items = Item::orderBy('name')->pluck('code', 'code');
         $categories = ItemCategory::orderBy('code')->get(['code', 'name']);

@@ -10,7 +10,6 @@ class StudentSizeProfile extends Model
 {
     protected $fillable = [
         'student_id',
-        'period_id',
         'is_filled',
         'filled_at',
     ];
@@ -26,11 +25,6 @@ class StudentSizeProfile extends Model
     public function student(): BelongsTo
     {
         return $this->belongsTo(Student::class);
-    }
-
-    public function period(): BelongsTo
-    {
-        return $this->belongsTo(DistributionPeriod::class, 'period_id');
     }
 
     public function sizeItems(): HasMany

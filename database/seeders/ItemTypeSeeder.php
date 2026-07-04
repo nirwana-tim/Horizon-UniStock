@@ -10,25 +10,24 @@ class ItemTypeSeeder extends Seeder
     public function run(): void
     {
         $types = [
-            ['code' => 'ALM', 'name' => 'Almamater'],
-            ['code' => 'CLG', 'name' => 'College'],
-            ['code' => 'CLC', 'name' => 'Clinical'],
-            ['code' => 'SCB', 'name' => 'Scrub'],
-            ['code' => 'LAB', 'name' => 'Laboratory'],
-            ['code' => 'COM', 'name' => 'Community'],
-            ['code' => 'SHO', 'name' => 'Shoes'],
-            ['code' => 'KTM', 'name' => 'KTM'],
-            ['code' => 'TAG', 'name' => 'Name Tag'],
-            ['code' => 'YDH', 'name' => 'Lanyard & Holder'],
-            ['code' => 'MID', 'name' => 'Midwifery Kit'],
-            ['code' => 'NUR', 'name' => 'Nursing Kit'],
-            ['code' => 'TBR', 'name' => 'Tumbler'],
+            ['code' => 'ALM', 'label' => 'Almamater'],
+            ['code' => 'CLG', 'label' => 'College'],
+            ['code' => 'CLC', 'label' => 'Clinical'],
+            ['code' => 'SCB', 'label' => 'Scrub'],
+            ['code' => 'LAB', 'label' => 'Laboratory'],
+            ['code' => 'COM', 'label' => 'Community'],
+            ['code' => 'YDH', 'label' => 'Lanyard & Holder'],
+            ['code' => 'KTM', 'label' => 'KTM'],
+            ['code' => 'TAG', 'label' => 'Name Tag'],
+            ['code' => 'NUR', 'label' => 'Nursing Kit'],
+            ['code' => 'MID', 'label' => 'Midwifery Kit'],
+            ['code' => 'TBR', 'label' => 'Tumbler'],
         ];
 
         foreach ($types as $type) {
             ItemType::firstOrCreate(
                 ['code' => $type['code']],
-                ['name' => $type['name']]
+                ['label' => $type['label']]
             );
         }
     }

@@ -100,7 +100,7 @@ class StockService
                 'items.hpp',
                 'items.selling_price',
                 'items.unit',
-                'item_categories.name as category_name',
+                'item_categories.label as category_name',
                 'item_categories.code as category_code',
                 'item_variants.size as variant_size'
             )

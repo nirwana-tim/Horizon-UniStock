@@ -14,8 +14,8 @@
                         </div>
 
                         <div>
-                            <h3 class="text-sm font-medium text-gray-500">{{ __('Nama') }}</h3>
-                            <p class="mt-1 text-sm text-gray-900">{{ $itemType->name }}</p>
+                            <h3 class="text-sm font-medium text-gray-500">{{ __('Label') }}</h3>
+                            <p class="mt-1 text-sm text-gray-900">{{ $itemType->label }}</p>
                         </div>
                     </div>
 

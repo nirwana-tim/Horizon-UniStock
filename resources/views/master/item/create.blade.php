@@ -30,7 +30,7 @@
                                     <option value="">-- Pilih Kategori --</option>
                                     @foreach($categories as $cat)
                                         <option value="{{ $cat->id }}" {{ old('category_id') == $cat->id ? 'selected' : '' }}>
-                                            {{ $cat->code }} - {{ $cat->name }}
+                                            {{ $cat->code }} - {{ $cat->label }}
                                         </option>
                                     @endforeach
                                 </select>
@@ -60,7 +60,7 @@
                                     <option value="">-- Pilih Tipe --</option>
                                     @foreach($types as $type)
                                         <option value="{{ $type->id }}" {{ old('type_id') == $type->id ? 'selected' : '' }}>
-                                            {{ $type->code }} - {{ $type->name }}
+                                            {{ $type->code }} - {{ $type->label }}
                                         </option>
                                     @endforeach
                                 </select>
@@ -76,7 +76,7 @@
                                     <option value="">-- Pilih Departemen --</option>
                                     @foreach($departments as $dept)
                                         <option value="{{ $dept->id }}" {{ old('department_id') == $dept->id ? 'selected' : '' }}>
-                                            {{ $dept->code }} - {{ $dept->name }}
+                                            {{ $dept->code }} - {{ $dept->label }}
                                         </option>
                                     @endforeach
                                 </select>
@@ -90,11 +90,6 @@
                                 <select name="size_id" id="size_id" required
                                     class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-gray-500 focus:border-gray-500 sm:text-sm">
                                     <option value="">-- Pilih Ukuran --</option>
-                                    @foreach($sizes as $size)
-                                        <option value="{{ $size->id }}" {{ old('size_id') == $size->id ? 'selected' : '' }}>
-                                            {{ $size->name }} ({{ $size->code }})
-                                        </option>
-                                    @endforeach
                                 </select>
                                 @error('size_id')
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -143,4 +138,29 @@
             </div>
         </div>
     </div>
+
+    <script>
+        const sizesByCategory = @json($sizesByCategory);
+        const sizeSelect = document.getElementById('size_id');
+        const categorySelect = document.getElementById('category_id');
+
+        function renderSizes(sizes) {
+            sizeSelect.innerHTML = '<option value="">-- Pilih Ukuran --</option>';
+            sizes.forEach(s => {
+                const opt = document.createElement('option');
+                opt.value = s.id;
+                opt.textContent = s.code + ' - ' + s.name;
+                sizeSelect.appendChild(opt);
+            });
+        }
+
+        function filterSizes() {
+            const catId = categorySelect.value;
+            const sizes = sizesByCategory[catId] || [];
+            renderSizes(sizes);
+        }
+
+        categorySelect.addEventListener('change', filterSizes);
+        filterSizes();
+    </script>
 </x-app-layout>

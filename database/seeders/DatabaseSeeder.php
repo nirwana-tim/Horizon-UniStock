@@ -30,8 +30,8 @@ class DatabaseSeeder extends Seeder
             ItemTypeSeeder::class,
             ItemDepartmentSeeder::class,
             ItemSizeSeeder::class,
+            CategoryItemSizeSeeder::class,
             ItemSeeder::class,
-            DistributionPeriodSeeder::class,
             ItemPriceSeeder::class,
             EntitlementSeeder::class,
         ]);

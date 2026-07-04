@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Finance;
 
 use App\Http\Controllers\Controller;
-use App\Models\DistributionPeriod;
+use App\Models\DistributionSchedule;
 use App\Services\GpmService;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -17,7 +17,7 @@ class GpmController extends Controller
     public function index(Request $request): View
     {
         $period = $request->input('period');
-        $periods = DistributionPeriod::orderBy('name', 'desc')->pluck('name', 'name');
+        $periods = DistributionSchedule::whereNotNull('period')->distinct()->orderBy('period', 'desc')->pluck('period', 'period');
 
         $gpmData = $this->service->calculateGpm($period);
         $gpmByCategory = $this->service->getGpmByCategory($period);

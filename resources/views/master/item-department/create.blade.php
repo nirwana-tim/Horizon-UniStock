@@ -17,9 +17,32 @@
                         </div>
 
                         <div class="mb-4">
-                            <x-input-label for="name" :value="__('Nama')" />
-                            <x-text-input id="name" name="name" type="text" class="mt-1 block w-full" :value="old('name')" required placeholder="Contoh: STIKES, STMIK, STIE" />
-                            <x-input-error :messages="$errors->get('name')" class="mt-2" />
+                            <x-input-label for="label" :value="__('Label')" />
+                            <x-text-input id="label" name="label" type="text" class="mt-1 block w-full" :value="old('label')" required placeholder="Contoh: STIKES, STMIK, STIE" />
+                            <x-input-error :messages="$errors->get('label')" class="mt-2" />
+                        </div>
+
+                        <div class="mb-4">
+                            <x-input-label :value="__('Program Studi Terkait')" />
+                            <div class="mt-2 space-y-4">
+                                @foreach($faculties as $faculty)
+                                    <div class="border border-gray-200 rounded-md p-3">
+                                        <div class="flex items-center mb-2">
+                                            <input type="checkbox" id="faculty-{{ $faculty->id }}" class="faculty-check rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" data-faculty="{{ $faculty->id }}">
+                                            <label for="faculty-{{ $faculty->id }}" class="ml-2 text-sm font-semibold text-gray-700">{{ $faculty->name }}</label>
+                                        </div>
+                                        <div class="ml-6 space-y-1">
+                                            @foreach($faculty->studyPrograms as $prodi)
+                                                <label class="flex items-center">
+                                                    <input type="checkbox" name="study_program_ids[]" value="{{ $prodi->id }}" class="prodi-check rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" data-faculty="{{ $faculty->id }}" {{ in_array($prodi->id, old('study_program_ids', [])) ? 'checked' : '' }}>
+                                                    <span class="ml-2 text-sm text-gray-600">{{ $prodi->name }}</span>
+                                                </label>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                            <x-input-error :messages="$errors->get('study_program_ids')" class="mt-2" />
                         </div>
 
                         <div class="flex items-center gap-2 mt-6">
@@ -33,4 +56,19 @@
             </div>
         </div>
     </div>
+
+    @push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.faculty-check').forEach(function (facultyCb) {
+                facultyCb.addEventListener('change', function () {
+                    var facultyId = this.dataset.faculty;
+                    document.querySelectorAll('.prodi-check[data-faculty="' + facultyId + '"]').forEach(function (cb) {
+                        cb.checked = facultyCb.checked;
+                    });
+                });
+            });
+        });
+    </script>
+    @endpush
 </x-app-layout>

@@ -17,7 +17,6 @@
                 <div class="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-md">
                     <p class="text-sm text-blue-700">
                         <strong>Jadwal Aktif:</strong> {{ $activeSchedule->name }}<br>
-                        <strong>Tahap:</strong> {{ $activeSchedule->stage->name ?? '-' }}<br>
                         <strong>Lokasi:</strong> {{ $activeSchedule->location }}<br>
                         <strong>Sesi:</strong> {{ $activeSchedule->session }}
                     </p>

@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\DistributionItem;
 use App\Models\DistributionSchedule;
 use App\Models\DistributionTransaction;
+use App\Models\EligibilityRecord;
 use App\Models\Entitlement;
 use App\Models\Item;
 use App\Models\ItemVariant;
@@ -24,16 +25,30 @@ class DistributionService
             ->first();
     }
 
+    public function getStudentEligibility(Student $student): ?EligibilityRecord
+    {
+        return $student->eligibilityRecords()->first();
+    }
+
+    public function isStudentEligible(Student $student): bool
+    {
+        $eligibility = $this->getStudentEligibility($student);
+
+        return $eligibility && $eligibility->is_eligible;
+    }
+
     public function getEntitlementForStudent(Student $student, DistributionSchedule $schedule): ?Entitlement
     {
-        $stage = $schedule->stage;
-
-        return Entitlement::where('study_program_id', $student->study_program_id)
+        $query = Entitlement::where('study_program_id', $student->study_program_id)
             ->where('program_level_id', $student->program_level_id)
-            ->where('period_id', $stage->period_id)
             ->where('student_type', $student->student_type)
-            ->with('items.item')
-            ->first();
+            ->with('items.item');
+
+        if ($schedule->semester) {
+            $query->where('semester', $schedule->semester);
+        }
+
+        return $query->first();
     }
 
     public function processDistribution(
@@ -42,7 +57,9 @@ class DistributionService
         User $staff,
         array $items
     ): DistributionTransaction {
-        $stage = $schedule->stage;
+        if (!$this->isStudentEligible($student)) {
+            throw new \Exception('Mahasiswa ini belum memenuhi syarat distribusi. Status pembayaran belum lunas.');
+        }
 
         $existingTransaction = DistributionTransaction::where('student_id', $student->id)
             ->where('schedule_id', $schedule->id)
@@ -52,11 +69,10 @@ class DistributionService
             throw new \Exception('Transaksi distribusi untuk mahasiswa ini pada jadwal ini sudah ada.');
         }
 
-        return DB::transaction(function () use ($student, $schedule, $staff, $items, $stage) {
+        return DB::transaction(function () use ($student, $schedule, $staff, $items) {
             $transaction = DistributionTransaction::create([
                 'student_id' => $student->id,
                 'schedule_id' => $schedule->id,
-                'stage_id' => $stage->id,
                 'staff_id' => $staff->id,
                 'status' => 'completed',
                 'pickup_time' => now(),
