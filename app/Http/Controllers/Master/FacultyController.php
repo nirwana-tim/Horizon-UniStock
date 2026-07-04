@@ -5,11 +5,16 @@ namespace App\Http\Controllers\Master;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\FacultyRequest;
 use App\Models\Faculty;
+use App\Services\Master\FacultyService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
 class FacultyController extends Controller
 {
+    public function __construct(
+        protected FacultyService $facultyService
+    ) {}
+
     public function index(): View
     {
         $faculties = Faculty::withCount('studyPrograms')->latest()->paginate(15);
@@ -24,7 +29,7 @@ class FacultyController extends Controller
 
     public function store(FacultyRequest $request): RedirectResponse
     {
-        Faculty::create($request->validated());
+        $this->facultyService->store($request->validated());
 
         return redirect()->route('master.faculty.index')->with('success', 'Fakultas berhasil ditambahkan.');
     }
@@ -43,14 +48,14 @@ class FacultyController extends Controller
 
     public function update(FacultyRequest $request, Faculty $faculty): RedirectResponse
     {
-        $faculty->update($request->validated());
+        $this->facultyService->update($faculty, $request->validated());
 
         return redirect()->route('master.faculty.index')->with('success', 'Fakultas berhasil diperbarui.');
     }
 
     public function destroy(Faculty $faculty): RedirectResponse
     {
-        $faculty->delete();
+        $this->facultyService->destroy($faculty);
 
         return redirect()->route('master.faculty.index')->with('success', 'Fakultas berhasil dihapus.');
     }

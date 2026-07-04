@@ -6,11 +6,16 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StudyProgramRequest;
 use App\Models\Faculty;
 use App\Models\StudyProgram;
+use App\Services\Master\StudyProgramService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
 class StudyProgramController extends Controller
 {
+    public function __construct(
+        protected StudyProgramService $studyProgramService
+    ) {}
+
     public function index(): View
     {
         $programs = StudyProgram::with('faculty')->latest()->paginate(15);
@@ -27,7 +32,7 @@ class StudyProgramController extends Controller
 
     public function store(StudyProgramRequest $request): RedirectResponse
     {
-        StudyProgram::create($request->validated());
+        $this->studyProgramService->store($request->validated());
 
         return redirect()->route('master.study-program.index')->with('success', 'Program studi berhasil ditambahkan.');
     }
@@ -48,14 +53,14 @@ class StudyProgramController extends Controller
 
     public function update(StudyProgramRequest $request, StudyProgram $program): RedirectResponse
     {
-        $program->update($request->validated());
+        $this->studyProgramService->update($program, $request->validated());
 
         return redirect()->route('master.study-program.index')->with('success', 'Program studi berhasil diperbarui.');
     }
 
     public function destroy(StudyProgram $program): RedirectResponse
     {
-        $program->delete();
+        $this->studyProgramService->destroy($program);
 
         return redirect()->route('master.study-program.index')->with('success', 'Program studi berhasil dihapus.');
     }

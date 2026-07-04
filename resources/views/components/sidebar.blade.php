@@ -7,11 +7,13 @@
         'master.faculty.*',
         'master.study-program.*',
         'master.program-level.*',
+        'master.student.*',
         'master.item-category.*',
         'master.item-type.*',
         'master.item-department.*',
         'master.item-size.*',
         'master.item.*',
+        'master.item-price.*',
         'master.vendor.*',
     ];
     $masterOpen = request()->routeIs($masterDataRoutes) ? 'true' : 'false';
@@ -105,6 +107,13 @@
                         Level Program
                     </a>
 
+                    {{-- Mahasiswa --}}
+                    <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider px-2 py-1.5 mt-2">Mahasiswa</p>
+                    <a href="{{ route('master.student.index') }}"
+                        class="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm {{ request()->routeIs('master.student.*') ? 'text-primary-700 font-medium bg-primary-50' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50' }} transition-colors">
+                        Data Mahasiswa
+                    </a>
+
                     {{-- Item --}}
                     <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider px-2 py-1.5 mt-2">Item</p>
                     <a href="{{ route('master.item-category.index') }}"
@@ -126,6 +135,10 @@
                     <a href="{{ route('master.item.index') }}"
                         class="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm {{ request()->routeIs('master.item.*') ? 'text-primary-700 font-medium bg-primary-50' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50' }} transition-colors">
                         Item / SKU
+                    </a>
+                    <a href="{{ route('master.item-price.index') }}"
+                        class="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm {{ request()->routeIs('master.item-price.*') ? 'text-primary-700 font-medium bg-primary-50' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50' }} transition-colors">
+                        Harga Item
                     </a>
 
                     {{-- Lainnya --}}

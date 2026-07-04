@@ -15,6 +15,12 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            @if(session('success'))
+                <div class="mb-4 px-4 py-3 bg-green-100 border border-green-300 text-green-700 rounded-md">
+                    {{ session('success') }}
+                </div>
+            @endif
+
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -56,8 +62,45 @@
                         </div>
                     </div>
 
+                    {{-- Varian Section --}}
                     <div class="mt-8 pt-4 border-t border-gray-200">
                         <h3 class="text-sm font-medium text-gray-500 mb-4">Varian</h3>
+
+                        {{-- Form Tambah Varian --}}
+                        <form action="{{ route('master.item.variant.store', $item) }}" method="POST" class="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                            @csrf
+                            <div class="flex items-end gap-3">
+                                <div class="flex-1">
+                                    <label for="size_id" class="block text-xs font-medium text-gray-500 mb-1">Ukuran</label>
+                                    <select name="size_id" id="size_id" required class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-gray-500 focus:border-gray-500 sm:text-sm">
+                                        <option value="">-- Pilih Ukuran --</option>
+                                        @foreach($sizes as $size)
+                                            <option value="{{ $size->id }}">{{ $size->code }} - {{ $size->label }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="flex-1">
+                                    <label for="size" class="block text-xs font-medium text-gray-500 mb-1">Label Ukuran</label>
+                                    <input type="text" name="size" id="size" required placeholder="S, M, L, XL, 40, 42" class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-gray-500 focus:border-gray-500 sm:text-sm">
+                                </div>
+                                <div class="flex-1">
+                                    <label for="sku" class="block text-xs font-medium text-gray-500 mb-1">SKU (opsional)</label>
+                                    <input type="text" name="sku" id="sku" placeholder="Auto jika kosong" class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-gray-500 focus:border-gray-500 sm:text-sm">
+                                </div>
+                                <div class="flex-1">
+                                    <label for="weight" class="block text-xs font-medium text-gray-500 mb-1">Berat (opsional)</label>
+                                    <input type="number" name="weight" id="weight" min="0" step="0.01" placeholder="0" class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-gray-500 focus:border-gray-500 sm:text-sm">
+                                </div>
+                                <button type="submit" class="px-4 py-2 bg-[#980416] text-white text-sm font-medium rounded-md hover:bg-[#7a0311] transition">
+                                    Tambah
+                                </button>
+                            </div>
+                            @error('size_id') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                            @error('size') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                            @error('sku') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                        </form>
+
+                        {{-- Tabel Varian --}}
                         @if($item->variants->count())
                             <div class="overflow-x-auto">
                                 <table class="min-w-full divide-y divide-gray-200">
@@ -65,6 +108,8 @@
                                         <tr>
                                             <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Ukuran</th>
                                             <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">SKU</th>
+                                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Berat</th>
+                                            <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Aksi</th>
                                         </tr>
                                     </thead>
                                     <tbody class="bg-white divide-y divide-gray-200">
@@ -72,6 +117,14 @@
                                             <tr>
                                                 <td class="px-4 py-2 text-sm">{{ $variant->size_label ?? $variant->size }}</td>
                                                 <td class="px-4 py-2 text-sm font-mono">{{ $variant->sku }}</td>
+                                                <td class="px-4 py-2 text-sm">{{ $variant->weight ? $variant->weight . ' kg' : '-' }}</td>
+                                                <td class="px-4 py-2 text-sm text-right">
+                                                    <form action="{{ route('master.item.variant.destroy', [$item, $variant]) }}" method="POST" class="inline" onsubmit="return confirm('Yakin ingin menghapus varian ini?')">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="text-red-600 hover:text-red-900 text-xs font-medium">Hapus</button>
+                                                    </form>
+                                                </td>
                                             </tr>
                                         @endforeach
                                     </tbody>

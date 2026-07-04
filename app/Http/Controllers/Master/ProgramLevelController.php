@@ -5,11 +5,16 @@ namespace App\Http\Controllers\Master;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ProgramLevelRequest;
 use App\Models\ProgramLevel;
+use App\Services\Master\ProgramLevelService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
 class ProgramLevelController extends Controller
 {
+    public function __construct(
+        protected ProgramLevelService $programLevelService
+    ) {}
+
     public function index(): View
     {
         $levels = ProgramLevel::withCount('students')->latest()->paginate(15);
@@ -24,7 +29,7 @@ class ProgramLevelController extends Controller
 
     public function store(ProgramLevelRequest $request): RedirectResponse
     {
-        ProgramLevel::create($request->validated());
+        $this->programLevelService->store($request->validated());
 
         return redirect()->route('master.program-level.index')->with('success', 'Level program berhasil ditambahkan.');
     }
@@ -43,14 +48,14 @@ class ProgramLevelController extends Controller
 
     public function update(ProgramLevelRequest $request, ProgramLevel $level): RedirectResponse
     {
-        $level->update($request->validated());
+        $this->programLevelService->update($level, $request->validated());
 
         return redirect()->route('master.program-level.index')->with('success', 'Level program berhasil diperbarui.');
     }
 
     public function destroy(ProgramLevel $level): RedirectResponse
     {
-        $level->delete();
+        $this->programLevelService->destroy($level);
 
         return redirect()->route('master.program-level.index')->with('success', 'Level program berhasil dihapus.');
     }
