@@ -44,6 +44,24 @@ Sebelum mengerjakan **task apa pun**, AI WAJIB mengikuti urutan ini:
 - JSON response pake **Resource**
 - **Route Model Binding** jika memungkinkan
 
+## Aturan UI / Frontend
+
+> Referensi desain lengkap: [`docs/guides/desain.md`](docs/guides/desain.md)
+
+- **Warna brand: `primary-700` = `#980416` (Maroon)** — jangan gunakan Indigo/Blue sebagai warna utama
+- **Font: Inter** (Google Fonts) — sudah di-load di `app.css`
+- **Layout Admin & Super Admin**: Sidebar (`components/sidebar.blade.php`) — desktop only
+- **Layout Staff & Student**: Bottom Tab Bar (`components/bottom-nav.blade.php`) — mobile-first
+- Flash message: gunakan `<x-alert type="success|error|warning|info">` bukan inline HTML
+- Badge status: gunakan `<x-badge type="success|warning|danger|info|neutral|primary">` bukan inline `span`
+- Statistik dashboard: gunakan `<x-stat-card title="..." value="..." color="...">` bukan inline HTML
+- Judul halaman: gunakan `<x-page-header title="...">` bukan inline `h2`
+- Empty state tabel/list: gunakan `<x-empty-state title="..." description="...">` bukan inline HTML
+- Card: `bg-white rounded-xl border border-gray-200 shadow-sm p-5`
+- Tombol primer: `bg-primary-700 text-white hover:bg-primary-800 rounded-lg px-4 py-2 text-sm font-medium`
+- Tombol sekunder (outline): `border border-primary-500 text-primary-700 hover:bg-primary-50 rounded-lg px-4 py-2 text-sm font-medium`
+- Tombol bahaya: `bg-red-600 text-white hover:bg-red-700 rounded-lg px-4 py-2 text-sm font-medium`
+
 ## Role & Permission
 
 | Role | Permissions | Keterangan |

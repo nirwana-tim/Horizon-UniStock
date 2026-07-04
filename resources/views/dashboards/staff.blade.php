@@ -1,53 +1,96 @@
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ __('Dashboard Staff') }}</h2>
-    </x-slot>
 
-    <div class="py-12">
-        <div class="max-w-4xl mx-auto sm:px-6 lg:px-8 space-y-6">
+    {{-- Page title for mobile topbar --}}
+    <h2 class="text-lg font-bold text-gray-800 mb-5">Distribusi Seragam</h2>
 
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Pilih Metode Pencarian Mahasiswa</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <a href="{{ route('staff.scan.index') }}" class="block p-6 bg-gray-50 border-2 border-gray-200 rounded-xl hover:border-indigo-400 hover:bg-indigo-50 transition text-center">
-                            <div class="text-4xl mb-3">📷</div>
-                            <h4 class="text-base font-semibold text-gray-900">Scan QR Mahasiswa</h4>
-                            <p class="mt-1 text-sm text-gray-500">Gunakan kamera untuk scan QR permanen mahasiswa</p>
-                        </a>
-                        <button type="button" onclick="document.getElementById('nim-form').classList.toggle('hidden')" class="block p-6 bg-gray-50 border-2 border-gray-200 rounded-xl hover:border-indigo-400 hover:bg-indigo-50 transition text-center">
-                            <div class="text-4xl mb-3">🔍</div>
-                            <h4 class="text-base font-semibold text-gray-900">Cari Manual NIM</h4>
-                            <p class="mt-1 text-sm text-gray-500">Ketik NIM mahasiswa untuk melanjutkan</p>
+    {{-- Main Action Cards --}}
+    <div class="grid grid-cols-1 gap-4 mb-6">
+
+        {{-- Scan QR --}}
+        <a href="{{ route('staff.scan.index') }}"
+           class="flex items-center gap-4 p-5 bg-primary-700 rounded-2xl shadow-md shadow-primary-200 hover:bg-primary-800 transition-colors group">
+            <div class="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
+                <svg class="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8H3a2 2 0 00-2 2v8a2 2 0 002 2h14a2 2 0 002-2v-8a2 2 0 00-2-2h-2"/>
+                </svg>
+            </div>
+            <div class="flex-1">
+                <h3 class="text-base font-bold text-white">Scan QR Mahasiswa</h3>
+                <p class="text-sm text-primary-200 mt-0.5">Gunakan kamera untuk scan QR permanen</p>
+            </div>
+            <svg class="w-5 h-5 text-primary-300 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+        </a>
+
+        {{-- Cari Manual NIM --}}
+        <div x-data="{ open: false }">
+            <button @click="open = !open"
+                    class="w-full flex items-center gap-4 p-5 bg-white border-2 border-gray-200 rounded-2xl hover:border-primary-300 hover:bg-primary-50 transition-all group">
+                <div class="w-14 h-14 bg-gray-100 group-hover:bg-primary-100 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors">
+                    <svg class="w-7 h-7 text-gray-500 group-hover:text-primary-700 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                </div>
+                <div class="flex-1 text-left">
+                    <h3 class="text-base font-bold text-gray-800">Cari Manual NIM</h3>
+                    <p class="text-sm text-gray-500 mt-0.5">Fallback jika QR tidak terbaca</p>
+                </div>
+                <svg :class="open ? 'rotate-180' : ''"
+                     class="w-5 h-5 text-gray-400 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                </svg>
+            </button>
+
+            {{-- NIM Form --}}
+            <div x-show="open"
+                 x-transition:enter="transition ease-out duration-200"
+                 x-transition:enter-start="opacity-0 -translate-y-2"
+                 x-transition:enter-end="opacity-100 translate-y-0"
+                 class="mt-2 p-4 bg-gray-50 rounded-xl border border-gray-200">
+                <form action="{{ route('staff.search') }}" method="POST">
+                    @csrf
+                    <label class="block text-xs font-semibold text-gray-700 mb-1.5">NIM Mahasiswa</label>
+                    <div class="flex gap-2">
+                        <input type="text"
+                               name="nim"
+                               placeholder="Ketik NIM mahasiswa..."
+                               required
+                               class="flex-1 px-3 py-2.5 h-11 text-sm bg-white border border-gray-200 rounded-lg
+                                      text-gray-800 placeholder-gray-400
+                                      focus:border-primary-500 focus:ring-2 focus:ring-primary-100 focus:bg-white
+                                      transition-colors">
+                        <button type="submit"
+                                class="px-5 h-11 bg-primary-700 text-white text-sm font-medium rounded-lg
+                                       hover:bg-primary-800 active:bg-primary-900 transition-colors flex-shrink-0">
+                            Cari
                         </button>
                     </div>
-
-                    <div id="nim-form" class="hidden mt-6 p-4 bg-gray-50 rounded-lg">
-                        <form action="{{ route('staff.search') }}" method="POST">
-                            @csrf
-                            <x-input-label for="nim" value="Masukkan NIM" />
-                            <div class="mt-1 flex gap-2">
-                                <x-text-input id="nim" name="nim" type="text" class="flex-1" placeholder="Ketik NIM mahasiswa" required />
-                                <x-primary-button class="!bg-gray-800 hover:!bg-gray-700">Cari</x-primary-button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
+                </form>
             </div>
+        </div>
 
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
-                    <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-3">Panduan Singkat</h3>
-                    <ol class="list-decimal list-inside space-y-2 text-sm text-gray-600">
-                        <li>Scan QR mahasiswa menggunakan kamera, atau cari manual via NIM</li>
-                        <li>Sistem akan menampilkan data mahasiswa dan entitlement tahap aktif</li>
-                        <li>Centang item yang diberikan, edit ukuran jika perlu</li>
-                        <li>Validasi stok, jika kurang bisa partial pickup</li>
-                        <li>Submit transaksi untuk menyimpan data distribusi</li>
-                    </ol>
+    </div>
+
+    {{-- Panduan Singkat --}}
+    <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+        <h3 class="text-sm font-semibold text-gray-700 mb-4">Panduan Distribusi</h3>
+        <div class="space-y-3">
+            @foreach([
+                ['step' => '1', 'text' => 'Scan QR mahasiswa atau cari manual via NIM'],
+                ['step' => '2', 'text' => 'Sistem menampilkan data mahasiswa & entitlement tahap aktif'],
+                ['step' => '3', 'text' => 'Centang item yang diberikan, edit ukuran jika perlu'],
+                ['step' => '4', 'text' => 'Validasi stok — jika kurang bisa partial pickup'],
+                ['step' => '5', 'text' => 'Submit transaksi untuk menyimpan & kurangi stok'],
+            ] as $guide)
+            <div class="flex items-start gap-3">
+                <div class="w-6 h-6 bg-primary-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <span class="text-xs font-bold text-primary-700">{{ $guide['step'] }}</span>
                 </div>
+                <p class="text-sm text-gray-600 leading-relaxed">{{ $guide['text'] }}</p>
             </div>
-
+            @endforeach
         </div>
     </div>
+
 </x-app-layout>

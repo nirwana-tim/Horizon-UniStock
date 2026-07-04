@@ -1,37 +1,103 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="csrf-token" content="{{ csrf_token() }}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'Laravel') }}</title>
+    <title>{{ isset($title) ? $title . ' — ' : '' }}{{ config('app.name', 'Horizon UniStock') }}</title>
+    <meta name="description" content="Sistem Distribusi Seragam & Inventory Management — Horizon UniStock">
 
-        <!-- Fonts -->
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-        <!-- Scripts -->
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
-    </head>
-    <body class="font-sans antialiased">
-        <div class="min-h-screen bg-gray-100">
-            @include('layouts.navigation')
+    <!-- Scripts & Styles -->
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 
-            <!-- Page Heading -->
-            @isset($header)
-                <header class="bg-white shadow">
-                    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                        {{ $header }}
-                    </div>
-                </header>
-            @endisset
+    @stack('styles')
+</head>
+<body class="font-sans antialiased bg-gray-50 text-gray-800">
 
-            <!-- Page Content -->
-            <main>
+@php
+    $isSidebarLayout = auth()->check() && auth()->user()->hasAnyRole(['super_admin', 'admin', 'finance']);
+    $isBottomNavLayout = auth()->check() && auth()->user()->hasAnyRole(['staff', 'student']);
+@endphp
+
+@if($isSidebarLayout)
+    {{-- ===== SIDEBAR LAYOUT (Admin & Super Admin) ===== --}}
+    <div class="flex h-screen overflow-hidden bg-gray-50">
+
+        {{-- Sidebar --}}
+        <x-sidebar />
+
+        {{-- Main area --}}
+        <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+            {{-- Topbar --}}
+            <x-topbar />
+
+            {{-- Page Content --}}
+            <main class="flex-1 overflow-y-auto custom-scroll p-6">
+
+                {{-- Session Flash Messages --}}
+                @if(session('success'))
+                    <x-alert type="success">{{ session('success') }}</x-alert>
+                @endif
+                @if(session('error'))
+                    <x-alert type="error">{{ session('error') }}</x-alert>
+                @endif
+                @if(session('warning'))
+                    <x-alert type="warning">{{ session('warning') }}</x-alert>
+                @endif
+                @if(session('info'))
+                    <x-alert type="info">{{ session('info') }}</x-alert>
+                @endif
+
                 {{ $slot }}
             </main>
         </div>
-        @stack('scripts')
-    </body>
+    </div>
+
+@elseif($isBottomNavLayout)
+    {{-- ===== BOTTOM NAV LAYOUT (Staff & Student) ===== --}}
+    <div class="min-h-screen bg-gray-50 pb-20">
+
+        {{-- Simple topbar --}}
+        <x-topbar :simple="true" />
+
+        {{-- Page Content --}}
+        <main class="px-4 py-5">
+
+            {{-- Session Flash Messages --}}
+            @if(session('success'))
+                <x-alert type="success">{{ session('success') }}</x-alert>
+            @endif
+            @if(session('error'))
+                <x-alert type="error">{{ session('error') }}</x-alert>
+            @endif
+            @if(session('warning'))
+                <x-alert type="warning">{{ session('warning') }}</x-alert>
+            @endif
+            @if(session('info'))
+                <x-alert type="info">{{ session('info') }}</x-alert>
+            @endif
+
+            {{ $slot }}
+        </main>
+
+        {{-- Bottom Navigation --}}
+        <x-bottom-nav />
+    </div>
+
+@else
+    {{-- ===== FALLBACK LAYOUT ===== --}}
+    <div class="min-h-screen bg-gray-50">
+        <main class="p-6">
+            {{ $slot }}
+        </main>
+    </div>
+@endif
+
+@stack('scripts')
+</body>
 </html>
