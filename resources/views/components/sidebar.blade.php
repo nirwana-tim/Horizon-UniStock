@@ -2,36 +2,54 @@
   Sidebar Component — Admin & Super Admin only
   Digunakan di layouts/app.blade.php
 --}}
-<aside x-data="{ collapsed: false, masterOpen: {{ request()->routeIs('master.*') ? 'true' : 'false' }}, stockOpen: false }"
+@php
+$masterDataRoutes = [
+    'master.faculty.*', 'master.study-program.*', 'master.program-level.*',
+    'master.item-category.*', 'master.item-type.*', 'master.item-department.*',
+    'master.item-size.*', 'master.item.*', 'master.vendor.*',
+];
+$masterOpen = request()->routeIs($masterDataRoutes) ? 'true' : 'false';
+@endphp
+<aside x-data="{ collapsed: false, masterOpen: {{ $masterOpen }}, stockOpen: false }"
+       x-init="setTimeout(() => $el.classList.add('sidebar-transition'), 50)"
        :class="collapsed ? 'w-16' : 'w-64'"
-       class="sidebar-transition flex-shrink-0 bg-white border-r border-gray-200 flex flex-col h-full overflow-hidden">
+       class="flex-shrink-0 bg-white border-r border-gray-200 flex flex-col h-full overflow-hidden">
 
     {{-- Logo / Brand --}}
-    <div class="flex items-center h-14 px-4 border-b border-gray-100 flex-shrink-0">
-        <a href="{{ route('dashboard') }}" class="flex items-center gap-2 min-w-0">
-            {{-- Icon --}}
+    <div class="h-14 border-b border-gray-100 flex-shrink-0 flex items-center overflow-hidden"
+         :class="collapsed ? 'justify-center px-0' : 'justify-between px-4'">
+
+        {{-- Expanded: Logo + text --}}
+        <a x-show="!collapsed" href="{{ route('dashboard') }}"
+           class="flex items-center gap-2 min-w-0">
             <div class="w-8 h-8 bg-primary-700 rounded-lg flex items-center justify-center flex-shrink-0">
                 <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10"/>
                 </svg>
             </div>
-            {{-- Text —  hidden saat collapsed --}}
-            <div x-show="!collapsed" x-transition:enter="transition-opacity duration-200"
-                 x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
-                 class="min-w-0">
+            <div class="min-w-0">
                 <p class="text-sm font-bold text-gray-900 leading-tight truncate">Horizon</p>
                 <p class="text-xs font-medium text-primary-700 truncate">UniStock</p>
             </div>
         </a>
-        {{-- Toggle button --}}
-        <button @click="collapsed = !collapsed"
-                class="ml-auto p-1.5 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors flex-shrink-0"
-                :title="collapsed ? 'Expand sidebar' : 'Collapse sidebar'">
-            <svg x-show="!collapsed" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+
+        {{-- Expanded: Collapse button --}}
+        <button x-show="!collapsed"
+                @click="collapsed = true"
+                title="Tutup sidebar"
+                class="p-1.5 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors flex-shrink-0">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/>
             </svg>
-            <svg x-show="collapsed" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"/>
+        </button>
+
+        {{-- Collapsed: Single centered expand button --}}
+        <button x-show="collapsed"
+                @click="collapsed = false"
+                title="Buka sidebar"
+                class="w-10 h-10 flex items-center justify-center rounded-lg text-primary-700 bg-primary-50 hover:bg-primary-100 transition-colors">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10"/>
             </svg>
         </button>
     </div>
