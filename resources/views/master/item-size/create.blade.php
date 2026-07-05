@@ -30,7 +30,7 @@
                                         <input type="checkbox" name="categories[]" value="{{ $cat->id }}"
                                             {{ in_array($cat->id, old('categories', [])) ? 'checked' : '' }}
                                             class="rounded border-gray-300 text-gray-800 focus:ring-primary-500">
-                                        <span class="text-sm text-gray-700">{{ $cat->code }} - {{ $cat->label }}</span>
+                                        <span class="text-sm text-gray-700">{{ $cat->label }} ({{ $cat->code }})</span>
                                     </label>
                                 @endforeach
                             </div>
