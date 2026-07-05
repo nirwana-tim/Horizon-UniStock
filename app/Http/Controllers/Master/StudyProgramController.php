@@ -18,7 +18,7 @@ class StudyProgramController extends Controller
 
     public function index(): View
     {
-        $programs = StudyProgram::with('faculty')->latest()->paginate(15);
+        $programs = StudyProgram::with('faculty')->withCount('students')->latest()->paginate(15);
 
         return view('master.study-program.index', compact('programs'));
     }
@@ -34,12 +34,13 @@ class StudyProgramController extends Controller
     {
         $this->studyProgramService->store($request->validated());
 
-        return redirect()->route('master.study-program.index')->with('success', 'Program studi berhasil ditambahkan.');
+        return redirect()->route('master-data.study-program.index')->with('success', 'Program studi berhasil ditambahkan.');
     }
 
     public function show(StudyProgram $program): View
     {
-        $program->load(['faculty', 'students']);
+        $program->load(['faculty']);
+        $program->loadCount('students');
 
         return view('master.study-program.show', compact('program'));
     }
@@ -55,13 +56,13 @@ class StudyProgramController extends Controller
     {
         $this->studyProgramService->update($program, $request->validated());
 
-        return redirect()->route('master.study-program.index')->with('success', 'Program studi berhasil diperbarui.');
+        return redirect()->route('master-data.study-program.index')->with('success', 'Program studi berhasil diperbarui.');
     }
 
     public function destroy(StudyProgram $program): RedirectResponse
     {
         $this->studyProgramService->destroy($program);
 
-        return redirect()->route('master.study-program.index')->with('success', 'Program studi berhasil dihapus.');
+        return redirect()->route('master-data.study-program.index')->with('success', 'Program studi berhasil dihapus.');
     }
 }

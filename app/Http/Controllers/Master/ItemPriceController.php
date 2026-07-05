@@ -36,7 +36,7 @@ class ItemPriceController extends Controller
     {
         $this->itemPriceService->store($request->validated());
 
-        return redirect()->route('master.item-price.index')->with('success', 'Harga item berhasil ditambahkan.');
+        return redirect()->route('master-data.item-price.index')->with('success', 'Harga item berhasil ditambahkan.');
     }
 
     public function show(ItemPrice $itemPrice): View
@@ -57,13 +57,13 @@ class ItemPriceController extends Controller
     {
         $this->itemPriceService->update($itemPrice, $request->validated());
 
-        return redirect()->route('master.item-price.index')->with('success', 'Harga item berhasil diperbarui.');
+        return redirect()->route('master-data.item-price.index')->with('success', 'Harga item berhasil diperbarui.');
     }
 
     public function destroy(ItemPrice $itemPrice): RedirectResponse
     {
         $this->itemPriceService->destroy($itemPrice);
 
-        return redirect()->route('master.item-price.index')->with('success', 'Harga item berhasil dihapus.');
+        return redirect()->route('master-data.item-price.index')->with('success', 'Harga item berhasil dihapus.');
     }
 }

@@ -59,7 +59,7 @@ class ItemController extends Controller
     {
         $this->itemService->store($request->validated());
 
-        return redirect()->route('master.item.index')->with('success', 'Item berhasil ditambahkan.');
+        return redirect()->route('master-data.item.index')->with('success', 'Item berhasil ditambahkan.');
     }
 
     public function show(Item $item): View
@@ -86,13 +86,13 @@ class ItemController extends Controller
     {
         $this->itemService->update($item, $request->validated());
 
-        return redirect()->route('master.item.index')->with('success', 'Item berhasil diperbarui.');
+        return redirect()->route('master-data.item.index')->with('success', 'Item berhasil diperbarui.');
     }
 
     public function destroy(Item $item): RedirectResponse
     {
         $this->itemService->destroy($item);
 
-        return redirect()->route('master.item.index')->with('success', 'Item berhasil dihapus.');
+        return redirect()->route('master-data.item.index')->with('success', 'Item berhasil dihapus.');
     }
 }

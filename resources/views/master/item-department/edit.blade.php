@@ -7,7 +7,7 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
-                    <form action="{{ route('master.item-department.update', $itemDepartment) }}" method="POST">
+                    <form action="{{ route('master-data.item-department.update', $itemDepartment) }}" method="POST">
                         @csrf
                         @method('PUT')
 
@@ -37,13 +37,13 @@
                                     @endphp
                                     <div class="border border-gray-200 rounded-md p-3">
                                         <div class="flex items-center mb-2">
-                                            <input type="checkbox" id="faculty-{{ $faculty->id }}" class="faculty-check rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" data-faculty="{{ $faculty->id }}" {{ $allChecked ? 'checked' : '' }}>
+                                            <input type="checkbox" id="faculty-{{ $faculty->id }}" class="faculty-check rounded border-gray-300 text-primary-600 focus:ring-primary-500" data-faculty="{{ $faculty->id }}" {{ $allChecked ? 'checked' : '' }}>
                                             <label for="faculty-{{ $faculty->id }}" class="ml-2 text-sm font-semibold text-gray-700">{{ $faculty->name }}</label>
                                         </div>
                                         <div class="ml-6 space-y-1">
                                             @foreach($faculty->studyPrograms as $prodi)
                                                 <label class="flex items-center">
-                                                    <input type="checkbox" name="study_program_ids[]" value="{{ $prodi->id }}" class="prodi-check rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" data-faculty="{{ $faculty->id }}" {{ in_array($prodi->id, $selectedIds) ? 'checked' : '' }}>
+                                                    <input type="checkbox" name="study_program_ids[]" value="{{ $prodi->id }}" class="prodi-check rounded border-gray-300 text-primary-600 focus:ring-primary-500" data-faculty="{{ $faculty->id }}" {{ in_array($prodi->id, $selectedIds) ? 'checked' : '' }}>
                                                     <span class="ml-2 text-sm text-gray-600">{{ $prodi->name }}</span>
                                                 </label>
                                             @endforeach
@@ -56,7 +56,7 @@
 
                         <div class="flex items-center gap-2 mt-6">
                             <x-primary-button>{{ __('Simpan') }}</x-primary-button>
-                            <a href="{{ route('master.item-department.index') }}" class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-25 transition ease-in-out duration-150">
+                            <a href="{{ route('master-data.item-department.index') }}" class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-25 transition ease-in-out duration-150">
                                 {{ __('Batal') }}
                             </a>
                         </div>

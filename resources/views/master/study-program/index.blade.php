@@ -13,7 +13,7 @@
                 <div class="p-6 text-gray-900">
                     <div class="flex items-center justify-between mb-6">
                         <h3 class="text-lg font-semibold text-gray-800">Program Studi</h3>
-                        <a href="{{ route('master.study-program.create') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white tracking-widest hover:bg-blue-700 transition">
+                        <a href="{{ route('master-data.study-program.create') }}" class="inline-flex items-center px-4 py-2 bg-primary-700 border border-transparent rounded-md font-semibold text-xs text-white tracking-widest hover:bg-primary-800 transition">
                             {{ __('Tambah Program Studi') }}
                         </a>
                     </div>
@@ -26,7 +26,7 @@
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kode</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fakultas</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jumlah Mahasiswa</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
@@ -47,14 +47,13 @@
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                             {{ $program->students_count ?? 0 }}
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                            <a href="{{ route('master.study-program.show', $program) }}" class="text-blue-600 hover:underline mr-3">Lihat</a>
-                                            <a href="{{ route('master.study-program.edit', $program) }}" class="text-yellow-600 hover:underline mr-3">Edit</a>
-                                            <form action="{{ route('master.study-program.destroy', $program) }}" method="POST" class="inline" onsubmit="return confirm('Yakin ingin menghapus?')">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="text-red-600 hover:underline">Hapus</button>
-                                            </form>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-right space-x-1.5">
+                                              <a href="{{ route('master-data.study-program.show', $program) }}" class="inline-flex items-center px-2.5 py-1 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 active:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150">Lihat</a>
+                                            <x-delete-modal
+                                                :route="route('master-data.study-program.destroy', $program)"
+                                                label="Hapus Program Studi"
+                                                description="Apakah Anda yakin ingin menghapus program studi ini? Data ini tidak dapat dikembalikan."
+                                            />
                                         </td>
                                     </tr>
                                 @empty

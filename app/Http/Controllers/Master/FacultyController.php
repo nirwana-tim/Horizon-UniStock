@@ -31,7 +31,7 @@ class FacultyController extends Controller
     {
         $this->facultyService->store($request->validated());
 
-        return redirect()->route('master.faculty.index')->with('success', 'Fakultas berhasil ditambahkan.');
+        return redirect()->route('master-data.faculty.index')->with('success', 'Fakultas berhasil ditambahkan.');
     }
 
     public function show(Faculty $faculty): View
@@ -50,13 +50,13 @@ class FacultyController extends Controller
     {
         $this->facultyService->update($faculty, $request->validated());
 
-        return redirect()->route('master.faculty.index')->with('success', 'Fakultas berhasil diperbarui.');
+        return redirect()->route('master-data.faculty.index')->with('success', 'Fakultas berhasil diperbarui.');
     }
 
     public function destroy(Faculty $faculty): RedirectResponse
     {
         $this->facultyService->destroy($faculty);
 
-        return redirect()->route('master.faculty.index')->with('success', 'Fakultas berhasil dihapus.');
+        return redirect()->route('master-data.faculty.index')->with('success', 'Fakultas berhasil dihapus.');
     }
 }

@@ -107,9 +107,13 @@ resources/views/
 ├── components/       # Blade component reusable
 ├── auth/             # Login, register, forgot-password
 ├── profile/          # Edit profile
-├── partials/         # Potongan kecil blade (navbar)
-├── vendor/           # Override package views
-├── dashboard.blade.php
+├── dashboards/       # Dashboard per role (super-admin, finance, staff, student)
+├── master/           # Master data CRUD (faculty, study-program, item, vendor, etc.)
+├── distribution/     # Entitlement, jadwal, size-monitor, scan
+├── inventory/        # Stock receive, stock opname
+├── report/           # Laporan & GPM
+├── student/          # Student self-service (size input, QR)
+├── import/           # Import data
 └── welcome.blade.php
 ```
 

@@ -13,7 +13,7 @@
                 <div class="p-6 text-gray-900">
                     <div class="flex items-center justify-between mb-6">
                         <h3 class="text-lg font-semibold text-gray-800">Harga Item</h3>
-                        <a href="{{ route('master.item-price.create') }}" class="inline-flex items-center px-4 py-2 bg-[#980416] border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-[#7a0311] transition">
+                        <a href="{{ route('master-data.item-price.create') }}" class="inline-flex items-center px-4 py-2 bg-[#980416] border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-[#7a0311] transition">
                             {{ __('Tambah Harga') }}
                         </a>
                     </div>
@@ -39,14 +39,13 @@
                                         <td class="px-4 py-3 text-sm text-right text-gray-900">Rp {{ number_format($itemPrice->selling_price, 0, ',', '.') }}</td>
                                         <td class="px-4 py-3 text-sm text-right text-gray-900">Rp {{ number_format($itemPrice->hpp, 0, ',', '.') }}</td>
                                         <td class="px-4 py-3 text-sm text-gray-500">{{ $itemPrice->effective_date?->format('d/m/Y') ?? '-' }}</td>
-                                        <td class="px-4 py-3 text-sm text-right space-x-2">
-                                            <a href="{{ route('master.item-price.show', $itemPrice) }}" class="text-indigo-600 hover:text-indigo-900">Lihat</a>
-                                            <a href="{{ route('master.item-price.edit', $itemPrice) }}" class="text-yellow-600 hover:text-yellow-900">Edit</a>
-                                            <form action="{{ route('master.item-price.destroy', $itemPrice) }}" method="POST" class="inline" onsubmit="return confirm('Yakin ingin menghapus?')">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="text-red-600 hover:text-red-900">Hapus</button>
-                                            </form>
+                                        <td class="px-4 py-3 text-sm text-right space-x-1.5">
+                                              <a href="{{ route('master-data.item-price.show', $itemPrice) }}" class="inline-flex items-center px-2.5 py-1 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 active:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150">Lihat</a>
+                                            <x-delete-modal
+                                                :route="route('master-data.item-price.destroy', $itemPrice)"
+                                                label="Hapus Harga Item"
+                                                description="Apakah Anda yakin ingin menghapus data harga ini? Data ini tidak dapat dikembalikan."
+                                            />
                                         </td>
                                     </tr>
                                 @empty
