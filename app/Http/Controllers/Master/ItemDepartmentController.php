@@ -39,7 +39,7 @@ class ItemDepartmentController extends Controller
 
     public function show(ItemDepartment $itemDepartment): View
     {
-        $itemDepartment->load('studyPrograms.faculty');
+        $itemDepartment->load(['studyPrograms.faculty', 'items.category']);
 
         return view('master.item-department.show', compact('itemDepartment'));
     }

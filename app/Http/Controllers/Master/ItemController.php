@@ -23,22 +23,7 @@ class ItemController extends Controller
     public function index(): View
     {
         $variants = ItemVariant::with(['item.category', 'itemSize'])
-            ->join('items', 'item_variants.item_id', '=', 'items.id')
-            ->leftJoin('item_categories', 'items.category_id', '=', 'item_categories.id')
-            ->select(
-                'item_variants.*',
-                'items.name as item_name',
-                'items.code as item_code',
-                'items.unit',
-                'items.selling_price',
-                'items.hpp',
-                'items.category_id',
-                'item_categories.label as category_name',
-                'item_categories.code as category_code'
-            )
-            ->orderBy('item_categories.code')
-            ->orderBy('items.code')
-            ->orderBy('item_variants.size')
+            ->orderBy('sku')
             ->paginate(25);
 
         return view('master.item.index', compact('variants'));
@@ -46,13 +31,14 @@ class ItemController extends Controller
 
     public function create(): View
     {
-        $categories = ItemCategory::with('sizes')->orderBy('code')->get();
+        $categories = ItemCategory::with(['sizes', 'types'])->orderBy('code')->get();
         $types = ItemType::orderBy('code')->get();
         $departments = ItemDepartment::orderBy('code')->get();
 
         $sizesByCategory = $categories->mapWithKeys(fn ($cat) => [$cat->id => $cat->sizes]);
+        $typesByCategory = $categories->mapWithKeys(fn ($cat) => [$cat->id => $cat->types]);
 
-        return view('master.item.create', compact('categories', 'types', 'departments', 'sizesByCategory'));
+        return view('master.item.create', compact('categories', 'types', 'departments', 'sizesByCategory', 'typesByCategory'));
     }
 
     public function store(ItemRequest $request): RedirectResponse
@@ -65,7 +51,7 @@ class ItemController extends Controller
     public function show(Item $item): View
     {
         $item->load(['category', 'type', 'department', 'variants.itemSize']);
-        $sizes = ItemSize::orderBy('code')->get();
+        $sizes = $item->category ? $item->category->sizes()->orderBy('code')->get() : collect();
 
         return view('master.item.show', compact('item', 'sizes'));
     }
@@ -73,13 +59,14 @@ class ItemController extends Controller
     public function edit(Item $item): View
     {
         $item->load('variants');
-        $categories = ItemCategory::with('sizes')->orderBy('code')->get();
+        $categories = ItemCategory::with(['sizes', 'types'])->orderBy('code')->get();
         $types = ItemType::orderBy('code')->get();
         $departments = ItemDepartment::orderBy('code')->get();
 
         $sizesByCategory = $categories->mapWithKeys(fn ($cat) => [$cat->id => $cat->sizes]);
+        $typesByCategory = $categories->mapWithKeys(fn ($cat) => [$cat->id => $cat->types]);
 
-        return view('master.item.edit', compact('item', 'categories', 'types', 'departments', 'sizesByCategory'));
+        return view('master.item.edit', compact('item', 'categories', 'types', 'departments', 'sizesByCategory', 'typesByCategory'));
     }
 
     public function update(ItemRequest $request, Item $item): RedirectResponse

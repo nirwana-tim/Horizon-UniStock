@@ -36,9 +36,9 @@
                             </div>
 
                             <div>
-                                <label for="category_id" class="block text-sm font-medium text-gray-700">Kategori <span class="text-red-500">*</span></label>
-                                <select name="category_id" id="category_id" required
-                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-gray-500 sm:text-sm">
+                                <label for="category_id" class="block text-sm font-medium text-gray-700 font-semibold">Kategori</label>
+                                <select id="category_id_display" disabled
+                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm bg-gray-100 text-gray-500 sm:text-sm cursor-not-allowed">
                                     <option value="">-- Pilih Kategori --</option>
                                     @foreach($categories as $cat)
                                         <option value="{{ $cat->id }}" {{ old('category_id', $item->category_id) == $cat->id ? 'selected' : '' }}>
@@ -46,29 +46,31 @@
                                         </option>
                                     @endforeach
                                 </select>
+                                <input type="hidden" name="category_id" id="category_id" value="{{ $item->category_id }}">
                                 @error('category_id')
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
                             </div>
 
                             <div>
-                                <label for="gender" class="block text-sm font-medium text-gray-700">Gender <span class="text-red-500">*</span></label>
-                                <select name="gender" id="gender" required
-                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-gray-500 sm:text-sm">
+                                <label for="gender" class="block text-sm font-medium text-gray-700 font-semibold">Gender</label>
+                                <select id="gender_display" disabled
+                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm bg-gray-100 text-gray-500 sm:text-sm cursor-not-allowed">
                                     <option value="">-- Pilih Gender --</option>
                                     <option value="L" {{ old('gender', $item->gender) == 'L' ? 'selected' : '' }}>Laki - Laki</option>
                                     <option value="P" {{ old('gender', $item->gender) == 'P' ? 'selected' : '' }}>Perempuan</option>
                                     <option value="U" {{ old('gender', $item->gender) == 'U' ? 'selected' : '' }}>Unisex</option>
                                 </select>
+                                <input type="hidden" name="gender" id="gender" value="{{ $item->gender }}">
                                 @error('gender')
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
                             </div>
 
                             <div>
-                                <label for="type_id" class="block text-sm font-medium text-gray-700">Tipe <span class="text-red-500">*</span></label>
-                                <select name="type_id" id="type_id" required
-                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-gray-500 sm:text-sm">
+                                <label for="type_id" class="block text-sm font-medium text-gray-700 font-semibold">Tipe</label>
+                                <select id="type_id_display" disabled
+                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm bg-gray-100 text-gray-500 sm:text-sm cursor-not-allowed">
                                     <option value="">-- Pilih Tipe --</option>
                                     @foreach($types as $type)
                                         <option value="{{ $type->id }}" {{ old('type_id', $item->type_id) == $type->id ? 'selected' : '' }}>
@@ -76,15 +78,16 @@
                                         </option>
                                     @endforeach
                                 </select>
+                                <input type="hidden" name="type_id" id="type_id" value="{{ $item->type_id }}">
                                 @error('type_id')
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
                             </div>
 
                             <div>
-                                <label for="department_id" class="block text-sm font-medium text-gray-700">Departemen <span class="text-red-500">*</span></label>
-                                <select name="department_id" id="department_id" required
-                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-gray-500 sm:text-sm">
+                                <label for="department_id" class="block text-sm font-medium text-gray-700 font-semibold">Departemen</label>
+                                <select id="department_id_display" disabled
+                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm bg-gray-100 text-gray-500 sm:text-sm cursor-not-allowed">
                                     <option value="">-- Pilih Departemen --</option>
                                     @foreach($departments as $dept)
                                         <option value="{{ $dept->id }}" {{ old('department_id', $item->department_id) == $dept->id ? 'selected' : '' }}>
@@ -92,6 +95,7 @@
                                         </option>
                                     @endforeach
                                 </select>
+                                <input type="hidden" name="department_id" id="department_id" value="{{ $item->department_id }}">
                                 @error('department_id')
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
@@ -129,11 +133,12 @@
                         </div>
 
                         <div class="mt-6">
-                            <label for="size_id" class="block text-sm font-medium text-gray-700">Ukuran <span class="text-red-500">*</span></label>
-                            <select name="size_id" id="size_id" required
-                                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-gray-500 sm:text-sm">
+                            <label for="size_id" class="block text-sm font-medium text-gray-700 font-semibold">Ukuran</label>
+                            <select id="size_id_display" disabled
+                                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm bg-gray-100 text-gray-500 sm:text-sm cursor-not-allowed">
                                 <option value="">-- Pilih Ukuran --</option>
                             </select>
+                            <input type="hidden" name="size_id" id="size_id" value="{{ old('size_id', $item->variants->first()?->size_id) }}">
                             @error('size_id')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
@@ -155,16 +160,19 @@
 
     <script>
         const sizesByCategory = @json($sizesByCategory);
-        const sizeSelect = document.getElementById('size_id');
-        const categorySelect = document.getElementById('category_id');
+        const typesByCategory = @json($typesByCategory);
+        const sizeSelect = document.getElementById('size_id_display');
+        const typeSelect = document.getElementById('type_id_display');
+        const categorySelect = document.getElementById('category_id_display');
         const currentSizeId = {{ old('size_id', $item->variants->first()?->size_id ?? 'null') }};
+        const currentTypeId = {{ old('type_id', $item->type_id ?? 'null') }};
 
         function renderSizes(sizes) {
             sizeSelect.innerHTML = '<option value="">-- Pilih Ukuran --</option>';
             sizes.forEach(s => {
                 const opt = document.createElement('option');
                 opt.value = s.id;
-                opt.textContent = s.code + ' - ' + s.name;
+                opt.textContent = s.code + ' - ' + (s.label || s.name);
                 if (s.id == currentSizeId) {
                     opt.selected = true;
                 }
@@ -172,13 +180,28 @@
             });
         }
 
-        function filterSizes() {
-            const catId = categorySelect.value;
-            const sizes = sizesByCategory[catId] || [];
-            renderSizes(sizes);
+        function renderTypes(types) {
+            typeSelect.innerHTML = '<option value="">-- Pilih Tipe --</option>';
+            types.forEach(t => {
+                const opt = document.createElement('option');
+                opt.value = t.id;
+                opt.textContent = t.code + ' - ' + (t.label || t.name);
+                if (t.id == currentTypeId) {
+                    opt.selected = true;
+                }
+                typeSelect.appendChild(opt);
+            });
         }
 
-        categorySelect.addEventListener('change', filterSizes);
-        filterSizes();
+        function filterOptions() {
+            const catId = categorySelect.value;
+            const sizes = sizesByCategory[catId] || [];
+            const types = typesByCategory[catId] || [];
+            renderSizes(sizes);
+            renderTypes(types);
+        }
+
+        categorySelect.addEventListener('change', filterOptions);
+        filterOptions();
     </script>
 </x-app-layout>

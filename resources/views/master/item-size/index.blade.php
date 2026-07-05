@@ -34,7 +34,7 @@
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $loop->iteration }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-900">{{ $size->code }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $size->label }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $size->categories->pluck('code')->implode(', ') ?: '-' }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $size->categories->map(fn($c) => $c->label . ' (' . $c->code . ')')->implode(', ') ?: '-' }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-right space-x-1.5">
                                               <a href="{{ route('master-data.item-size.show', $size) }}" class="inline-flex items-center px-2.5 py-1 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 active:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150">Lihat</a>
                                             <x-delete-modal
@@ -46,7 +46,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="5" class="px-6 py-4 text-center text-sm text-gray-500">Tidak ada data.</td>
+                                        <td colspan="4" class="px-6 py-4 text-center text-sm text-gray-500">Tidak ada data.</td>
                                     </tr>
                                 @endforelse
                             </tbody>

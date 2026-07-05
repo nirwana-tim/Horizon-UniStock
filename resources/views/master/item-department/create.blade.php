@@ -10,11 +10,7 @@
                     <form action="{{ route('master-data.item-department.store') }}" method="POST">
                         @csrf
 
-                        <div class="mb-4">
-                            <x-input-label for="code" :value="__('Kode')" />
-                            <x-text-input id="code" name="code" type="text" class="mt-1 block w-full" :value="old('code')" required maxlength="2" placeholder="Contoh: 02, 04, 06" />
-                            <x-input-error :messages="$errors->get('code')" class="mt-2" />
-                        </div>
+
 
                         <div class="mb-4">
                             <x-input-label for="label" :value="__('Label')" />

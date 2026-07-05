@@ -12,15 +12,28 @@
                         @method('PUT')
 
                         <div class="mb-4">
-                            <x-input-label for="code" :value="__('Kode')" />
-                            <x-text-input id="code" name="code" type="text" class="mt-1 block w-full" :value="old('code', $itemType->code)" required maxlength="3" />
-                            <x-input-error :messages="$errors->get('code')" class="mt-2" />
+                            <x-input-label :value="__('Kode')" />
+                            <p class="mt-1 text-sm font-mono text-gray-900 bg-gray-100 p-2.5 rounded-md border border-gray-200">{{ $itemType->code }}</p>
                         </div>
 
                         <div class="mb-4">
                             <x-input-label for="label" :value="__('Label')" />
                             <x-text-input id="label" name="label" type="text" class="mt-1 block w-full" :value="old('label', $itemType->label)" required />
                             <x-input-error :messages="$errors->get('label')" class="mt-2" />
+                        </div>
+                        <div class="mb-4">
+                            <x-input-label :value="__('Kategori')" class="mb-2" />
+                            <div class="mt-1 grid grid-cols-2 sm:grid-cols-3 gap-2">
+                                @foreach($categories as $cat)
+                                    <label class="inline-flex items-center gap-2 px-3 py-2 bg-gray-50 border border-gray-200 rounded-md cursor-pointer hover:bg-gray-100">
+                                        <input type="checkbox" name="categories[]" value="{{ $cat->id }}"
+                                            {{ in_array($cat->id, old('categories', $itemType->categories->pluck('id')->toArray())) ? 'checked' : '' }}
+                                            class="rounded border-gray-300 text-gray-800 focus:ring-primary-500">
+                                        <span class="text-sm text-gray-700">{{ $cat->label }} ({{ $cat->code }})</span>
+                                    </label>
+                                @endforeach
+                            </div>
+                            <x-input-error :messages="$errors->get('categories')" class="mt-2" />
                         </div>
 
                         <div class="flex items-center gap-2 mt-6">

@@ -63,42 +63,90 @@
                     </div>
 
                     {{-- Varian Section --}}
-                    <div class="mt-8 pt-4 border-t border-gray-200">
-                        <h3 class="text-sm font-medium text-gray-500 mb-4">Varian</h3>
+                    <div class="mt-8 pt-4 border-t border-gray-200" x-data="{ showModal: false, selectedSize: '', generatedSku: '', baseCode: '{{ $item->base_code ?? $item->code }}' }">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-sm font-medium text-gray-500">Varian</h3>
+                            <button type="button" @click="showModal = true" class="inline-flex items-center px-4 py-2 bg-[#980416] text-white text-xs font-semibold rounded-lg hover:bg-[#7a0311] transition shadow-sm">
+                                + Tambah Varian
+                            </button>
+                        </div>
 
-                        {{-- Form Tambah Varian --}}
-                        <form action="{{ route('master-data.item.variant.store', $item) }}" method="POST" class="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                            @csrf
-                            <div class="flex items-end gap-3">
-                                <div class="flex-1">
-                                    <label for="size_id" class="block text-xs font-medium text-gray-500 mb-1">Ukuran</label>
-                                    <select name="size_id" id="size_id" required class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-gray-500 sm:text-sm">
-                                        <option value="">-- Pilih Ukuran --</option>
-                                        @foreach($sizes as $size)
-                                            <option value="{{ $size->id }}">{{ $size->code }} - {{ $size->label }}</option>
-                                        @endforeach
-                                    </select>
+                        <!-- Add Variant Modal -->
+                        <div x-show="showModal" class="fixed inset-0 z-50 overflow-y-auto" x-cloak>
+                            <!-- Backdrop overlay -->
+                            <div x-show="showModal"
+                                 x-transition:enter="ease-out duration-300"
+                                 x-transition:enter-start="opacity-0"
+                                 x-transition:enter-end="opacity-100"
+                                 x-transition:leave="ease-in duration-200"
+                                 x-transition:leave-start="opacity-100"
+                                 x-transition:leave-end="opacity-0"
+                                 class="fixed inset-0 bg-gray-500/75 backdrop-blur-sm transition-opacity" @click="showModal = false"></div>
+
+                            <!-- Modal Positioner -->
+                            <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+                                <!-- Modal Panel -->
+                                <div x-show="showModal"
+                                     x-transition:enter="ease-out duration-300"
+                                     x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                                     x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                                     x-transition:leave="ease-in duration-200"
+                                     x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                                     x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                                     class="relative transform overflow-hidden rounded-xl bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-md p-6">
+                                    
+                                    <form action="{{ route('master-data.item.variant.store', $item) }}" method="POST">
+                                        @csrf
+                                        <div class="flex items-center justify-between border-b pb-3 mb-4">
+                                            <h3 class="text-base font-bold text-gray-900">Tambah Varian Baru</h3>
+                                            <button type="button" @click="showModal = false" class="text-gray-400 hover:text-gray-500 transition">
+                                                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                                </svg>
+                                            </button>
+                                        </div>
+
+                                        <div class="space-y-4">
+                                            <div>
+                                                <x-input-label for="modal_size_id" :value="__('Ukuran')" class="mb-1" />
+                                                <select name="size_id" id="modal_size_id" required 
+                                                        @change="
+                                                            const opt = $event.target.options[$event.target.selectedIndex];
+                                                            selectedSize = opt.dataset.code || '';
+                                                            generatedSku = selectedSize ? (baseCode + '-' + selectedSize) : '';
+                                                        "
+                                                        class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 text-sm">
+                                                    <option value="">-- Pilih Ukuran --</option>
+                                                    @foreach($sizes as $size)
+                                                        <option value="{{ $size->id }}" data-code="{{ $size->code }}">{{ $size->code }} - {{ $size->label }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+
+                                            <div>
+                                                <x-input-label for="modal_size" :value="__('Label Ukuran')" class="mb-1" />
+                                                <x-text-input type="text" name="size" id="modal_size" required x-model="selectedSize" placeholder="S, M, L, XL, 40, 42" class="w-full text-sm" />
+                                            </div>
+
+                                            <div>
+                                                <x-input-label for="modal_sku" :value="__('SKU (opsional)')" class="mb-1" />
+                                                <x-text-input type="text" name="sku" id="modal_sku" x-model="generatedSku" placeholder="Auto jika kosong" class="w-full text-sm font-mono" />
+                                            </div>
+
+                                            <div>
+                                                <x-input-label for="modal_weight" :value="__('Berat (opsional dalam kg)')" class="mb-1" />
+                                                <x-text-input type="number" name="weight" id="modal_weight" min="0" step="0.01" placeholder="0" class="w-full text-sm" />
+                                            </div>
+                                        </div>
+
+                                        <div class="mt-6 flex justify-end gap-2 border-t pt-4">
+                                            <button type="button" @click="showModal = false" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold rounded-lg transition">Batal</button>
+                                            <button type="submit" class="px-4 py-2 bg-primary-700 hover:bg-primary-800 text-white text-xs font-semibold rounded-lg transition shadow-sm">Simpan</button>
+                                        </div>
+                                    </form>
                                 </div>
-                                <div class="flex-1">
-                                    <label for="size" class="block text-xs font-medium text-gray-500 mb-1">Label Ukuran</label>
-                                    <input type="text" name="size" id="size" required placeholder="S, M, L, XL, 40, 42" class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-gray-500 sm:text-sm">
-                                </div>
-                                <div class="flex-1">
-                                    <label for="sku" class="block text-xs font-medium text-gray-500 mb-1">SKU (opsional)</label>
-                                    <input type="text" name="sku" id="sku" placeholder="Auto jika kosong" class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-gray-500 sm:text-sm">
-                                </div>
-                                <div class="flex-1">
-                                    <label for="weight" class="block text-xs font-medium text-gray-500 mb-1">Berat (opsional)</label>
-                                    <input type="number" name="weight" id="weight" min="0" step="0.01" placeholder="0" class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-gray-500 sm:text-sm">
-                                </div>
-                                <button type="submit" class="px-4 py-2 bg-[#980416] text-white text-sm font-medium rounded-md hover:bg-[#7a0311] transition">
-                                    Tambah
-                                </button>
                             </div>
-                            @error('size_id') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
-                            @error('size') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
-                            @error('sku') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
-                        </form>
+                        </div>
 
                         {{-- Tabel Varian --}}
                         @if($item->variants->count())

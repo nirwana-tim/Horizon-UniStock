@@ -9,18 +9,13 @@
                 <div class="p-6 text-gray-900">
                     <div class="space-y-4">
                         <div>
-                            <h3 class="text-sm font-medium text-gray-500">{{ __('Kode') }}</h3>
-                            <p class="mt-1 text-sm font-mono text-gray-900">{{ $itemSize->code }}</p>
+                            <h3 class="text-sm font-medium text-gray-500">Ukuran</h3>
+                            <p class="mt-1 text-sm text-gray-900 font-semibold">{{ $itemSize->label }} ({{ $itemSize->code }})</p>
                         </div>
 
                         <div>
-                            <h3 class="text-sm font-medium text-gray-500">{{ __('Label') }}</h3>
-                            <p class="mt-1 text-sm text-gray-900">{{ $itemSize->label }}</p>
-                        </div>
-
-                        <div>
-                            <h3 class="text-sm font-medium text-gray-500">{{ __('Kategori') }}</h3>
-                            <p class="mt-1 text-sm text-gray-900">{{ $itemSize->categories->pluck('code')->implode(', ') ?: '-' }}</p>
+                            <h3 class="text-sm font-medium text-gray-500">Kategori</h3>
+                            <p class="mt-1 text-sm text-gray-900">{{ $itemSize->categories->map(fn($c) => $c->label . ' (' . $c->code . ')')->implode(', ') ?: '-' }}</p>
                         </div>
                     </div>
 

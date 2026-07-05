@@ -17,6 +17,7 @@ class ItemCategoryService
     public function update(ItemCategory $category, array $data): ItemCategory
     {
         $old = $category->toArray();
+        unset($data['code']);
         $category->update($data);
         AuditService::log('update', 'item_category', $category->id, $old, $data);
         return $category;
@@ -24,7 +25,7 @@ class ItemCategoryService
 
     public function destroy(ItemCategory $category): void
     {
-        $category->delete();
-        AuditService::log('delete', 'item_category', $category->id);
+        AuditService::log('delete', 'item_category', $category->id, $category->toArray(), null);
+        $category->delete([]);
     }
 }

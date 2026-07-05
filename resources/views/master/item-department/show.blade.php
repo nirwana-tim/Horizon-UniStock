@@ -39,8 +39,41 @@
                         </div>
 
                         <div>
-                            <h3 class="text-sm font-medium text-gray-500">{{ __('Item') }}</h3>
-                            <p class="mt-1 text-sm text-gray-900">{{ $itemDepartment->items_count ?? $itemDepartment->items()->count() }} item</p>
+                            <h3 class="text-sm font-medium text-gray-500 mb-2">Daftar Item Terkait</h3>
+                            @if($itemDepartment->items->count())
+                                <div class="overflow-x-auto border border-gray-200 rounded-lg">
+                                    <table class="min-w-full divide-y divide-gray-200">
+                                        <thead class="bg-gray-50">
+                                            <tr>
+                                                <th class="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">#</th>
+                                                <th class="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Kode</th>
+                                                <th class="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Nama Item</th>
+                                                <th class="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Kategori</th>
+                                                <th class="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Satuan</th>
+                                                <th class="px-4 py-2 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Aksi</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="bg-white divide-y divide-gray-200">
+                                            @foreach($itemDepartment->items as $item)
+                                                <tr>
+                                                    <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">{{ $loop->iteration }}</td>
+                                                    <td class="px-4 py-2 whitespace-nowrap text-sm font-mono text-gray-900">{{ $item->code }}</td>
+                                                    <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{{ $item->name }}</td>
+                                                    <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">{{ $item->category?->label ?? '-' }}</td>
+                                                    <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">{{ $item->unit }}</td>
+                                                    <td class="px-4 py-2 whitespace-nowrap text-sm text-right">
+                                                        <a href="{{ route('master-data.item.show', $item->code) }}" class="inline-flex items-center px-2 py-1 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 active:bg-blue-800 transition">
+                                                            Lihat
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            @else
+                                <p class="mt-1 text-sm text-gray-400 italic">Belum ada item yang terhubung ke departemen ini.</p>
+                            @endif
                         </div>
                     </div>
 

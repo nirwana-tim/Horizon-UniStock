@@ -12,9 +12,8 @@
                         @method('PUT')
 
                         <div class="mb-4">
-                            <x-input-label for="code" :value="__('Kode')" />
-                            <x-text-input id="code" name="code" type="text" class="mt-1 block w-full" :value="old('code', $itemDepartment->code)" required maxlength="2" />
-                            <x-input-error :messages="$errors->get('code')" class="mt-2" />
+                            <x-input-label :value="__('Kode')" />
+                            <p class="mt-1 text-sm font-mono text-gray-900 bg-gray-100 p-2.5 rounded-md border border-gray-200">{{ $itemDepartment->code }}</p>
                         </div>
 
                         <div class="mb-4">

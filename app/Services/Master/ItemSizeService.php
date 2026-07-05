@@ -12,6 +12,31 @@ class ItemSizeService
         $categoryIds = $data['categories'] ?? [];
         unset($data['categories']);
 
+        $label = trim($data['label']);
+        if (is_numeric($label)) {
+            $code = str_pad($label, 2, '0', STR_PAD_LEFT);
+        } else {
+            $code = null;
+            for ($i = 1; $i <= 99; $i++) {
+                $candidate = str_pad($i, 2, '0', STR_PAD_LEFT);
+                if (!ItemSize::where('code', '=', $candidate, 'and')->exists()) {
+                    $code = $candidate;
+                    break;
+                }
+            }
+            if (!$code) {
+                $code = substr(strtoupper(preg_replace('/[^A-Za-z0-9]/', '', $label)), 0, 3);
+            }
+        }
+
+        if (ItemSize::where('code', '=', $code, 'and')->exists()) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'label' => "Kode ukuran '{$code}' untuk label '{$label}' sudah terpakai. Harap gunakan label lain.",
+            ]);
+        }
+
+        $data['code'] = $code;
+
         $size = ItemSize::create($data);
         $size->categories()->sync($categoryIds);
 
@@ -24,6 +49,7 @@ class ItemSizeService
         $old = $itemSize->toArray();
         $categoryIds = $data['categories'] ?? [];
         unset($data['categories']);
+        unset($data['code']); // Protect code from modification
 
         $itemSize->update($data);
         $itemSize->categories()->sync($categoryIds);
@@ -34,7 +60,7 @@ class ItemSizeService
 
     public function destroy(ItemSize $itemSize): void
     {
-        $itemSize->delete();
-        AuditService::log('delete', 'item_size', $itemSize->id);
+        AuditService::log('delete', 'item_size', $itemSize->id, $itemSize->toArray(), null);
+        $itemSize->delete([]);
     }
 }

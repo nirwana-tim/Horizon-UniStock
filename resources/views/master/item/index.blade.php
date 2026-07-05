@@ -28,40 +28,40 @@
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Satuan</th>
                                     <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
                                 </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
-                                @forelse($variants as $variant)
-                                    <tr>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $variants->firstItem() + $loop->index }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-900">{{ $variant->sku }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            {{ $variant->item_name }}, Size {{ $variant->itemSize?->label ?? $variant->size_label ?? $variant->size }}
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            {{ $variant->category_code ?? '' }} - {{ $variant->category_name ?? '-' }}
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $variant->unit }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-right space-x-1.5">
-                                              <a href="{{ route('master-data.item.show', $variant->item_code) }}" class="inline-flex items-center px-2.5 py-1 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 active:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150">Lihat</a>
-                                            <x-delete-modal
-                                                :route="route('master-data.item.destroy', $variant->item_code)"
-                                                label="Hapus Item"
-                                                description="Apakah Anda yakin ingin menghapus item ini? Data ini tidak dapat dikembalikan."
-                                            />
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">Belum ada data item.</td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <div class="mt-4">
-                        {{ $variants->links() }}
-                    </div>
+                             </thead>
+                             <tbody class="bg-white divide-y divide-gray-200">
+                                 @forelse($variants as $variant)
+                                     <tr>
+                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $variants->firstItem() + $loop->index }}</td>
+                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-900">{{ $variant->sku }}</td>
+                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                             {{ $variant->item?->name }}, Size {{ $variant->size_label ?? $variant->size }}
+                                         </td>
+                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                             {{ $variant->item?->category?->label ?? '-' }} ({{ $variant->item?->category?->code ?? '-' }})
+                                         </td>
+                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $variant->item?->unit ?? 'pcs' }}</td>
+                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-right space-x-1.5">
+                                             <a href="{{ route('master-data.item.show', $variant->item?->code ?? '') }}" class="inline-flex items-center px-2.5 py-1 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 active:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150">Lihat</a>
+                                             <x-delete-modal
+                                                 :route="route('master-data.item.variant.destroy', [$variant->item, $variant])"
+                                                 label="Hapus Varian"
+                                                 description="Apakah Anda yakin ingin menghapus varian/SKU {{ $variant->sku }} ini? Data ini tidak dapat dikembalikan."
+                                             />
+                                         </td>
+                                     </tr>
+                                 @empty
+                                     <tr>
+                                         <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">Belum ada data SKU/Varian.</td>
+                                     </tr>
+                                 @endforelse
+                             </tbody>
+                         </table>
+                     </div>
+ 
+                     <div class="mt-4">
+                         {{ $variants->links() }}
+                     </div>
                 </div>
             </div>
         </div>

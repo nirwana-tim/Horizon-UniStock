@@ -17,6 +17,21 @@
                             <h3 class="text-sm font-medium text-gray-500">{{ __('Label') }}</h3>
                             <p class="mt-1 text-sm text-gray-900">{{ $itemType->label }}</p>
                         </div>
+
+                        <div>
+                            <h3 class="text-sm font-medium text-gray-500">Kategori Terkait</h3>
+                            @if($itemType->categories->count())
+                                <div class="mt-1 flex flex-wrap gap-1.5">
+                                    @foreach($itemType->categories as $cat)
+                                        <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-gray-100 text-gray-800 border border-gray-200">
+                                            {{ $cat->label }} ({{ $cat->code }})
+                                        </span>
+                                    @endforeach
+                                </div>
+                            @else
+                                <p class="mt-1 text-sm text-gray-400 italic">Belum terhubung ke kategori manapun</p>
+                            @endif
+                        </div>
                     </div>
 
                     <div class="flex items-center gap-2 mt-6 pt-4 border-t border-gray-200">

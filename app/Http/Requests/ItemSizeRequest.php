@@ -18,7 +18,7 @@ class ItemSizeRequest extends FormRequest
 
         return [
             'label' => 'required|string|max:255',
-            'code' => ['required', 'string', 'max:10', Rule::unique('item_sizes', 'code')->ignore($sizeId)],
+            'code' => ['nullable', 'string', 'max:10', Rule::unique('item_sizes', 'code')->ignore($sizeId)],
             'categories' => 'required|array|min:1',
             'categories.*' => 'exists:item_categories,id',
         ];
