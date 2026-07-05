@@ -15,7 +15,6 @@ class DistributionScheduleRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:255',
-            'period' => 'nullable|string|max:50',
             'date' => 'required|date',
             'location' => 'required|string|max:255',
             'session' => 'required|string|max:100',
