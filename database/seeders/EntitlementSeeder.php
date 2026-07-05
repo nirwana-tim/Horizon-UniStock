@@ -118,35 +118,47 @@ class EntitlementSeeder extends Seeder
 
     public function run(): void
     {
+        $levels = \App\Models\ProgramLevel::all();
         $created = 0;
         $skipped = 0;
 
-        foreach ($this->entitlements as $data) {
-            $entitlement = Entitlement::firstOrCreate(
-                ['code' => $data['code']],
-                ['description' => $data['desc']]
-            );
+        foreach ($levels as $level) {
+            foreach ($this->entitlements as $data) {
+                // Replace the cohort code prefix (e.g. "2425" or "2324") with the current level's code
+                $originalCode = $data['code'];
+                $restPart = substr($originalCode, 4);
+                $newCode = $level->code . $restPart;
 
-            if ($entitlement->wasRecentlyCreated) {
-                $created++;
-            } else {
-                $skipped++;
-            }
+                // Adjust description for current level
+                $newDesc = str_replace('Angkatan 2024/2025', $level->name, $data['desc']);
+                $newDesc = str_replace('Angkatan 2023/2024', $level->name, $newDesc);
 
-            foreach ($data['items'] as $baseCode => $quantity) {
-                // Find representative item by base_code (first item in the product group)
-                $item = Item::where('base_code', $baseCode)->first();
-                if (!$item) {
-                    continue;
+                $entitlement = Entitlement::firstOrCreate(
+                    ['code' => $newCode],
+                    ['description' => $newDesc]
+                );
+
+                if ($entitlement->wasRecentlyCreated) {
+                    $created++;
+                } else {
+                    $skipped++;
                 }
 
-                EntitlementItem::firstOrCreate(
-                    [
-                        'entitlement_id' => $entitlement->id,
-                        'item_id' => $item->id,
-                    ],
-                    ['quantity' => $quantity]
-                );
+                foreach ($data['items'] as $baseCode => $quantity) {
+                    // Find representative item by base_code
+                    $item = Item::where('base_code', '=', $baseCode, 'and')->first();
+                    if (!$item) {
+                        continue;
+                    }
+
+                    EntitlementItem::firstOrCreate(
+                        [
+                            'entitlement_id' => $entitlement->id,
+                            'item_id' => $item->id,
+                        ],
+                        ['quantity' => $quantity]
+                    );
+                }
             }
         }
 
