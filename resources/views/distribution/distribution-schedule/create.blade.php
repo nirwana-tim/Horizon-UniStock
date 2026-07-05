@@ -20,11 +20,6 @@
                                 <x-input-error :messages="$errors->get('name')" class="mt-2" />
                             </div>
                             <div>
-                                <x-input-label for="period" :value="__('Periode')" />
-                                <x-text-input id="period" name="period" type="text" class="mt-1 block w-full" :value="old('period')" placeholder="contoh: 2025/2026" />
-                                <x-input-error :messages="$errors->get('period')" class="mt-2" />
-                            </div>
-                            <div>
                                 <x-input-label for="program_level_id" :value="__('Angkatan')" />
                                 @php
                                     $levelOptions = $programLevels->map(fn($l) => [
@@ -36,29 +31,52 @@
                                 <x-searchable-select name="program_level_id" :options="$levelOptions" :value="old('program_level_id')" placeholder="-- Semua Angkatan --" />
                                 <x-input-error :messages="$errors->get('program_level_id')" class="mt-2" />
                             </div>
-                            <div>
-                                <x-input-label for="faculty_id" :value="__('Fakultas')" />
-                                @php
-                                    $facultyOptions = $faculties->map(fn($f) => [
-                                        'value' => $f->id,
-                                        'label' => $f->name,
-                                        'group' => '',
-                                    ])->toArray();
-                                @endphp
-                                <x-searchable-select name="faculty_id" :options="$facultyOptions" :value="old('faculty_id')" placeholder="-- Semua Fakultas --" />
-                                <x-input-error :messages="$errors->get('faculty_id')" class="mt-2" />
-                            </div>
-                            <div>
-                                <x-input-label for="study_program_id" :value="__('Program Studi')" />
-                                @php
-                                    $prodiOptions = $studyPrograms->map(fn($sp) => [
-                                        'value' => $sp->id,
-                                        'label' => $sp->name,
-                                        'group' => $sp->faculty->code ?? '',
-                                    ])->toArray();
-                                @endphp
-                                <x-searchable-select name="study_program_id" :options="$prodiOptions" :value="old('study_program_id')" placeholder="-- Semua Prodi --" />
-                                <x-input-error :messages="$errors->get('study_program_id')" class="mt-2" />
+                            @php
+                                $prodiByFaculty = $studyPrograms->groupBy('faculty_id')->map(fn($group) => $group->map(fn($sp) => [
+                                    'value' => (string) $sp->id,
+                                    'label' => $sp->name,
+                                ])->values()->toArray())->toArray();
+                                $allProdi = $studyPrograms->map(fn($sp) => [
+                                    'value' => (string) $sp->id,
+                                    'label' => $sp->name,
+                                    'faculty_id' => (string) $sp->faculty_id,
+                                ])->toArray();
+                            @endphp
+                            <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6" x-data="{
+                                facultyId: '{{ old('faculty_id') }}',
+                                prodiId: '{{ old('study_program_id') }}',
+                                prodiByFaculty: {{ json_encode($prodiByFaculty) }},
+                                allProdi: {{ json_encode($allProdi) }},
+                                get filteredProdi() {
+                                    if (this.facultyId && this.prodiByFaculty[this.facultyId]) {
+                                        return this.prodiByFaculty[this.facultyId];
+                                    }
+                                    if (!this.facultyId) return this.allProdi;
+                                    return [];
+                                }
+                            }">
+                                <div>
+                                    <x-input-label for="faculty_id" :value="__('Fakultas')" />
+                                    <select id="faculty_id" name="faculty_id" x-model="facultyId"
+                                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500">
+                                        <option value="">-- Semua Fakultas --</option>
+                                        @foreach($faculties as $f)
+                                            <option value="{{ $f->id }}">{{ $f->name }}</option>
+                                        @endforeach
+                                    </select>
+                                    <x-input-error :messages="$errors->get('faculty_id')" class="mt-2" />
+                                </div>
+                                <div>
+                                    <x-input-label for="study_program_id" :value="__('Program Studi')" />
+                                    <select id="study_program_id" name="study_program_id" x-model="prodiId"
+                                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500">
+                                        <option value="">-- Semua Prodi --</option>
+                                        <template x-for="sp in filteredProdi" :key="sp.value">
+                                            <option x-bind:value="sp.value" x-text="sp.label"></option>
+                                        </template>
+                                    </select>
+                                    <x-input-error :messages="$errors->get('study_program_id')" class="mt-2" />
+                                </div>
                             </div>
                             <div>
                                 <x-input-label for="is_active" :value="__('Status Aktif')" />

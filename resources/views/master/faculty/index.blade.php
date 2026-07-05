@@ -35,7 +35,7 @@
                                             {{ $loop->iteration + ($faculties->currentPage() - 1) * $faculties->perPage() }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
-                                            <a href="{{ route('master-data.faculty.show', $faculty) }}" class="text-sm font-medium text-primary-600 hover:text-primary-900">
+                                            <a href="{{ route('master-data.faculty.show', $faculty) }}" class="text-sm font-medium text-gray-900 hover:text-primary-700">
                                                 {{ $faculty->name }}
                                             </a>
                                         </td>
