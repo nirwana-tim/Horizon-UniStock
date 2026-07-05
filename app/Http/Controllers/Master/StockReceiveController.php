@@ -23,7 +23,7 @@ class StockReceiveController extends Controller
             ->latest()
             ->paginate(15);
 
-        return view('master.stock-receive.index', compact('receives'));
+        return view('inventory.stock-receive.index', compact('receives'));
     }
 
     public function create(): View
@@ -31,7 +31,7 @@ class StockReceiveController extends Controller
         $vendors = Vendor::orderBy('name')->get();
         $items = Item::with('category', 'variants')->orderBy('name')->get();
 
-        return view('master.stock-receive.create', compact('vendors', 'items'));
+        return view('inventory.stock-receive.create', compact('vendors', 'items'));
     }
 
     public function store(StockReceiveRequest $request): RedirectResponse
@@ -39,7 +39,7 @@ class StockReceiveController extends Controller
         $this->stockService->receiveStock($request->validated());
 
         return redirect()
-            ->route('master.stock-receive.index')
+            ->route('inventory.stock-receive.index')
             ->with('success', 'Penerimaan barang berhasil dicatat.');
     }
 
@@ -47,7 +47,7 @@ class StockReceiveController extends Controller
     {
         $stockReceive->load(['vendor', 'items.item', 'items.variant']);
 
-        return view('master.stock-receive.show', compact('stockReceive'));
+        return view('inventory.stock-receive.show', compact('stockReceive'));
     }
 
     public function destroy(StockReceive $stockReceive): RedirectResponse
@@ -60,7 +60,7 @@ class StockReceiveController extends Controller
         $stockReceive->delete();
 
         return redirect()
-            ->route('master.stock-receive.index')
+            ->route('inventory.stock-receive.index')
             ->with('success', 'Penerimaan barang berhasil dihapus.');
     }
 }

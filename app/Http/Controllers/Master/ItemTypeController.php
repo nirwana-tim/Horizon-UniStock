@@ -31,7 +31,7 @@ class ItemTypeController extends Controller
     {
         $this->typeService->store($request->validated());
 
-        return redirect()->route('master.item-type.index')->with('success', 'Tipe item berhasil ditambahkan.');
+        return redirect()->route('master-data.item-type.index')->with('success', 'Tipe item berhasil ditambahkan.');
     }
 
     public function show(ItemType $itemType): View
@@ -48,13 +48,13 @@ class ItemTypeController extends Controller
     {
         $this->typeService->update($itemType, $request->validated());
 
-        return redirect()->route('master.item-type.index')->with('success', 'Tipe item berhasil diperbarui.');
+        return redirect()->route('master-data.item-type.index')->with('success', 'Tipe item berhasil diperbarui.');
     }
 
     public function destroy(ItemType $itemType): RedirectResponse
     {
         $this->typeService->destroy($itemType);
 
-        return redirect()->route('master.item-type.index')->with('success', 'Tipe item berhasil dihapus.');
+        return redirect()->route('master-data.item-type.index')->with('success', 'Tipe item berhasil dihapus.');
     }
 }

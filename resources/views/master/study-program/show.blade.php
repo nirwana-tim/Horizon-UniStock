@@ -36,10 +36,10 @@
                     </div>
 
                     <div class="mt-6 flex items-center gap-3">
-                        <a href="{{ route('master.study-program.edit', $program) }}" class="inline-flex items-center px-4 py-2 bg-yellow-600 border border-transparent rounded-md font-semibold text-xs text-white tracking-widest hover:bg-yellow-700 transition">
+                        <a href="{{ route('master-data.study-program.edit', $program) }}" class="inline-flex items-center px-4 py-2 bg-amber-500 border border-transparent rounded-md font-semibold text-xs text-white tracking-widest hover:bg-amber-600 transition">
                             {{ __('Edit') }}
                         </a>
-                        <a href="{{ route('master.study-program.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-300 border border-transparent rounded-md font-semibold text-xs text-gray-700 tracking-widest hover:bg-gray-400 transition">
+                        <a href="{{ route('master-data.study-program.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-300 border border-transparent rounded-md font-semibold text-xs text-gray-700 tracking-widest hover:bg-gray-400 transition">
                             {{ __('Kembali') }}
                         </a>
                     </div>

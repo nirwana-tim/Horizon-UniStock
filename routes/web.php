@@ -24,7 +24,6 @@ use App\Http\Controllers\TemplateController;
 use App\Http\Controllers\Auth\EmailVerificationOtpController;
 use App\Http\Controllers\Auth\ForgotPasswordStudentController;
 use App\Http\Controllers\Auth\PasswordChangeController;
-use App\Http\Controllers\Master\StudentAccountController;
 use App\Http\Controllers\Master\StudentController;
 use App\Http\Controllers\Master\SizeMonitorController;
 use App\Http\Controllers\Staff\ScanController;
@@ -43,7 +42,7 @@ Route::middleware(['auth', 'password.changed'])->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-Route::middleware(['auth', 'password.changed', 'role:super_admin|admin'])->prefix('master')->name('master.')->group(function () {
+Route::middleware(['auth', 'password.changed', 'role:super_admin|admin'])->prefix('master-data')->name('master-data.')->group(function () {
     Route::resource('faculty', FacultyController::class);
     Route::resource('study-program', StudyProgramController::class);
     Route::resource('program-level', ProgramLevelController::class);
@@ -59,15 +58,40 @@ Route::middleware(['auth', 'password.changed', 'role:super_admin|admin'])->prefi
 
     Route::resource('vendor', VendorController::class);
     Route::resource('item-price', ItemPriceController::class);
-    Route::resource('distribution-schedule', DistributionScheduleController::class);
-    Route::resource('entitlement', EntitlementController::class);
-    Route::resource('student', StudentController::class);
+});
 
-    Route::resource('stock-receive', StockReceiveController::class)->except(['edit', 'update']);
-    Route::get('student-account', [StudentAccountController::class, 'index'])->name('student-account.index');
-    Route::post('student-account/generate', [StudentAccountController::class, 'generate'])->name('student-account.generate');
-    Route::post('student-account/generate-all', [StudentAccountController::class, 'generateAll'])->name('student-account.generate-all');
+Route::middleware(['auth', 'password.changed', 'role:super_admin|admin'])->prefix('student')->name('students.')->group(function () {
+    Route::resource('/', StudentController::class)->parameters(['' => 'student']);
+    Route::post('/generate', [StudentController::class, 'generate'])->name('generate');
+    Route::post('/generate-all', [StudentController::class, 'generateAll'])->name('generateAll');
+});
+
+Route::middleware(['auth', 'password.changed', 'role:super_admin|admin'])->prefix('distribution')->name('distribution.')->group(function () {
+    Route::resource('entitlement', EntitlementController::class);
+    Route::resource('distribution-schedule', DistributionScheduleController::class);
     Route::get('size-monitor', [SizeMonitorController::class, 'index'])->name('size-monitor.index');
+    Route::get('/scan', [ScanController::class, 'index'])->name('scan.index');
+    Route::post('/search', [ScanController::class, 'search'])->name('search');
+    Route::post('/process', [ScanController::class, 'process'])->name('process');
+});
+
+Route::middleware(['auth', 'password.changed', 'role:super_admin|admin'])->prefix('inventory')->name('inventory.')->group(function () {
+    Route::resource('stock-receive', StockReceiveController::class)->except(['edit', 'update']);
+    Route::resource('stock-opname', StockOpnameController::class)->except(['edit', 'update', 'destroy']);
+    Route::post('stock-opname/{stockOpname}/upload', [StockOpnameController::class, 'upload'])->name('stock-opname.upload');
+    Route::post('stock-opname/{stockOpname}/approve', [StockOpnameController::class, 'approve'])->name('stock-opname.approve');
+});
+
+Route::middleware(['auth', 'password.changed', 'role:super_admin|admin'])->prefix('report')->name('report.')->group(function () {
+    Route::get('/', [ReportController::class, 'index'])->name('index');
+    Route::get('distribution', [ReportController::class, 'distribution'])->name('distribution');
+    Route::get('inventory', [ReportController::class, 'inventory'])->name('inventory');
+    Route::get('gpm', [ReportController::class, 'gpm'])->name('gpm');
+    Route::get('stock', [ReportController::class, 'stock'])->name('stock');
+    Route::get('stock-opname', [ReportController::class, 'stockOpname'])->name('stock-opname');
+    Route::get('stock-card', [ReportController::class, 'stockCard'])->name('stock-card');
+    Route::get('loss', [ReportController::class, 'loss'])->name('loss');
+    Route::get('gpm-cost', [GpmController::class, 'index'])->name('gpm-cost');
 });
 
 Route::middleware(['auth', 'password.changed', 'role:super_admin|admin'])->group(function () {
@@ -80,24 +104,6 @@ Route::middleware(['auth', 'password.changed', 'role:super_admin|admin'])->prefi
     Route::post('/preview', [ImportController::class, 'preview'])->name('preview');
 });
 
-Route::middleware(['auth', 'password.changed', 'role:super_admin|admin'])->prefix('admin')->name('admin.')->group(function () {
-    Route::resource('stock-opname', StockOpnameController::class)->except(['edit', 'update', 'destroy']);
-    Route::post('stock-opname/{stockOpname}/upload', [StockOpnameController::class, 'upload'])->name('stock-opname.upload');
-    Route::post('stock-opname/{stockOpname}/approve', [StockOpnameController::class, 'approve'])->name('stock-opname.approve');
-    Route::get('gpm', [GpmController::class, 'index'])->name('gpm.index');
-});
-
-Route::middleware(['auth', 'password.changed', 'role:super_admin|admin'])->prefix('reports')->name('reports.')->group(function () {
-    Route::get('/', [ReportController::class, 'index'])->name('index');
-    Route::get('distribution', [ReportController::class, 'distribution'])->name('distribution');
-    Route::get('inventory', [ReportController::class, 'inventory'])->name('inventory');
-    Route::get('gpm', [ReportController::class, 'gpm'])->name('gpm');
-    Route::get('stock', [ReportController::class, 'stock'])->name('stock');
-    Route::get('stock-opname', [ReportController::class, 'stockOpname'])->name('stock-opname');
-    Route::get('stock-card', [ReportController::class, 'stockCard'])->name('stock-card');
-    Route::get('loss', [ReportController::class, 'loss'])->name('loss');
-});
-
 Route::middleware(['auth', 'password.changed', 'role:student'])->prefix('student')->name('student.')->group(function () {
     Route::get('/sizes', [SizeController::class, 'index'])->name('sizes.index');
     Route::post('/sizes', [SizeController::class, 'store'])->name('sizes.store');
@@ -105,12 +111,6 @@ Route::middleware(['auth', 'password.changed', 'role:student'])->prefix('student
     Route::get('/email/verify', [EmailVerificationOtpController::class, 'showVerifyForm'])->name('email.verify-form');
     Route::post('/email/verify-otp', [EmailVerificationOtpController::class, 'verifyOtp'])->name('email.verify-otp');
     Route::get('/qr', [SizeController::class, 'qr'])->name('qr');
-});
-
-Route::middleware(['auth', 'password.changed', 'role:staff|admin'])->prefix('staff')->name('staff.')->group(function () {
-    Route::get('/scan', [ScanController::class, 'index'])->name('scan.index');
-    Route::post('/search', [ScanController::class, 'search'])->name('search');
-    Route::post('/process', [ScanController::class, 'process'])->name('process');
 });
 
 Route::middleware(['auth'])->group(function () {

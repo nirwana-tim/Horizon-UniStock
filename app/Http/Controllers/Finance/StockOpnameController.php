@@ -23,12 +23,12 @@ class StockOpnameController extends Controller
             ->latest()
             ->paginate(15);
 
-        return view('stock-opname.index', compact('batches'));
+        return view('inventory.stock-opname.index', compact('batches'));
     }
 
     public function create(): View
     {
-        return view('stock-opname.create');
+        return view('inventory.stock-opname.create');
     }
 
     public function store(Request $request)
@@ -51,7 +51,7 @@ class StockOpnameController extends Controller
 
         $this->service->calculateVariance($stockOpname);
 
-        return view('stock-opname.show', ['batch' => $stockOpname]);
+        return view('inventory.stock-opname.show', ['batch' => $stockOpname]);
     }
 
     public function upload(Request $request, StockOpname $stockOpname)

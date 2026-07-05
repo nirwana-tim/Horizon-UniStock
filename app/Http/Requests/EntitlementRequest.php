@@ -13,12 +13,17 @@ class EntitlementRequest extends FormRequest
 
     public function rules(): array
     {
+        $entitlementId = $this->route('entitlement')?->id;
+
         return [
-            'study_program_id' => 'required|integer|exists:study_programs,id',
-            'program_level_id' => 'required|integer|exists:program_levels,id',
-            'student_type' => 'required|string|in:freshman,continuing',
-            'semester' => 'required|string|in:ganjil,genap',
+            'code' => [
+                'required',
+                'string',
+                'max:50',
+                "unique:entitlements,code,{$entitlementId}",
+            ],
             'description' => 'nullable|string|max:500',
+            'is_active' => 'boolean',
             'items' => 'required|array|min:1',
             'items.*.item_id' => 'required|integer|exists:items,id',
             'items.*.quantity' => 'required|integer|min:1',

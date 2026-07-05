@@ -27,7 +27,7 @@ class GpmController extends Controller
         $total_selling = $gpmData->sum('total_selling_price');
         $total_laba_rugi = $total_selling - $total_hpp;
 
-        return view('finance.gpm', compact(
+        return view('report.gpm-cost', compact(
             'period',
             'periods',
             'gpmData',

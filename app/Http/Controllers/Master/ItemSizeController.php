@@ -34,7 +34,7 @@ class ItemSizeController extends Controller
     {
         $this->sizeService->store($request->validated());
 
-        return redirect()->route('master.item-size.index')->with('success', 'Ukuran item berhasil ditambahkan.');
+        return redirect()->route('master-data.item-size.index')->with('success', 'Ukuran item berhasil ditambahkan.');
     }
 
     public function show(ItemSize $itemSize): View
@@ -56,13 +56,13 @@ class ItemSizeController extends Controller
     {
         $this->sizeService->update($itemSize, $request->validated());
 
-        return redirect()->route('master.item-size.index')->with('success', 'Ukuran item berhasil diperbarui.');
+        return redirect()->route('master-data.item-size.index')->with('success', 'Ukuran item berhasil diperbarui.');
     }
 
     public function destroy(ItemSize $itemSize): RedirectResponse
     {
         $this->sizeService->destroy($itemSize);
 
-        return redirect()->route('master.item-size.index')->with('success', 'Ukuran item berhasil dihapus.');
+        return redirect()->route('master-data.item-size.index')->with('success', 'Ukuran item berhasil dihapus.');
     }
 }

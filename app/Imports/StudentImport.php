@@ -17,6 +17,11 @@ class StudentImport implements ToModel, WithHeadingRow, WithValidation
         $studyProgram = StudyProgram::where('code', $row['program_studi'])->first();
         $programLevel = ProgramLevel::where('code', $row['level'])->first();
 
+        $entitlementCode = null;
+        if ($programLevel && $studyProgram?->faculty) {
+            $entitlementCode = $programLevel->code . $studyProgram->faculty->code . $studyProgram->code;
+        }
+
         return new Student([
             'nim' => $row['nim'],
             'name' => $row['nama'],
@@ -25,6 +30,7 @@ class StudentImport implements ToModel, WithHeadingRow, WithValidation
             'study_program_id' => $studyProgram?->id,
             'program_level_id' => $programLevel?->id,
             'student_type' => $row['student_type'] ?? 'freshman',
+            'entitlement_code' => $entitlementCode,
             'qr_token' => Str::uuid(),
         ]);
     }

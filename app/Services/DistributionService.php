@@ -39,16 +39,26 @@ class DistributionService
 
     public function getEntitlementForStudent(Student $student, DistributionSchedule $schedule): ?Entitlement
     {
-        $query = Entitlement::where('study_program_id', $student->study_program_id)
-            ->where('program_level_id', $student->program_level_id)
-            ->where('student_type', $student->student_type)
-            ->with('items.item');
-
-        if ($schedule->semester) {
-            $query->where('semester', $schedule->semester);
+        if (!$student->entitlement_code) {
+            return null;
         }
 
-        return $query->first();
+        return Entitlement::where('code', $student->entitlement_code)
+            ->where('is_active', true)
+            ->with('items.item')
+            ->first();
+    }
+
+    /**
+     * Find the specific item (by base_code + size) for distribution.
+     * Returns the item with matching base_code and variant size.
+     */
+    public function findItemByBaseCodeAndSize(string $baseCode, string $size): ?Item
+    {
+        return Item::where('base_code', $baseCode)
+            ->whereHas('variants', fn($q) => $q->where('size', $size))
+            ->with('variants')
+            ->first();
     }
 
     public function processDistribution(

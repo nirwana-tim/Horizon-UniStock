@@ -26,7 +26,7 @@ class ReportController extends Controller
         $items = Item::orderBy('name')->pluck('code', 'code');
         $categories = ItemCategory::orderBy('code')->get(['code', 'name']);
 
-        return view('reports.index', compact('periods', 'stockOpnames', 'items', 'categories'));
+        return view('report.index', compact('periods', 'stockOpnames', 'items', 'categories'));
     }
 
     public function distribution(Request $request)

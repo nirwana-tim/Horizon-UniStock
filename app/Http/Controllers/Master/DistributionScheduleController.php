@@ -18,7 +18,7 @@ class DistributionScheduleController extends Controller
     {
         $schedules = DistributionSchedule::with('programLevel', 'faculty', 'studyProgram')->latest()->paginate(15);
 
-        return view('master.distribution-schedule.index', compact('schedules'));
+        return view('distribution.distribution-schedule.index', compact('schedules'));
     }
 
     public function create(): View
@@ -28,7 +28,7 @@ class DistributionScheduleController extends Controller
         $studyPrograms = StudyProgram::with('faculty')->orderBy('name')->get();
         $items = Item::orderBy('name')->get();
 
-        return view('master.distribution-schedule.create', compact('programLevels', 'faculties', 'studyPrograms', 'items'));
+        return view('distribution.distribution-schedule.create', compact('programLevels', 'faculties', 'studyPrograms', 'items'));
     }
 
     public function store(DistributionScheduleRequest $request): RedirectResponse
@@ -41,14 +41,14 @@ class DistributionScheduleController extends Controller
             }
         }
 
-        return redirect()->route('master.distribution-schedule.index')->with('success', 'Jadwal distribusi berhasil ditambahkan.');
+        return redirect()->route('distribution.distribution-schedule.index')->with('success', 'Jadwal distribusi berhasil ditambahkan.');
     }
 
     public function show(DistributionSchedule $distributionSchedule): View
     {
         $distributionSchedule->load(['programLevel', 'faculty', 'studyProgram', 'items.item', 'transactions.student']);
 
-        return view('master.distribution-schedule.show', compact('distributionSchedule'));
+        return view('distribution.distribution-schedule.show', compact('distributionSchedule'));
     }
 
     public function edit(DistributionSchedule $distributionSchedule): View
@@ -59,7 +59,7 @@ class DistributionScheduleController extends Controller
         $studyPrograms = StudyProgram::with('faculty')->orderBy('name')->get();
         $items = Item::orderBy('name')->get();
 
-        return view('master.distribution-schedule.edit', compact('distributionSchedule', 'programLevels', 'faculties', 'studyPrograms', 'items'));
+        return view('distribution.distribution-schedule.edit', compact('distributionSchedule', 'programLevels', 'faculties', 'studyPrograms', 'items'));
     }
 
     public function update(DistributionScheduleRequest $request, DistributionSchedule $distributionSchedule): RedirectResponse
@@ -74,7 +74,7 @@ class DistributionScheduleController extends Controller
             }
         }
 
-        return redirect()->route('master.distribution-schedule.index')->with('success', 'Jadwal distribusi berhasil diperbarui.');
+        return redirect()->route('distribution.distribution-schedule.index')->with('success', 'Jadwal distribusi berhasil diperbarui.');
     }
 
     public function destroy(DistributionSchedule $distributionSchedule): RedirectResponse
@@ -82,6 +82,6 @@ class DistributionScheduleController extends Controller
         $distributionSchedule->items()->delete();
         $distributionSchedule->delete();
 
-        return redirect()->route('master.distribution-schedule.index')->with('success', 'Jadwal distribusi berhasil dihapus.');
+        return redirect()->route('distribution.distribution-schedule.index')->with('success', 'Jadwal distribusi berhasil dihapus.');
     }
 }

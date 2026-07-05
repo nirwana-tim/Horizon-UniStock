@@ -54,7 +54,7 @@
 
                             <div>
                                 <x-input-label for="import_type" :value="__('Tipe Import')" />
-                                <select name="import_type" id="import_type" class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                                <select name="import_type" id="import_type" class="mt-1 block w-full border-gray-300 focus:border-primary-500 focus:ring-primary-500 rounded-md shadow-sm">
                                     <option value="">-- Pilih Tipe Import --</option>
                                     <option value="student" {{ old('import_type') === 'student' ? 'selected' : '' }}>Mahasiswa</option>
                                     <option value="eligibility" {{ old('import_type') === 'eligibility' ? 'selected' : '' }}>DP Lunas</option>
