@@ -18,8 +18,12 @@
     ];
     $masterOpen = request()->routeIs($masterDataRoutes) ? 'true' : 'false';
 @endphp
-<aside x-data="{ collapsed: false, masterOpen: {{ $masterOpen }}, stockOpen: false }" x-init="setTimeout(() => $el.classList.add('sidebar-transition'), 50)" :class="collapsed ? 'w-16' : 'w-64'"
-    class="flex-shrink-0 bg-white border-r border-gray-200 flex flex-col h-full overflow-hidden">
+
+<!-- Mobile Backdrop -->
+<div id="sidebar-backdrop" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden lg:hidden" onclick="toggleSidebar()"></div>
+
+<aside id="mobile-sidebar" x-data="{ collapsed: false, masterOpen: {{ $masterOpen }}, stockOpen: false }" x-init="setTimeout(() => $el.classList.add('sidebar-transition'), 50)" :class="collapsed ? 'lg:w-16' : 'w-64'"
+    class="fixed inset-y-0 left-0 z-50 transform -translate-x-full transition-transform duration-300 lg:static lg:translate-x-0 lg:block flex-shrink-0 bg-white border-r border-gray-200 flex flex-col h-full overflow-hidden">
 
     {{-- Logo / Brand --}}
     <div class="h-14 border-b border-gray-100 flex-shrink-0 flex items-center overflow-hidden"
@@ -41,7 +45,7 @@
 
         {{-- Expanded: Collapse button --}}
         <button x-show="!collapsed" @click="collapsed = true" title="Tutup sidebar"
-            class="p-1.5 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors flex-shrink-0">
+            class="hidden lg:block p-1.5 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors flex-shrink-0">
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
@@ -50,7 +54,7 @@
 
         {{-- Collapsed: Single centered expand button --}}
         <button x-show="collapsed" @click="collapsed = false" title="Buka sidebar"
-            class="w-10 h-10 flex items-center justify-center rounded-lg text-primary-700 bg-primary-50 hover:bg-primary-100 transition-colors">
+            class="hidden lg:flex w-10 h-10 items-center justify-center rounded-lg text-primary-700 bg-primary-50 hover:bg-primary-100 transition-colors">
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10" />
@@ -369,3 +373,19 @@
     </div>
 
 </aside>
+
+<!-- Script JS sederhana untuk toggle class -->
+<script>
+    function toggleSidebar() {
+        const sidebar = document.getElementById('mobile-sidebar');
+        const backdrop = document.getElementById('sidebar-backdrop');
+        
+        if (sidebar && backdrop) {
+            sidebar.classList.toggle('-translate-x-full');
+            backdrop.classList.toggle('hidden');
+        }
+    }
+
+    // Listen to toggle-sidebar event dispatched from Topbar
+    document.addEventListener('toggle-sidebar', toggleSidebar);
+</script>
