@@ -31,39 +31,86 @@
             transform: translateY(-4px);
             box-shadow: 0 20px 40px rgba(152,4,22,0.08);
         }
+
+        /* Custom Vanilla CSS header styles to prevent Tailwind compilation mismatch and ensure centering */
+        #main-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            margin-left: auto;
+            margin-right: auto;
+            width: 100%;
+            max-width: 100%;
+            background-color: rgba(46, 1, 5, 0); /* transparent maroon */
+            backdrop-filter: blur(0px);
+            border: 1px solid rgba(255, 255, 255, 0);
+            border-radius: 0px;
+            box-shadow: 0 0 0px rgba(0, 0, 0, 0);
+            padding-top: 1rem;
+            padding-bottom: 1rem;
+            transition: all 0.3s ease-in-out;
+            z-index: 50;
+        }
+        #main-header.scrolled {
+            top: 1rem;
+            width: calc(100% - 2rem);
+            max-width: 1024px; /* max-w-5xl */
+            background-color: rgba(46, 1, 5, 0.95); /* bg-primary-950/95 */
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 9999px; /* rounded-full */
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            padding-top: 0.25rem;
+            padding-bottom: 0.25rem;
+        }
+        #main-header nav a {
+            color: #ffffff !important;
+            opacity: 0.8;
+            transition: all 0.3s ease;
+        }
+        #main-header nav a:hover {
+            opacity: 1 !important;
+            background-color: rgba(255, 255, 255, 0.1) !important;
+        }
+        #main-header nav a.active-link {
+            opacity: 1 !important;
+            background-color: rgba(255, 255, 255, 0.15) !important;
+        }
     </style>
 </head>
 <body class="font-sans antialiased bg-gray-50">
 
 <!-- ===== NAVBAR ===== -->
-<header class="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200/60">
-    <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+<header id="main-header">
+    <div class="max-w-5xl mx-auto px-6 sm:px-8 h-14 flex items-center justify-between transition-all duration-300">
         <!-- Logo -->
         <div class="flex items-center gap-2.5">
-            <div class="w-8 h-8 bg-primary-700 rounded-lg flex items-center justify-center">
-                <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div class="w-8 h-8 bg-white rounded-full flex items-center justify-center">
+                <svg class="w-4 h-4 text-primary-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10"/>
                 </svg>
             </div>
-            <span class="text-sm font-bold text-gray-900">Horizon <span class="text-primary-700">UniStock</span></span>
+            <span class="text-sm font-bold text-white">
+                Horizon <span class="text-primary-200">UniStock</span>
+            </span>
         </div>
 
         <!-- Nav links -->
-        <nav class="hidden md:flex items-center gap-6">
-            <a href="#alur" class="text-sm text-gray-600 hover:text-primary-700 transition-colors">Alur</a>
-            <a href="#fitur" class="text-sm text-gray-600 hover:text-primary-700 transition-colors">Fitur</a>
+        <nav class="hidden md:flex items-center gap-2">
+            <a href="#" class="px-4 py-1.5 text-xs font-semibold rounded-full active-link">Beranda</a>
+            <a href="#alur" class="px-4 py-1.5 text-xs font-semibold rounded-full">Alur</a>
+            <a href="#fitur" class="px-4 py-1.5 text-xs font-semibold rounded-full">Fitur</a>
         </nav>
 
         <!-- CTA -->
         @if (Route::has('login'))
             @auth
-                <a href="{{ url('/dashboard') }}"
-                   class="px-4 py-2 bg-primary-700 text-white text-sm font-medium rounded-lg hover:bg-primary-800 transition-colors">
+                <a href="{{ url('/dashboard') }}" class="cta-btn px-5 py-1.5 bg-white text-primary-700 hover:bg-primary-50 text-xs font-bold rounded-full transition-all shadow-sm">
                     Dashboard
                 </a>
             @else
-                <a href="{{ route('login') }}"
-                   class="px-4 py-2 bg-primary-700 text-white text-sm font-medium rounded-lg hover:bg-primary-800 transition-colors">
+                <a href="{{ route('login') }}" class="cta-btn px-5 py-1.5 bg-white text-primary-700 hover:bg-primary-50 text-xs font-bold rounded-full transition-all shadow-sm">
                     Masuk
                 </a>
             @endauth
@@ -72,7 +119,8 @@
 </header>
 
 <!-- ===== HERO ===== -->
-<section class="hero-gradient hero-pattern pt-32 pb-24 px-6 relative overflow-hidden">
+<section class="hero-gradient pt-32 pb-24 px-6 relative overflow-hidden">
+    <div class="absolute inset-0 hero-pattern opacity-40"></div>
 
     <!-- Decorative elements -->
     <div class="absolute top-20 right-0 w-96 h-96 bg-primary-600/30 rounded-full blur-3xl"></div>
@@ -257,6 +305,21 @@
         <p class="text-xs text-primary-400">&copy; {{ date('Y') }} Sistem Distribusi Seragam Mahasiswa. All rights reserved.</p>
     </div>
 </footer>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const header = document.getElementById('main-header');
+        function handleScroll() {
+            if (window.scrollY > 20) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        }
+        window.addEventListener('scroll', handleScroll);
+        handleScroll(); // Run initially in case page is loaded scrolled down
+    });
+</script>
 
 </body>
 </html>
