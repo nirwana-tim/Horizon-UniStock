@@ -13,7 +13,7 @@ class ProgramLevelRequest extends FormRequest
 
     public function rules(): array
     {
-        $levelId = $this->route('level')?->id;
+        $levelId = $this->route('program_level')?->id;
 
         return [
             'name' => 'required|string|max:255',

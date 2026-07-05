@@ -31,7 +31,7 @@ class VendorController extends Controller
     {
         $this->vendorService->store($request->validated());
 
-        return redirect()->route('master.vendor.index')->with('success', 'Vendor berhasil ditambahkan.');
+        return redirect()->route('master-data.vendor.index')->with('success', 'Vendor berhasil ditambahkan.');
     }
 
     public function show(Vendor $vendor): View
@@ -50,13 +50,13 @@ class VendorController extends Controller
     {
         $this->vendorService->update($vendor, $request->validated());
 
-        return redirect()->route('master.vendor.index')->with('success', 'Vendor berhasil diperbarui.');
+        return redirect()->route('master-data.vendor.index')->with('success', 'Vendor berhasil diperbarui.');
     }
 
     public function destroy(Vendor $vendor): RedirectResponse
     {
         $this->vendorService->destroy($vendor);
 
-        return redirect()->route('master.vendor.index')->with('success', 'Vendor berhasil dihapus.');
+        return redirect()->route('master-data.vendor.index')->with('success', 'Vendor berhasil dihapus.');
     }
 }

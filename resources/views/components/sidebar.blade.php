@@ -1,29 +1,52 @@
 {{--
   Sidebar Component — Admin & Super Admin only
-  Digunakan di layouts/app.blade.php
+  Used in layouts/app.blade.php
 --}}
 @php
     $masterDataRoutes = [
-        'master.faculty.*',
-        'master.study-program.*',
-        'master.program-level.*',
-        'master.student.*',
-        'master.item-category.*',
-        'master.item-type.*',
-        'master.item-department.*',
-        'master.item-size.*',
-        'master.item.*',
-        'master.item-price.*',
-        'master.vendor.*',
+        'master-data.faculty.*',
+        'master-data.study-program.*',
+        'master-data.program-level.*',
+        'master-data.item-category.*',
+        'master-data.item-type.*',
+        'master-data.item-department.*',
+        'master-data.item-size.*',
+        'master-data.item.*',
+        'master-data.item-price.*',
+        'master-data.vendor.*',
     ];
+    $studentsRoutes = [
+        'students.*',
+    ];
+    $distributionRoutes = [
+        'distribution.entitlement.*',
+        'distribution.distribution-schedule.*',
+        'distribution.scan.*',
+        'distribution.size-monitor.*',
+    ];
+    $inventoryRoutes = [
+        'inventory.stock-receive.*',
+        'inventory.stock-opname.*',
+    ];
+    $reportsRoutes = [
+        'report.gpm-cost',
+        'report.gpm-cost.*',
+        'report.*',
+    ];
+    $systemRoutes = [
+        'admin.user.*',
+        'admin.audit-log.*',
+        'admin.system-config.*',
+    ];
+
     $masterOpen = request()->routeIs($masterDataRoutes) ? 'true' : 'false';
+    $distributionOpen = request()->routeIs($distributionRoutes) ? 'true' : 'false';
+    $inventoryOpen = request()->routeIs($inventoryRoutes) ? 'true' : 'false';
+    $reportsOpen = request()->routeIs($reportsRoutes) ? 'true' : 'false';
+    $systemOpen = request()->routeIs($systemRoutes) ? 'true' : 'false';
 @endphp
-
-<!-- Mobile Backdrop -->
-<div id="sidebar-backdrop" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden lg:hidden" onclick="toggleSidebar()"></div>
-
-<aside id="mobile-sidebar" x-data="{ collapsed: false, masterOpen: {{ $masterOpen }}, stockOpen: false }" x-init="setTimeout(() => $el.classList.add('sidebar-transition'), 50)" :class="collapsed ? 'lg:w-16' : 'w-64'"
-    class="fixed inset-y-0 left-0 z-50 transform -translate-x-full transition-transform duration-300 lg:static lg:translate-x-0 lg:block flex-shrink-0 bg-white border-r border-gray-200 flex flex-col h-full overflow-hidden">
+<aside x-data="{ collapsed: false, masterOpen: {{ $masterOpen }}, distributionOpen: {{ $distributionOpen }}, inventoryOpen: {{ $inventoryOpen }}, reportsOpen: {{ $reportsOpen }}, systemOpen: {{ $systemOpen }} }" x-init="setTimeout(() => $el.classList.add('sidebar-transition'), 50)" :class="collapsed ? 'w-16' : 'w-64'"
+    class="flex-shrink-0 bg-white border-r border-gray-200 flex flex-col h-full overflow-hidden">
 
     {{-- Logo / Brand --}}
     <div class="h-14 border-b border-gray-100 flex-shrink-0 flex items-center overflow-hidden"
@@ -44,8 +67,8 @@
         </a>
 
         {{-- Expanded: Collapse button --}}
-        <button x-show="!collapsed" @click="collapsed = true" title="Tutup sidebar"
-            class="hidden lg:block p-1.5 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors flex-shrink-0">
+        <button x-show="!collapsed" @click="collapsed = true" title="Collapse sidebar"
+            class="p-1.5 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors flex-shrink-0">
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
@@ -53,8 +76,8 @@
         </button>
 
         {{-- Collapsed: Single centered expand button --}}
-        <button x-show="collapsed" @click="collapsed = false" title="Buka sidebar"
-            class="hidden lg:flex w-10 h-10 items-center justify-center rounded-lg text-primary-700 bg-primary-50 hover:bg-primary-100 transition-colors">
+        <button x-show="collapsed" @click="collapsed = false" title="Expand sidebar"
+            class="w-10 h-10 flex items-center justify-center rounded-lg text-primary-700 bg-primary-50 hover:bg-primary-100 transition-colors">
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10" />
@@ -75,30 +98,7 @@
             <span x-show="!collapsed" class="truncate">Dashboard</span>
         </a>
 
-        {{-- ===== STUDENT MENU ===== --}}
-        @role('student')
-            {{-- Ukuran Saya --}}
-            <a href="{{ route('student.sizes.index') }}"
-                class="flex items-center gap-3 px-2 py-2 rounded-lg text-sm {{ request()->routeIs('student.sizes.*') ? 'sidebar-item-active' : 'sidebar-item' }}">
-                <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
-                </svg>
-                <span x-show="!collapsed" class="truncate">Ukuran Saya</span>
-            </a>
-
-            {{-- QR Code Saya --}}
-            <a href="{{ route('student.qr') }}"
-                class="flex items-center gap-3 px-2 py-2 rounded-lg text-sm {{ request()->routeIs('student.qr') ? 'sidebar-item-active' : 'sidebar-item' }}">
-                <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8H3a2 2 0 00-2 2v8a2 2 0 002 2h14a2 2 0 002-2v-8a2 2 0 00-2-2h-2" />
-                </svg>
-                <span x-show="!collapsed" class="truncate">QR Code Saya</span>
-            </a>
-        @endrole
-
-        {{-- ===== FINANCE / ADMIN MENU ===== --}}
+        {{-- ===== ADMIN / FINANCE MENU ===== --}}
         @hasanyrole(['admin', 'finance', 'super_admin'])
 
             {{-- Master Data (Collapsible) --}}
@@ -119,59 +119,52 @@
 
                 <div x-show="masterOpen && !collapsed" x-collapse
                     class="mt-0.5 ml-4 pl-4 border-l border-gray-200 space-y-0.5">
-                    {{-- Institusi --}}
-                    <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider px-2 py-1.5 mt-1">Institusi</p>
-                    <a href="{{ route('master.faculty.index') }}"
-                        class="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm {{ request()->routeIs('master.faculty.*') ? 'text-primary-700 font-medium bg-primary-50' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50' }} transition-colors">
-                        Fakultas
+                    {{-- Institution --}}
+                    <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider px-2 py-1.5 mt-1">Institution</p>
+                    <a href="{{ route('master-data.faculty.index') }}"
+                        class="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm {{ request()->routeIs('master-data.faculty.*') ? 'text-primary-700 font-medium bg-primary-50' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50' }} transition-colors">
+                        Faculty
                     </a>
-                    <a href="{{ route('master.study-program.index') }}"
-                        class="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm {{ request()->routeIs('master.study-program.*') ? 'text-primary-700 font-medium bg-primary-50' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50' }} transition-colors">
-                        Program Studi
+                    <a href="{{ route('master-data.study-program.index') }}"
+                        class="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm {{ request()->routeIs('master-data.study-program.*') ? 'text-primary-700 font-medium bg-primary-50' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50' }} transition-colors">
+                        Study Program
                     </a>
-                    <a href="{{ route('master.program-level.index') }}"
-                        class="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm {{ request()->routeIs('master.program-level.*') ? 'text-primary-700 font-medium bg-primary-50' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50' }} transition-colors">
-                        Level Program
-                    </a>
-
-                    {{-- Mahasiswa --}}
-                    <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider px-2 py-1.5 mt-2">Mahasiswa</p>
-                    <a href="{{ route('master.student.index') }}"
-                        class="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm {{ request()->routeIs('master.student.*') ? 'text-primary-700 font-medium bg-primary-50' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50' }} transition-colors">
-                        Data Mahasiswa
+                    <a href="{{ route('master-data.program-level.index') }}"
+                        class="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm {{ request()->routeIs('master-data.program-level.*') ? 'text-primary-700 font-medium bg-primary-50' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50' }} transition-colors">
+                        Program Level
                     </a>
 
                     {{-- Item --}}
                     <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider px-2 py-1.5 mt-2">Item</p>
-                    <a href="{{ route('master.item-category.index') }}"
-                        class="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm {{ request()->routeIs('master.item-category.*') ? 'text-primary-700 font-medium bg-primary-50' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50' }} transition-colors">
-                        Kategori Item
+                    <a href="{{ route('master-data.item-category.index') }}"
+                        class="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm {{ request()->routeIs('master-data.item-category.*') ? 'text-primary-700 font-medium bg-primary-50' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50' }} transition-colors">
+                        Item Category
                     </a>
-                    <a href="{{ route('master.item-type.index') }}"
-                        class="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm {{ request()->routeIs('master.item-type.*') ? 'text-primary-700 font-medium bg-primary-50' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50' }} transition-colors">
-                        Tipe Item
+                    <a href="{{ route('master-data.item-type.index') }}"
+                        class="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm {{ request()->routeIs('master-data.item-type.*') ? 'text-primary-700 font-medium bg-primary-50' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50' }} transition-colors">
+                        Item Type
                     </a>
-                    <a href="{{ route('master.item-department.index') }}"
-                        class="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm {{ request()->routeIs('master.item-department.*') ? 'text-primary-700 font-medium bg-primary-50' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50' }} transition-colors">
-                        Departemen Item
+                    <a href="{{ route('master-data.item-department.index') }}"
+                        class="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm {{ request()->routeIs('master-data.item-department.*') ? 'text-primary-700 font-medium bg-primary-50' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50' }} transition-colors">
+                        Item Department
                     </a>
-                    <a href="{{ route('master.item-size.index') }}"
-                        class="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm {{ request()->routeIs('master.item-size.*') ? 'text-primary-700 font-medium bg-primary-50' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50' }} transition-colors">
-                        Ukuran Item
+                    <a href="{{ route('master-data.item-size.index') }}"
+                        class="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm {{ request()->routeIs('master-data.item-size.*') ? 'text-primary-700 font-medium bg-primary-50' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50' }} transition-colors">
+                        Item Size
                     </a>
-                    <a href="{{ route('master.item.index') }}"
-                        class="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm {{ request()->routeIs('master.item.*') ? 'text-primary-700 font-medium bg-primary-50' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50' }} transition-colors">
+                    <a href="{{ route('master-data.item.index') }}"
+                        class="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm {{ request()->routeIs('master-data.item.*') ? 'text-primary-700 font-medium bg-primary-50' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50' }} transition-colors">
                         Item / SKU
                     </a>
-                    <a href="{{ route('master.item-price.index') }}"
-                        class="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm {{ request()->routeIs('master.item-price.*') ? 'text-primary-700 font-medium bg-primary-50' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50' }} transition-colors">
-                        Harga Item
+                    <a href="{{ route('master-data.item-price.index') }}"
+                        class="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm {{ request()->routeIs('master-data.item-price.*') ? 'text-primary-700 font-medium bg-primary-50' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50' }} transition-colors">
+                        Item Price
                     </a>
 
-                    {{-- Lainnya --}}
-                    <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider px-2 py-1.5 mt-2">Lainnya</p>
-                    <a href="{{ route('master.vendor.index') }}"
-                        class="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm {{ request()->routeIs('master.vendor.*') ? 'text-primary-700 font-medium bg-primary-50' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50' }} transition-colors">
+                    {{-- Other --}}
+                    <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider px-2 py-1.5 mt-2">Other</p>
+                    <a href="{{ route('master-data.vendor.index') }}"
+                        class="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm {{ request()->routeIs('master-data.vendor.*') ? 'text-primary-700 font-medium bg-primary-50' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50' }} transition-colors">
                         Vendor
                     </a>
                 </div>
@@ -187,136 +180,165 @@
                 <span x-show="!collapsed" class="truncate">Import Data</span>
             </a>
 
-            {{-- Entitlement --}}
-            <a href="{{ route('master.entitlement.index') }}"
-                class="flex items-center gap-3 px-2 py-2 rounded-lg text-sm {{ request()->routeIs('master.entitlement.*') ? 'sidebar-item-active' : 'sidebar-item' }}">
+            {{-- Students --}}
+            <a href="{{ route('students.index') }}"
+                class="flex items-center gap-3 px-2 py-2 rounded-lg text-sm {{ request()->routeIs('students.*') ? 'sidebar-item-active' : 'sidebar-item' }}">
                 <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                 </svg>
-                <span x-show="!collapsed" class="truncate">Entitlement</span>
+                <span x-show="!collapsed" class="truncate">Students</span>
             </a>
 
-            {{-- Jadwal Distribusi --}}
-            <a href="{{ route('master.distribution-schedule.index') }}"
-                class="flex items-center gap-3 px-2 py-2 rounded-lg text-sm {{ request()->routeIs('master.distribution-schedule.*') ? 'sidebar-item-active' : 'sidebar-item' }}">
-                <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-                <span x-show="!collapsed" class="truncate">Jadwal Distribusi</span>
-            </a>
-
-            {{-- Penerimaan Stok --}}
-            <a href="{{ route('master.stock-receive.index') }}"
-                class="flex items-center gap-3 px-2 py-2 rounded-lg text-sm {{ request()->routeIs('master.stock-receive.*') ? 'sidebar-item-active' : 'sidebar-item' }}">
-                <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-                </svg>
-                <span x-show="!collapsed" class="truncate">Penerimaan Stok</span>
-            </a>
-
-            {{-- Generate Akun --}}
-            <a href="{{ route('master.student-account.index') }}"
-                class="flex items-center gap-3 px-2 py-2 rounded-lg text-sm {{ request()->routeIs('master.student-account.*') ? 'sidebar-item-active' : 'sidebar-item' }}">
-                <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-                </svg>
-                <span x-show="!collapsed" class="truncate">Generate Akun</span>
-            </a>
-
-            {{-- Monitor Ukuran --}}
-            <a href="{{ route('master.size-monitor.index') }}"
-                class="flex items-center gap-3 px-2 py-2 rounded-lg text-sm {{ request()->routeIs('master.size-monitor.*') ? 'sidebar-item-active' : 'sidebar-item' }}">
-                <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                </svg>
-                <span x-show="!collapsed" class="truncate">Monitor Ukuran</span>
-            </a>
-
-            {{-- Scan & Distribusi (Finance + Staff access) --}}
-            @hasanyrole(['admin', 'finance', 'staff'])
-                <a href="{{ route('staff.scan.index') }}"
-                    class="flex items-center gap-3 px-2 py-2 rounded-lg text-sm {{ request()->routeIs('staff.*') ? 'sidebar-item-active' : 'sidebar-item' }}">
+            {{-- Distribution (Collapsible) --}}
+            <div>
+                <button @click="distributionOpen = !distributionOpen"
+                    class="w-full flex items-center gap-3 px-2 py-2 rounded-lg text-sm {{ request()->routeIs($distributionRoutes) ? 'sidebar-item-active' : 'sidebar-item' }}">
                     <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8H3a2 2 0 00-2 2v8a2 2 0 002 2h14a2 2 0 002-2v-8a2 2 0 00-2-2h-2" />
+                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
-                    <span x-show="!collapsed" class="truncate">Scan & Distribusi</span>
-                </a>
-            @endhasanyrole
+                    <span x-show="!collapsed" class="flex-1 text-left truncate">Distribution</span>
+                    <svg x-show="!collapsed" :class="distributionOpen ? 'rotate-180' : ''"
+                        class="w-4 h-4 flex-shrink-0 transition-transform duration-200" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </button>
 
-            {{-- Divider --}}
-            <div class="my-2 border-t border-gray-100"></div>
+                <div x-show="distributionOpen && !collapsed" x-collapse
+                    class="mt-0.5 ml-4 pl-4 border-l border-gray-200 space-y-0.5">
+                    <a href="{{ route('distribution.entitlement.index') }}"
+                        class="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm {{ request()->routeIs('distribution.entitlement.*') ? 'text-primary-700 font-medium bg-primary-50' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50' }} transition-colors">
+                        Entitlement
+                    </a>
+                    <a href="{{ route('distribution.distribution-schedule.index') }}"
+                        class="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm {{ request()->routeIs('distribution.distribution-schedule.*') ? 'text-primary-700 font-medium bg-primary-50' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50' }} transition-colors">
+                        Distribution Schedule
+                    </a>
+                    <a href="{{ route('distribution.scan.index') }}"
+                        class="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm {{ request()->routeIs('distribution.scan.*') ? 'text-primary-700 font-medium bg-primary-50' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50' }} transition-colors">
+                        Scan & Distribution
+                    </a>
+                    <a href="{{ route('distribution.size-monitor.index') }}"
+                        class="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm {{ request()->routeIs('distribution.size-monitor.*') ? 'text-primary-700 font-medium bg-primary-50' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50' }} transition-colors">
+                        Size Monitor
+                    </a>
+                </div>
+            </div>
 
-            {{-- Stock Opname --}}
-            <a href="{{ route('admin.stock-opname.index') }}"
-                class="flex items-center gap-3 px-2 py-2 rounded-lg text-sm {{ request()->routeIs('admin.stock-opname.*') ? 'sidebar-item-active' : 'sidebar-item' }}">
-                <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-                </svg>
-                <span x-show="!collapsed" class="truncate">Stock Opname</span>
-            </a>
+            {{-- Inventory (Collapsible) --}}
+            <div>
+                <button @click="inventoryOpen = !inventoryOpen"
+                    class="w-full flex items-center gap-3 px-2 py-2 rounded-lg text-sm {{ request()->routeIs($inventoryRoutes) ? 'sidebar-item-active' : 'sidebar-item' }}">
+                    <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                    </svg>
+                    <span x-show="!collapsed" class="flex-1 text-left truncate">Inventory</span>
+                    <svg x-show="!collapsed" :class="inventoryOpen ? 'rotate-180' : ''"
+                        class="w-4 h-4 flex-shrink-0 transition-transform duration-200" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </button>
 
-            {{-- GPM / Cost --}}
-            <a href="{{ route('admin.gpm.index') }}"
-                class="flex items-center gap-3 px-2 py-2 rounded-lg text-sm {{ request()->routeIs('admin.gpm.*') ? 'sidebar-item-active' : 'sidebar-item' }}">
-                <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                </svg>
-                <span x-show="!collapsed" class="truncate">GPM / Cost</span>
-            </a>
+                <div x-show="inventoryOpen && !collapsed" x-collapse
+                    class="mt-0.5 ml-4 pl-4 border-l border-gray-200 space-y-0.5">
+                    <a href="{{ route('inventory.stock-receive.index') }}"
+                        class="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm {{ request()->routeIs('inventory.stock-receive.*') ? 'text-primary-700 font-medium bg-primary-50' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50' }} transition-colors">
+                        Stock Receive
+                    </a>
+                    <a href="{{ route('inventory.stock-opname.index') }}"
+                        class="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm {{ request()->routeIs('inventory.stock-opname.*') ? 'text-primary-700 font-medium bg-primary-50' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50' }} transition-colors">
+                        Stock Opname
+                    </a>
+                </div>
+            </div>
 
-            {{-- Reports --}}
-            <a href="{{ route('reports.index') }}"
-                class="flex items-center gap-3 px-2 py-2 rounded-lg text-sm {{ request()->routeIs('reports.*') ? 'sidebar-item-active' : 'sidebar-item' }}">
-                <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                <span x-show="!collapsed" class="truncate">Reports</span>
-            </a>
+            {{-- Reports (Collapsible) --}}
+            <div>
+                <button @click="reportsOpen = !reportsOpen"
+                    class="w-full flex items-center gap-3 px-2 py-2 rounded-lg text-sm {{ request()->routeIs($reportsRoutes) ? 'sidebar-item-active' : 'sidebar-item' }}">
+                    <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <span x-show="!collapsed" class="flex-1 text-left truncate">Reports</span>
+                    <svg x-show="!collapsed" :class="reportsOpen ? 'rotate-180' : ''"
+                        class="w-4 h-4 flex-shrink-0 transition-transform duration-200" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </button>
+
+                <div x-show="reportsOpen && !collapsed" x-collapse
+                    class="mt-0.5 ml-4 pl-4 border-l border-gray-200 space-y-0.5">
+                    <a href="{{ route('report.gpm-cost') }}"
+                        class="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm {{ request()->routeIs('report.gpm-cost*') ? 'text-primary-700 font-medium bg-primary-50' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50' }} transition-colors">
+                        GPM / Cost
+                    </a>
+                    <a href="{{ route('report.index') }}"
+                        class="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm {{ request()->routeIs('report.*') ? 'text-primary-700 font-medium bg-primary-50' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50' }} transition-colors">
+                        Reports
+                    </a>
+                </div>
+            </div>
 
         @endhasanyrole
 
         {{-- ===== SUPER ADMIN ONLY ===== --}}
         @role('super_admin')
             <div class="my-2 border-t border-gray-100"></div>
-            <p x-show="!collapsed" class="px-2 py-1 text-xs font-semibold text-gray-400 uppercase tracking-wider">Sistem
-            </p>
 
-            <a href="#" class="flex items-center gap-3 px-2 py-2 rounded-lg text-sm sidebar-item">
-                <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                </svg>
-                <span x-show="!collapsed" class="truncate">Pengguna & Role</span>
-            </a>
+            {{-- System (Collapsible) --}}
+            <div>
+                <button @click="systemOpen = !systemOpen"
+                    class="w-full flex items-center gap-3 px-2 py-2 rounded-lg text-sm {{ request()->routeIs($systemRoutes) ? 'sidebar-item-active' : 'sidebar-item' }}">
+                    <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <span x-show="!collapsed" class="flex-1 text-left truncate">System</span>
+                    <svg x-show="!collapsed" :class="systemOpen ? 'rotate-180' : ''"
+                        class="w-4 h-4 flex-shrink-0 transition-transform duration-200" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </button>
 
-            <a href="#" class="flex items-center gap-3 px-2 py-2 rounded-lg text-sm sidebar-item">
-                <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                </svg>
-                <span x-show="!collapsed" class="truncate">Audit Log</span>
-            </a>
-
-            <a href="#" class="flex items-center gap-3 px-2 py-2 rounded-lg text-sm sidebar-item">
-                <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-                <span x-show="!collapsed" class="truncate">System Config</span>
-            </a>
+                <div x-show="systemOpen && !collapsed" x-collapse
+                    class="mt-0.5 ml-4 pl-4 border-l border-gray-200 space-y-0.5">
+                    <a href="#"
+                        class="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-50 transition-colors">
+                        <svg class="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                        </svg>
+                        Users & Roles
+                    </a>
+                    <a href="#"
+                        class="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-50 transition-colors">
+                        <svg class="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                        </svg>
+                        Audit Log
+                    </a>
+                    <a href="#"
+                        class="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-50 transition-colors">
+                        <svg class="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        System Config
+                    </a>
+                </div>
+            </div>
         @endrole
 
     </nav>
@@ -354,7 +376,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
-                    Profil Saya
+                    My Profile
                 </a>
                 <div class="border-t border-gray-100 my-1"></div>
                 <form method="POST" action="{{ route('logout') }}">
@@ -365,7 +387,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                         </svg>
-                        Keluar
+                        Logout
                     </button>
                 </form>
             </div>

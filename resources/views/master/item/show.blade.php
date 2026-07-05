@@ -3,10 +3,10 @@
         <div class="flex items-center justify-between">
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ __('Detail Item') }}</h2>
             <div class="flex gap-2">
-                <a href="{{ route('master.item.edit', $item) }}" class="inline-flex items-center px-4 py-2 bg-yellow-500 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-yellow-600 focus:bg-yellow-600 active:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2 transition ease-in-out duration-150">
+                <a href="{{ route('master-data.item.edit', $item) }}" class="inline-flex items-center px-4 py-2 bg-amber-500 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-amber-600 focus:bg-amber-600 active:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 transition ease-in-out duration-150">
                     {{ __('Edit') }}
                 </a>
-                <a href="{{ route('master.item.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-300 focus:bg-gray-300 active:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                <a href="{{ route('master-data.item.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-300 focus:bg-gray-300 active:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition ease-in-out duration-150">
                     {{ __('Kembali') }}
                 </a>
             </div>
@@ -67,12 +67,12 @@
                         <h3 class="text-sm font-medium text-gray-500 mb-4">Varian</h3>
 
                         {{-- Form Tambah Varian --}}
-                        <form action="{{ route('master.item.variant.store', $item) }}" method="POST" class="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                        <form action="{{ route('master-data.item.variant.store', $item) }}" method="POST" class="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
                             @csrf
                             <div class="flex items-end gap-3">
                                 <div class="flex-1">
                                     <label for="size_id" class="block text-xs font-medium text-gray-500 mb-1">Ukuran</label>
-                                    <select name="size_id" id="size_id" required class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-gray-500 focus:border-gray-500 sm:text-sm">
+                                    <select name="size_id" id="size_id" required class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-gray-500 sm:text-sm">
                                         <option value="">-- Pilih Ukuran --</option>
                                         @foreach($sizes as $size)
                                             <option value="{{ $size->id }}">{{ $size->code }} - {{ $size->label }}</option>
@@ -81,15 +81,15 @@
                                 </div>
                                 <div class="flex-1">
                                     <label for="size" class="block text-xs font-medium text-gray-500 mb-1">Label Ukuran</label>
-                                    <input type="text" name="size" id="size" required placeholder="S, M, L, XL, 40, 42" class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-gray-500 focus:border-gray-500 sm:text-sm">
+                                    <input type="text" name="size" id="size" required placeholder="S, M, L, XL, 40, 42" class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-gray-500 sm:text-sm">
                                 </div>
                                 <div class="flex-1">
                                     <label for="sku" class="block text-xs font-medium text-gray-500 mb-1">SKU (opsional)</label>
-                                    <input type="text" name="sku" id="sku" placeholder="Auto jika kosong" class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-gray-500 focus:border-gray-500 sm:text-sm">
+                                    <input type="text" name="sku" id="sku" placeholder="Auto jika kosong" class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-gray-500 sm:text-sm">
                                 </div>
                                 <div class="flex-1">
                                     <label for="weight" class="block text-xs font-medium text-gray-500 mb-1">Berat (opsional)</label>
-                                    <input type="number" name="weight" id="weight" min="0" step="0.01" placeholder="0" class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-gray-500 focus:border-gray-500 sm:text-sm">
+                                    <input type="number" name="weight" id="weight" min="0" step="0.01" placeholder="0" class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-gray-500 sm:text-sm">
                                 </div>
                                 <button type="submit" class="px-4 py-2 bg-[#980416] text-white text-sm font-medium rounded-md hover:bg-[#7a0311] transition">
                                     Tambah
@@ -119,11 +119,11 @@
                                                 <td class="px-4 py-2 text-sm font-mono">{{ $variant->sku }}</td>
                                                 <td class="px-4 py-2 text-sm">{{ $variant->weight ? $variant->weight . ' kg' : '-' }}</td>
                                                 <td class="px-4 py-2 text-sm text-right">
-                                                    <form action="{{ route('master.item.variant.destroy', [$item, $variant]) }}" method="POST" class="inline" onsubmit="return confirm('Yakin ingin menghapus varian ini?')">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit" class="text-red-600 hover:text-red-900 text-xs font-medium">Hapus</button>
-                                                    </form>
+                                                    <x-delete-modal
+                                                        :route="route('master-data.item.variant.destroy', [$item, $variant])"
+                                                        label="Hapus Varian"
+                                                        description="Apakah Anda yakin ingin menghapus varian {{ $variant->size }} ini? Data ini tidak dapat dikembalikan."
+                                                    />
                                                 </td>
                                             </tr>
                                         @endforeach

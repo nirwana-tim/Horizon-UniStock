@@ -24,7 +24,7 @@ class ScanController extends Controller
             ->where('date', today())
             ->first();
 
-        return view('staff.scan', compact('activeSchedule'));
+        return view('distribution.scan', compact('activeSchedule'));
     }
 
     public function search(Request $request): View|RedirectResponse
@@ -65,7 +65,7 @@ class ScanController extends Controller
             $request->input('items')
         );
 
-        return redirect()->route('staff.scan.index')
+        return redirect()->route('distribution.scan.index')
             ->with('success', "Distribusi berhasil dicatat untuk {$student->nim} - {$student->name}.");
     }
 
@@ -110,7 +110,7 @@ class ScanController extends Controller
             }
         }
 
-        return view('staff.distribution', compact(
+        return view('distribution.distribution', compact(
             'student',
             'activeSchedule',
             'entitlement',

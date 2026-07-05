@@ -5,19 +5,14 @@ namespace Database\Seeders;
 use App\Models\Entitlement;
 use App\Models\EntitlementItem;
 use App\Models\Item;
-use App\Models\ProgramLevel;
-use App\Models\StudyProgram;
 use Illuminate\Database\Seeder;
 
 class EntitlementSeeder extends Seeder
 {
-    private array $programs = [
+    private array $entitlements = [
         [
-            'program' => 'D3-KEP',
-            'level' => 'ANG-2024',
-            'type' => 'freshman',
-            'semester' => 'ganjil',
-            'desc' => 'Paket Freshman D3 Keperawatan 2025/2026',
+            'code' => '2425FHSD3-KEP',
+            'desc' => 'D3 Keperawatan Angkatan 2024/2025',
             'items' => [
                 'UNF-U-ALM-02' => 1,
                 'UNF-P-CLG-02' => 2,
@@ -28,11 +23,8 @@ class EntitlementSeeder extends Seeder
             ],
         ],
         [
-            'program' => 'S1-KEP',
-            'level' => 'ANG-2024',
-            'type' => 'freshman',
-            'semester' => 'ganjil',
-            'desc' => 'Paket Freshman S1 Keperawatan 2025/2026',
+            'code' => '2425FHSS1-KEP',
+            'desc' => 'S1 Keperawatan Angkatan 2024/2025',
             'items' => [
                 'UNF-U-ALM-02' => 1,
                 'UNF-P-CLG-02' => 2,
@@ -43,11 +35,8 @@ class EntitlementSeeder extends Seeder
             ],
         ],
         [
-            'program' => 'D3-KEB',
-            'level' => 'ANG-2024',
-            'type' => 'freshman',
-            'semester' => 'ganjil',
-            'desc' => 'Paket Freshman D3 Kebidanan 2025/2026',
+            'code' => '2425FHSD3-KEB',
+            'desc' => 'D3 Kebidanan Angkatan 2024/2025',
             'items' => [
                 'UNF-U-ALM-02' => 1,
                 'UNF-P-CLG-02' => 2,
@@ -58,25 +47,8 @@ class EntitlementSeeder extends Seeder
             ],
         ],
         [
-            'program' => 'PROF-NERS',
-            'level' => 'ANG-2024',
-            'type' => 'continuing',
-            'semester' => 'ganjil',
-            'desc' => 'Paket Profesi Ners 2025/2026',
-            'items' => [
-                'UNF-P-CLC-02' => 2,
-                'SHO-P-CLC-02' => 1,
-                'KTM-U-KTM-01' => 1,
-                'KTM-U-TAG-02' => 1,
-                'KIT-U-NUR-09' => 1,
-            ],
-        ],
-        [
-            'program' => 'S1-INF',
-            'level' => 'ANG-2024',
-            'type' => 'freshman',
-            'semester' => 'ganjil',
-            'desc' => 'Paket Freshman S1 Informatika 2025/2026',
+            'code' => '2425FCSS1-INF',
+            'desc' => 'S1 Informatika Angkatan 2024/2025',
             'items' => [
                 'UNF-U-ALM-03' => 1,
                 'UNF-L-CLG-03' => 2,
@@ -85,14 +57,59 @@ class EntitlementSeeder extends Seeder
             ],
         ],
         [
-            'program' => 'S1-MNJ',
-            'level' => 'ANG-2024',
-            'type' => 'freshman',
-            'semester' => 'ganjil',
-            'desc' => 'Paket Freshman S1 Manajemen 2025/2026',
+            'code' => '2425FCSS1-TI',
+            'desc' => 'S1 Teknologi Informasi Angkatan 2024/2025',
+            'items' => [
+                'UNF-U-ALM-03' => 1,
+                'UNF-L-CLG-03' => 2,
+                'KTM-U-KTM-01' => 1,
+                'KTM-U-TAG-02' => 1,
+            ],
+        ],
+        [
+            'code' => '2425FCSS1-SI',
+            'desc' => 'S1 Sistem Informasi Angkatan 2024/2025',
+            'items' => [
+                'UNF-U-ALM-03' => 1,
+                'UNF-L-CLG-03' => 2,
+                'KTM-U-KTM-01' => 1,
+                'KTM-U-TAG-02' => 1,
+            ],
+        ],
+        [
+            'code' => '2425FEBS1-MNJ',
+            'desc' => 'S1 Manajemen Angkatan 2024/2025',
             'items' => [
                 'UNF-U-ALM-04' => 1,
                 'UNF-P-CLG-04' => 2,
+                'KTM-U-KTM-01' => 1,
+                'KTM-U-TAG-02' => 1,
+            ],
+        ],
+        [
+            'code' => '2425FEBS1-AKT',
+            'desc' => 'S1 Akuntansi Angkatan 2024/2025',
+            'items' => [
+                'UNF-U-ALM-04' => 1,
+                'UNF-P-CLG-04' => 2,
+                'KTM-U-KTM-01' => 1,
+                'KTM-U-TAG-02' => 1,
+            ],
+        ],
+        [
+            'code' => '2425FTHS1-PAR',
+            'desc' => 'S1 Pariwisata Angkatan 2024/2025',
+            'items' => [
+                'UNF-U-ALM-05' => 1,
+                'UNF-P-CLG-05' => 2,
+                'KTM-U-KTM-01' => 1,
+                'KTM-U-TAG-02' => 1,
+            ],
+        ],
+        [
+            'code' => '2324FHSS1-KEP',
+            'desc' => 'S1 Keperawatan Angkatan 2023/2024',
+            'items' => [
                 'KTM-U-KTM-01' => 1,
                 'KTM-U-TAG-02' => 1,
             ],
@@ -104,22 +121,10 @@ class EntitlementSeeder extends Seeder
         $created = 0;
         $skipped = 0;
 
-        foreach ($this->programs as $prog) {
-            $studyProgram = StudyProgram::where('code', $prog['program'])->first();
-            $programLevel = ProgramLevel::where('code', $prog['level'])->first();
-
-            if (!$studyProgram || !$programLevel) {
-                continue;
-            }
-
+        foreach ($this->entitlements as $data) {
             $entitlement = Entitlement::firstOrCreate(
-                [
-                    'study_program_id' => $studyProgram->id,
-                    'program_level_id' => $programLevel->id,
-                    'student_type' => $prog['type'],
-                    'semester' => $prog['semester'],
-                ],
-                ['description' => $prog['desc']]
+                ['code' => $data['code']],
+                ['description' => $data['desc']]
             );
 
             if ($entitlement->wasRecentlyCreated) {
@@ -128,8 +133,9 @@ class EntitlementSeeder extends Seeder
                 $skipped++;
             }
 
-            foreach ($prog['items'] as $itemCode => $quantity) {
-                $item = Item::where('code', $itemCode)->first();
+            foreach ($data['items'] as $baseCode => $quantity) {
+                // Find representative item by base_code (first item in the product group)
+                $item = Item::where('base_code', $baseCode)->first();
                 if (!$item) {
                     continue;
                 }

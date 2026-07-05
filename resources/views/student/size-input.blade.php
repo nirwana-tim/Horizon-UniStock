@@ -72,7 +72,7 @@
                                                         Pilih Ukuran <span class="text-red-500">*</span>
                                                     </label>
                                                     <select name="sizes[{{ $item->id }}]" id="size_{{ $item->id }}" required
-                                                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm">
                                                         <option value="">-- Pilih Ukuran --</option>
                                                         @forelse($item->variants as $variant)
                                                             <option value="{{ $variant->size }}" {{ $currentSize == $variant->size ? 'selected' : '' }}>
@@ -93,7 +93,7 @@
                             </div>
 
                             <div class="mt-8 flex items-center gap-4">
-                                <button type="submit" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                                <button type="submit" class="inline-flex items-center px-4 py-2 bg-primary-700 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-primary-800 focus:bg-primary-800 active:bg-primary-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition ease-in-out duration-150">
                                     {{ __('Simpan Ukuran') }}
                                 </button>
                             </div>

@@ -1,5 +1,5 @@
 {{--
-  Bottom Navigation Component — Staff & Student only
+  Bottom Navigation Component â€” Staff & Student only
   Fixed di bagian bawah layar mobile
 --}}
 <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50 h-16">
@@ -16,16 +16,16 @@
             <span class="text-xs {{ request()->routeIs('dashboard') ? 'font-semibold' : 'font-normal' }}">Beranda</span>
         </a>
 
-        <a href="{{ route('staff.scan.index') }}"
+        <a href="{{ route('distribution.scan.index') }}"
            class="flex-1 flex flex-col items-center justify-center gap-1 transition-colors
-                  {{ request()->routeIs('staff.*') ? 'text-primary-700' : 'text-gray-400 hover:text-gray-600' }}">
+                  {{ request()->routeIs('distribution.scan.*') ? 'text-primary-700' : 'text-gray-400 hover:text-gray-600' }}">
             {{-- Scan button besar di tengah --}}
-            <div class="{{ request()->routeIs('staff.*') ? 'bg-primary-700' : 'bg-gray-200' }} w-10 h-10 rounded-full flex items-center justify-center -mt-3 shadow-md transition-colors">
-                <svg class="w-5 h-5 {{ request()->routeIs('staff.*') ? 'text-white' : 'text-gray-500' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <div class="{{ request()->routeIs('distribution.scan.*') ? 'bg-primary-700' : 'bg-gray-200' }} w-10 h-10 rounded-full flex items-center justify-center -mt-3 shadow-md transition-colors">
+                <svg class="w-5 h-5 {{ request()->routeIs('distribution.scan.*') ? 'text-white' : 'text-gray-500' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8H3a2 2 0 00-2 2v8a2 2 0 002 2h14a2 2 0 002-2v-8a2 2 0 00-2-2h-2"/>
                 </svg>
             </div>
-            <span class="text-xs {{ request()->routeIs('staff.*') ? 'font-semibold text-primary-700' : 'font-normal text-gray-400' }} -mt-1">Scan</span>
+            <span class="text-xs {{ request()->routeIs('distribution.scan.*') ? 'font-semibold text-primary-700' : 'font-normal text-gray-400' }} -mt-1">Scan</span>
         </a>
 
         <a href="{{ route('profile.edit') }}"
@@ -69,13 +69,13 @@
             <span class="text-xs {{ request()->routeIs('student.qr') ? 'font-semibold text-primary-700' : 'font-normal text-gray-400' }} -mt-1">QR</span>
         </a>
 
-        <a href="{{ route('master.distribution-schedule.index') }}"
+        <a href="{{ route('distribution.distribution-schedule.index') }}"
            class="flex-1 flex flex-col items-center justify-center gap-1 transition-colors
-                  {{ request()->routeIs('master.distribution-schedule.*') ? 'text-primary-700' : 'text-gray-400 hover:text-gray-600' }}">
-            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="{{ request()->routeIs('master.distribution-schedule.*') ? '2.5' : '2' }}">
+                  {{ request()->routeIs('distribution.distribution-schedule.*') ? 'text-primary-700' : 'text-gray-400 hover:text-gray-600' }}">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="{{ request()->routeIs('distribution.distribution-schedule.*') ? '2.5' : '2' }}">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
             </svg>
-            <span class="text-xs {{ request()->routeIs('master.distribution-schedule.*') ? 'font-semibold' : 'font-normal' }}">Jadwal</span>
+            <span class="text-xs {{ request()->routeIs('distribution.distribution-schedule.*') ? 'font-semibold' : 'font-normal' }}">Jadwal</span>
         </a>
 
         <a href="{{ route('profile.edit') }}"

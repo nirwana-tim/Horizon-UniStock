@@ -6,24 +6,21 @@ use App\Models\AuditLog;
 use App\Models\Entitlement;
 use App\Models\EntitlementItem;
 use App\Models\Student;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class EntitlementService
 {
-    public function getEntitlement(Student $student, ?string $semester = null): ?Entitlement
+    public function getEntitlement(Student $student): ?Entitlement
     {
-        $query = Entitlement::where('study_program_id', $student->study_program_id)
-            ->where('program_level_id', $student->program_level_id)
-            ->where('student_type', $student->student_type)
-            ->with('items.item');
-
-        if ($semester) {
-            $query->where('semester', $semester);
+        if (!$student->entitlement_code) {
+            return null;
         }
 
-        return $query->first();
+        return Entitlement::where('code', $student->entitlement_code)
+            ->where('is_active', true)
+            ->with('items.item')
+            ->first();
     }
 
     public function validateEligibility(Student $student): bool
@@ -37,11 +34,9 @@ class EntitlementService
     {
         return DB::transaction(function () use ($data) {
             $entitlement = Entitlement::create([
-                'study_program_id' => $data['study_program_id'],
-                'program_level_id' => $data['program_level_id'],
-                'student_type' => $data['student_type'],
-                'semester' => $data['semester'],
+                'code' => $data['code'],
                 'description' => $data['description'] ?? null,
+                'is_active' => $data['is_active'] ?? true,
             ]);
 
             if (isset($data['items']) && is_array($data['items'])) {
@@ -63,7 +58,7 @@ class EntitlementService
                 'ip_address' => request()->ip(),
             ]);
 
-            return $entitlement->fresh(['items.item', 'studyProgram', 'programLevel']);
+            return $entitlement->fresh(['items.item']);
         });
     }
 
@@ -73,11 +68,9 @@ class EntitlementService
             $oldValues = $entitlement->toArray();
 
             $entitlement->update([
-                'study_program_id' => $data['study_program_id'] ?? $entitlement->study_program_id,
-                'program_level_id' => $data['program_level_id'] ?? $entitlement->program_level_id,
-                'student_type' => $data['student_type'] ?? $entitlement->student_type,
-                'semester' => $data['semester'] ?? $entitlement->semester,
+                'code' => $data['code'] ?? $entitlement->code,
                 'description' => $data['description'] ?? $entitlement->description,
+                'is_active' => $data['is_active'] ?? $entitlement->is_active,
             ]);
 
             if (isset($data['items']) && is_array($data['items'])) {
@@ -102,7 +95,7 @@ class EntitlementService
                 'ip_address' => request()->ip(),
             ]);
 
-            return $entitlement->fresh(['items.item', 'studyProgram', 'programLevel']);
+            return $entitlement->fresh(['items.item']);
         });
     }
 

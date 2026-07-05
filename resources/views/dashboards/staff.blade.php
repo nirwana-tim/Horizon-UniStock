@@ -7,7 +7,7 @@
     <div class="grid grid-cols-1 gap-4 mb-6">
 
         {{-- Scan QR --}}
-        <a href="{{ route('staff.scan.index') }}"
+        <a href="{{ route('distribution.scan.index') }}"
            class="flex items-center gap-4 p-5 bg-primary-700 rounded-2xl shadow-md shadow-primary-200 hover:bg-primary-800 transition-colors group">
             <div class="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
                 <svg class="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -48,7 +48,7 @@
                  x-transition:enter-start="opacity-0 -translate-y-2"
                  x-transition:enter-end="opacity-100 translate-y-0"
                  class="mt-2 p-4 bg-gray-50 rounded-xl border border-gray-200">
-                <form action="{{ route('staff.search') }}" method="POST">
+                <form action="{{ route('distribution.search') }}" method="POST">
                     @csrf
                     <label class="block text-xs font-semibold text-gray-700 mb-1.5">NIM Mahasiswa</label>
                     <div class="flex gap-2">
@@ -80,7 +80,7 @@
                 ['step' => '1', 'text' => 'Scan QR mahasiswa atau cari manual via NIM'],
                 ['step' => '2', 'text' => 'Sistem menampilkan data mahasiswa & entitlement tahap aktif'],
                 ['step' => '3', 'text' => 'Centang item yang diberikan, edit ukuran jika perlu'],
-                ['step' => '4', 'text' => 'Validasi stok — jika kurang bisa partial pickup'],
+                ['step' => '4', 'text' => 'Validasi stok â€” jika kurang bisa partial pickup'],
                 ['step' => '5', 'text' => 'Submit transaksi untuk menyimpan & kurangi stok'],
             ] as $guide)
             <div class="flex items-start gap-3">

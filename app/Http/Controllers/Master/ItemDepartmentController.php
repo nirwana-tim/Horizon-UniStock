@@ -34,7 +34,7 @@ class ItemDepartmentController extends Controller
     {
         $this->departmentService->store($request->validated());
 
-        return redirect()->route('master.item-department.index')->with('success', 'Departemen item berhasil ditambahkan.');
+        return redirect()->route('master-data.item-department.index')->with('success', 'Departemen item berhasil ditambahkan.');
     }
 
     public function show(ItemDepartment $itemDepartment): View
@@ -56,13 +56,13 @@ class ItemDepartmentController extends Controller
     {
         $this->departmentService->update($itemDepartment, $request->validated());
 
-        return redirect()->route('master.item-department.index')->with('success', 'Departemen item berhasil diperbarui.');
+        return redirect()->route('master-data.item-department.index')->with('success', 'Departemen item berhasil diperbarui.');
     }
 
     public function destroy(ItemDepartment $itemDepartment): RedirectResponse
     {
         $this->departmentService->destroy($itemDepartment);
 
-        return redirect()->route('master.item-department.index')->with('success', 'Departemen item berhasil dihapus.');
+        return redirect()->route('master-data.item-department.index')->with('success', 'Departemen item berhasil dihapus.');
     }
 }
