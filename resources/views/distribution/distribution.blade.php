@@ -107,6 +107,31 @@
                         </div>
                     </div>
                 </div>
+            @elseif(!$student->activeSizeProfile)
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                    <div class="p-6">
+                        <div class="flex items-center mb-4">
+                            <div class="flex-shrink-0 w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center">
+                                <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+                                </svg>
+                            </div>
+                            <h3 class="ml-3 text-lg font-medium text-yellow-800">Mahasiswa Belum Mengisi Ukuran</h3>
+                        </div>
+                        <div class="ml-12">
+                            <p class="text-sm text-gray-600 mb-3">
+                                Mahasiswa ini <span class="font-semibold text-yellow-600">belum mengisi profil ukuran</span> di akun mereka.
+                            </p>
+                            <p class="text-xs text-gray-500 mb-4">
+                                Mohon arahkan mahasiswa untuk login terlebih dahulu ke sistem menggunakan NIM mereka dan mengisi form input ukuran sebelum melakukan pengambilan barang.
+                            </p>
+                            <a href="{{ route('distribution.scan.index') }}"
+                                class="inline-flex items-center px-4 py-2 border border-primary-500 text-primary-700 hover:bg-primary-50 rounded-lg text-sm font-medium transition ease-in-out duration-150">
+                                {{ __('Kembali ke Scan') }}
+                            </a>
+                        </div>
+                    </div>
+                </div>
             @elseif(!$entitlement)
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6 text-center">
@@ -124,7 +149,7 @@
                             <div class="flex items-center justify-between mb-4">
                                 <h3 class="text-lg font-medium text-gray-900">Item yang Berhak Diterima</h3>
                                 <div class="text-sm text-gray-500">
-                                    {{ $activeSchedule->stage->name ?? '-' }} | {{ $activeSchedule->date->format('d M Y') }}
+                                    {{ $activeSchedule->name }} | {{ $activeSchedule->date?->format('d M Y') ?? '-' }}
                                 </div>
                             </div>
 
@@ -161,54 +186,58 @@
                                         <tbody class="bg-white divide-y divide-gray-200">
                                             @foreach($scheduleItems as $index => $item)
                                                 @php
-                                                    $sizeInfo = $studentSizes[$item->id] ?? null;
-                                                    $expectedSize = $sizeInfo['size'] ?? '-';
+                                                    $sizeInfo       = $studentSizes[$item->id] ?? null;
+                                                    $expectedSize   = $sizeInfo['size'] ?? '-';
+                                                    $expectedLabel  = $sizeInfo['size_label'] ?? $expectedSize;
                                                     $availableStock = $stockInfo[$item->id][$expectedSize] ?? 0;
+                                                    $outOfStock     = $availableStock <= 0;
                                                 @endphp
-                                                <tr>
+                                                <tr class="{{ $outOfStock ? 'bg-gray-50 opacity-60' : '' }}">
                                                     <td class="px-6 py-4 whitespace-nowrap">
                                                         <input type="checkbox"
                                                             name="items[{{ $index }}][item_id]"
                                                             value="{{ $item->id }}"
                                                             class="item-check rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-                                                            data-index="{{ $index }}">
+                                                            data-index="{{ $index }}"
+                                                            {{ $outOfStock ? 'disabled' : '' }}>
                                                         <input type="hidden" name="items[{{ $index }}][expected_size]" value="{{ $expectedSize }}">
                                                     </td>
                                                     <td class="px-6 py-4 whitespace-nowrap">
                                                         <div class="text-sm font-medium text-gray-900">{{ $item->name }}</div>
+                                                        @if($outOfStock)
+                                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-700 mt-1">Stok Habis</span>
+                                                        @endif
                                                     </td>
                                                     <td class="px-6 py-4 whitespace-nowrap">
                                                         <div class="text-sm text-gray-500">{{ $item->code }}</div>
                                                     </td>
                                                     <td class="px-6 py-4 whitespace-nowrap">
-                                                        <div class="text-sm text-gray-900">{{ $expectedSize }}</div>
+                                                        <div class="text-sm text-gray-900">{{ $expectedLabel }}</div>
                                                     </td>
                                                     <td class="px-6 py-4 whitespace-nowrap">
                                                         <select name="items[{{ $index }}][actual_size]"
-                                                            class="block w-24 border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm item-size"
-                                                            data-index="{{ $index }}">
-                                                            @if(strpos($expectedSize, '3') === 0 || in_array((int)$expectedSize, range(38, 46)))
-                                                                @foreach(range(38, 46) as $size)
-                                                                    <option value="{{ $size }}" {{ $expectedSize == $size ? 'selected' : '' }}>{{ $size }}</option>
-                                                                @endforeach
-                                                            @else
-                                                                @foreach(['S', 'M', 'L', 'XL', 'XXL'] as $size)
-                                                                    <option value="{{ $size }}" {{ $expectedSize == $size ? 'selected' : '' }}>{{ $size }}</option>
-                                                                @endforeach
-                                                            @endif
+                                                            class="block w-28 border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm item-size"
+                                                            data-index="{{ $index }}"
+                                                            {{ $outOfStock ? 'disabled' : '' }}>
+                                                            @forelse($item->variants as $variant)
+                                                                <option value="{{ $variant->size }}" {{ $expectedSize == $variant->size ? 'selected' : '' }}>
+                                                                    {{ $variant->size_label }}
+                                                                </option>
+                                                            @empty
+                                                                <option value="{{ $expectedSize }}">{{ $expectedLabel }}</option>
+                                                            @endforelse
                                                         </select>
                                                     </td>
                                                     <td class="px-6 py-4 whitespace-nowrap">
                                                         <input type="number" name="items[{{ $index }}][quantity]"
-                                                            value="1" min="1" max="10"
+                                                            value="1" min="1" max="{{ max(1, $availableStock) }}"
                                                             class="block w-20 border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm item-qty"
-                                                            data-index="{{ $index }}">
+                                                            data-index="{{ $index }}"
+                                                            {{ $outOfStock ? 'disabled' : '' }}>
                                                     </td>
                                                     <td class="px-6 py-4 whitespace-nowrap">
-                                                        @php
-                                                            $stockQty = $stockInfo[$item->id][$expectedSize] ?? 0;
-                                                        @endphp
-                                                        <span class="text-sm {{ $stockQty > 0 ? 'text-green-600' : 'text-red-600' }}">
+                                                        @php $stockQty = $availableStock; @endphp
+                                                        <span class="text-sm font-medium {{ $stockQty > 0 ? 'text-green-600' : 'text-red-600' }}">
                                                             {{ $stockQty }} pcs
                                                         </span>
                                                     </td>

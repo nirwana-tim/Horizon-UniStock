@@ -44,14 +44,23 @@ class ScanController extends Controller
 
     public function process(Request $request): RedirectResponse
     {
+        // Filter out items that are not checked (they won't have item_id submitted)
+        $items = array_filter($request->input('items', []), function ($item) {
+            return isset($item['item_id']) && !empty($item['item_id']);
+        });
+        $request->merge(['items' => $items]);
+
         $request->validate([
             'student_id' => 'required|integer',
             'schedule_id' => 'required|integer',
-            'items' => 'required|array',
+            'items' => 'required|array|min:1',
             'items.*.item_id' => 'required|integer',
             'items.*.actual_size' => 'required|string|max:10',
             'items.*.expected_size' => 'nullable|string|max:10',
             'items.*.quantity' => 'required|integer|min:1',
+        ], [
+            'items.required' => 'Pilih minimal satu barang yang akan didistribusikan.',
+            'items.min' => 'Pilih minimal satu barang yang akan didistribusikan.',
         ]);
 
         $student = Student::with(['studyProgram', 'programLevel'])->findOrFail($request->input('student_id'));
@@ -82,6 +91,7 @@ class ScanController extends Controller
 
         if ($activeSchedule) {
             $entitlement = $this->distributionService->getEntitlementForStudent($student, $activeSchedule);
+            $activeSchedule->load('items.item.variants');
             $scheduleItems = $activeSchedule->items->pluck('item')->filter();
         }
 
@@ -90,9 +100,14 @@ class ScanController extends Controller
         $sizeProfile = $student->activeSizeProfile;
         if ($sizeProfile) {
             foreach ($sizeProfile->sizeItems as $sizeItem) {
+                // Cari size_label dari variant yang cocok
+                $variant = ItemVariant::where('item_id', $sizeItem->item_id)
+                    ->where('size', $sizeItem->size)
+                    ->first();
                 $studentSizes[$sizeItem->item_id] = [
-                    'size' => $sizeItem->size,
-                    'change_count' => $sizeItem->change_count,
+                    'size'        => $sizeItem->size,
+                    'size_label'  => $variant?->size_label ?? $sizeItem->size,
+                    'change_count'=> $sizeItem->change_count,
                 ];
             }
         }

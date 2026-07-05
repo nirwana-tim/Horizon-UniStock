@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Finance\StockOpnameController;
 use App\Http\Controllers\Finance\GpmController;
+use App\Http\Controllers\Finance\EligibilityController;
 use App\Http\Controllers\Master\DistributionScheduleController;
 use App\Http\Controllers\Master\EntitlementController;
 use App\Http\Controllers\Master\FacultyController;
@@ -60,7 +61,7 @@ Route::middleware(['auth', 'password.changed', 'role:super_admin|admin'])->prefi
     Route::resource('item-price', ItemPriceController::class);
 });
 
-Route::middleware(['auth', 'password.changed', 'role:super_admin|admin'])->prefix('student')->name('students.')->group(function () {
+Route::middleware(['auth', 'password.changed', 'role:super_admin|admin'])->prefix('admin/students')->name('students.')->group(function () {
     Route::resource('/', StudentController::class)->parameters(['' => 'student']);
     Route::post('/generate', [StudentController::class, 'generate'])->name('generate');
     Route::post('/generate-all', [StudentController::class, 'generateAll'])->name('generateAll');
@@ -72,6 +73,9 @@ Route::middleware(['auth', 'password.changed', 'role:super_admin|admin'])->prefi
     Route::get('size-monitor', [SizeMonitorController::class, 'index'])->name('size-monitor.index');
     Route::get('/scan', [ScanController::class, 'index'])->name('scan.index');
     Route::post('/search', [ScanController::class, 'search'])->name('search');
+    Route::get('/search', function () {
+        return redirect()->route('distribution.scan.index');
+    });
     Route::post('/process', [ScanController::class, 'process'])->name('process');
 });
 
@@ -102,6 +106,11 @@ Route::middleware(['auth', 'password.changed', 'role:super_admin|admin'])->prefi
     Route::get('/', [ImportController::class, 'index'])->name('index');
     Route::post('/', [ImportController::class, 'store'])->name('store');
     Route::post('/preview', [ImportController::class, 'preview'])->name('preview');
+});
+
+Route::middleware(['auth', 'password.changed', 'role:super_admin|admin'])->prefix('finance')->name('finance.')->group(function () {
+    Route::get('eligibility', [EligibilityController::class, 'index'])->name('eligibility.index');
+    Route::post('eligibility/{student}/toggle', [EligibilityController::class, 'toggle'])->name('eligibility.toggle');
 });
 
 Route::middleware(['auth', 'password.changed', 'role:student'])->prefix('student')->name('student.')->group(function () {

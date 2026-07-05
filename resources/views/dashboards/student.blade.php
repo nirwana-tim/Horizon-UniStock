@@ -125,7 +125,7 @@
             @foreach($recentTransactions as $tx)
             <div class="flex items-center justify-between px-5 py-3">
                 <div>
-                    <p class="text-sm text-gray-800">{{ $tx->stage?->name ?? 'Distribusi' }}</p>
+                    <p class="text-sm text-gray-800">{{ $tx->schedule?->name ?? 'Distribusi' }}</p>
                     <p class="text-xs text-gray-400">{{ $tx->pickup_time?->format('d/m/Y H:i') ?? '-' }}</p>
                 </div>
                 @if($tx->status === 'completed')

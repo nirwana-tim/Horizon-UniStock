@@ -49,9 +49,9 @@ class UserTestSeeder extends Seeder
             }
         }
 
-        $studentUser = User::where('email', 'student@horizon-unistock.test')->first();
+        $studentUser = User::where('email', '=', 'student@horizon-unistock.test', 'and')->first();
 
-        Student::firstOrCreate(
+        $student = Student::firstOrCreate(
             ['user_id' => $studentUser->id],
             [
                 'nim' => '1234567890123456',
@@ -61,6 +61,17 @@ class UserTestSeeder extends Seeder
                 'study_program_id' => StudyProgram::first()->id ?? 1,
                 'program_level_id' => ProgramLevel::first()->id ?? 1,
                 'student_type' => 'freshman',
+            ]
+        );
+
+        // Seed eligibility record for test student
+        \App\Models\EligibilityRecord::firstOrCreate(
+            [
+                'student_id' => $student->id,
+            ],
+            [
+                'is_eligible' => true,
+                'payment_status' => 'Paid',
             ]
         );
     }

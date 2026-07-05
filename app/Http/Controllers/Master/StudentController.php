@@ -135,15 +135,22 @@ class StudentController extends Controller
             ->whereNull('user_id')
             ->get();
 
-        $generated = 0;
+        $generated = [];
 
         foreach ($students as $student) {
-            $this->studentService->generateAccount($student);
-            $generated++;
+            [$user, $password] = $this->studentService->generateAccount($student);
+            $generated[] = "{$student->name} (NIM: {$student->nim}) -> Password: <strong>{$password}</strong>";
         }
 
+        if (empty($generated)) {
+            return redirect()->route('students.index', ['tab' => 'generate-akun'])
+                ->with('info', 'Tidak ada akun baru yang digenerate.');
+        }
+
+        $message = "Berhasil membuat " . count($generated) . " akun mahasiswa:<br>" . implode('<br>', $generated);
+
         return redirect()->route('students.index', ['tab' => 'generate-akun'])
-            ->with('success', "$generated akun mahasiswa berhasil digenerate.");
+            ->with('success', $message);
     }
 
     public function generateAll(Request $request): RedirectResponse
@@ -155,14 +162,16 @@ class StudentController extends Controller
                 ->with('info', 'Semua mahasiswa sudah memiliki akun.');
         }
 
-        $generated = 0;
+        $generated = [];
 
         foreach ($students as $student) {
-            $this->studentService->generateAccount($student);
-            $generated++;
+            [$user, $password] = $this->studentService->generateAccount($student);
+            $generated[] = "{$student->name} (NIM: {$student->nim}) -> Password: <strong>{$password}</strong>";
         }
 
+        $message = "Berhasil membuat " . count($generated) . " akun mahasiswa:<br>" . implode('<br>', $generated);
+
         return redirect()->route('students.index', ['tab' => 'generate-akun'])
-            ->with('success', "$generated akun mahasiswa berhasil digenerate.");
+            ->with('success', $message);
     }
 }

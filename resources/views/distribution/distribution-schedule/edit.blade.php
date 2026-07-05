@@ -2,7 +2,7 @@
     <x-slot name="header">
         <div class="flex items-center justify-between">
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ __('Edit Jadwal Distribusi') }}</h2>
-            <a href="{{ route('distribution.distribution-schedule.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-300 focus:bg-gray-300 active:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition ease-in-out duration-150">{{ __('â† Kembali') }}</a>
+            <a href="{{ route('distribution.distribution-schedule.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-300 focus:bg-gray-300 active:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition ease-in-out duration-150">{{ __('← Kembali') }}</a>
         </div>
     </x-slot>
 
@@ -101,14 +101,27 @@
                                 <x-text-input id="session" name="session" type="text" class="mt-1 block w-full" :value="old('session', $distributionSchedule->session)" required />
                                 <x-input-error :messages="$errors->get('session')" class="mt-2" />
                             </div>
+                            
+                            {{-- Simplified Grid of Checked Items for Schedule --}}
                             <div class="md:col-span-2">
-                                <x-input-label for="item_ids" :value="__('Item yang Dibagikan')" />
-                                <div class="mt-1 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-                                    @php $selectedItems = old('item_ids', $distributionSchedule->items->pluck('item_id')->toArray()) @endphp
+                                <x-input-label :value="__('Item yang Dibagikan')" />
+                                <p class="mt-1 mb-4 text-xs text-gray-500">Pilih item yang akan didistribusikan pada jadwal ini.</p>
+                                
+                                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                                    @php 
+                                        $selectedItems = old('item_ids', $distributionSchedule->items->pluck('item_id')->toArray());
+                                    @endphp
                                     @foreach($items as $item)
-                                        <label class="flex items-center space-x-2 p-2 border rounded hover:bg-gray-50">
-                                            <input type="checkbox" name="item_ids[]" value="{{ $item->id }}" {{ in_array($item->id, $selectedItems) ? 'checked' : '' }} class="rounded border-gray-300 text-primary-600 shadow-sm focus:ring-primary-500">
-                                            <span class="text-sm text-gray-700">{{ $item->name }} ({{ $item->code }})</span>
+                                        @php
+                                            $isChecked = in_array($item->id, $selectedItems);
+                                        @endphp
+                                        <label class="flex items-center space-x-2 p-3 border rounded-lg bg-gray-50 hover:bg-gray-100 transition cursor-pointer">
+                                            <input type="checkbox" 
+                                                   name="item_ids[]" 
+                                                   value="{{ $item->id }}" 
+                                                   {{ $isChecked ? 'checked' : '' }} 
+                                                   class="rounded border-gray-300 text-primary-700 shadow-sm focus:ring-primary-500">
+                                            <span class="text-sm text-gray-700 font-semibold">{{ $item->name }} ({{ $item->code }})</span>
                                         </label>
                                     @endforeach
                                 </div>
