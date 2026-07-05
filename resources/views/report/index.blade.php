@@ -57,7 +57,7 @@
                                 <select name="category" class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 sm:text-sm">
                                     <option value="">Semua Kategori</option>
                                     @foreach($categories as $cat)
-                                        <option value="{{ $cat->code }}">{{ $cat->code }} ({{ $cat->name }})</option>
+                                        <option value="{{ $cat->code }}">{{ $cat->label }} ({{ $cat->code }})</option>
                                     @endforeach
                                 </select>
                             </div>
