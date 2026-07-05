@@ -31,32 +31,32 @@ class ProgramLevelController extends Controller
     {
         $this->programLevelService->store($request->validated());
 
-        return redirect()->route('master.program-level.index')->with('success', 'Level program berhasil ditambahkan.');
+        return redirect()->route('master-data.program-level.index')->with('success', 'Level program berhasil ditambahkan.');
     }
 
-    public function show(ProgramLevel $level): View
+    public function show(ProgramLevel $programLevel): View
     {
-        $level->load('students');
+        $programLevel->loadCount('students');
 
-        return view('master.program-level.show', compact('level'));
+        return view('master.program-level.show', ['level' => $programLevel]);
     }
 
-    public function edit(ProgramLevel $level): View
+    public function edit(ProgramLevel $programLevel): View
     {
-        return view('master.program-level.edit', compact('level'));
+        return view('master.program-level.edit', ['level' => $programLevel]);
     }
 
-    public function update(ProgramLevelRequest $request, ProgramLevel $level): RedirectResponse
+    public function update(ProgramLevelRequest $request, ProgramLevel $programLevel): RedirectResponse
     {
-        $this->programLevelService->update($level, $request->validated());
+        $this->programLevelService->update($programLevel, $request->validated());
 
-        return redirect()->route('master.program-level.index')->with('success', 'Level program berhasil diperbarui.');
+        return redirect()->route('master-data.program-level.index')->with('success', 'Level program berhasil diperbarui.');
     }
 
-    public function destroy(ProgramLevel $level): RedirectResponse
+    public function destroy(ProgramLevel $programLevel): RedirectResponse
     {
-        $this->programLevelService->destroy($level);
+        $this->programLevelService->destroy($programLevel);
 
-        return redirect()->route('master.program-level.index')->with('success', 'Level program berhasil dihapus.');
+        return redirect()->route('master-data.program-level.index')->with('success', 'Level program berhasil dihapus.');
     }
 }

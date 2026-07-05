@@ -31,7 +31,7 @@ class ItemCategoryController extends Controller
     {
         $this->categoryService->store($request->validated());
 
-        return redirect()->route('master.item-category.index')->with('success', 'Kategori item berhasil ditambahkan.');
+        return redirect()->route('master-data.item-category.index')->with('success', 'Kategori item berhasil ditambahkan.');
     }
 
     public function show(int $item_category): View
@@ -54,7 +54,7 @@ class ItemCategoryController extends Controller
         $category = ItemCategory::findOrFail($item_category);
         $this->categoryService->update($category, $request->validated());
 
-        return redirect()->route('master.item-category.index')->with('success', 'Kategori item berhasil diperbarui.');
+        return redirect()->route('master-data.item-category.index')->with('success', 'Kategori item berhasil diperbarui.');
     }
 
     public function destroy(int $item_category): RedirectResponse
@@ -62,6 +62,6 @@ class ItemCategoryController extends Controller
         $category = ItemCategory::findOrFail($item_category);
         $this->categoryService->destroy($category);
 
-        return redirect()->route('master.item-category.index')->with('success', 'Kategori item berhasil dihapus.');
+        return redirect()->route('master-data.item-category.index')->with('success', 'Kategori item berhasil dihapus.');
     }
 }

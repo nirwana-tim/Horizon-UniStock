@@ -13,7 +13,7 @@
 
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
-                    <form action="{{ route('master.study-program.update', $program) }}" method="POST">
+                    <form action="{{ route('master-data.study-program.update', $program) }}" method="POST">
                         @csrf
                         @method('PUT')
 
@@ -55,10 +55,10 @@
                         </div>
 
                         <div class="flex items-center gap-3">
-                            <button type="submit" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white tracking-widest hover:bg-blue-700 transition">
+                            <button type="submit" class="inline-flex items-center px-4 py-2 bg-primary-700 border border-transparent rounded-md font-semibold text-xs text-white tracking-widest hover:bg-primary-800 transition">
                                 {{ __('Update') }}
                             </button>
-                            <a href="{{ route('master.study-program.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-300 border border-transparent rounded-md font-semibold text-xs text-gray-700 tracking-widest hover:bg-gray-400 transition">
+                            <a href="{{ route('master-data.study-program.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-300 border border-transparent rounded-md font-semibold text-xs text-gray-700 tracking-widest hover:bg-gray-400 transition">
                                 {{ __('Batal') }}
                             </a>
                         </div>

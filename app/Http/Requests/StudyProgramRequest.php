@@ -13,7 +13,7 @@ class StudyProgramRequest extends FormRequest
 
     public function rules(): array
     {
-        $programId = $this->route('program')?->id;
+        $programId = $this->route('study_program')?->id;
 
         return [
             'name' => 'required|string|max:255',

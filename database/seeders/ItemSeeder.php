@@ -63,9 +63,14 @@ class ItemSeeder extends Seeder
             '06' => ItemSize::where('code', '06')->first(),
             '07' => ItemSize::where('code', '07')->first(),
             '34' => ItemSize::where('code', '34')->first(),
+            '35' => ItemSize::where('code', '35')->first(),
             '36' => ItemSize::where('code', '36')->first(),
             '37' => ItemSize::where('code', '37')->first(),
+            '38' => ItemSize::where('code', '38')->first(),
             '39' => ItemSize::where('code', '39')->first(),
+            '40' => ItemSize::where('code', '40')->first(),
+            '41' => ItemSize::where('code', '41')->first(),
+            '42' => ItemSize::where('code', '42')->first(),
             'TM' => ItemSize::where('code', 'TM')->first(),
         ];
 
@@ -125,10 +130,50 @@ class ItemSeeder extends Seeder
 
         // Uniforms Unisex
         $this->createItem('UNF-U-ALM-01-03', 'Uniform Almamater Unisex Horizon', 'UNF', 'ALM', 'U', '01', '03');
+        $this->createItem('UNF-U-ALM-01-04', 'Uniform Almamater Unisex Horizon', 'UNF', 'ALM', 'U', '01', '04');
+        $this->createItem('UNF-U-ALM-01-05', 'Uniform Almamater Unisex Horizon', 'UNF', 'ALM', 'U', '01', '05');
+        $this->createItem('UNF-U-ALM-01-06', 'Uniform Almamater Unisex Horizon', 'UNF', 'ALM', 'U', '01', '06');
+        $this->createItem('UNF-U-ALM-01-07', 'Uniform Almamater Unisex Horizon', 'UNF', 'ALM', 'U', '01', '07');
         $this->createItem('UNF-U-ALM-02-03', 'Uniform Almamater Unisex STIKES', 'UNF', 'ALM', 'U', '02', '03');
+        $this->createItem('UNF-U-ALM-02-04', 'Uniform Almamater Unisex STIKES', 'UNF', 'ALM', 'U', '02', '04');
+        $this->createItem('UNF-U-ALM-02-05', 'Uniform Almamater Unisex STIKES', 'UNF', 'ALM', 'U', '02', '05');
+        $this->createItem('UNF-U-ALM-02-06', 'Uniform Almamater Unisex STIKES', 'UNF', 'ALM', 'U', '02', '06');
+        $this->createItem('UNF-U-ALM-02-07', 'Uniform Almamater Unisex STIKES', 'UNF', 'ALM', 'U', '02', '07');
         $this->createItem('UNF-U-ALM-03-03', 'Uniform Almamater Unisex STMIK', 'UNF', 'ALM', 'U', '03', '03');
         $this->createItem('UNF-U-ALM-04-03', 'Uniform Almamater Unisex STIE', 'UNF', 'ALM', 'U', '04', '03');
         $this->createItem('UNF-U-LAB-02-03', 'Uniform Laboratory Unisex STIKES', 'UNF', 'LAB', 'U', '02', '03');
+
+        // Additional Uniform sizes (M, L, XL for key products)
+        $this->createItem('UNF-L-SCB-02-04', 'Uniform Scrub Laki-Laki STIKES', 'UNF', 'SCB', 'L', '02', '04');
+        $this->createItem('UNF-L-SCB-02-05', 'Uniform Scrub Laki-Laki STIKES', 'UNF', 'SCB', 'L', '02', '05');
+        $this->createItem('UNF-L-SCB-02-06', 'Uniform Scrub Laki-Laki STIKES', 'UNF', 'SCB', 'L', '02', '06');
+        $this->createItem('UNF-P-SCB-02-04', 'Uniform Scrub Perempuan STIKES', 'UNF', 'SCB', 'P', '02', '04');
+        $this->createItem('UNF-P-SCB-02-05', 'Uniform Scrub Perempuan STIKES', 'UNF', 'SCB', 'P', '02', '05');
+        $this->createItem('UNF-P-SCB-02-06', 'Uniform Scrub Perempuan STIKES', 'UNF', 'SCB', 'P', '02', '06');
+        $this->createItem('UNF-L-CLC-02-04', 'Uniform Clinical Laki-Laki STIKES', 'UNF', 'CLC', 'L', '02', '04');
+        $this->createItem('UNF-L-CLC-02-05', 'Uniform Clinical Laki-Laki STIKES', 'UNF', 'CLC', 'L', '02', '05');
+        $this->createItem('UNF-L-CLC-02-06', 'Uniform Clinical Laki-Laki STIKES', 'UNF', 'CLC', 'L', '02', '06');
+        $this->createItem('UNF-P-CLC-02-04', 'Uniform Clinical Perempuan STIKES', 'UNF', 'CLC', 'P', '02', '04');
+        $this->createItem('UNF-P-CLC-02-05', 'Uniform Clinical Perempuan STIKES', 'UNF', 'CLC', 'P', '02', '05');
+        $this->createItem('UNF-P-CLC-02-06', 'Uniform Clinical Perempuan STIKES', 'UNF', 'CLC', 'P', '02', '06');
+        $this->createItem('UNF-L-CLG-02-04', 'Uniform College Laki-Laki STIKES', 'UNF', 'CLG', 'L', '02', '04');
+        $this->createItem('UNF-L-CLG-02-05', 'Uniform College Laki-Laki STIKES', 'UNF', 'CLG', 'L', '02', '05');
+        $this->createItem('UNF-L-CLG-02-06', 'Uniform College Laki-Laki STIKES', 'UNF', 'CLG', 'L', '02', '06');
+        $this->createItem('UNF-P-CLG-02-04', 'Uniform College Perempuan STIKES', 'UNF', 'CLG', 'P', '02', '04');
+        $this->createItem('UNF-P-CLG-02-05', 'Uniform College Perempuan STIKES', 'UNF', 'CLG', 'P', '02', '05');
+        $this->createItem('UNF-P-CLG-02-06', 'Uniform College Perempuan STIKES', 'UNF', 'CLG', 'P', '02', '06');
+
+        // Additional Shoe sizes
+        $this->createItem('SHO-L-CLC-02-38', 'Shoes Clinical Laki-Laki STIKES', 'SHO', 'CLC', 'L', '02', '38');
+        $this->createItem('SHO-L-CLC-02-39', 'Shoes Clinical Laki-Laki STIKES', 'SHO', 'CLC', 'L', '02', '39');
+        $this->createItem('SHO-L-CLC-02-40', 'Shoes Clinical Laki-Laki STIKES', 'SHO', 'CLC', 'L', '02', '40');
+        $this->createItem('SHO-L-CLC-02-41', 'Shoes Clinical Laki-Laki STIKES', 'SHO', 'CLC', 'L', '02', '41');
+        $this->createItem('SHO-L-CLC-02-42', 'Shoes Clinical Laki-Laki STIKES', 'SHO', 'CLC', 'L', '02', '42');
+        $this->createItem('SHO-P-CLC-02-35', 'Shoes Clinical Perempuan STIKES', 'SHO', 'CLC', 'P', '02', '35');
+        $this->createItem('SHO-P-CLC-02-36', 'Shoes Clinical Perempuan STIKES', 'SHO', 'CLC', 'P', '02', '36');
+        $this->createItem('SHO-P-CLC-02-37', 'Shoes Clinical Perempuan STIKES', 'SHO', 'CLC', 'P', '02', '37');
+        $this->createItem('SHO-P-CLC-02-38', 'Shoes Clinical Perempuan STIKES', 'SHO', 'CLC', 'P', '02', '38');
+        $this->createItem('SHO-P-CLC-02-39', 'Shoes Clinical Perempuan STIKES', 'SHO', 'CLC', 'P', '02', '39');
     }
 
     private function createItem(string $code, string $name, string $catCode, string $typeCode, string $gender, string $deptCode, string $sizeCode): void
@@ -142,10 +187,15 @@ class ItemSeeder extends Seeder
             return;
         }
 
+        // Calculate base_code by stripping the last size suffix (last 3 chars)
+        // e.g., UNF-L-SCB-02-03 → UNF-L-SCB-02
+        $baseCode = substr($code, 0, -3);
+
         $item = Item::firstOrCreate(
             ['code' => $code],
             [
                 'name' => $name,
+                'base_code' => $baseCode,
                 'gender' => $gender,
                 'category_id' => $category->id,
                 'type_id' => $type->id,

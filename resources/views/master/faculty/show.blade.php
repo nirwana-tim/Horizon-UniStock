@@ -2,8 +2,8 @@
     <x-slot name="header">
         <div class="flex items-center justify-between">
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ __('Detail Fakultas') }}</h2>
-            <a href="{{ route('master.faculty.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-300 focus:bg-gray-300 active:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                {{ __('← Kembali') }}
+            <a href="{{ route('master-data.faculty.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-300 focus:bg-gray-300 active:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                {{ __('â† Kembali') }}
             </a>
         </div>
     </x-slot>
@@ -33,16 +33,14 @@
                     </div>
 
                     <div class="mb-6 flex items-center gap-3">
-                        <a href="{{ route('master.faculty.edit', $faculty) }}" class="inline-flex items-center px-4 py-2 bg-yellow-500 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-yellow-600 focus:bg-yellow-600 active:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                        <a href="{{ route('master-data.faculty.edit', $faculty) }}" class="inline-flex items-center px-4 py-2 bg-amber-500 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-amber-600 focus:bg-amber-600 active:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 transition ease-in-out duration-150">
                             {{ __('Edit') }}
                         </a>
-                        <form action="{{ route('master.faculty.destroy', $faculty) }}" method="POST" class="inline" onsubmit="return confirm('Yakin ingin menghapus fakultas ini?')">
-                            @csrf
-                            @method('DELETE')
-                            <x-danger-button>
-                                {{ __('Hapus') }}
-                            </x-danger-button>
-                        </form>
+                        <x-delete-modal
+                            :route="route('master-data.faculty.destroy', $faculty)"
+                            label="Hapus Fakultas"
+                            description="Apakah Anda yakin ingin menghapus fakultas {{ $faculty->name }}? Data ini tidak dapat dikembalikan."
+                        />
                     </div>
 
                     <div class="border-t border-gray-200 pt-6">

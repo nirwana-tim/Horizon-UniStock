@@ -18,6 +18,6 @@ class SizeMonitorController extends Controller
             ->latest('changed_at')
             ->paginate(20);
 
-        return view('master.size-monitor.index', compact('histories'));
+        return view('distribution.size-monitor.index', compact('histories'));
     }
 }

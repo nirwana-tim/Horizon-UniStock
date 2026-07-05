@@ -21,6 +21,7 @@ class Student extends Authenticatable
         'study_program_id',
         'program_level_id',
         'student_type',
+        'entitlement_code',
         'email_verified_at',
     ];
 
@@ -30,6 +31,17 @@ class Student extends Authenticatable
             'qr_generated_at' => 'datetime',
             'email_verified_at' => 'datetime',
         ];
+    }
+
+    public static function generateEntitlementCode(Model $student): ?string
+    {
+        if (!$student->programLevel || !$student->studyProgram?->faculty) {
+            return null;
+        }
+
+        return $student->programLevel->code
+            . $student->studyProgram->faculty->code
+            . $student->studyProgram->code;
     }
 
     public function user(): BelongsTo

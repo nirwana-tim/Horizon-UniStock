@@ -18,6 +18,17 @@ database
 
 resources
 ├── views
+│   ├── auth/                  # Login, register, forgot password
+│   ├── components/            # Reusable Blade components
+│   ├── dashboards/            # Dashboard per role
+│   ├── distribution/          # Entitlement, jadwal, size monitor, scan
+│   ├── import/                # Import data
+│   ├── inventory/             # Stock receive, stock opname
+│   ├── layouts/               # App layout, navigation
+│   ├── master/                # Master data (faculty, prodi, level, item, vendor)
+│   ├── report/                # Laporan & GPM
+│   ├── student/               # Student self-service (size input, QR)
+│   └── profile/               # User profile (Breeze)
 
 routes
 ├── web.php
@@ -47,6 +58,35 @@ routes
 | QR Code | Simple QR Code (SVG/PNG) |
 | QR Scanner | HTML5 QR Scanner |
 | Email | Laravel Mail + SMTP |
+
+## Route Structure
+
+| Route Prefix | Name Prefix | Controller Namespace | Middleware |
+|---|---|---|---|
+| `/master-data` | `master-data.*` | `Master\*` | `role:super_admin\|admin` |
+| `/student` | `students.*` | `Master\StudentController` | `role:super_admin\|admin` |
+| `/distribution` | `distribution.*` | `Master\EntitlementController`, etc. | `role:super_admin\|admin` |
+| `/inventory` | `inventory.*` | `Finance\StockOpnameController`, `Master\StockReceiveController` | `role:super_admin\|admin` |
+| `/report` | `report.*` | `ReportController`, `Finance\GpmController` | `role:super_admin\|admin` |
+| `/import` | `import.*` | `ImportController` | `role:super_admin\|admin` |
+| `/student` (self) | `student.*` | `Student\SizeController` | `role:student` |
+
+## View Folder Structure
+
+```
+resources/views
+├── auth/                  # Login, register, forgot password (Breeze)
+├── components/            # Reusable: primary-button, danger-button, secondary-button, sidebar, etc.
+├── dashboards/            # super-admin, finance, staff, student
+├── distribution/          # entitlement/, distribution-schedule/, size-monitor/, scan
+├── import/                # index, preview, result
+├── inventory/             # stock-receive/, stock-opname/
+├── layouts/               # app.blade.php, navigation
+├── master/                # faculty/, study-program/, program-level/, item/, vendor/, etc.
+├── report/                # index, gpm-cost
+├── student/               # size-input, qr-show (student self-service)
+└── profile/               # Breeze profile
+```
 
 ## Aturan Kode
 

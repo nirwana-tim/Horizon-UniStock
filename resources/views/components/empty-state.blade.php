@@ -1,15 +1,15 @@
 {{--
   Empty State Component
   Props:
-    - $title: string — Judul empty state
-    - $description: string (optional) — Deskripsi tambahan
+    - $title: string â€” Judul empty state
+    - $description: string (optional) â€” Deskripsi tambahan
   Slots:
-    - $icon (optional) — Custom SVG icon
-    - $actions (optional) — Tombol aksi
+    - $icon (optional) â€” Custom SVG icon
+    - $actions (optional) â€” Tombol aksi
   Usage:
     <x-empty-state title="Belum Ada Fakultas" description="Tambahkan fakultas pertama Anda.">
         <x-slot name="actions">
-            <a href="{{ route('master.faculty.create') }}" class="...">Tambah</a>
+            <a href="{{ route('master-data.faculty.create') }}" class="...">Tambah</a>
         </x-slot>
     </x-empty-state>
 --}}

@@ -109,12 +109,16 @@ app/
 └── View/                  # Components (AppLayout, GuestLayout)
 resources/views/
 ├── layouts/               # app.blade.php, guest.blade.php
-├── components/            # input-error, nav-link, primary-button
-├── pages/                 # dashboard, profile
-├── partials/              # navbar, page-heading
-├── profile/               # update-password-form, dll
-├── auth/                  # login, register, forgot-password, dll
-├── dashboard.blade.php
+├── components/            # input-error, nav-link, primary-button, sidebar, etc.
+├── auth/                  # login, register, forgot-password, verify-email, dll
+├── profile/               # update-profile-information-form, update-password-form
+├── dashboards/            # Dashboard per role
+├── master/                # Master data CRUD
+├── distribution/          # Entitlement, jadwal, scan
+├── inventory/             # Stock receive, stock opname
+├── report/                # Laporan & GPM
+├── student/               # Student self-service
+├── import/                # Import data
 └── welcome.blade.php
 ```
 

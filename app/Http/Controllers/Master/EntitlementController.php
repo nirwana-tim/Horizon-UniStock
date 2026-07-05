@@ -5,10 +5,7 @@ namespace App\Http\Controllers\Master;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\EntitlementRequest;
 use App\Models\Entitlement;
-use App\Models\Faculty;
 use App\Models\Item;
-use App\Models\ProgramLevel;
-use App\Models\StudyProgram;
 use App\Services\EntitlementService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
@@ -21,59 +18,86 @@ class EntitlementController extends Controller
 
     public function index(): View
     {
-        $entitlements = Entitlement::with(['studyProgram', 'programLevel', 'items.item'])
+        $entitlements = Entitlement::with('items.item')
             ->latest()
             ->paginate(15);
 
-        return view('master.entitlement.index', compact('entitlements'));
+        return view('distribution.entitlement.index', compact('entitlements'));
     }
 
     public function create(): View
     {
-        $faculties = Faculty::orderBy('name')->get();
-        $studyPrograms = StudyProgram::with('faculty')->orderBy('name')->get();
-        $programLevels = ProgramLevel::orderBy('name')->get();
-        $items = Item::with('category', 'variants')->orderBy('name')->get();
+        $items = $this->getGroupedItems();
 
-        return view('master.entitlement.create', compact('faculties', 'studyPrograms', 'programLevels', 'items'));
+        return view('distribution.entitlement.create', compact('items'));
     }
 
     public function store(EntitlementRequest $request): RedirectResponse
     {
         $this->entitlementService->createEntitlement($request->validated());
 
-        return redirect()->route('master.entitlement.index')->with('success', 'Hak barang (entitlement) berhasil ditambahkan.');
+        return redirect()->route('distribution.entitlement.index')->with('success', 'Entitlement berhasil ditambahkan.');
     }
 
     public function show(Entitlement $entitlement): View
     {
-        $entitlement->load(['studyProgram', 'programLevel', 'items.item']);
+        $entitlement->load('items.item');
 
-        return view('master.entitlement.show', compact('entitlement'));
+        return view('distribution.entitlement.show', compact('entitlement'));
     }
 
     public function edit(Entitlement $entitlement): View
     {
         $entitlement->load('items');
-        $faculties = Faculty::orderBy('name')->get();
-        $studyPrograms = StudyProgram::with('faculty')->orderBy('name')->get();
-        $programLevels = ProgramLevel::orderBy('name')->get();
-        $items = Item::with('category', 'variants')->orderBy('name')->get();
+        $items = $this->getGroupedItems();
 
-        return view('master.entitlement.edit', compact('entitlement', 'faculties', 'studyPrograms', 'programLevels', 'items'));
+        return view('distribution.entitlement.edit', compact('entitlement', 'items'));
     }
 
     public function update(EntitlementRequest $request, Entitlement $entitlement): RedirectResponse
     {
         $this->entitlementService->updateEntitlement($entitlement, $request->validated());
 
-        return redirect()->route('master.entitlement.index')->with('success', 'Hak barang (entitlement) berhasil diperbarui.');
+        return redirect()->route('distribution.entitlement.index')->with('success', 'Entitlement berhasil diperbarui.');
     }
 
     public function destroy(Entitlement $entitlement): RedirectResponse
     {
         $this->entitlementService->deleteEntitlement($entitlement);
 
-        return redirect()->route('master.entitlement.index')->with('success', 'Hak barang (entitlement) berhasil dihapus.');
+        return redirect()->route('distribution.entitlement.index')->with('success', 'Entitlement berhasil dihapus.');
+    }
+
+    /**
+     * Get items grouped by base_code (product level, not size level).
+     * Returns one representative item per product group with size info.
+     */
+    private function getGroupedItems(): \Illuminate\Support\Collection
+    {
+        return Item::whereNotNull('base_code')
+            ->select('base_code')
+            ->distinct('base_code')
+            ->orderBy('base_code')
+            ->get()
+            ->map(function ($row) {
+                $rep = Item::where('base_code', $row->base_code)
+                    ->with(['category', 'variants'])
+                    ->first();
+
+                return (object) [
+                    'id' => $rep->id,
+                    'name' => $rep->name,
+                    'code' => $row->base_code,
+                    'gender' => $rep->gender,
+                    'category' => $rep->category,
+                    'sizes' => Item::where('base_code', $row->base_code)
+                        ->pluck('code', 'id')
+                        ->map(fn($code, $id) => [
+                            'id' => $id,
+                            'code' => $code,
+                            'label' => Item::find($id)->variants->first()->size_label ?? $code,
+                        ]),
+                ];
+            });
     }
 }
