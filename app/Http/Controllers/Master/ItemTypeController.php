@@ -17,14 +17,15 @@ class ItemTypeController extends Controller
 
     public function index(): View
     {
-        $types = ItemType::withCount('items')->orderBy('code')->paginate(15);
+        $types = ItemType::with('categories')->withCount('items')->orderBy('code')->paginate(15);
 
         return view('master.item-type.index', compact('types'));
     }
 
     public function create(): View
     {
-        return view('master.item-type.create');
+        $categories = \App\Models\ItemCategory::orderBy('code')->get();
+        return view('master.item-type.create', compact('categories'));
     }
 
     public function store(ItemTypeRequest $request): RedirectResponse
@@ -36,12 +37,15 @@ class ItemTypeController extends Controller
 
     public function show(ItemType $itemType): View
     {
+        $itemType->load('categories');
         return view('master.item-type.show', compact('itemType'));
     }
 
     public function edit(ItemType $itemType): View
     {
-        return view('master.item-type.edit', compact('itemType'));
+        $categories = \App\Models\ItemCategory::orderBy('code')->get();
+        $itemType->load('categories');
+        return view('master.item-type.edit', compact('itemType', 'categories'));
     }
 
     public function update(ItemTypeRequest $request, ItemType $itemType): RedirectResponse

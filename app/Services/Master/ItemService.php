@@ -21,7 +21,8 @@ class ItemService
 
         $genderLabels = ['L' => 'Laki - Laki', 'P' => 'Perempuan', 'U' => 'Unisex'];
 
-        $code = $category->code . '-' . $data['gender'] . '-' . ($type?->code ?? 'XX') . '-' . ($department?->code ?? '00') . '-' . $size->code;
+        // Item code is general: KATEGORI-GENDER-TIPE-DEPARTEMEN (no size suffix)
+        $code = $category->code . '-' . $data['gender'] . '-' . ($type?->code ?? 'XX') . '-' . ($department?->code ?? '00');
         $name = $category->label . ' ' . ($genderLabels[$data['gender']] ?? '') . ' ' . ($type?->label ?? '') . ' ' . ($department?->label ?? '');
 
         if (Item::where('code', $code)->exists()) {
@@ -32,6 +33,7 @@ class ItemService
 
         $item = Item::create([
             'code' => $code,
+            'base_code' => $code,
             'name' => trim($name),
             'gender' => $data['gender'],
             'category_id' => $data['category_id'],
@@ -42,11 +44,12 @@ class ItemService
             'hpp' => $data['hpp'] ?? 0,
         ]);
 
+        // Create the first variant SKU with the size suffix
         $item->variants()->create([
             'size_id' => $size->id,
             'size' => $size->code,
             'size_label' => $size->label,
-            'sku' => $code,
+            'sku' => $code . '-' . $size->code,
         ]);
 
         $auditData = $data;
@@ -67,7 +70,7 @@ class ItemService
 
         $genderLabels = ['L' => 'Laki - Laki', 'P' => 'Perempuan', 'U' => 'Unisex'];
 
-        $newCode = $category->code . '-' . $data['gender'] . '-' . ($type?->code ?? 'XX') . '-' . ($department?->code ?? '00') . '-' . $size->code;
+        $newCode = $category->code . '-' . $data['gender'] . '-' . ($type?->code ?? 'XX') . '-' . ($department?->code ?? '00');
         $newName = trim($category->label . ' ' . ($genderLabels[$data['gender']] ?? '') . ' ' . ($type?->label ?? '') . ' ' . ($department?->label ?? ''));
 
         if ($newCode !== $item->code && Item::where('code', $newCode)->exists()) {
@@ -78,26 +81,36 @@ class ItemService
 
         $updateData = $data;
         $updateData['code'] = $newCode;
+        $updateData['base_code'] = $newCode;
         $updateData['name'] = $newName;
         unset($updateData['size_id']);
 
         $item->update($updateData);
 
-        $item->variants()->where('size_id', '!=', $size->id)->delete();
+        // Update SKUs for all variants if the base code changed
+        if ($newCode !== $old['code']) {
+            foreach ($item->variants as $var) {
+                $var->update([
+                    'sku' => $newCode . '-' . $var->size,
+                ]);
+            }
+        }
 
-        $variant = $item->variants()->where('size_id', $size->id)->first();
-        if ($variant) {
-            $variant->update([
+        // Update the primary/first variant to match the selected size
+        $firstVariant = $item->variants()->orderBy('id')->first();
+        if ($firstVariant) {
+            $firstVariant->update([
+                'size_id' => $size->id,
                 'size' => $size->code,
                 'size_label' => $size->label,
-                'sku' => $newCode,
+                'sku' => $newCode . '-' . $size->code,
             ]);
         } else {
             $item->variants()->create([
                 'size_id' => $size->id,
                 'size' => $size->code,
                 'size_label' => $size->label,
-                'sku' => $newCode,
+                'sku' => $newCode . '-' . $size->code,
             ]);
         }
 

@@ -141,7 +141,9 @@
 
     <script>
         const sizesByCategory = @json($sizesByCategory);
+        const typesByCategory = @json($typesByCategory);
         const sizeSelect = document.getElementById('size_id');
+        const typeSelect = document.getElementById('type_id');
         const categorySelect = document.getElementById('category_id');
 
         function renderSizes(sizes) {
@@ -149,18 +151,30 @@
             sizes.forEach(s => {
                 const opt = document.createElement('option');
                 opt.value = s.id;
-                opt.textContent = s.code + ' - ' + s.name;
+                opt.textContent = s.code + ' - ' + (s.label || s.name);
                 sizeSelect.appendChild(opt);
             });
         }
 
-        function filterSizes() {
-            const catId = categorySelect.value;
-            const sizes = sizesByCategory[catId] || [];
-            renderSizes(sizes);
+        function renderTypes(types) {
+            typeSelect.innerHTML = '<option value="">-- Pilih Tipe --</option>';
+            types.forEach(t => {
+                const opt = document.createElement('option');
+                opt.value = t.id;
+                opt.textContent = t.code + ' - ' + (t.label || t.name);
+                typeSelect.appendChild(opt);
+            });
         }
 
-        categorySelect.addEventListener('change', filterSizes);
-        filterSizes();
+        function filterOptions() {
+            const catId = categorySelect.value;
+            const sizes = sizesByCategory[catId] || [];
+            const types = typesByCategory[catId] || [];
+            renderSizes(sizes);
+            renderTypes(types);
+        }
+
+        categorySelect.addEventListener('change', filterOptions);
+        filterOptions();
     </script>
 </x-app-layout>

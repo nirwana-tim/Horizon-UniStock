@@ -12,6 +12,17 @@ class ItemDepartmentService
         $studyProgramIds = $data['study_program_ids'] ?? [];
         unset($data['study_program_ids']);
 
+        // Auto generate sequential numeric code: 01, 02, etc.
+        $code = null;
+        for ($i = 1; $i <= 99; $i++) {
+            $candidate = str_pad($i, 2, '0', STR_PAD_LEFT);
+            if (!ItemDepartment::where('code', '=', $candidate, 'and')->exists()) {
+                $code = $candidate;
+                break;
+            }
+        }
+        $data['code'] = $code;
+
         $department = ItemDepartment::create($data);
         $department->studyPrograms()->sync($studyProgramIds);
 
@@ -24,6 +35,7 @@ class ItemDepartmentService
         $old = $itemDepartment->toArray();
         $studyProgramIds = $data['study_program_ids'] ?? [];
         unset($data['study_program_ids']);
+        unset($data['code']); // Protect code from modification
 
         $itemDepartment->update($data);
         $itemDepartment->studyPrograms()->sync($studyProgramIds);
@@ -34,7 +46,7 @@ class ItemDepartmentService
 
     public function destroy(ItemDepartment $itemDepartment): void
     {
-        $itemDepartment->delete();
-        AuditService::log('delete', 'item_department', $itemDepartment->id);
+        AuditService::log('delete', 'item_department', $itemDepartment->id, $itemDepartment->toArray(), null);
+        $itemDepartment->delete([]);
     }
 }

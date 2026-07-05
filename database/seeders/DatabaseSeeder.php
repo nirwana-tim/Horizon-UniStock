@@ -31,6 +31,7 @@ class DatabaseSeeder extends Seeder
             ItemDepartmentSeeder::class,
             ItemSizeSeeder::class,
             CategoryItemSizeSeeder::class,
+            CategoryItemTypeSeeder::class,
             VendorSeeder::class,
             ItemSeeder::class,
             ItemPriceSeeder::class,
