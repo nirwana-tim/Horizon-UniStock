@@ -23,8 +23,8 @@ class StudentSizeService
             return collect();
         }
 
-        $entitlement = Entitlement::where('code', $student->entitlement_code)
-            ->where('is_active', true)
+        $entitlement = Entitlement::where('code', '=', $student->entitlement_code, 'and')
+            ->where('is_active', '=', true, 'and')
             ->with(['items.item.variants'])
             ->first();
 

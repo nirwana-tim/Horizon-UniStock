@@ -20,8 +20,8 @@ class DistributionService
     public function findStudent(string $query): ?Student
     {
         return Student::with(['studyProgram', 'programLevel'])
-            ->where('nim', $query)
-            ->orWhere('qr_token', $query)
+            ->where('nim', '=', $query, 'and')
+            ->orWhere('qr_token', '=', $query, 'or')
             ->first();
     }
 
@@ -43,8 +43,8 @@ class DistributionService
             return null;
         }
 
-        return Entitlement::where('code', $student->entitlement_code)
-            ->where('is_active', true)
+        return Entitlement::where('code', '=', $student->entitlement_code, 'and')
+            ->where('is_active', '=', true, 'and')
             ->with('items.item')
             ->first();
     }
@@ -55,8 +55,8 @@ class DistributionService
      */
     public function findItemByBaseCodeAndSize(string $baseCode, string $size): ?Item
     {
-        return Item::where('base_code', $baseCode)
-            ->whereHas('variants', fn($q) => $q->where('size', $size))
+        return Item::where('base_code', '=', $baseCode, 'and')
+            ->whereHas('variants', fn($q) => $q->where('size', '=', $size, 'and'))
             ->with('variants')
             ->first();
     }
@@ -71,8 +71,8 @@ class DistributionService
             throw new \Exception('Mahasiswa ini belum memenuhi syarat distribusi. Status pembayaran belum lunas.');
         }
 
-        $existingTransaction = DistributionTransaction::where('student_id', $student->id)
-            ->where('schedule_id', $schedule->id)
+        $existingTransaction = DistributionTransaction::where('student_id', '=', $student->id, 'and')
+            ->where('schedule_id', '=', $schedule->id, 'and')
             ->exists();
 
         if ($existingTransaction) {
@@ -91,20 +91,20 @@ class DistributionService
             $allFullyStocked = true;
 
             foreach ($items as $itemData) {
-                $item = Item::find($itemData['item_id']);
+                $item = Item::find($itemData['item_id'], ['*']);
                 if (!$item) {
                     continue;
                 }
 
-                $variant = ItemVariant::where('item_id', $item->id)
-                    ->where('size', $itemData['actual_size'])
+                $variant = ItemVariant::where('item_id', '=', $item->id, 'and')
+                    ->where('size', '=', $itemData['actual_size'], 'and')
                     ->first();
 
                 $quantity = (int) ($itemData['quantity'] ?? 1);
 
                 if ($variant) {
-                    $stockBalance = StockBalance::where('item_id', $item->id)
-                        ->where('variant_id', $variant->id)
+                    $stockBalance = StockBalance::where('item_id', '=', $item->id, 'and')
+                        ->where('variant_id', '=', $variant->id, 'and')
                         ->first();
 
                     $availableStock = $stockBalance ? $stockBalance->quantity - $stockBalance->reserved : 0;
@@ -140,8 +140,9 @@ class DistributionService
                     'quantity' => $quantity,
                 ]);
 
-                if (isset($itemData['old_size']) && $itemData['old_size'] !== $itemData['actual_size']) {
-                    $this->logSizeChange($student, $item, $itemData['old_size'], $itemData['actual_size'], $staff);
+                $oldSize = $itemData['old_size'] ?? $itemData['expected_size'] ?? null;
+                if ($oldSize && $oldSize !== $itemData['actual_size'] && $oldSize !== '-') {
+                    $this->logSizeChange($student, $item, $oldSize, $itemData['actual_size'], $staff);
                 }
             }
 
@@ -161,7 +162,7 @@ class DistributionService
         }
 
         $sizeItem = $sizeProfile->sizeItems()
-            ->where('item_id', $item->id)
+            ->where('item_id', '=', $item->id, 'and')
             ->first();
 
         if ($sizeItem) {
