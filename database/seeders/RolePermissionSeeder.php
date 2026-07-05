@@ -26,7 +26,7 @@ class RolePermissionSeeder extends Seeder
 
         Role::firstOrCreate(['name' => 'student']);
 
-        $user = User::find(1);
+        $user = User::findOrFail(1);
         if ($user && !$user->hasRole('super_admin')) {
             $user->assignRole('super_admin');
         }
