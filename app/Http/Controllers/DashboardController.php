@@ -89,13 +89,13 @@ class DashboardController extends Controller
             'student' => $student,
             'hasFilledSize' => !is_null($student->activeSizeProfile),
             'hasQr' => !is_null($student->qr_token),
-            'activeSchedules' => DistributionSchedule::with('stage')
+            'activeSchedules' => DistributionSchedule::query()
                 ->where('is_active', true)
                 ->where('date', '>=', now()->format('Y-m-d'))
                 ->orderBy('date')
                 ->take(5)
                 ->get(),
-            'recentTransactions' => DistributionTransaction::with('stage')
+            'recentTransactions' => DistributionTransaction::with('schedule')
                 ->where('student_id', $student->id)
                 ->latest()
                 ->take(5)

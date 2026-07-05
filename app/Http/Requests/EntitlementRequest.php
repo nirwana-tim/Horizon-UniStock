@@ -29,4 +29,22 @@ class EntitlementRequest extends FormRequest
             'items.*.quantity' => 'required|integer|min:1',
         ];
     }
+
+    protected function prepareForValidation(): void
+    {
+        if ($this->has('items') && is_array($this->items)) {
+            $filtered = [];
+            foreach ($this->items as $item) {
+                if (isset($item['checked']) && $item['checked'] == '1') {
+                    $filtered[] = [
+                        'item_id' => (int) $item['item_id'],
+                        'quantity' => (int) ($item['quantity'] ?? 1),
+                    ];
+                }
+            }
+            $this->merge([
+                'items' => $filtered,
+            ]);
+        }
+    }
 }

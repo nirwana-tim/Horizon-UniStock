@@ -44,7 +44,7 @@ class StudentService
         $student->delete();
     }
 
-    public function generateAccount(Student $student): User
+    public function generateAccount(Student $student): array
     {
         return DB::transaction(function () use ($student) {
             $password = Str::random(12);
@@ -68,7 +68,7 @@ class StudentService
                 'name' => $student->name,
             ]);
 
-            return $user;
+            return [$user, $password];
         });
     }
 

@@ -35,7 +35,7 @@
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $schedule->programLevel?->name ?? '-' }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $schedule->faculty?->name ?? '-' }}{{ $schedule->studyProgram ? ' / ' . $schedule->studyProgram->name : '' }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $schedule->period ?? '-' }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $schedule->date->format('d/m/Y') }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $schedule->date?->format('d/m/Y') ?? '-' }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $schedule->location }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $schedule->is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' }}">{{ $schedule->is_active ? 'Aktif' : 'Tidak' }}</span>

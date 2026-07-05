@@ -15,10 +15,9 @@
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <x-input-label for="code" :value="__('Kode Entitlement')" />
-                                <x-text-input id="code" name="code" type="text" class="mt-1 block w-full" :value="old('code', $entitlement->code)" required />
-                                <p class="mt-1 text-xs text-gray-500">Format: {LevelAngkatan}{Fakultas}{Prodi} — otomatis sama dengan kode pada mahasiswa</p>
-                                <x-input-error :messages="$errors->get('code')" class="mt-2" />
+                                <x-input-label :value="__('Kode Entitlement (Read-Only)')" />
+                                <x-text-input id="code_display" type="text" class="mt-1 block w-full bg-gray-50 text-gray-500 font-mono" :value="$entitlement->code" disabled />
+                                <input type="hidden" name="code" value="{{ $entitlement->code }}">
                             </div>
                             <div>
                                 <x-input-label for="is_active" :value="__('Status')" />
@@ -32,40 +31,42 @@
                                 <textarea id="description" name="description" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500" rows="2">{{ old('description', $entitlement->description) }}</textarea>
                                 <x-input-error :messages="$errors->get('description')" class="mt-2" />
                             </div>
+                            
+                            {{-- Simplified Grid of Checked Items --}}
                             <div class="md:col-span-2">
-                                <x-input-label :value="__('Item & Jumlah')" />
-                                <p class="mt-1 mb-2 text-xs text-gray-500">Pilih item (produk) dan jumlah yang diberikan. Ukuran akan dipilih oleh mahasiswa saat login.</p>
-
-                                @php
-                                    $itemOptions = $items->map(fn($it) => [
-                                        'value' => $it->id,
-                                        'label' => $it->name . ' (' . $it->code . ')',
-                                        'group' => $it->sizes->pluck('label')->implode(', '),
-                                    ])->toArray();
-
-                                    $entitlementItems = old('items', $entitlement->items->map(fn($i) => ['item_id' => $i->item_id, 'quantity' => $i->quantity])->toArray());
-                                @endphp
-
-                                <div id="items-container" class="mt-2 space-y-2">
-                                    @forelse($entitlementItems as $idx => $ei)
-                                        <div class="item-row flex items-center gap-2 p-2 border rounded bg-gray-50">
-                                            <div class="flex-1">
-                                                <x-searchable-select name="items[{{ $idx }}][item_id]" :options="$itemOptions" :value="$ei['item_id']" placeholder="-- Pilih Item --" :required="true" />
+                                <x-input-label :value="__('Pilih Item & Jumlah Hak')" />
+                                <p class="mt-1 mb-4 text-xs text-gray-500">Pilih item yang berhak didapatkan mahasiswa dan sesuaikan jumlahnya.</p>
+                                
+                                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                                    @foreach($items as $idx => $item)
+                                        @php
+                                            $oldItem = collect(old('items', $entitlement->items))->first(fn($i) => ($i['item_id'] ?? $i->item_id ?? null) == $item->id);
+                                            $isChecked = !empty($oldItem);
+                                            $qty = $oldItem['quantity'] ?? $oldItem->quantity ?? 1;
+                                        @endphp
+                                        <div class="flex items-center justify-between p-3 border rounded-lg bg-gray-50 hover:bg-gray-100 transition">
+                                            <label class="flex items-center space-x-2 cursor-pointer flex-1 mr-2">
+                                                <input type="checkbox" 
+                                                       name="items[{{ $idx }}][checked]" 
+                                                       value="1" 
+                                                       {{ $isChecked ? 'checked' : '' }}
+                                                       class="rounded border-gray-300 text-primary-700 shadow-sm focus:ring-primary-500">
+                                                <span class="text-sm text-gray-700 font-semibold">{{ $item->name }} ({{ $item->code }})</span>
+                                            </label>
+                                            
+                                            <input type="hidden" name="items[{{ $idx }}][item_id]" value="{{ $item->id }}">
+                                            
+                                            <div class="flex items-center gap-1">
+                                                <span class="text-xs text-gray-500">Qty:</span>
+                                                <input type="number" 
+                                                       name="items[{{ $idx }}][quantity]" 
+                                                       value="{{ $qty }}" 
+                                                       min="1" 
+                                                       class="w-16 rounded-md border-gray-300 py-1 px-2 text-sm focus:border-primary-500 focus:ring-primary-500">
                                             </div>
-                                            <x-text-input name="items[{{ $idx }}][quantity]" type="number" class="w-20" min="1" :value="$ei['quantity'] ?? 1" required />
-                                            <button type="button" class="remove-item px-2 py-1 text-red-600 hover:text-red-800 text-sm font-medium">Hapus</button>
                                         </div>
-                                    @empty
-                                        <div class="item-row flex items-center gap-2 p-2 border rounded bg-gray-50">
-                                            <div class="flex-1">
-                                                <x-searchable-select name="items[0][item_id]" :options="$itemOptions" placeholder="-- Pilih Item --" :required="true" />
-                                            </div>
-                                            <x-text-input name="items[0][quantity]" type="number" class="w-20" min="1" value="1" required />
-                                            <button type="button" class="remove-item px-2 py-1 text-red-600 hover:text-red-800 text-sm font-medium">Hapus</button>
-                                        </div>
-                                    @endforelse
+                                    @endforeach
                                 </div>
-                                <button type="button" id="add-item" class="mt-2 inline-flex items-center px-3 py-1 bg-primary-100 border border-transparent rounded-md font-semibold text-xs text-primary-700 uppercase tracking-widest hover:bg-primary-200 transition">+ Tambah Item</button>
                                 <x-input-error :messages="$errors->get('items')" class="mt-2" />
                             </div>
                         </div>
@@ -79,71 +80,4 @@
             </div>
         </div>
     </div>
-
-@push('scripts')
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        let itemIndex = {{ count($entitlementItems) }};
-        const itemOptions = @json($itemOptions);
-
-        function createItemRow(selectedValue = '', quantity = 1) {
-            const div = document.createElement('div');
-            div.className = 'item-row flex items-center gap-2 p-2 border rounded bg-gray-50';
-
-            const select = document.createElement('select');
-            select.name = `items[${itemIndex}][item_id]`;
-            select.className = 'flex-1 mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500 text-sm';
-            select.required = true;
-
-            const emptyOpt = document.createElement('option');
-            emptyOpt.value = '';
-            emptyOpt.textContent = '-- Pilih Item --';
-            select.appendChild(emptyOpt);
-
-            itemOptions.forEach(function(opt) {
-                const option = document.createElement('option');
-                option.value = opt.value;
-                option.textContent = opt.label;
-                select.appendChild(option);
-            });
-
-            select.value = selectedValue;
-
-            const qtyInput = document.createElement('input');
-            qtyInput.type = 'number';
-            qtyInput.name = `items[${itemIndex}][quantity]`;
-            qtyInput.className = 'w-20 mt-1 block border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500 text-sm';
-            qtyInput.min = '1';
-            qtyInput.value = quantity;
-            qtyInput.required = true;
-
-            const removeBtn = document.createElement('button');
-            removeBtn.type = 'button';
-            removeBtn.className = 'remove-item px-2 py-1 text-red-600 hover:text-red-800 text-sm font-medium';
-            removeBtn.textContent = 'Hapus';
-
-            div.appendChild(select);
-            div.appendChild(qtyInput);
-            div.appendChild(removeBtn);
-
-            itemIndex++;
-            return div;
-        }
-
-        document.getElementById('add-item').addEventListener('click', function () {
-            const container = document.getElementById('items-container');
-            container.appendChild(createItemRow());
-        });
-
-        document.getElementById('items-container').addEventListener('click', function (e) {
-            if (e.target.classList.contains('remove-item')) {
-                const rows = document.querySelectorAll('.item-row');
-                if (rows.length > 1) {
-                    e.target.closest('.item-row').remove();
-                }
-            }
-        });
-    });
-</script>
-@endpush
 </x-app-layout>

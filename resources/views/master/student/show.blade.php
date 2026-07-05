@@ -122,7 +122,10 @@
                                 </table>
                             </div>
                         @else
-                            <p class="text-sm text-gray-500 italic">Tidak ada data entitlement.</p>
+                            <div class="p-4 bg-gray-50 border rounded-lg">
+                                <p class="text-sm text-gray-500 italic">Tidak ada data entitlement yang cocok ditemukan di sistem.</p>
+                                <p class="text-xs text-gray-400 mt-2">Kode Entitlement Mahasiswa (Berdasarkan Angkatan & Prodi): <strong class="font-mono text-gray-700">{{ $student->entitlement_code ?? '(Belum Dihitung)' }}</strong></p>
+                            </div>
                         @endif
                     </div>
 

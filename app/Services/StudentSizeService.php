@@ -25,36 +25,16 @@ class StudentSizeService
 
         $entitlement = Entitlement::where('code', $student->entitlement_code)
             ->where('is_active', true)
-            ->with('items.item')
+            ->with(['items.item.variants'])
             ->first();
 
         if (!$entitlement) {
             return collect();
         }
 
-        // Get representative items (one per product group)
         return $entitlement->items
             ->pluck('item')
-            ->filter()
-            ->map(function ($item) {
-                // Find all sizes for this product group
-                $availableSizes = Item::where('base_code', $item->base_code)
-                    ->with('variants')
-                    ->get()
-                    ->map(fn($s) => [
-                        'item_id' => $s->id,
-                        'code' => $s->code,
-                        'size' => $s->variants->first()->size ?? $s->code,
-                        'size_label' => $s->variants->first()->size_label ?? $s->code,
-                    ]);
-
-                return (object) [
-                    'id' => $item->id,
-                    'name' => $item->name,
-                    'code' => $item->base_code,
-                    'available_sizes' => $availableSizes,
-                ];
-            });
+            ->filter();
     }
 
     public function saveSizes(Student $student, array $sizes): void
@@ -73,8 +53,8 @@ class StudentSizeService
                 continue;
             }
 
-            $sizeItem = StudentSizeItem::where('size_profile_id', $profile->id)
-                ->where('item_id', $itemId)
+            $sizeItem = StudentSizeItem::where('size_profile_id', '=', $profile->id, 'and')
+                ->where('item_id', '=', $itemId, 'and')
                 ->first();
 
             if ($sizeItem) {

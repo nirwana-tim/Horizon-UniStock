@@ -31,7 +31,7 @@
 
                         <div class="mb-6">
                             <p class="text-xs text-gray-400">Token: {{ substr($student->qr_token, 0, 8) }}...</p>
-                            <p class="text-xs text-gray-400">Dibuat: {{ $student->qr_generated_at->format('d M Y H:i') }}</p>
+                            <p class="text-xs text-gray-400">Dibuat: {{ $student->qr_generated_at?->format('d M Y H:i') ?? '-' }}</p>
                         </div>
 
                         <div class="flex items-center justify-center gap-4">

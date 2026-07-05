@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\EntitlementRequest;
 use App\Models\Entitlement;
 use App\Models\Item;
+use App\Models\ProgramLevel;
+use App\Models\StudyProgram;
 use App\Services\EntitlementService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
@@ -28,8 +30,10 @@ class EntitlementController extends Controller
     public function create(): View
     {
         $items = $this->getGroupedItems();
+        $programLevels = ProgramLevel::orderBy('code', 'asc')->get(['*']);
+        $studyPrograms = StudyProgram::with(['faculty'])->orderBy('name', 'asc')->get(['*']);
 
-        return view('distribution.entitlement.create', compact('items'));
+        return view('distribution.entitlement.create', compact('items', 'programLevels', 'studyPrograms'));
     }
 
     public function store(EntitlementRequest $request): RedirectResponse
@@ -50,8 +54,10 @@ class EntitlementController extends Controller
     {
         $entitlement->load('items');
         $items = $this->getGroupedItems();
+        $programLevels = ProgramLevel::orderBy('code', 'asc')->get(['*']);
+        $studyPrograms = StudyProgram::with(['faculty'])->orderBy('name', 'asc')->get(['*']);
 
-        return view('distribution.entitlement.edit', compact('entitlement', 'items'));
+        return view('distribution.entitlement.edit', compact('entitlement', 'items', 'programLevels', 'studyPrograms'));
     }
 
     public function update(EntitlementRequest $request, Entitlement $entitlement): RedirectResponse
@@ -76,11 +82,11 @@ class EntitlementController extends Controller
     {
         return Item::whereNotNull('base_code')
             ->select('base_code')
-            ->distinct('base_code')
-            ->orderBy('base_code')
+            ->distinct()
+            ->orderBy('base_code', 'asc')
             ->get()
             ->map(function ($row) {
-                $rep = Item::where('base_code', $row->base_code)
+                $rep = Item::where('base_code', '=', $row->base_code, 'and')
                     ->with(['category', 'variants'])
                     ->first();
 
@@ -90,12 +96,12 @@ class EntitlementController extends Controller
                     'code' => $row->base_code,
                     'gender' => $rep->gender,
                     'category' => $rep->category,
-                    'sizes' => Item::where('base_code', $row->base_code)
+                    'sizes' => Item::where('base_code', '=', $row->base_code, 'and')
                         ->pluck('code', 'id')
                         ->map(fn($code, $id) => [
                             'id' => $id,
                             'code' => $code,
-                            'label' => Item::find($id)->variants->first()->size_label ?? $code,
+                            'label' => Item::find($id, ['*'])->variants->first()->size_label ?? $code,
                         ]),
                 ];
             });
