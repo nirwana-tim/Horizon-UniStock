@@ -21,18 +21,13 @@
 
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
-                    <div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-md">
-                        <p class="text-sm text-blue-700">
-                            <strong>Periode Aktif:</strong> {{ $activePeriod->name }}<br>
-                            <strong>Deadline Input Ukuran:</strong>
-                            {{ $activePeriod->size_change_deadline ? $activePeriod->size_change_deadline->format('d M Y H:i') : 'Tidak ditentukan' }}
-                        </p>
-                        @if(!$canUpdate)
-                            <p class="mt-2 text-sm text-amber-600">
+                    @if(!$canUpdate)
+                        <div class="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-md">
+                            <p class="text-sm text-amber-600">
                                 <strong>Catatan:</strong> Anda sudah melakukan perubahan ukuran sebelumnya. Maksimal 1 kali perubahan diperbolehkan.
                             </p>
-                        @endif
-                    </div>
+                        </div>
+                    @endif
 
                     @if($entitlementItems->isEmpty())
                         <div class="p-4 bg-yellow-50 border border-yellow-200 rounded-md">
