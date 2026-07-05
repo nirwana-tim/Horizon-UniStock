@@ -20,8 +20,8 @@
 <body class="font-sans antialiased bg-gray-50 text-gray-800">
 
 @php
-    $isSidebarLayout = auth()->check() && auth()->user()->hasAnyRole(['super_admin', 'admin', 'finance']);
-    $isBottomNavLayout = auth()->check() && auth()->user()->hasAnyRole(['staff', 'student']);
+    $isSidebarLayout = auth()->check() && auth()->user()->hasAnyRole(['super_admin', 'admin', 'finance', 'student']);
+    $isBottomNavLayout = auth()->check() && auth()->user()->hasAnyRole(['staff']);
 @endphp
 
 @if($isSidebarLayout)

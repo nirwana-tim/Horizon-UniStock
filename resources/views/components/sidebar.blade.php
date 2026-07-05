@@ -71,6 +71,29 @@
             <span x-show="!collapsed" class="truncate">Dashboard</span>
         </a>
 
+        {{-- ===== STUDENT MENU ===== --}}
+        @role('student')
+            {{-- Ukuran Saya --}}
+            <a href="{{ route('student.sizes.index') }}"
+                class="flex items-center gap-3 px-2 py-2 rounded-lg text-sm {{ request()->routeIs('student.sizes.*') ? 'sidebar-item-active' : 'sidebar-item' }}">
+                <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                </svg>
+                <span x-show="!collapsed" class="truncate">Ukuran Saya</span>
+            </a>
+
+            {{-- QR Code Saya --}}
+            <a href="{{ route('student.qr') }}"
+                class="flex items-center gap-3 px-2 py-2 rounded-lg text-sm {{ request()->routeIs('student.qr') ? 'sidebar-item-active' : 'sidebar-item' }}">
+                <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8H3a2 2 0 00-2 2v8a2 2 0 002 2h14a2 2 0 002-2v-8a2 2 0 00-2-2h-2" />
+                </svg>
+                <span x-show="!collapsed" class="truncate">QR Code Saya</span>
+            </a>
+        @endrole
+
         {{-- ===== FINANCE / ADMIN MENU ===== --}}
         @hasanyrole(['admin', 'finance', 'super_admin'])
 
