@@ -232,6 +232,49 @@
                     </div>
                 </div>
 
+                {{-- Rekap Ukuran --}}
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border border-primary-100 shadow-primary-50">
+                    <div class="p-6 text-gray-900">
+                        <div class="flex items-center mb-4">
+                            <div class="flex-shrink-0 w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center">
+                                <svg class="w-6 h-6 text-primary-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                                </svg>
+                            </div>
+                            <h3 class="ml-4 text-lg font-semibold text-gray-900">Rekap Ukuran</h3>
+                        </div>
+                        <p class="text-sm text-gray-500 mb-4">Rekap ukuran mahasiswa (input pemesanan vendor).</p>
+                        <form action="{{ route('report.size-recap') }}" method="GET">
+                            <div class="grid grid-cols-1 gap-2 mb-4">
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-700">Angkatan</label>
+                                    <select name="program_level_id" class="block w-full border-gray-300 rounded-md shadow-sm sm:text-sm">
+                                        <option value="">Semua Angkatan</option>
+                                        @foreach($programLevels as $level)
+                                            <option value="{{ $level->id }}">{{ $level->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-700">Program Studi</label>
+                                    <select name="study_program_id" class="block w-full border-gray-300 rounded-md shadow-sm sm:text-sm">
+                                        <option value="">Semua Prodi</option>
+                                        @foreach($studyPrograms as $prodi)
+                                            <option value="{{ $prodi->id }}">{{ $prodi->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                            <button type="submit" class="w-full inline-flex items-center justify-center px-4 py-2 bg-primary-700 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-primary-800 focus:bg-primary-800 transition ease-in-out duration-150">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                                Download Excel
+                             </button>
+                        </form>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>

@@ -179,7 +179,7 @@ class UserTestSeeder extends Seeder
 
                         StudentSizeItem::firstOrCreate(
                             [
-                                'profile_id' => $profile->id,
+                                'size_profile_id' => $profile->id,
                                 'item_id' => $item->id,
                             ],
                             [
