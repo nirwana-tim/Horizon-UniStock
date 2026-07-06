@@ -10,7 +10,65 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
-                    <form action="{{ route('distribution.distribution-schedule.update', $distributionSchedule) }}" method="POST">
+                    @php
+                        $prodiByFaculty = $studyPrograms->groupBy('faculty_id')->map(fn($group) => $group->map(fn($sp) => [
+                            'value' => (string) $sp->id,
+                            'label' => $sp->name,
+                        ])->values()->toArray())->toArray();
+                        $allProdi = $studyPrograms->map(fn($sp) => [
+                            'value' => (string) $sp->id,
+                            'label' => $sp->name,
+                            'faculty_id' => (string) $sp->faculty_id,
+                        ])->toArray();
+                    @endphp
+
+                    <form action="{{ route('distribution.distribution-schedule.update', $distributionSchedule) }}" method="POST"
+                          x-data="{
+                              programLevelId: '{{ old('program_level_id', $distributionSchedule->program_level_id) }}',
+                              facultyId: '{{ old('faculty_id', $distributionSchedule->faculty_id) }}',
+                              prodiId: '{{ old('study_program_id', $distributionSchedule->study_program_id) }}',
+                              prodiByFaculty: {{ json_encode($prodiByFaculty) }},
+                              allProdi: {{ json_encode($allProdi) }},
+                              levelCodes: {{ json_encode($levelCodes) }},
+                              facultyCodes: {{ json_encode($facultyCodes) }},
+                              prodiCodes: {{ json_encode($prodiCodes) }},
+                              entitlementMap: {{ json_encode($entitlementMap) }},
+                              get filteredProdi() {
+                                  if (this.facultyId && this.prodiByFaculty[this.facultyId]) {
+                                      return this.prodiByFaculty[this.facultyId];
+                                  }
+                                  if (!this.facultyId) return this.allProdi;
+                                  return [];
+                              },
+                              get entitlementCode() {
+                                  let levelCode = this.levelCodes[this.programLevelId] || '';
+                                  let facultyCode = this.facultyCodes[this.facultyId] || '';
+                                  let prodiCode = this.prodiCodes[this.prodiId] || '';
+                                  if (levelCode && facultyCode && prodiCode) {
+                                      return levelCode + facultyCode + prodiCode;
+                                  }
+                                  return '';
+                              },
+                              isItemVisible(itemId) {
+                                  let code = this.entitlementCode;
+                                  if (!code) return true;
+                                  let allowedItems = this.entitlementMap[code] || [];
+                                  return allowedItems.includes(itemId);
+                              },
+                              init() {
+                                  this.$watch('entitlementCode', (newCode) => {
+                                      if (newCode) {
+                                          let allowed = this.entitlementMap[newCode] || [];
+                                          document.querySelectorAll('input[name=\'item_ids[]\']').forEach(input => {
+                                              let itemId = parseInt(input.value);
+                                              if (!allowed.includes(itemId)) {
+                                                  input.checked = false;
+                                              }
+                                          });
+                                      }
+                                  });
+                              }
+                          }">
                         @csrf @method('PUT')
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -19,7 +77,7 @@
                                 <x-text-input id="name" name="name" type="text" class="mt-1 block w-full" :value="old('name', $distributionSchedule->name)" required autofocus />
                                 <x-input-error :messages="$errors->get('name')" class="mt-2" />
                             </div>
-                            <div>
+                            <div @change="programLevelId = $event.target.value">
                                 <x-input-label for="program_level_id" :value="__('Angkatan')" />
                                 @php
                                     $levelOptions = $programLevels->map(fn($l) => [
@@ -31,30 +89,7 @@
                                 <x-searchable-select name="program_level_id" :options="$levelOptions" :value="old('program_level_id', $distributionSchedule->program_level_id)" placeholder="-- Semua Angkatan --" />
                                 <x-input-error :messages="$errors->get('program_level_id')" class="mt-2" />
                             </div>
-                            @php
-                                $prodiByFaculty = $studyPrograms->groupBy('faculty_id')->map(fn($group) => $group->map(fn($sp) => [
-                                    'value' => (string) $sp->id,
-                                    'label' => $sp->name,
-                                ])->values()->toArray())->toArray();
-                                $allProdi = $studyPrograms->map(fn($sp) => [
-                                    'value' => (string) $sp->id,
-                                    'label' => $sp->name,
-                                    'faculty_id' => (string) $sp->faculty_id,
-                                ])->toArray();
-                            @endphp
-                            <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6" x-data="{
-                                facultyId: '{{ old('faculty_id', $distributionSchedule->faculty_id) }}',
-                                prodiId: '{{ old('study_program_id', $distributionSchedule->study_program_id) }}',
-                                prodiByFaculty: {{ json_encode($prodiByFaculty) }},
-                                allProdi: {{ json_encode($allProdi) }},
-                                get filteredProdi() {
-                                    if (this.facultyId && this.prodiByFaculty[this.facultyId]) {
-                                        return this.prodiByFaculty[this.facultyId];
-                                    }
-                                    if (!this.facultyId) return this.allProdi;
-                                    return [];
-                                }
-                            }">
+                            <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
                                     <x-input-label for="faculty_id" :value="__('Fakultas')" />
                                     <select id="faculty_id" name="faculty_id" x-model="facultyId"
@@ -115,7 +150,8 @@
                                         @php
                                             $isChecked = in_array($item->id, $selectedItems);
                                         @endphp
-                                        <label class="flex items-center space-x-2 p-3 border rounded-lg bg-gray-50 hover:bg-gray-100 transition cursor-pointer">
+                                        <label x-show="isItemVisible({{ $item->id }})"
+                                               class="flex items-center space-x-2 p-3 border rounded-lg bg-gray-50 hover:bg-gray-100 transition cursor-pointer">
                                             <input type="checkbox" 
                                                    name="item_ids[]" 
                                                    value="{{ $item->id }}" 

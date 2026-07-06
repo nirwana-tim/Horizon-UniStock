@@ -23,12 +23,24 @@ class DistributionScheduleController extends Controller
 
     public function create(): View
     {
-        $programLevels = ProgramLevel::orderBy('name')->get();
-        $faculties = Faculty::orderBy('name')->get();
-        $studyPrograms = StudyProgram::with('faculty')->orderBy('name')->get();
-        $items = Item::orderBy('name')->get();
+        $programLevels = ProgramLevel::orderBy('name', 'asc')->get();
+        $faculties = Faculty::orderBy('name', 'asc')->get();
+        $studyPrograms = StudyProgram::with('faculty')->orderBy('name', 'asc')->get();
+        $items = Item::orderBy('name', 'asc')->get();
 
-        return view('distribution.distribution-schedule.create', compact('programLevels', 'faculties', 'studyPrograms', 'items'));
+        $entitlements = \App\Models\Entitlement::with('items')->get();
+        $entitlementMap = [];
+        foreach ($entitlements as $ent) {
+            $entitlementMap[$ent->code] = $ent->items->pluck('item_id')->toArray();
+        }
+        $levelCodes = $programLevels->pluck('code', 'id')->toArray();
+        $facultyCodes = $faculties->pluck('code', 'id')->toArray();
+        $prodiCodes = $studyPrograms->pluck('code', 'id')->toArray();
+
+        return view('distribution.distribution-schedule.create', compact(
+            'programLevels', 'faculties', 'studyPrograms', 'items',
+            'entitlementMap', 'levelCodes', 'facultyCodes', 'prodiCodes'
+        ));
     }
 
     public function store(DistributionScheduleRequest $request): RedirectResponse
@@ -54,12 +66,24 @@ class DistributionScheduleController extends Controller
     public function edit(DistributionSchedule $distributionSchedule): View
     {
         $distributionSchedule->load('items');
-        $programLevels = ProgramLevel::orderBy('name')->get();
-        $faculties = Faculty::orderBy('name')->get();
-        $studyPrograms = StudyProgram::with('faculty')->orderBy('name')->get();
-        $items = Item::orderBy('name')->get();
+        $programLevels = ProgramLevel::orderBy('name', 'asc')->get();
+        $faculties = Faculty::orderBy('name', 'asc')->get();
+        $studyPrograms = StudyProgram::with('faculty')->orderBy('name', 'asc')->get();
+        $items = Item::orderBy('name', 'asc')->get();
 
-        return view('distribution.distribution-schedule.edit', compact('distributionSchedule', 'programLevels', 'faculties', 'studyPrograms', 'items'));
+        $entitlements = \App\Models\Entitlement::with('items')->get();
+        $entitlementMap = [];
+        foreach ($entitlements as $ent) {
+            $entitlementMap[$ent->code] = $ent->items->pluck('item_id')->toArray();
+        }
+        $levelCodes = $programLevels->pluck('code', 'id')->toArray();
+        $facultyCodes = $faculties->pluck('code', 'id')->toArray();
+        $prodiCodes = $studyPrograms->pluck('code', 'id')->toArray();
+
+        return view('distribution.distribution-schedule.edit', compact(
+            'distributionSchedule', 'programLevels', 'faculties', 'studyPrograms', 'items',
+            'entitlementMap', 'levelCodes', 'facultyCodes', 'prodiCodes'
+        ));
     }
 
     public function update(DistributionScheduleRequest $request, DistributionSchedule $distributionSchedule): RedirectResponse

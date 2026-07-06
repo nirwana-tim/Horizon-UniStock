@@ -1,76 +1,102 @@
-# Horizon-UniStock — Daftar Kasus Bisnis & Aturan Validasi
+# Horizon-UniStock — Daftar Kasus Bisnis & Pilihan Keputusan Finance
 
-Dokumen ini merangkum seluruh skenario kasus bisnis (*business cases*), aturan validasi, dan keputusan arsitektur yang telah didiskusikan dan diimplementasikan untuk referensi pengembangan sistem di masa mendatang.
+Dokumen ini merangkum seluruh skenario kasus bisnis (*business cases*), aturan validasi, keputusan arsitektur yang sudah diimplementasikan, serta **pilihan keputusan (opsi kebijakan)** untuk kasus-kasus yang masih memerlukan persetujuan akhir dari tim Finance saat presentasi prototype.
 
 ---
 
-### **Kasus 1: Proteksi Kode SKU & Entitlement (Immutability)**
+## Bagian A: Kasus Bisnis yang Sudah Diimplementasikan
+
+### **Kasus 1: Proteksi Kode Master & SKU (Immutability)**
 * **Skenario**: Pengguna salah menginput kode kategori/tipe/departemen/entitlement dan ingin mengeditnya di kemudian hari.
-* **Keputusan Arsitektur**: **KODE DIKUNCI (Read-Only / Disabled)** setelah dibuat.
-* **Alasan**: 
-  * Perubahan kode master di tengah jalan akan merusak string SKU barang yang sudah tersebar di database transaksi lama (`stock_movements`, `distribution_items`).
-  * Jika kode diubah di sistem, QR Code fisik yang sudah telanjur dicetak dan ditempel di seragam tidak akan bisa di-scan lagi (*mismatch*).
-* **Solusi**: Input kode disembunyikan/di-disable pada halaman Edit. Jika terjadi kesalahan ketik di awal, admin harus menghapus data tersebut (selama belum ada transaksi) dan membuat baru.
+* **Keputusan Sistem**: **KODE DIKUNCI (Read-Only)** setelah dibuat.
+* **Alasan**: Perubahan kode master di tengah jalan akan merusak string SKU barang yang sudah terikat di riwayat transaksi lama (`stock_movements`, `distribution_items`). Jika kode diubah, QR Code fisik yang sudah ditempel di baju tidak akan bisa di-scan lagi.
+* **Solusi**: Kolom Kode di-disable pada form Edit. Jika salah ketik, data harus dihapus (selama belum ada transaksi) lalu dibuat ulang.
+
+### **Kasus 2: Aturan Input Master Kode Baru (Auto-generate)**
+* **Skenario**: Menjaga kerapian kode agar tidak diisi asal-asalan oleh admin.
+* **Keputusan Sistem**: 
+  * **Kode Huruf (Kategori & Tipe)**: Diisi manual oleh admin (misal: `UNF`, `SHO`, `ALM`).
+  * **Kode Angka (Departemen & Ukuran)**: Form input kode dibuang. Sistem otomatis men-generate nomor urut dua digit secara berurutan (seperti `01`, `02`, `03`... `99`) agar rapi.
+
+### **Kasus 3: Generator Kode Entitlement Otomatis**
+* **Skenario**: Menghindari salah ketik saat menulis Kode Entitlement secara manual (contoh format: `{Level}{Faculty}{Prodi}` seperti `2627FHSS1-KEP`).
+* **Keputusan Sistem**: Form input teks diubah menjadi `readonly`. Admin cukup memilih dropdown **Angkatan** dan **Program Studi**, lalu JavaScript otomatis menggabungkannya secara *real-time*.
+
+### **Kasus 4: Pencatatan Harga Barang Historis (Kesiapan FIFO)**
+* **Skenario**: Harga seragam dari vendor mengalami kenaikan di tengah tahun berjalan.
+* **Keputusan Sistem**: Harga jual dan HPP disimpan di tabel terpisah `item_prices` secara historis. Mengubah harga sekarang tidak akan mengubah margin laba (GPM) pada laporan transaksi tahun lalu.
+
+### **Kasus 5: Pengubahan Ukuran oleh Mahasiswa (Edit Limit)**
+* **Skenario**: Mahasiswa terus-menerus mengubah ukuran baju sehingga membingungkan rekap pemesanan ke vendor.
+* **Keputusan Sistem**: Mahasiswa hanya boleh mengisi ukuran **maksimal 2 kali** (1x input pertama, 1x kesempatan edit) per Periode Distribusi. Setelah itu, dropdown terkunci secara otomatis.
+
+### **Kasus 6: Penyaringan Saldo Hak Lintas Transaksi (Remaining Balance Tracking)**
+* **Skenario**: Bagaimana mencegah mahasiswa melakukan klaim/ambil ganda (*double-claim*) untuk barang yang sama di tahun berikutnya atau pada jadwal yang berbeda?
+* **Keputusan Sistem**: **SISTEM SALDO HAK OTOMATIS**. 
+* **Solusi**: Setiap kali mahasiswa di-scan di loket, sistem secara *real-time* menghitung sisa saldo barang (`Sisa Saldo = Total Hak Entitlement - Jumlah yang Sudah Pernah Diambil di Masa Lalu`). Jika saldo barang tersebut sudah habis (bernilai 0), maka baris barang di layar scan staf otomatis terkunci (*disabled/gray out*) dengan label hijau **"Sudah Diambil"**.
+
+### **Kasus 7: Filter Dinamis Form Pembuatan Jadwal (Dynamic Form Filtering)**
+* **Skenario**: Bagaimana mencegah admin salah mencentang barang yang tidak sesuai untuk prodi/angkatan tertentu saat membuat jadwal distribusi?
+* **Keputusan Sistem**: **FORM DINAMIS BERBASIS ALPINE.JS**.
+* **Solusi**: Saat membuat/mengedit jadwal distribusi, begitu Fakultas, Prodi, dan Angkatan dipilih, grid checklist barang di bagian bawah otomatis menyusut hanya menampilkan item yang terdaftar di Entitlement prodi tersebut. Jika Admin mengubah pilihan prodi secara mendadak, sistem otomatis meng-uncheck (membatalkan centang) barang-barang yang tersembunyi di latar belakang.
 
 ---
 
-### **Kasus 2: Aturan Input Kode Baru (Huruf vs Angka)**
-* **Skenario**: Pembedaan metode pengisian kode saat pembuatan baru (*create*) berdasarkan tipe kode.
-* **Aturan Implementasi**:
-  * **Kode Karakter/Huruf (Kategori & Tipe)**: Admin menginput kode secara manual (misal: `UNF`, `SHO`, `CLG`) pada form tambah. Validasi backend menjamin kode wajib diisi (`required`) dan **harus unik** di database.
-  * **Kode Angka/Nomor (Departemen & Ukuran)**: Form input kode dihapus. Backend secara otomatis men-generate nomor urut dua digit yang belum terpakai (seperti `01`, `02`, `03`... `99`) agar penomoran rapi dan konsisten.
+## Bagian B: Kasus Ambigu (Butuh Pilihan Keputusan dari Finance)
+
+Berikut adalah beberapa kasus operasional yang memiliki beberapa alternatif solusi. Mohon pihak Finance memberikan keputusan kebijakan yang ingin diterapkan pada sistem:
+
+### **Kasus 8: Batas Akhir Input Ukuran (Lock Deadline)**
+* **Skenario**: Tanggal batas akhir pengisian ukuran mahasiswa sudah lewat. Bagaimana sistem harus membatasi mahasiswa?
+* **Opsi Keputusan untuk Finance**:
+  * **Opsi 1 (Kunci Total - Rekomendasi)**: Form pengisian di akun mahasiswa langsung dikunci total. Mahasiswa tidak bisa mengisi atau mengganti ukuran sama sekali. Mereka harus melapor manual ke Admin jika ingin mengubahnya.
+  * **Opsi 2 (Tombol Minta Izin)**: Form tetap dikunci, tetapi mahasiswa diberikan tombol "Minta Izin Ubah Ukuran". Admin tinggal klik setujui/tolak dari layar Admin.
+  * **Opsi 3 (Buka dengan Catatan)**: Form dibiarkan tetap terbuka, tetapi setiap pengubahan yang terlambat otomatis diberi tanda "Terlambat" di rekap pesanan ke vendor.
+
+### **Kasus 9: Penanganan Desain Baru vs Stok Lama**
+* **Skenario**: Ada perubahan desain seragam (misal: celana olahraga dari biru diganti merah). Bagaimana agar sisa stok celana biru di gudang tidak salah diberikan ke Mahasiswa Baru?
+* **Opsi Keputusan untuk Finance**:
+  * **Opsi 1 (Daftarkan Barang Baru - Rekomendasi)**: Desain celana merah didaftarkan sebagai nama barang baru di sistem. Sisa stok celana biru dipisahkan dan hanya digunakan untuk mahasiswa lama yang ingin membeli gantinya (eceran).
+  * **Opsi 2 (Karantina / Kosongkan Stok)**: Tetap memakai nama barang yang sama, tetapi sisa stok celana biru di sistem gudang langsung dikurangi menjadi 0 (dianggap tidak aktif) agar tidak otomatis terpotong saat pembagian.
+  * **Opsi 3 (Sistem Batch/Lot)**: Mengaktifkan pemisahan batch stok di gudang (Batch 2025 vs Batch 2026), lalu diatur agar pembagian mahasiswa baru hanya memotong stok dari Batch 2026.
+
+### **Kasus 10: Penanganan Stok Habis Saat Pembagian**
+* **Skenario**: Mahasiswa datang membawa QR Code, tetapi ukuran bajunya (misal: L) ternyata habis di gudang. Bagaimana staf gudang mencatatnya?
+* **Opsi Keputusan untuk Finance**:
+  * **Opsi 1 (Tunda Pembagian - Sudah Diterapkan)**: Barang tersebut tidak bisa dicentang di aplikasi. Staf hanya membagikan barang yang ada saja. Transaksi dicatat "Diterima Sebagian", dan sisa barang diambil nanti saat stok baru datang.
+  * **Opsi 2 (Kas Bon Seragam / Stok Minus)**: Tetap dicentang sebagai "Sudah Diambil", tetapi stok di sistem dibiarkan menjadi minus (`-1`) sebagai tanda gudang berhutang seragam ke mahasiswa tersebut.
+
+### **Kasus 11: Tampilan Daftar Barang di Layar Scan Staf**
+* **Skenario**: Jadwal hari ini membagikan semua jenis barang, tetapi mahasiswa yang di-scan hanya berhak menerima beberapa barang saja sesuai prodi/angkatan mereka.
+* **Opsi Keputusan untuk Finance**:
+  * **Opsi 1 (Hanya Tampilkan Hak Mahasiswa - Rekomendasi)**: Layar scan staf hanya menampilkan barang-barang yang memang menjadi hak mahasiswa tersebut. Layar terlihat bersih dan ringkas.
+  * **Opsi 2 (Tampilkan Semua tapi Kunci Barang Lain)**: Layar menampilkan seluruh jenis barang yang dibagikan hari itu, tetapi barang yang bukan hak mahasiswa tersebut otomatis terkunci (gray out) dan tidak bisa dicentang staf.
+
+### **Kasus 12: Pengisian Ukuran Mahasiswa Lama (Continuing)**
+* **Skenario**: Mahasiswa angkatan atas berhak mendapat barang baru (misal: Baju Praktek Baru). Bagaimana sistem menentukan ukurannya agar pembagian tidak macet karena mahasiswa lupa isi ukuran?
+* **Opsi Keputusan untuk Finance**:
+  * **Opsi 1 (Gunakan Ukuran Tahun Lalu - Sudah Aktif)**: Sistem otomatis menggunakan ukuran yang diisi mahasiswa pada tahun pertama. Namun jika ada tipe barang baru, mahasiswa tetap harus login untuk mengisi ukuran barang baru tersebut.
+  * **Opsi 2 (Auto-Copy Kategori Serupa - Rekomendasi)**: Sistem otomatis menyamakan ukuran barang baru dengan ukuran barang lama yang sejenis (misal: jika ukuran jas almamater tahun lalu `M`, maka baju praktek baru otomatis diset `M`). Mahasiswa tidak perlu mengisi ulang kecuali ukurannya berubah.
+  * **Opsi 3 (Wajib Isi Ulang Setiap Tahun)**: Setiap awal tahun ajaran baru, semua mahasiswa wajib mengisi ulang ukuran badan mereka untuk mengantisipasi perubahan berat/tinggi badan.
+
+### **Kasus 13: Pembelian Eceran Indent (Pre-Order via QR)**
+* **Skenario**: Mahasiswa lama membeli seragam eceran, tetapi stok kosong dan harus menunggu pesanan batch baru. Bagaimana merekam pengambilannya nanti di loket pembagian menggunakan QR Code?
+* **Opsi Keputusan untuk Finance**:
+  * **Opsi 1 (Masukkan ke Hak Pembagian - Rekomendasi)**: Setelah mahasiswa lama membayar eceran, Admin memasukkan namanya secara manual ke dalam daftar hak penerima barang periode tersebut. Saat antre, staf tinggal scan QR seperti biasa.
+  * **Opsi 2 (Pemisahan Status Belanjaan)**: Saat di-scan, layar staf memunculkan info khusus bahwa mahasiswa lama tersebut mengambil **"Barang Belanjaan Eceran (Lunas)"**, bukan jatah seragam gratis akademik. (Rapi secara pencatatan audit keuangan, memerlukan modifikasi fitur).
 
 ---
 
-### **Kasus 3: Generator Kode Entitlement Otomatis (UI Dropdown)**
-* **Skenario**: Admin kesulitan dan rawan melakukan salah ketik (*typo*) saat menuliskan string Kode Entitlement secara manual (contoh format: `{LevelCode}{FacultyCode}{ProdiCode}` seperti `2425FHSS1-KEP`).
-* **Solusi Implementasi**:
-  * Form input teks Kode Entitlement diubah menjadi **`readonly` (di-lock)** di halaman Tambah Entitlement.
-  * Ditambahkan dua dropdown menu: **Angkatan (Program Level)** dan **Program Studi (Study Program)**.
-  * JavaScript secara dinamis mendeteksi pilihan admin, menarik kode relasi fakultas terkait secara otomatis, lalu menggabungkannya menjadi kode entitlement yang valid secara *real-time*. Menjamin kecocokan kode 100% dengan data mahasiswa.
+## Bagian C: Daftar Pertanyaan Wawancara Alur Aktual Finance
 
----
+Berikut adalah daftar pertanyaan terarah yang dapat digunakan saat presentasi prototype untuk memvalidasi alur operasional keuangan dan logistik:
 
-### **Kasus 4: Pencatatan Harga Barang Historis & Kesiapan FIFO**
-* **Skenario**: Harga seragam dari vendor mengalami kenaikan di tahun berjalan akibat inflasi atau pergantian vendor.
-* **Solusi Implementasi**: 
-  * Harga jual dan HPP disimpan di dalam tabel terpisah **`item_prices`** yang terhubung secara historis ke barang.
-  * Menghindari perubahan harga retroaktif (mengubah harga sekarang tidak akan merusak laporan margin laba/GPM periode tahun lalu).
-  * Struktur ini sudah mendukung penuh jika di masa depan diaktifkan fitur **FIFO (First-In, First-Out)**, di mana pemotongan stok tinggal didasarkan pada data *batch* `stock_receive_items` tertua yang tersisa.
+### **1. Alur Pengadaan & Pemesanan ke Vendor (Restock / Procurement)**
+* *"Bagaimana cara Finance menentukan kuota pesanan seragam ke vendor saat ini? Apakah memesan persis sejumlah data ukuran mahasiswa yang masuk, atau selalu ditambah buffer (misal +5% atau +10%) untuk cadangan salah ukuran?"*
+* *"Kapan pemesanan (Purchase Order) dikirimkan ke vendor? Apakah menunggu sampai deadline input ukuran ditutup, atau dicicil per gelombang pendaftaran mahasiswa?"*
+* *"Ketika barang datang dari vendor, apakah tim gudang mencatat penerimaan barang (Stock Receive) berdasarkan Surat Jalan/Delivery Order? Dan apakah Finance mencocokkan jumlah barang datang tersebut dengan dokumen Purchase Order (PO) awal?"*
 
----
-
-### **Kasus 5: Kelayakan Pembayaran Mahasiswa (Eligibility One-Click Toggle)**
-* **Skenario**: Menjamin mahasiswa layak mengambil barang bertahap sesuai status keuangan (lunas/cuti), dengan pengujian harian yang praktis tanpa bergantung penuh pada unggahan file Excel.
-* **Solusi Implementasi**:
-  * Sistem mendukung **Excel Import** untuk input data keuangan secara massal di awal semester.
-  * Disediakan menu manual **"Kelayakan Mahasiswa"** berupa daftar seluruh mahasiswa kampus yang dilengkapi tombol **Toggle Satu-Klik**:
-    * Mahasiswa belum lunas &rarr; Klik **"Set Lunas (Eligible)"** untuk mendaftarkan kelayakan instan.
-    * Mahasiswa lunas &rarr; Klik **"Set Belum Lunas"** untuk menghapus status kelayakan instan (menolak hak ambil barang di loket scan).
-
----
-
-### **Kasus 6: Pengisian & Pengubahan Ukuran oleh Mahasiswa**
-* **Skenario**: Pembatasan kuota perubahan ukuran agar mahasiswa tidak terus-menerus mengganti ukuran baju setelah dipesan.
-* **Solusi Implementasi**:
-  * Mahasiswa hanya boleh mengisi ukuran **maksimal 2 kali** (termasuk inputan pertama kali) pada periode aktif.
-  * Kuota perubahan ini dihitung per **Periode Distribusi** (di-reset di tahun kedua agar mahasiswa bisa menginput ukuran baru untuk kit tahun kedua mereka).
-  * Form pengisian otomatis terkunci secara global begitu melewati batas tanggal **`size_change_deadline`** yang ditentukan admin pada periode berjalan.
-
----
-
-### **Kasus 7: Fitting & Pergantian Ukuran di Lapangan (Fitting Overrides)**
-* **Skenario**: Di meja pembagian gudang, mahasiswa mencoba baju ukuran M (sesuai pesanannya), namun ternyata sempit dan minta tukar ke ukuran L di tempat.
-* **Solusi Implementasi**:
-  * Staff dibekali dropdown **"Ukuran Aktual"** pada layar scan.
-  * Staff mengubah ukuran dari M ke L sebelum klik simpan.
-  * Sistem akan memotong stok fisik ukuran L (bukan ukuran M) di database, dan mencatat riwayat transaksi bahwa barang yang diserahkan secara aktual adalah ukuran L.
-
----
-
-### **Kasus 8: Pembagian Entitlement & Kelayakan Bertahap per Semester**
-* **Skenario**: Barang hak mahasiswa (seperti Jas Almamater vs Kit Klinis) dibagikan di semester/tahun yang berbeda. Ditambah lagi, kelayakan pembayaran (*Eligibility*) dicek setiap pergantian semester. Selain itu, mahasiswa boleh menginput ukuran badan kapan saja meski belum melakukan registrasi ulang.
-* **Solusi Implementasi**:
-  * **Pemisahan Entitlement**: Hak barang dipecah per-semester/tingkat (misal: Entitlement Ganjil untuk Almamater, Entitlement Genap untuk Kit Klinis). Mahasiswa dikaitkan ke Entitlement aktif yang sesuai.
-  * **Reset Status Kelayakan**: Status kelayakan mahasiswa (`EligibilityRecord`) di-reset kembali menjadi "Belum Lunas" setiap kali memasuki semester baru.
-  * **Pemisahan Input Ukuran & Distribusi**: Pintu input ukuran di aplikasi mahasiswa selalu terbuka secara bebas (tidak diblokir status lunas), namun saat pengambilan barang di gudang (`DistributionService`), status kelayakan wajib bernilai **Eligible (Lunas)**.
+### **2. Alur Penjualan Sisa Stok (Excess Stock & Retail POS)**
+* *"Jika di akhir masa distribusi terdapat kelebihan seragam (stok sisa), apakah sisa tersebut boleh dijual secara eceran (POS) kepada mahasiswa lama yang seragamnya hilang/rusak?"*
+* *"Jika boleh dijual eceran, bagaimana harga jual eceran ditentukan? Apakah sama dengan HPP modal, atau ada margin keuntungan tersendiri untuk kas universitas?"*
+* *"Bagaimana alur pembayaran untuk POS Eceran ini nantinya? Apakah mahasiswa bayar tunai di gudang, via transfer bank universitas, atau di-potong dari tagihan semesteran mereka?"*
