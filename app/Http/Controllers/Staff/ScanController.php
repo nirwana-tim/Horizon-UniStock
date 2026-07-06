@@ -112,13 +112,25 @@ class ScanController extends Controller
             }
         }
 
+        $distributedItems = \Illuminate\Support\Facades\DB::table('distribution_items')
+            ->join('distribution_transactions', 'distribution_items.transaction_id', '=', 'distribution_transactions.id')
+            ->where('distribution_transactions.student_id', '=', $student->id)
+            ->select('distribution_items.item_id', \Illuminate\Support\Facades\DB::raw('SUM(distribution_items.quantity) as total_qty'))
+            ->groupBy('distribution_items.item_id')
+            ->pluck('total_qty', 'item_id')
+            ->toArray();
+
+        $entitledQuantities = $entitlement
+            ? $entitlement->items->pluck('quantity', 'item_id')->toArray()
+            : [];
+
         $stockInfo = [];
         if ($activeSchedule) {
             foreach ($scheduleItems as $item) {
-                $variants = ItemVariant::where('item_id', $item->id)->get();
+                $variants = ItemVariant::where('item_id', '=', $item->id, 'and')->get();
                 foreach ($variants as $variant) {
-                    $balance = StockBalance::where('item_id', $item->id)
-                        ->where('variant_id', $variant->id)
+                    $balance = StockBalance::where('item_id', '=', $item->id, 'and')
+                        ->where('variant_id', '=', $variant->id, 'and')
                         ->first();
                     $stockInfo[$item->id][$variant->size] = $balance ? $balance->quantity : 0;
                 }
@@ -132,7 +144,9 @@ class ScanController extends Controller
             'scheduleItems',
             'studentSizes',
             'stockInfo',
-            'eligibility'
+            'eligibility',
+            'distributedItems',
+            'entitledQuantities'
         ));
     }
 }

@@ -191,20 +191,26 @@
                                                     $expectedLabel  = $sizeInfo['size_label'] ?? $expectedSize;
                                                     $availableStock = $stockInfo[$item->id][$expectedSize] ?? 0;
                                                     $outOfStock     = $availableStock <= 0;
+                                                    $takenQty       = $distributedItems[$item->id] ?? 0;
+                                                    $entitledQty    = $entitledQuantities[$item->id] ?? 0;
+                                                    $alreadyTaken   = $entitledQty > 0 && $takenQty >= $entitledQty;
+                                                    $isDisabled     = $outOfStock || $alreadyTaken;
                                                 @endphp
-                                                <tr class="{{ $outOfStock ? 'bg-gray-50 opacity-60' : '' }}">
+                                                <tr class="{{ $isDisabled ? 'bg-gray-50 opacity-60' : '' }}">
                                                     <td class="px-6 py-4 whitespace-nowrap">
                                                         <input type="checkbox"
                                                             name="items[{{ $index }}][item_id]"
                                                             value="{{ $item->id }}"
                                                             class="item-check rounded border-gray-300 text-primary-600 focus:ring-primary-500"
                                                             data-index="{{ $index }}"
-                                                            {{ $outOfStock ? 'disabled' : '' }}>
+                                                            {{ $isDisabled ? 'disabled' : '' }}>
                                                         <input type="hidden" name="items[{{ $index }}][expected_size]" value="{{ $expectedSize }}">
                                                     </td>
                                                     <td class="px-6 py-4 whitespace-nowrap">
                                                         <div class="text-sm font-medium text-gray-900">{{ $item->name }}</div>
-                                                        @if($outOfStock)
+                                                        @if($alreadyTaken)
+                                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-700 mt-1">Sudah Diambil</span>
+                                                        @elseif($outOfStock)
                                                             <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-700 mt-1">Stok Habis</span>
                                                         @endif
                                                     </td>
@@ -218,7 +224,7 @@
                                                         <select name="items[{{ $index }}][actual_size]"
                                                             class="block w-28 border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm item-size"
                                                             data-index="{{ $index }}"
-                                                            {{ $outOfStock ? 'disabled' : '' }}>
+                                                            {{ $isDisabled ? 'disabled' : '' }}>
                                                             @forelse($item->variants as $variant)
                                                                 <option value="{{ $variant->size }}" {{ $expectedSize == $variant->size ? 'selected' : '' }}>
                                                                     {{ $variant->size_label }}
@@ -233,7 +239,7 @@
                                                             value="1" min="1" max="{{ max(1, $availableStock) }}"
                                                             class="block w-20 border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm item-qty"
                                                             data-index="{{ $index }}"
-                                                            {{ $outOfStock ? 'disabled' : '' }}>
+                                                            {{ $isDisabled ? 'disabled' : '' }}>
                                                     </td>
                                                     <td class="px-6 py-4 whitespace-nowrap">
                                                         @php $stockQty = $availableStock; @endphp
