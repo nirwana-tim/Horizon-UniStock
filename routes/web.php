@@ -96,6 +96,7 @@ Route::middleware(['auth', 'password.changed', 'role:super_admin|admin'])->prefi
     Route::get('stock-card', [ReportController::class, 'stockCard'])->name('stock-card');
     Route::get('loss', [ReportController::class, 'loss'])->name('loss');
     Route::get('gpm-cost', [GpmController::class, 'index'])->name('gpm-cost');
+    Route::get('size-recap', [ReportController::class, 'sizeRecap'])->name('size-recap');
 });
 
 Route::middleware(['auth', 'password.changed', 'role:super_admin|admin'])->group(function () {

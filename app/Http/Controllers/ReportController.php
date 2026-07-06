@@ -11,6 +11,9 @@ use App\Exports\Reports\StockOpnameReport;
 use App\Exports\Reports\StockReport;
 use App\Models\DistributionSchedule;
 use App\Models\Item;
+use App\Exports\Reports\SizeRecapReport;
+use App\Models\ProgramLevel;
+use App\Models\StudyProgram;
 use App\Models\ItemCategory;
 use App\Models\StockOpname;
 use Illuminate\Http\Request;
@@ -21,12 +24,29 @@ class ReportController extends Controller
 {
     public function index(): View
     {
-        $periods = DistributionSchedule::whereNotNull('period')->distinct()->orderBy('period', 'desc')->pluck('period', 'period');
+        $periods = DistributionSchedule::select('period')->whereNotNull('period')->groupBy('period')->orderBy('period', 'desc')->pluck('period', 'period');
         $stockOpnames = StockOpname::orderBy('created_at', 'desc')->pluck('period', 'id');
-        $items = Item::orderBy('name')->pluck('code', 'code');
-        $categories = ItemCategory::orderBy('code')->get(['code', 'name']);
+        $items = Item::orderBy('name', 'asc')->pluck('code', 'code');
+        $categories = ItemCategory::orderBy('code', 'asc')->get(['code', 'label']);
+        
+        $programLevels = ProgramLevel::orderBy('name', 'asc')->get();
+        $studyPrograms = StudyProgram::orderBy('name', 'asc')->get();
 
-        return view('report.index', compact('periods', 'stockOpnames', 'items', 'categories'));
+        return view('report.index', compact('periods', 'stockOpnames', 'items', 'categories', 'programLevels', 'studyPrograms'));
+    }
+
+    public function sizeRecap(Request $request)
+    {
+        $request->validate([
+            'program_level_id' => 'nullable|integer|exists:program_levels,id',
+            'study_program_id' => 'nullable|integer|exists:study_programs,id',
+        ]);
+
+        $levelId = $request->input('program_level_id');
+        $prodiId = $request->input('study_program_id');
+        $filename = 'Laporan_Rekap_Kebutuhan_Ukuran.xlsx';
+
+        return Excel::download(new SizeRecapReport($levelId, $prodiId), $filename);
     }
 
     public function distribution(Request $request)
