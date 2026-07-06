@@ -289,7 +289,7 @@
                         GPM / Cost
                     </a>
                     <a href="{{ route('report.index') }}"
-                        class="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm {{ request()->routeIs('report.*') ? 'text-primary-700 font-medium bg-primary-50' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50' }} transition-colors">
+                        class="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm {{ (request()->routeIs('report.*') && !request()->routeIs('report.gpm-cost*')) ? 'text-primary-700 font-medium bg-primary-50' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50' }} transition-colors">
                         Reports
                     </a>
                 </div>
