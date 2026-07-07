@@ -43,9 +43,17 @@ class ItemDepartmentController extends Controller
 
     public function create(): View
     {
-        $faculties = Faculty::with('studyPrograms')->orderBy('name')->get();
+        $faculties = Faculty::orderBy('name')->get();
 
         return view('master.item-department.create', compact('faculties'));
+    }
+
+    public function studyPrograms(Faculty $faculty, Request $request): View
+    {
+        $faculty->load('studyPrograms');
+        $selectedIds = $request->input('selected_ids', []);
+
+        return view('master.item-department._study-programs', compact('faculty', 'selectedIds'));
     }
 
     public function store(ItemDepartmentRequest $request): RedirectResponse
@@ -65,7 +73,7 @@ class ItemDepartmentController extends Controller
     public function edit(ItemDepartment $itemDepartment): View
     {
         $itemDepartment->load('studyPrograms');
-        $faculties = Faculty::with('studyPrograms')->orderBy('name')->get();
+        $faculties = Faculty::orderBy('name')->get();
 
         return view('master.item-department.edit', compact('itemDepartment', 'faculties'));
     }

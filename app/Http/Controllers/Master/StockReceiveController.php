@@ -46,9 +46,38 @@ class StockReceiveController extends Controller
     public function create(): View
     {
         $vendors = Vendor::orderBy('name')->get();
-        $items = Item::with('category', 'variants')->orderBy('name')->get();
 
-        return view('inventory.stock-receive.create', compact('vendors', 'items'));
+        return view('inventory.stock-receive.create', compact('vendors'));
+    }
+
+    public function searchItems(Request $request): JsonResponse
+    {
+        $query = Item::with('category');
+
+        if ($q = $request->input('q')) {
+            $query->where(function ($qry) use ($q) {
+                $qry->where('name', 'like', "%{$q}%")
+                    ->orWhere('code', 'like', "%{$q}%")
+                    ->orWhere('base_code', 'like', "%{$q}%");
+            });
+        }
+
+        $items = $query->orderBy('name')->limit(20)->get()->map(fn ($item) => [
+            'id' => $item->id,
+            'label' => $item->name . ' (' . ($item->category?->code ?? '-') . ')',
+        ]);
+
+        return response()->json($items);
+    }
+
+    public function variantsByItem(Item $item): JsonResponse
+    {
+        $variants = $item->variants()->orderBy('size')->get()->map(fn ($v) => [
+            'id' => $v->id,
+            'label' => $v->size_label . ' (' . $v->sku . ')',
+        ]);
+
+        return response()->json($variants);
     }
 
     public function store(StockReceiveRequest $request): RedirectResponse

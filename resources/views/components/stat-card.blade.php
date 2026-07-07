@@ -15,6 +15,7 @@
     'color' => 'primary',
     'trend' => null,
     'href' => null,
+    'xValue' => null,
 ])
 
 @php
@@ -36,7 +37,7 @@ $tag = $href ? 'a' : 'div';
     <div class="flex items-start justify-between">
         <div class="flex-1 min-w-0">
             <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider truncate">{{ $title }}</p>
-            <p class="mt-2 text-3xl font-bold text-gray-800">{{ $value }}</p>
+            <p class="mt-2 text-3xl font-bold text-gray-800" @if($xValue) x-text="{{ $xValue }}" @endif>{{ $xValue ? '0' : $value }}</p>
             @if($trend)
                 <p class="mt-1 text-xs text-gray-400">{{ $trend }}</p>
             @endif

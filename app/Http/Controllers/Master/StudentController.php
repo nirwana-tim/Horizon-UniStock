@@ -81,15 +81,13 @@ class StudentController extends Controller
 
     public function show(Student $student): View
     {
-        $student->load([
-            'studyProgram.faculty',
-            'programLevel',
-            'user',
-            'distributionTransactions' => fn($q) => $q->latest(),
-            'distributionTransactions.items.item',
-            'distributionTransactions.schedule',
-        ]);
+        $student->load(['studyProgram.faculty', 'programLevel', 'user']);
 
+        return view('master.student.show', compact('student'));
+    }
+
+    public function entitlement(Student $student): View
+    {
         $entitlement = $student->entitlement_code
             ? Entitlement::where('code', $student->entitlement_code)
                 ->where('is_active', true)
@@ -97,7 +95,19 @@ class StudentController extends Controller
                 ->first()
             : null;
 
-        // Group received items by base_code (product group) to match entitlement items
+        $receivedItems = DistributionItem::whereHas('transaction', fn($q) =>
+            $q->where('student_id', $student->id)
+        )
+            ->with('item')
+            ->get()
+            ->groupBy(fn($di) => $di->item->base_code ?? $di->item_id)
+            ->map(fn($items) => ['total_qty' => $items->sum('quantity')]);
+
+        return view('master.student._entitlement', compact('student', 'entitlement', 'receivedItems'));
+    }
+
+    public function receivedItems(Student $student): View
+    {
         $receivedItems = DistributionItem::whereHas('transaction', fn($q) =>
             $q->where('student_id', $student->id)
         )
@@ -115,7 +125,18 @@ class StudentController extends Controller
                 ]),
             ]);
 
-        return view('master.student.show', compact('student', 'entitlement', 'receivedItems'));
+        return view('master.student._received-items', compact('receivedItems'));
+    }
+
+    public function transactions(Student $student): View
+    {
+        $student->load([
+            'distributionTransactions' => fn($q) => $q->latest(),
+            'distributionTransactions.items.item',
+            'distributionTransactions.schedule',
+        ]);
+
+        return view('master.student._transactions', compact('student'));
     }
 
     public function edit(Student $student): View
