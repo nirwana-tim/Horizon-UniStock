@@ -36,8 +36,8 @@
                                     @include('distribution.entitlement._table')
                                 </tbody>
                             </table>
-                            <div class="mt-4">
-                                {{ $entitlements->links() }}
+                            <div x-html="paginationHtml" class="mt-4">
+                                @component('components.alpine-pagination', ['paginator' => $entitlements])@endcomponent
                             </div>
                         </div>
 

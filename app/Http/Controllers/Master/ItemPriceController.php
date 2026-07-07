@@ -34,6 +34,7 @@ class ItemPriceController extends Controller
         if ($request->ajax()) {
             return response()->json([
                 'html' => view('master.item-price._table', compact('itemPrices'))->render(),
+                'pagination' => view('components.alpine-pagination', ['paginator' => $itemPrices])->render(),
             ]);
         }
 

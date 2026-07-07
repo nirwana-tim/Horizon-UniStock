@@ -32,7 +32,8 @@ class EntitlementController extends Controller
 
         if ($request->ajax()) {
             $html = view('distribution.entitlement._table', compact('entitlements'))->render();
-            return response()->json(compact('html'));
+            $pagination = view('components.alpine-pagination', ['paginator' => $entitlements])->render();
+            return response()->json(compact('html', 'pagination'));
         }
 
         return view('distribution.entitlement.index', compact('entitlements'));

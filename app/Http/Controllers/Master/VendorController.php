@@ -35,6 +35,7 @@ class VendorController extends Controller
         if ($request->ajax()) {
             return response()->json([
                 'html' => view('master.vendor._table', compact('vendors'))->render(),
+                'pagination' => view('components.alpine-pagination', ['paginator' => $vendors])->render(),
             ]);
         }
 

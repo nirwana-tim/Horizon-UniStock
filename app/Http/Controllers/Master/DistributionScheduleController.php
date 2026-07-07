@@ -29,7 +29,8 @@ class DistributionScheduleController extends Controller
 
         if ($request->ajax()) {
             $html = view('distribution.distribution-schedule._table', compact('schedules'))->render();
-            return response()->json(compact('html'));
+            $pagination = view('components.alpine-pagination', ['paginator' => $schedules])->render();
+            return response()->json(compact('html', 'pagination'));
         }
 
         return view('distribution.distribution-schedule.index', compact('schedules'));

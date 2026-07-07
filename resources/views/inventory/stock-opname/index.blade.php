@@ -46,8 +46,8 @@
                                     @include('inventory.stock-opname._table')
                                 </tbody>
                             </table>
-                            <div class="mt-4">
-                                {{ $batches->links() }}
+                            <div x-html="paginationHtml" class="mt-4">
+                                @component('components.alpine-pagination', ['paginator' => $batches])@endcomponent
                             </div>
                         </div>
                     </div>

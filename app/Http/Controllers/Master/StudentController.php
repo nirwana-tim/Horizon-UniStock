@@ -38,6 +38,7 @@ class StudentController extends Controller
         if ($request->ajax()) {
             return response()->json([
                 'html' => view('master.student._table', compact('students'))->render(),
+                'pagination' => view('components.alpine-pagination', ['paginator' => $students])->render(),
             ]);
         }
 

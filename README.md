@@ -79,6 +79,19 @@ php artisan serve
 ```
 Buka http://127.0.0.1:8000
 
+# After Pull (Setelah `git pull`)
+
+Setiap kali menarik perubahan terbaru dari repositori, jalankan perintah berikut secara berurutan:
+
+```bash
+php artisan config:clear && php artisan route:clear && php artisan view:clear && php artisan cache:clear, npm install sama npm run build
+```
+```bash
+npm install && npm run build
+```
+
+> **Catatan:** `npm install && npm run build` wajib dijalankan jika ada perubahan pada file JavaScript, CSS, atau dependensi frontend. Keempat `php artisan ...:clear` membersihkan cache Laravel yang mungkin masih menyimpan versi lama.
+
 ### Login Default
 | Role | Email | Password |
 |------|-------|----------|

@@ -33,6 +33,7 @@ class FacultyController extends Controller
         if ($request->ajax()) {
             return response()->json([
                 'html' => view('master.faculty._table', compact('faculties'))->render(),
+                'pagination' => view('components.alpine-pagination', ['paginator' => $faculties])->render(),
             ]);
         }
 

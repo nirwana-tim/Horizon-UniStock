@@ -32,7 +32,8 @@ class SizeMonitorController extends Controller
 
         if ($request->ajax()) {
             $html = view('distribution.size-monitor._table', compact('histories'))->render();
-            return response()->json(compact('html'));
+            $pagination = view('components.alpine-pagination', ['paginator' => $histories])->render();
+            return response()->json(compact('html', 'pagination'));
         }
 
         return view('distribution.size-monitor.index', compact('histories'));
