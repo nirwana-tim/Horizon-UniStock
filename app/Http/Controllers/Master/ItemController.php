@@ -51,14 +51,21 @@ class ItemController extends Controller
 
     public function create(): View
     {
-        $categories = ItemCategory::with(['sizes', 'types'])->orderBy('code')->get();
+        $categories = ItemCategory::orderBy('code')->get();
         $types = ItemType::orderBy('code')->get();
         $departments = ItemDepartment::orderBy('code')->get();
 
-        $sizesByCategory = $categories->mapWithKeys(fn ($cat) => [$cat->id => $cat->sizes]);
-        $typesByCategory = $categories->mapWithKeys(fn ($cat) => [$cat->id => $cat->types]);
+        return view('master.item.create', compact('categories', 'types', 'departments'));
+    }
 
-        return view('master.item.create', compact('categories', 'types', 'departments', 'sizesByCategory', 'typesByCategory'));
+    public function sizesTypesByCategory(Request $request): JsonResponse
+    {
+        $category = ItemCategory::with(['sizes', 'types'])->findOrFail($request->input('category_id'));
+
+        return response()->json([
+            'sizes' => $category->sizes,
+            'types' => $category->types,
+        ]);
     }
 
     public function store(ItemRequest $request): RedirectResponse
@@ -78,15 +85,12 @@ class ItemController extends Controller
 
     public function edit(Item $item): View
     {
-        $item->load('variants');
-        $categories = ItemCategory::with(['sizes', 'types'])->orderBy('code')->get();
+        $item->load(['category.sizes', 'category.types', 'variants']);
+        $categories = ItemCategory::orderBy('code')->get();
         $types = ItemType::orderBy('code')->get();
         $departments = ItemDepartment::orderBy('code')->get();
 
-        $sizesByCategory = $categories->mapWithKeys(fn ($cat) => [$cat->id => $cat->sizes]);
-        $typesByCategory = $categories->mapWithKeys(fn ($cat) => [$cat->id => $cat->types]);
-
-        return view('master.item.edit', compact('item', 'categories', 'types', 'departments', 'sizesByCategory', 'typesByCategory'));
+        return view('master.item.edit', compact('item', 'categories', 'types', 'departments'));
     }
 
     public function update(ItemRequest $request, Item $item): RedirectResponse

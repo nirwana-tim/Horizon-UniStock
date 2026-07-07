@@ -41,11 +41,10 @@ class EntitlementController extends Controller
 
     public function create(): View
     {
-        $items = $this->getGroupedItems();
         $programLevels = ProgramLevel::orderBy('code', 'asc')->get(['*']);
         $studyPrograms = StudyProgram::with(['faculty'])->orderBy('name', 'asc')->get(['*']);
 
-        return view('distribution.entitlement.create', compact('items', 'programLevels', 'studyPrograms'));
+        return view('distribution.entitlement.create', compact('programLevels', 'studyPrograms'));
     }
 
     public function store(EntitlementRequest $request): RedirectResponse
@@ -65,11 +64,10 @@ class EntitlementController extends Controller
     public function edit(Entitlement $entitlement): View
     {
         $entitlement->load('items');
-        $items = $this->getGroupedItems();
         $programLevels = ProgramLevel::orderBy('code', 'asc')->get(['*']);
         $studyPrograms = StudyProgram::with(['faculty'])->orderBy('name', 'asc')->get(['*']);
 
-        return view('distribution.entitlement.edit', compact('entitlement', 'items', 'programLevels', 'studyPrograms'));
+        return view('distribution.entitlement.edit', compact('entitlement', 'programLevels', 'studyPrograms'));
     }
 
     public function update(EntitlementRequest $request, Entitlement $entitlement): RedirectResponse
@@ -77,6 +75,18 @@ class EntitlementController extends Controller
         $this->entitlementService->updateEntitlement($entitlement, $request->validated());
 
         return redirect()->route('distribution.entitlement.index')->with('success', 'Entitlement berhasil diperbarui.');
+    }
+
+    public function itemsGrid(Request $request): View
+    {
+        $items = $this->getGroupedItems();
+        $entitlement = null;
+
+        if ($entitlementId = $request->input('entitlement_id')) {
+            $entitlement = Entitlement::with('items')->find($entitlementId);
+        }
+
+        return view('distribution.entitlement._items-grid', compact('items', 'entitlement'));
     }
 
     public function destroy(Entitlement $entitlement): RedirectResponse

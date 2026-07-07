@@ -92,9 +92,29 @@ class DistributionScheduleController extends Controller
 
     public function show(DistributionSchedule $distributionSchedule): View
     {
-        $distributionSchedule->load(['programLevel', 'faculty', 'studyProgram', 'items.item', 'transactions.student']);
+        $distributionSchedule->load(['programLevel', 'faculty', 'studyProgram', 'items.item']);
 
         return view('distribution.distribution-schedule.show', compact('distributionSchedule'));
+    }
+
+    public function transactions(DistributionSchedule $distributionSchedule, Request $request): View|JsonResponse
+    {
+        $query = $distributionSchedule->transactions()->with('student');
+
+        if ($search = $request->input('q')) {
+            $query->whereHas('student', fn($q) => $q->where('name', 'like', "%{$search}%")->orWhere('nim', 'like', "%{$search}%"));
+        }
+
+        $transactions = $query->latest('pickup_time')->paginate(20);
+
+        if ($request->ajax()) {
+            return response()->json([
+                'html' => view('distribution.distribution-schedule._transactions', compact('transactions'))->render(),
+                'pagination' => view('components.alpine-pagination', ['paginator' => $transactions])->render(),
+            ]);
+        }
+
+        return view('distribution.distribution-schedule._transactions', compact('transactions'));
     }
 
     public function edit(DistributionSchedule $distributionSchedule): View

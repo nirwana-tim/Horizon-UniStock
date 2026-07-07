@@ -12,6 +12,7 @@ use App\Models\StockReceive;
 use App\Models\Student;
 use App\Models\StudyProgram;
 use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
@@ -22,11 +23,11 @@ class DashboardController extends Controller
         $user = Auth::user();
 
         if ($user->hasRole('super_admin')) {
-            return $this->superAdminDashboard();
+            return view('dashboards.super-admin');
         }
 
         if ($user->hasRole('admin')) {
-            return $this->financeDashboard();
+            return view('dashboards.finance');
         }
 
         if ($user->hasRole('staff')) {
@@ -36,43 +37,46 @@ class DashboardController extends Controller
         return $this->studentDashboard();
     }
 
-    private function superAdminDashboard(): View
+    public function stats(): JsonResponse
     {
-        $data = [
-            'totalUsers' => User::count(),
-            'totalStudents' => Student::count(),
-            'totalItems' => Item::count(),
-            'totalStockReceives' => StockReceive::count(),
-            'outOfStockItems' => StockBalance::where('quantity', '<=', 0)->count(),
-            'lowStockItems' => StockBalance::with('item')
-                ->where('quantity', '>', 0)
-                ->where('quantity', '<=', 5)
-                ->orderBy('quantity')
-                ->take(10)
-                ->get(),
-        ];
+        $user = Auth::user();
 
-        return view('dashboards.super-admin', $data);
-    }
+        if ($user->hasRole('super_admin')) {
+            return response()->json([
+                'totalUsers' => User::count(),
+                'totalStudents' => Student::count(),
+                'totalItems' => Item::count(),
+                'totalStockReceives' => StockReceive::count(),
+                'outOfStockItems' => StockBalance::where('quantity', '<=', 0)->count(),
+            ]);
+        }
 
-    private function financeDashboard(): View
-    {
-        $data = [
+        return response()->json([
             'totalFaculties' => Faculty::count(),
             'totalStudyPrograms' => StudyProgram::count(),
             'totalItems' => Item::count(),
             'monthlyReceives' => StockReceive::whereMonth('receive_date', now()->month)->count(),
             'draftOpnames' => StockOpname::where('status', 'draft')->count(),
             'outOfStockItems' => StockBalance::where('quantity', '<=', 0)->count(),
-            'lowStockItems' => StockBalance::with('item')
-                ->where('quantity', '>', 0)
-                ->where('quantity', '<=', 5)
-                ->orderBy('quantity')
-                ->take(10)
-                ->get(),
-        ];
+        ]);
+    }
 
-        return view('dashboards.finance', $data);
+    public function lowStock(): View|JsonResponse
+    {
+        $lowStockItems = StockBalance::with('item')
+            ->where('quantity', '>', 0)
+            ->where('quantity', '<=', 5)
+            ->orderBy('quantity')
+            ->take(10)
+            ->get();
+
+        if (request()->wantsJson()) {
+            return response()->json([
+                'html' => view('dashboards._low-stock', compact('lowStockItems'))->render(),
+            ]);
+        }
+
+        return view('dashboards._low-stock', compact('lowStockItems'));
     }
 
     private function staffDashboard(): View

@@ -6,73 +6,71 @@
         </div>
     </x-slot>
 
-    @php
-        $itemOptions = $items->map(fn($item) => [
-            'value' => $item->id,
-            'label' => $item->name . ' (' . ($item->category?->code ?? '-') . ')',
-        ])->toArray();
-
-        $variantOptions = collect();
-        foreach ($items as $item) {
-            foreach ($item->variants as $variant) {
-                $variantOptions->push([
-                    'value' => $variant->id,
-                    'item_id' => $item->id,
-                    'label' => $item->name . ' - ' . $variant->size_label . ' (' . $variant->sku . ')',
-                ]);
-            }
-        }
-    @endphp
-
     <div class="py-12" x-data="{
         items: {{ json_encode(old('items', [])) }},
         showModal: false,
-        newItem: { item_id: '', variant_id: '', quantity: 1, unit_price: 0, hpp: 0 },
-        itemOptions: {{ json_encode($itemOptions) }},
-        variantOptions: {{ json_encode($variantOptions) }},
-        
-        get filteredVariantOptions() {
-            if (!this.newItem.item_id) return [];
-            return this.variantOptions.filter(v => v.item_id == this.newItem.item_id);
-        },
-        
+        searchQuery: '',
+        searchResults: [],
+        loading: false,
+        searchItemsUrl: '{{ route('inventory.stock-receive.search-items') }}',
+        variantUrlBase: '{{ url('inventory/stock-receive/variants-by-item') }}',
+        newItem: { item_id: '', item_label: '', variant_id: '', variant_label: '', quantity: 1, unit_price: 0, hpp: 0 },
+        variantOptions: [],
+        debounceTimer: null,
+
         addItem() {
             if (!this.newItem.item_id || !this.newItem.variant_id) {
                 alert('Please select an item and variant first.');
                 return;
             }
-            
-            const itemOpt = this.itemOptions.find(o => o.value == this.newItem.item_id);
-            const varOpt = this.variantOptions.find(o => o.value == this.newItem.variant_id);
-            
+
+            const varOpt = this.variantOptions.find(o => o.id == this.newItem.variant_id);
+
             this.items.push({
                 item_id: this.newItem.item_id,
-                item_label: itemOpt ? itemOpt.label : '',
+                item_label: this.newItem.item_label,
                 variant_id: this.newItem.variant_id,
                 variant_label: varOpt ? varOpt.label : '',
                 quantity: this.newItem.quantity,
                 unit_price: this.newItem.unit_price,
                 hpp: this.newItem.hpp
             });
-            
-            this.newItem = { item_id: '', variant_id: '', quantity: 1, unit_price: 0, hpp: 0 };
+
+            this.newItem = { item_id: '', item_label: '', variant_id: '', variant_label: '', quantity: 1, unit_price: 0, hpp: 0 };
+            this.searchQuery = '';
+            this.searchResults = [];
+            this.variantOptions = [];
             this.showModal = false;
         },
-        
+
         removeItem(index) {
             this.items.splice(index, 1);
         },
-        
-        init() {
-            this.items = this.items.map(item => {
-                const itemOpt = this.itemOptions.find(o => o.value == item.item_id);
-                const varOpt = this.variantOptions.find(o => o.value == item.variant_id);
-                return {
-                    ...item,
-                    item_label: itemOpt ? itemOpt.label : '',
-                    variant_label: varOpt ? varOpt.label : (item.variant_label || '')
-                };
-            });
+
+        searchItems() {
+            if (this.debounceTimer) clearTimeout(this.debounceTimer);
+            if (!this.searchQuery || this.searchQuery.length < 2) {
+                this.searchResults = [];
+                return;
+            }
+            this.debounceTimer = setTimeout(() => {
+                this.loading = true;
+                axios.get(this.searchItemsUrl, { params: { q: this.searchQuery } })
+                    .then(res => { this.searchResults = res.data; })
+                    .finally(() => { this.loading = false; });
+            }, 300);
+        },
+
+        selectItem(item) {
+            this.newItem.item_id = item.id;
+            this.newItem.item_label = item.label;
+            this.searchQuery = item.label;
+            this.searchResults = [];
+            this.newItem.variant_id = '';
+            this.variantOptions = [];
+
+            axios.get(this.variantUrlBase + '/' + item.id)
+                .then(res => { this.variantOptions = res.data; });
         }
     }">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
@@ -190,13 +188,7 @@
                      x-transition:leave="ease-in duration-200"
                      x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
                      x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                     class="relative transform overflow-hidden rounded-xl bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg p-6"
-                     @change="
-                        if ($event.target.name === 'modal_item_id') {
-                            newItem.item_id = $event.target.value;
-                            newItem.variant_id = '';
-                        }
-                     ">
+                     class="relative transform overflow-hidden rounded-xl bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg p-6">
                     
                     <div class="flex items-center justify-between border-b pb-3 mb-4">
                         <h3 class="text-base font-bold text-gray-900">Add Item</h3>
@@ -208,17 +200,30 @@
                     </div>
 
                     <div class="space-y-4">
-                        <div>
-                            <x-input-label :value="__('Select Item')" class="mb-1" />
-                            <x-searchable-select name="modal_item_id" :options="$itemOptions" placeholder="-- Search Item --" />
+                        <div class="relative">
+                            <x-input-label :value="__('Search Item')" class="mb-1" />
+                            <input type="text" x-model="searchQuery" @input="searchItems()"
+                                placeholder="Type item name or code..."
+                                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500 text-sm">
+
+                            <div x-show="searchResults.length > 0" class="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg max-h-48 overflow-y-auto">
+                                <template x-for="item in searchResults" :key="item.id">
+                                    <button type="button" @click="selectItem(item)"
+                                        class="w-full text-left px-3 py-2 text-sm hover:bg-primary-50 focus:bg-primary-50 transition"
+                                        x-text="item.label">
+                                    </button>
+                                </template>
+                            </div>
+
+                            <div x-show="loading" class="mt-1 text-xs text-gray-400">Searching...</div>
                         </div>
 
                         <div>
                             <x-input-label :value="__('Select Size Variant')" class="mb-1" />
                             <select x-model="newItem.variant_id" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500 text-sm">
                                 <option value="">-- Select Size Variant --</option>
-                                <template x-for="opt in filteredVariantOptions" :key="opt.value">
-                                    <option :value="opt.value" x-text="opt.label"></option>
+                                <template x-for="opt in variantOptions" :key="opt.id">
+                                    <option :value="opt.id" x-text="opt.label"></option>
                                 </template>
                             </select>
                         </div>

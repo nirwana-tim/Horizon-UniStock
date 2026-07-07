@@ -36,6 +36,8 @@ Route::get('/', function () {
 });
 
 Route::get('/dashboard', DashboardController::class)->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/dashboard/stats', [DashboardController::class, 'stats'])->middleware(['auth', 'verified'])->name('dashboard.stats');
+Route::get('/dashboard/low-stock', [DashboardController::class, 'lowStock'])->middleware(['auth', 'verified'])->name('dashboard.low-stock');
 
 Route::middleware(['auth', 'password.changed'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -51,9 +53,11 @@ Route::middleware(['auth', 'password.changed', 'role:super_admin|admin'])->prefi
     Route::resource('item-category', ItemCategoryController::class);
     Route::resource('item-type', ItemTypeController::class);
     Route::resource('item-department', ItemDepartmentController::class);
+    Route::get('item-department/study-programs/{faculty}', [ItemDepartmentController::class, 'studyPrograms'])->name('item-department.study-programs');
     Route::resource('item-size', ItemSizeController::class);
 
     Route::resource('item', ItemController::class);
+    Route::get('item/sizes-types-by-category', [ItemController::class, 'sizesTypesByCategory'])->name('item.sizes-types-by-category');
     Route::post('item/{item}/variant', [ItemVariantController::class, 'store'])->name('item.variant.store');
     Route::delete('item/{item}/variant/{variant}', [ItemVariantController::class, 'destroy'])->name('item.variant.destroy');
 
@@ -63,13 +67,18 @@ Route::middleware(['auth', 'password.changed', 'role:super_admin|admin'])->prefi
 
 Route::middleware(['auth', 'password.changed', 'role:super_admin|admin'])->prefix('admin/students')->name('students.')->group(function () {
     Route::resource('/', StudentController::class)->parameters(['' => 'student']);
+    Route::get('/{student}/entitlement', [StudentController::class, 'entitlement'])->name('entitlement');
+    Route::get('/{student}/received-items', [StudentController::class, 'receivedItems'])->name('received-items');
+    Route::get('/{student}/transactions', [StudentController::class, 'transactions'])->name('transactions');
     Route::post('/generate', [StudentController::class, 'generate'])->name('generate');
     Route::post('/generate-all', [StudentController::class, 'generateAll'])->name('generateAll');
 });
 
 Route::middleware(['auth', 'password.changed', 'role:super_admin|admin'])->prefix('distribution')->name('distribution.')->group(function () {
     Route::resource('entitlement', EntitlementController::class);
+    Route::get('entitlement/items-grid', [EntitlementController::class, 'itemsGrid'])->name('entitlement.items-grid');
     Route::get('distribution-schedule/fetch-items', [DistributionScheduleController::class, 'fetchItems'])->name('distribution-schedule.fetch-items');
+    Route::get('distribution-schedule/{distributionSchedule}/transactions', [DistributionScheduleController::class, 'transactions'])->name('distribution-schedule.transactions');
     Route::resource('distribution-schedule', DistributionScheduleController::class);
     Route::get('size-monitor', [SizeMonitorController::class, 'index'])->name('size-monitor.index');
     Route::get('/scan', [ScanController::class, 'index'])->name('scan.index');
@@ -82,6 +91,8 @@ Route::middleware(['auth', 'password.changed', 'role:super_admin|admin'])->prefi
 
 Route::middleware(['auth', 'password.changed', 'role:super_admin|admin'])->prefix('inventory')->name('inventory.')->group(function () {
     Route::resource('stock-receive', StockReceiveController::class)->except(['edit', 'update']);
+    Route::get('stock-receive/search-items', [StockReceiveController::class, 'searchItems'])->name('stock-receive.search-items');
+    Route::get('stock-receive/variants-by-item/{item}', [StockReceiveController::class, 'variantsByItem'])->name('stock-receive.variants-by-item');
     Route::resource('stock-opname', StockOpnameController::class)->except(['edit', 'update', 'destroy']);
     Route::post('stock-opname/{stockOpname}/upload', [StockOpnameController::class, 'upload'])->name('stock-opname.upload');
     Route::post('stock-opname/{stockOpname}/approve', [StockOpnameController::class, 'approve'])->name('stock-opname.approve');

@@ -26,26 +26,15 @@
 
                         <div class="mb-4">
                             <x-input-label :value="__('Related Study Programs')" />
-                            <div class="mt-2 space-y-4">
+                            <div class="mt-2 space-y-4" x-data="{ loadedFaculties: {} }">
                                 @foreach($faculties as $faculty)
-                                    @php
-                                        $facultyProdiIds = $faculty->studyPrograms->pluck('id')->toArray();
-                                        $checkedInFaculty = array_intersect($selectedIds, $facultyProdiIds);
-                                        $allChecked = count($checkedInFaculty) === count($facultyProdiIds) && count($facultyProdiIds) > 0;
-                                        $anyChecked = count($checkedInFaculty) > 0;
-                                    @endphp
                                     <div class="border border-gray-200 rounded-md p-3">
                                         <div class="flex items-center mb-2">
-                                            <input type="checkbox" id="faculty-{{ $faculty->id }}" class="faculty-check rounded border-gray-300 text-primary-600 focus:ring-primary-500" data-faculty="{{ $faculty->id }}" {{ $allChecked ? 'checked' : '' }}>
-                                            <label for="faculty-{{ $faculty->id }}" class="ml-2 text-sm font-semibold text-gray-700">{{ $faculty->name }}</label>
+                                            <input type="checkbox" id="faculty-{{ $faculty->id }}" class="faculty-check rounded border-gray-300 text-primary-600 focus:ring-primary-500" data-faculty="{{ $faculty->id }}">
+                                            <label for="faculty-{{ $faculty->id }}" @click="if (!loadedFaculties[{{ $faculty->id }}]) { loadedFaculties[{{ $faculty->id }}] = true; $nextTick(() => { axios.get('{{ route('master-data.item-department.study-programs', $faculty) }}?selected_ids={{ implode(',', $selectedIds) }}').then(r => { $refs['prodi-{{ $faculty->id }}'].innerHTML = r.data; }); }); }" class="ml-2 text-sm font-semibold text-gray-700 cursor-pointer">{{ $faculty->name }}</label>
                                         </div>
-                                        <div class="ml-6 space-y-1">
-                                            @foreach($faculty->studyPrograms as $prodi)
-                                                <label class="flex items-center">
-                                                    <input type="checkbox" name="study_program_ids[]" value="{{ $prodi->id }}" class="prodi-check rounded border-gray-300 text-primary-600 focus:ring-primary-500" data-faculty="{{ $faculty->id }}" {{ in_array($prodi->id, $selectedIds) ? 'checked' : '' }}>
-                                                    <span class="ml-2 text-sm text-gray-600">{{ $prodi->name }}</span>
-                                                </label>
-                                            @endforeach
+                                        <div class="ml-6 space-y-1" x-ref="prodi-{{ $faculty->id }}">
+                                            <p class="text-xs text-gray-400 italic">Click faculty name to load study programs...</p>
                                         </div>
                                     </div>
                                 @endforeach

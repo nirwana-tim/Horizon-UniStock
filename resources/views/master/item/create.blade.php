@@ -140,8 +140,6 @@
     </div>
 
     <script>
-        const sizesByCategory = @json($sizesByCategory);
-        const typesByCategory = @json($typesByCategory);
         const sizeSelect = document.getElementById('size_id');
         const typeSelect = document.getElementById('type_id');
         const categorySelect = document.getElementById('category_id');
@@ -166,15 +164,26 @@
             });
         }
 
-        function filterOptions() {
-            const catId = categorySelect.value;
-            const sizes = sizesByCategory[catId] || [];
-            const types = typesByCategory[catId] || [];
-            renderSizes(sizes);
-            renderTypes(types);
+        function loadSizesAndTypes(categoryId) {
+            if (!categoryId) {
+                renderSizes([]);
+                renderTypes([]);
+                return;
+            }
+            axios.get('{{ route("master-data.item.sizes-types-by-category") }}', {
+                params: { category_id: categoryId }
+            }).then(res => {
+                renderSizes(res.data.sizes);
+                renderTypes(res.data.types);
+            });
         }
 
-        categorySelect.addEventListener('change', filterOptions);
-        filterOptions();
+        categorySelect.addEventListener('change', function () {
+            loadSizesAndTypes(this.value);
+        });
+
+        if (categorySelect.value) {
+            loadSizesAndTypes(categorySelect.value);
+        }
     </script>
 </x-app-layout>
