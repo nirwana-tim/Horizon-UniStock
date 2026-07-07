@@ -2,7 +2,7 @@
     <x-slot name="header">
         <div class="flex items-center justify-between">
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ __('Edit Entitlement') }}</h2>
-            <a href="{{ route('distribution.entitlement.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-300 transition">{{ __('← Kembali') }}</a>
+            <a href="{{ route('distribution.entitlement.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-300 transition">{{ __('← Back') }}</a>
         </div>
     </x-slot>
 
@@ -15,7 +15,7 @@
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <x-input-label :value="__('Kode Entitlement (Read-Only)')" />
+                                <x-input-label :value="__('Entitlement Code (Read-Only)') />
                                 <x-text-input id="code_display" type="text" class="mt-1 block w-full bg-gray-50 text-gray-500 font-mono" :value="$entitlement->code" disabled />
                                 <input type="hidden" name="code" value="{{ $entitlement->code }}">
                             </div>
@@ -27,15 +27,15 @@
                                 </select>
                             </div>
                             <div class="md:col-span-2">
-                                <x-input-label for="description" :value="__('Deskripsi')" />
+                                <x-input-label for="description" :value="__('Description')" />
                                 <textarea id="description" name="description" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500" rows="2">{{ old('description', $entitlement->description) }}</textarea>
                                 <x-input-error :messages="$errors->get('description')" class="mt-2" />
                             </div>
                             
                             {{-- Simplified Grid of Checked Items --}}
                             <div class="md:col-span-2">
-                                <x-input-label :value="__('Pilih Item & Jumlah Hak')" />
-                                <p class="mt-1 mb-4 text-xs text-gray-500">Pilih item yang berhak didapatkan mahasiswa dan sesuaikan jumlahnya.</p>
+                                <x-input-label :value="__('Select Items & Entitlement Quantity')" />
+                                <p class="mt-1 mb-4 text-xs text-gray-500">Select items that students are entitled to and adjust the quantity.</p>
                                 
                                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
                                     @foreach($items as $idx => $item)
@@ -72,8 +72,8 @@
                         </div>
 
                         <div class="mt-6 flex items-center gap-3">
-                            <x-primary-button>{{ __('Perbarui') }}</x-primary-button>
-                            <a href="{{ route('distribution.entitlement.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-300 transition">{{ __('Batal') }}</a>
+                            <x-primary-button>{{ __('Update') }}</x-primary-button>
+                            <a href="{{ route('distribution.entitlement.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-300 transition">{{ __('Cancel') }}</a>
                         </div>
                     </form>
                 </div>

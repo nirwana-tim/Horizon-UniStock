@@ -36,7 +36,7 @@ class ScanController extends Controller
         $student = $this->distributionService->findStudent($request->input('query'));
 
         if (!$student) {
-            return back()->withErrors(['query' => 'Mahasiswa tidak ditemukan. Pastikan NIM atau QR token valid.']);
+            return back()->withErrors(['query' => 'Mahasiswa tidak ditemukan. Pastikan NIM valid.']);
         }
 
         return $this->showDistribution($student);

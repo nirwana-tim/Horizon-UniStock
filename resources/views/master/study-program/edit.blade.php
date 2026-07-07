@@ -1,6 +1,6 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ __('Edit Program Studi') }}</h2>
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ __('Edit Study Program') }}</h2>
     </x-slot>
 
     <div class="py-12">
@@ -18,7 +18,7 @@
                         @method('PUT')
 
                         <div class="mb-4">
-                            <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Nama Program Studi</label>
+                            <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Study Program Name</label>
                             <input type="text" name="name" id="name" value="{{ old('name', $program->name) }}"
                                    class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 @error('name') border-red-500 @enderror"
                                    required>
@@ -28,7 +28,7 @@
                         </div>
 
                         <div class="mb-4">
-                            <label for="code" class="block text-sm font-medium text-gray-700 mb-1">Kode</label>
+                            <label for="code" class="block text-sm font-medium text-gray-700 mb-1">Code</label>
                             <input type="text" name="code" id="code" value="{{ old('code', $program->code) }}"
                                    class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 @error('code') border-red-500 @enderror"
                                    required>
@@ -38,11 +38,11 @@
                         </div>
 
                         <div class="mb-6">
-                            <label for="faculty_id" class="block text-sm font-medium text-gray-700 mb-1">Fakultas</label>
+                            <label for="faculty_id" class="block text-sm font-medium text-gray-700 mb-1">Faculty</label>
                             <select name="faculty_id" id="faculty_id"
                                     class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 @error('faculty_id') border-red-500 @enderror"
                                     required>
-                                <option value="">-- Pilih Fakultas --</option>
+                                <option value="">-- Select Faculty --</option>
                                 @foreach($faculties as $faculty)
                                     <option value="{{ $faculty->id }}" {{ old('faculty_id', $program->faculty_id) == $faculty->id ? 'selected' : '' }}>
                                         {{ $faculty->name }}
@@ -59,7 +59,7 @@
                                 {{ __('Update') }}
                             </button>
                             <a href="{{ route('master-data.study-program.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-300 border border-transparent rounded-md font-semibold text-xs text-gray-700 tracking-widest hover:bg-gray-400 transition">
-                                {{ __('Batal') }}
+                                {{ __('Cancel') }}
                             </a>
                         </div>
                     </form>

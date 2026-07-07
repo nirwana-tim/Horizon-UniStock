@@ -4,7 +4,7 @@
     - $type: 'success'|'error'|'warning'|'info'
     - $dismissible: bool (default true)
   Usage:
-    <x-alert type="success">Data berhasil disimpan</x-alert>
+    <x-alert type="success">Data saved successfully</x-alert>
     or auto from session:
     @if(session('success')) <x-alert type="success">{{ session('success') }}</x-alert> @endif
 --}}
@@ -60,7 +60,7 @@ $c = $config[$type] ?? $config['info'];
     @if($dismissible)
     <button @click="show = false"
             class="{{ $c['close'] }} transition-colors ml-1 flex-shrink-0"
-            aria-label="Tutup notifikasi">
+            aria-label="Close notification">
         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
         </svg>

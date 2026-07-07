@@ -5,7 +5,6 @@ namespace App\Imports;
 use App\Models\ProgramLevel;
 use App\Models\Student;
 use App\Models\StudyProgram;
-use Illuminate\Support\Str;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
@@ -31,7 +30,6 @@ class StudentImport implements ToModel, WithHeadingRow, WithValidation
             'program_level_id' => $programLevel?->id,
             'student_type' => $row['student_type'] ?? 'freshman',
             'entitlement_code' => $entitlementCode,
-            'qr_token' => Str::uuid(),
         ]);
     }
 

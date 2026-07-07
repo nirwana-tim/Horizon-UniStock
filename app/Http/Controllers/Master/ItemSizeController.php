@@ -7,7 +7,9 @@ use App\Http\Requests\ItemSizeRequest;
 use App\Models\ItemCategory;
 use App\Models\ItemSize;
 use App\Services\Master\ItemSizeService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class ItemSizeController extends Controller
@@ -16,11 +18,26 @@ class ItemSizeController extends Controller
         protected ItemSizeService $sizeService
     ) {}
 
-    public function index(): View
+    public function index(Request $request): View|JsonResponse
     {
-        $sizes = ItemSize::with('categories')->orderBy('code')->paginate(15);
+        $query = ItemSize::with('categories');
 
-        return view('master.item-size.index', compact('sizes'));
+        if ($search = $request->input('q')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('label', 'like', "%{$search}%")
+                  ->orWhere('code', 'like', "%{$search}%");
+            });
+        }
+
+        $data = $query->orderBy('code')->paginate(20);
+
+        if ($request->ajax()) {
+            return response()->json([
+                'html' => view('master.item-size._table', compact('data'))->render(),
+            ]);
+        }
+
+        return view('master.item-size.index', compact('data'));
     }
 
     public function create(): View

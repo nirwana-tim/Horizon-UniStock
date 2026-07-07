@@ -10,22 +10,22 @@
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
                     <h3 class="text-lg font-semibold text-gray-900 mb-4">Download Template Import</h3>
-                    <p class="text-sm text-gray-500 mb-4">Download template Excel, isi data, lalu upload di form bawah.</p>
+                    <p class="text-sm text-gray-500 mb-4">Download the Excel template, fill in the data, then upload using the form below.</p>
                     <div class="grid grid-cols-1 md:grid-cols-5 gap-3">
                         <a href="{{ route('templates.download', 'mahasiswa') }}" class="inline-flex items-center justify-center px-4 py-2 bg-[#980416] border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-[#7a0311] transition">
-                            Mahasiswa
+                            Student
                         </a>
                         <a href="{{ route('templates.download', 'dp_lunas') }}" class="inline-flex items-center justify-center px-4 py-2 bg-[#980416] border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-[#7a0311] transition">
-                            DP Lunas
+                            Eligibility / DP Paid
                         </a>
                         <a href="{{ route('templates.download', 'katalog') }}" class="inline-flex items-center justify-center px-4 py-2 bg-[#980416] border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-[#7a0311] transition">
-                            Katalog Barang
+                            Item Catalog
                         </a>
                         <a href="{{ route('templates.download', 'harga') }}" class="inline-flex items-center justify-center px-4 py-2 bg-[#980416] border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-[#7a0311] transition">
-                            Harga Barang
+                            Item Price
                         </a>
                         <a href="{{ route('templates.download', 'hak_barang') }}" class="inline-flex items-center justify-center px-4 py-2 bg-[#980416] border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-[#7a0311] transition">
-                            Hak Barang
+                            Item Entitlement
                         </a>
                     </div>
                 </div>
@@ -53,21 +53,21 @@
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
                             <div>
-                                <x-input-label for="import_type" :value="__('Tipe Import')" />
+                                <x-input-label for="import_type" :value="__('Import Type')" />
                                 <select name="import_type" id="import_type" class="mt-1 block w-full border-gray-300 focus:border-primary-500 focus:ring-primary-500 rounded-md shadow-sm">
-                                    <option value="">-- Pilih Tipe Import --</option>
-                                    <option value="student" {{ old('import_type') === 'student' ? 'selected' : '' }}>Mahasiswa</option>
-                                    <option value="eligibility" {{ old('import_type') === 'eligibility' ? 'selected' : '' }}>DP Lunas</option>
-                                    <option value="item" {{ old('import_type') === 'item' ? 'selected' : '' }}>Katalog Barang</option>
-                                    <option value="item_price" {{ old('import_type') === 'item_price' ? 'selected' : '' }}>Harga Barang</option>
-                                    <option value="entitlement" {{ old('import_type') === 'entitlement' ? 'selected' : '' }}>Hak Barang</option>
+                                    <option value="">-- Select Import Type --</option>
+                                    <option value="student" {{ old('import_type') === 'student' ? 'selected' : '' }}>Student</option>
+                                    <option value="eligibility" {{ old('import_type') === 'eligibility' ? 'selected' : '' }}>Eligibility / DP Paid</option>
+                                    <option value="item" {{ old('import_type') === 'item' ? 'selected' : '' }}>Item Catalog</option>
+                                    <option value="item_price" {{ old('import_type') === 'item_price' ? 'selected' : '' }}>Item Price</option>
+                                    <option value="entitlement" {{ old('import_type') === 'entitlement' ? 'selected' : '' }}>Item Entitlement</option>
                                     <option value="stock_opname" {{ old('import_type') === 'stock_opname' ? 'selected' : '' }}>Stock Opname</option>
                                 </select>
                                 <x-input-error :messages="$errors->get('import_type')" class="mt-2" />
                             </div>
 
                             <div>
-                                <x-input-label for="file" :value="__('File Excel')" />
+                                <x-input-label for="file" :value="__('Excel File')" />
                                 <input type="file" name="file" id="file" accept=".xlsx,.xls,.csv" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-[#980416] file:text-white hover:file:bg-[#7a0311]" />
                                 <x-input-error :messages="$errors->get('file')" class="mt-2" />
                             </div>

@@ -1,7 +1,7 @@
 <x-app-layout>
 
     {{-- Page title for mobile topbar --}}
-    <h2 class="text-lg font-bold text-gray-800 mb-5">Distribusi Seragam</h2>
+    <h2 class="text-lg font-bold text-gray-800 mb-5">Uniform Distribution</h2>
 
     {{-- Main Action Cards --}}
     <div class="grid grid-cols-1 gap-4 mb-6">
@@ -15,8 +15,8 @@
                 </svg>
             </div>
             <div class="flex-1">
-                <h3 class="text-base font-bold text-white">Scan QR Mahasiswa</h3>
-                <p class="text-sm text-primary-200 mt-0.5">Gunakan kamera untuk scan QR permanen</p>
+                <h3 class="text-base font-bold text-white">Scan Student QR</h3>
+                <p class="text-sm text-primary-200 mt-0.5">Use camera to scan permanent QR</p>
             </div>
             <svg class="w-5 h-5 text-primary-300 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
@@ -33,8 +33,8 @@
                     </svg>
                 </div>
                 <div class="flex-1 text-left">
-                    <h3 class="text-base font-bold text-gray-800">Cari Manual NIM</h3>
-                    <p class="text-sm text-gray-500 mt-0.5">Fallback jika QR tidak terbaca</p>
+                    <h3 class="text-base font-bold text-gray-800">Manual NIM Search</h3>
+                    <p class="text-sm text-gray-500 mt-0.5">Fallback if QR is unreadable</p>
                 </div>
                 <svg :class="open ? 'rotate-180' : ''"
                      class="w-5 h-5 text-gray-400 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -50,11 +50,11 @@
                  class="mt-2 p-4 bg-gray-50 rounded-xl border border-gray-200">
                 <form action="{{ route('distribution.search') }}" method="POST">
                     @csrf
-                    <label class="block text-xs font-semibold text-gray-700 mb-1.5">NIM Mahasiswa</label>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1.5">Student NIM</label>
                     <div class="flex gap-2">
                         <input type="text"
                                name="nim"
-                               placeholder="Ketik NIM mahasiswa..."
+                               placeholder="Type student NIM..."
                                required
                                class="flex-1 px-3 py-2.5 h-11 text-sm bg-white border border-gray-200 rounded-lg
                                       text-gray-800 placeholder-gray-400
@@ -63,7 +63,7 @@
                         <button type="submit"
                                 class="px-5 h-11 bg-primary-700 text-white text-sm font-medium rounded-lg
                                        hover:bg-primary-800 active:bg-primary-900 transition-colors flex-shrink-0">
-                            Cari
+                            Search
                         </button>
                     </div>
                 </form>
@@ -72,16 +72,16 @@
 
     </div>
 
-    {{-- Panduan Singkat --}}
+    {{-- Quick Guide --}}
     <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
-        <h3 class="text-sm font-semibold text-gray-700 mb-4">Panduan Distribusi</h3>
+        <h3 class="text-sm font-semibold text-gray-700 mb-4">Distribution Guide</h3>
         <div class="space-y-3">
             @foreach([
-                ['step' => '1', 'text' => 'Scan QR mahasiswa atau cari manual via NIM'],
-                ['step' => '2', 'text' => 'Sistem menampilkan data mahasiswa & entitlement tahap aktif'],
-                ['step' => '3', 'text' => 'Centang item yang diberikan, edit ukuran jika perlu'],
-                ['step' => '4', 'text' => 'Validasi stok â€” jika kurang bisa partial pickup'],
-                ['step' => '5', 'text' => 'Submit transaksi untuk menyimpan & kurangi stok'],
+                ['step' => '1', 'text' => 'Scan student QR or search manually by NIM'],
+                ['step' => '2', 'text' => 'System displays student data & active entitlement stage'],
+                ['step' => '3', 'text' => 'Check items given, edit size if needed'],
+                ['step' => '4', 'text' => 'Validate stock — partial pickup if insufficient'],
+                ['step' => '5', 'text' => 'Submit transaction to save & reduce stock'],
             ] as $guide)
             <div class="flex items-start gap-3">
                 <div class="w-6 h-6 bg-primary-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">

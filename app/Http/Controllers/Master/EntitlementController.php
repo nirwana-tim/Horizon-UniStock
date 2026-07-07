@@ -9,7 +9,9 @@ use App\Models\Item;
 use App\Models\ProgramLevel;
 use App\Models\StudyProgram;
 use App\Services\EntitlementService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class EntitlementController extends Controller
@@ -18,11 +20,20 @@ class EntitlementController extends Controller
         private readonly EntitlementService $entitlementService
     ) {}
 
-    public function index(): View
+    public function index(Request $request): View|JsonResponse
     {
         $entitlements = Entitlement::with('items.item')
+            ->when($request->input('q'), function ($query, $search) {
+                $query->where('code', 'like', "%{$search}%")
+                      ->orWhere('description', 'like', "%{$search}%");
+            })
             ->latest()
-            ->paginate(15);
+            ->paginate(20);
+
+        if ($request->ajax()) {
+            $html = view('distribution.entitlement._table', compact('entitlements'))->render();
+            return response()->json(compact('html'));
+        }
 
         return view('distribution.entitlement.index', compact('entitlements'));
     }

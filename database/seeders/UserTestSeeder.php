@@ -137,8 +137,6 @@ class UserTestSeeder extends Seeder
                     'study_program_id' => $data['study_program_id'],
                     'program_level_id' => $data['program_level_id'],
                     'student_type' => $data['student_type'],
-                    'qr_token' => \Illuminate\Support\Str::uuid()->toString(),
-                    'qr_generated_at' => now(),
                 ]
             );
 

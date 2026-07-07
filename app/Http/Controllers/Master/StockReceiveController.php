@@ -8,7 +8,9 @@ use App\Models\Item;
 use App\Models\StockReceive;
 use App\Models\Vendor;
 use App\Services\StockService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class StockReceiveController extends Controller
@@ -17,11 +19,25 @@ class StockReceiveController extends Controller
         private readonly StockService $stockService
     ) {}
 
-    public function index(): View
+    public function index(Request $request): View|JsonResponse
     {
-        $receives = StockReceive::with('vendor', 'items')
-            ->latest()
-            ->paginate(15);
+        $query = StockReceive::with('vendor', 'items');
+
+        if ($search = $request->input('q')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('reference_number', 'like', "%{$search}%")
+                  ->orWhereRelation('vendor', 'name', 'like', "%{$search}%")
+                  ->orWhere('notes', 'like', "%{$search}%");
+            });
+        }
+
+        $receives = $query->latest()->paginate(20);
+
+        if ($request->ajax()) {
+            return response()->json([
+                'html' => view('inventory.stock-receive._table', compact('receives'))->render(),
+            ]);
+        }
 
         return view('inventory.stock-receive.index', compact('receives'));
     }

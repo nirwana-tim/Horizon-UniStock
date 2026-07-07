@@ -21,7 +21,7 @@ class DistributionScheduleRequest extends FormRequest
             'is_active' => 'boolean',
             'program_level_id' => 'nullable|integer|exists:program_levels,id',
             'faculty_id' => 'nullable|integer|exists:faculties,id',
-            'study_program_id' => 'nullable|integer|exists:study_programs,id',
+            'study_program_id' => 'nullable|string',
             'item_ids' => 'nullable|array',
             'item_ids.*' => 'integer|exists:items,id',
         ];

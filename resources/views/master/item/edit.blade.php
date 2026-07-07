@@ -3,7 +3,7 @@
         <div class="flex items-center justify-between">
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ __('Edit Item') }}</h2>
             <a href="{{ route('master-data.item.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-300 focus:bg-gray-300 active:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                {{ __('Kembali') }}
+                {{ __('Back') }}
             </a>
         </div>
     </x-slot>
@@ -24,22 +24,22 @@
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700">Kode Item</label>
+                                <label class="block text-sm font-medium text-gray-700">Item Code</label>
                                 <p class="mt-1 text-sm font-mono text-gray-900">{{ $item->code }}</p>
                                 <input type="hidden" name="code" value="{{ $item->code }}">
                             </div>
 
                             <div>
-                                <label class="block text-sm font-medium text-gray-700">Nama Item</label>
+                                <label class="block text-sm font-medium text-gray-700">Item Name</label>
                                 <p class="mt-1 text-sm text-gray-900">{{ $item->name }}</p>
                                 <input type="hidden" name="name" value="{{ $item->name }}">
                             </div>
 
                             <div>
-                                <label for="category_id" class="block text-sm font-medium text-gray-700 font-semibold">Kategori</label>
+                                <label for="category_id" class="block text-sm font-medium text-gray-700 font-semibold">Category</label>
                                 <select id="category_id_display" disabled
                                     class="mt-1 block w-full border-gray-300 rounded-md shadow-sm bg-gray-100 text-gray-500 sm:text-sm cursor-not-allowed">
-                                    <option value="">-- Pilih Kategori --</option>
+                                    <option value="">-- Select Category --</option>
                                     @foreach($categories as $cat)
                                         <option value="{{ $cat->id }}" {{ old('category_id', $item->category_id) == $cat->id ? 'selected' : '' }}>
                                             {{ $cat->label }} ({{ $cat->code }})
@@ -56,9 +56,9 @@
                                 <label for="gender" class="block text-sm font-medium text-gray-700 font-semibold">Gender</label>
                                 <select id="gender_display" disabled
                                     class="mt-1 block w-full border-gray-300 rounded-md shadow-sm bg-gray-100 text-gray-500 sm:text-sm cursor-not-allowed">
-                                    <option value="">-- Pilih Gender --</option>
-                                    <option value="L" {{ old('gender', $item->gender) == 'L' ? 'selected' : '' }}>Laki - Laki</option>
-                                    <option value="P" {{ old('gender', $item->gender) == 'P' ? 'selected' : '' }}>Perempuan</option>
+                                    <option value="">-- Select Gender --</option>
+                                    <option value="L" {{ old('gender', $item->gender) == 'L' ? 'selected' : '' }}>Male</option>
+                                    <option value="P" {{ old('gender', $item->gender) == 'P' ? 'selected' : '' }}>Female</option>
                                     <option value="U" {{ old('gender', $item->gender) == 'U' ? 'selected' : '' }}>Unisex</option>
                                 </select>
                                 <input type="hidden" name="gender" id="gender" value="{{ $item->gender }}">
@@ -68,10 +68,10 @@
                             </div>
 
                             <div>
-                                <label for="type_id" class="block text-sm font-medium text-gray-700 font-semibold">Tipe</label>
+                                <label for="type_id" class="block text-sm font-medium text-gray-700 font-semibold">Type</label>
                                 <select id="type_id_display" disabled
                                     class="mt-1 block w-full border-gray-300 rounded-md shadow-sm bg-gray-100 text-gray-500 sm:text-sm cursor-not-allowed">
-                                    <option value="">-- Pilih Tipe --</option>
+<option value="">-- Select Type --</option>
                                     @foreach($types as $type)
                                         <option value="{{ $type->id }}" {{ old('type_id', $item->type_id) == $type->id ? 'selected' : '' }}>
                                             {{ $type->code }} - {{ $type->label }}
@@ -85,10 +85,10 @@
                             </div>
 
                             <div>
-                                <label for="department_id" class="block text-sm font-medium text-gray-700 font-semibold">Departemen</label>
+                                <label for="department_id" class="block text-sm font-medium text-gray-700 font-semibold">Department</label>
                                 <select id="department_id_display" disabled
                                     class="mt-1 block w-full border-gray-300 rounded-md shadow-sm bg-gray-100 text-gray-500 sm:text-sm cursor-not-allowed">
-                                    <option value="">-- Pilih Departemen --</option>
+                                    <option value="">-- Select Department --</option>
                                     @foreach($departments as $dept)
                                         <option value="{{ $dept->id }}" {{ old('department_id', $item->department_id) == $dept->id ? 'selected' : '' }}>
                                             {{ $dept->code }} - {{ $dept->label }}
@@ -105,7 +105,7 @@
 
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
                             <div>
-                                <label for="unit" class="block text-sm font-medium text-gray-700">Satuan</label>
+                                <label for="unit" class="block text-sm font-medium text-gray-700">Unit</label>
                                 <input type="text" name="unit" id="unit" value="{{ old('unit', $item->unit) }}"
                                     class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-gray-500 sm:text-sm">
                                 @error('unit')
@@ -114,7 +114,7 @@
                             </div>
 
                             <div>
-                                <label for="selling_price" class="block text-sm font-medium text-gray-700">Harga Jual</label>
+                                <label for="selling_price" class="block text-sm font-medium text-gray-700">Selling Price</label>
                                 <input type="number" name="selling_price" id="selling_price" value="{{ old('selling_price', $item->selling_price) }}" min="0" step="100"
                                     class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-gray-500 sm:text-sm">
                                 @error('selling_price')
@@ -123,7 +123,7 @@
                             </div>
 
                             <div>
-                                <label for="hpp" class="block text-sm font-medium text-gray-700">HPP</label>
+                                <label for="hpp" class="block text-sm font-medium text-gray-700">COGS</label>
                                 <input type="number" name="hpp" id="hpp" value="{{ old('hpp', $item->hpp) }}" min="0" step="100"
                                     class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-gray-500 sm:text-sm">
                                 @error('hpp')
@@ -133,10 +133,10 @@
                         </div>
 
                         <div class="mt-6">
-                            <label for="size_id" class="block text-sm font-medium text-gray-700 font-semibold">Ukuran</label>
+                            <label for="size_id" class="block text-sm font-medium text-gray-700 font-semibold">Size</label>
                             <select id="size_id_display" disabled
                                 class="mt-1 block w-full border-gray-300 rounded-md shadow-sm bg-gray-100 text-gray-500 sm:text-sm cursor-not-allowed">
-                                <option value="">-- Pilih Ukuran --</option>
+                                <option value="">-- Select Size --</option>
                             </select>
                             <input type="hidden" name="size_id" id="size_id" value="{{ old('size_id', $item->variants->first()?->size_id) }}">
                             @error('size_id')
@@ -146,10 +146,10 @@
 
                         <div class="mt-8 flex items-center gap-4">
                             <button type="submit" class="inline-flex items-center px-4 py-2 bg-primary-700 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-primary-800 focus:bg-primary-800 active:bg-primary-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                                {{ __('Simpan Perubahan') }}
+                                {{ __('Save Changes') }}
                             </button>
                             <a href="{{ route('master-data.item.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-300 focus:bg-gray-300 active:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                                {{ __('Batal') }}
+                                {{ __('Cancel') }}
                             </a>
                         </div>
                     </form>
@@ -168,7 +168,7 @@
         const currentTypeId = {{ old('type_id', $item->type_id ?? 'null') }};
 
         function renderSizes(sizes) {
-            sizeSelect.innerHTML = '<option value="">-- Pilih Ukuran --</option>';
+            sizeSelect.innerHTML = '<option value="">-- Select Size --</option>';
             sizes.forEach(s => {
                 const opt = document.createElement('option');
                 opt.value = s.id;
@@ -181,7 +181,7 @@
         }
 
         function renderTypes(types) {
-            typeSelect.innerHTML = '<option value="">-- Pilih Tipe --</option>';
+            typeSelect.innerHTML = '<option value="">-- Select Type --</option>';
             types.forEach(t => {
                 const opt = document.createElement('option');
                 opt.value = t.id;

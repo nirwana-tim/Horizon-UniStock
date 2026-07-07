@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Imports\StockOpnameImport;
 use App\Models\StockOpname;
 use App\Services\StockOpnameService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
@@ -17,11 +18,20 @@ class StockOpnameController extends Controller
         private StockOpnameService $service
     ) {}
 
-    public function index(): View
+    public function index(Request $request): View|JsonResponse
     {
         $batches = StockOpname::with('creator')
+            ->when($request->input('q'), function ($query, $search) {
+                $query->where('period', 'like', "%{$search}%")
+                      ->orWhere('status', 'like', "%{$search}%");
+            })
             ->latest()
-            ->paginate(15);
+            ->paginate(20);
+
+        if ($request->ajax()) {
+            $html = view('inventory.stock-opname._table', compact('batches'))->render();
+            return response()->json(compact('html'));
+        }
 
         return view('inventory.stock-opname.index', compact('batches'));
     }

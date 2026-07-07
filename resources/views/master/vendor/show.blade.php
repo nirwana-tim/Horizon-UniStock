@@ -1,9 +1,9 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex items-center justify-between">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ __('Detail Vendor') }}</h2>
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ __('Vendor Details') }}</h2>
             <a href="{{ route('master-data.vendor.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-300 focus:bg-gray-300 active:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                {{ __('â† Kembali') }}
+                {{ __('Back') }}
             </a>
         </div>
     </x-slot>
@@ -16,7 +16,7 @@
                     <div class="mb-6">
                         <dl class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div class="bg-gray-50 p-4 rounded-lg">
-                                <dt class="text-sm font-medium text-gray-500">{{ __('Nama Vendor') }}</dt>
+                                <dt class="text-sm font-medium text-gray-500">{{ __('Vendor Name') }}</dt>
                                 <dd class="mt-1 text-sm text-gray-900 font-semibold">{{ $vendor->name }}</dd>
                             </div>
                             <div class="bg-gray-50 p-4 rounded-lg">
@@ -24,11 +24,11 @@
                                 <dd class="mt-1 text-sm text-gray-900 font-semibold">{{ $vendor->email ?? '-' }}</dd>
                             </div>
                             <div class="bg-gray-50 p-4 rounded-lg">
-                                <dt class="text-sm font-medium text-gray-500">{{ __('Kontak Person') }}</dt>
+                                <dt class="text-sm font-medium text-gray-500">{{ __('Contact Person') }}</dt>
                                 <dd class="mt-1 text-sm text-gray-900 font-semibold">{{ $vendor->contact ?? '-' }}</dd>
                             </div>
                             <div class="bg-gray-50 p-4 rounded-lg">
-                                <dt class="text-sm font-medium text-gray-500">{{ __('No. Telepon') }}</dt>
+                                <dt class="text-sm font-medium text-gray-500">{{ __('Phone Number') }}</dt>
                                 <dd class="mt-1 text-sm text-gray-900 font-semibold">{{ $vendor->phone ?? '-' }}</dd>
                             </div>
                         </dl>
@@ -40,13 +40,13 @@
                         </a>
                         <x-delete-modal
                             :route="route('master-data.vendor.destroy', $vendor)"
-                            label="Hapus Vendor"
-                            description="Apakah Anda yakin ingin menghapus vendor {{ $vendor->name }}? Data ini tidak dapat dikembalikan."
+                            label="Delete Vendor"
+                            description="Are you sure you want to delete vendor {{ $vendor->name }}? This action cannot be undone."
                         />
                     </div>
 
                     <div class="border-t border-gray-200 pt-6">
-                        <h3 class="text-lg font-semibold text-gray-800 mb-4">{{ __('Riwayat Penerimaan Barang') }}</h3>
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">{{ __('Stock Receive History') }}</h3>
 
                         @if($vendor->stockReceives->count())
                             <div class="overflow-x-auto">
@@ -54,8 +54,8 @@
                                     <thead class="bg-gray-50">
                                         <tr>
                                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No</th>
-                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Referensi</th>
-                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reference</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
                                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                                         </tr>
                                     </thead>
@@ -76,7 +76,7 @@
                                 </table>
                             </div>
                         @else
-                            <p class="text-sm text-gray-500">{{ __('Belum ada penerimaan barang.') }}</p>
+                            <p class="text-sm text-gray-500">{{ __('No stock receipts yet.') }}</p>
                         @endif
                     </div>
 

@@ -2,7 +2,7 @@
     <x-slot name="header">
         <div class="flex items-center justify-between">
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ __('Detail Entitlement') }}</h2>
-            <a href="{{ route('distribution.entitlement.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-300 focus:bg-gray-300 active:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition ease-in-out duration-150">{{ __('← Kembali') }}</a>
+            <a href="{{ route('distribution.entitlement.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-300 focus:bg-gray-300 active:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition ease-in-out duration-150">{{ __('← Back') }}</a>
         </div>
     </x-slot>
 
@@ -14,7 +14,7 @@
                     <div class="mb-6">
                         <dl class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div class="bg-gray-50 p-4 rounded-lg">
-                                <dt class="text-sm font-medium text-gray-500">{{ __('Kode Entitlement') }}</dt>
+                                <dt class="text-sm font-medium text-gray-500">{{ __('Entitlement Code') }}</dt>
                                 <dd class="mt-1 text-sm text-gray-900 font-semibold font-mono">{{ $entitlement->code }}</dd>
                             </div>
                             <div class="bg-gray-50 p-4 rounded-lg">
@@ -23,7 +23,7 @@
                             </div>
                             @if($entitlement->description)
                             <div class="bg-gray-50 p-4 rounded-lg md:col-span-2">
-                                <dt class="text-sm font-medium text-gray-500">{{ __('Deskripsi') }}</dt>
+                                <dt class="text-sm font-medium text-gray-500">{{ __('Description') }}</dt>
                                 <dd class="mt-1 text-sm text-gray-900">{{ $entitlement->description }}</dd>
                             </div>
                             @endif
@@ -34,23 +34,23 @@
                         <a href="{{ route('distribution.entitlement.edit', $entitlement) }}" class="inline-flex items-center px-4 py-2 bg-amber-500 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-amber-600 focus:bg-amber-600 active:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 transition ease-in-out duration-150">{{ __('Edit') }}</a>
                         <x-delete-modal
                             :route="route('distribution.entitlement.destroy', $entitlement)"
-                            label="Hapus Entitlement"
-                            description="Apakah Anda yakin ingin menghapus entitlement {{ $entitlement->code }}? Data ini tidak dapat dikembalikan."
+label="Delete Entitlement"
+            description="Are you sure you want to delete entitlement {{ $entitlement->code }}? This data cannot be restored."
                         />
                     </div>
 
                     <div class="border-t border-gray-200 pt-6">
-                        <h3 class="text-lg font-semibold text-gray-800 mb-4">{{ __('Daftar Item') }}</h3>
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">{{ __('Item List') }}</h3>
                         @if($entitlement->items->count())
                             <div class="overflow-x-auto">
                                 <table class="min-w-full divide-y divide-gray-200">
                                     <thead class="bg-gray-50">
                                         <tr>
                                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No</th>
-                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Item</th>
-                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kode Produk</th>
-                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ukuran Tersedia</th>
-                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jumlah</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item Name</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product Code</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Available Sizes</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
                                         </tr>
                                     </thead>
                                     <tbody class="bg-white divide-y divide-gray-200">
@@ -77,7 +77,7 @@
                                 </table>
                             </div>
                         @else
-                            <p class="text-sm text-gray-500">{{ __('Belum ada item.') }}</p>
+                            <p class="text-sm text-gray-500">{{ __('No items yet.') }}</p>
                         @endif
                     </div>
 

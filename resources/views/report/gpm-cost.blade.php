@@ -1,6 +1,6 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ __('Laporan GPM / Laba Rugi') }}</h2>
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ __('GPM / Profit & Loss Report') }}</h2>
     </x-slot>
 
     <div class="py-12">
@@ -10,9 +10,9 @@
                     <form action="{{ route('report.gpm-cost') }}" method="GET">
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Filter Periode</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Filter Period</label>
                                 <select name="period" class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm">
-                                    <option value="">Semua Periode</option>
+                                    <option value="">All Periods</option>
                                     @foreach($periods as $p)
                                         <option value="{{ $p }}" {{ $period === $p ? 'selected' : '' }}>{{ $p }}</option>
                                     @endforeach
@@ -30,22 +30,22 @@
 
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
                 <div class="p-6 text-gray-900">
-                    <h3 class="text-lg font-semibold mb-4">Ringkasan</h3>
+                    <h3 class="text-lg font-semibold mb-4">Summary</h3>
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                         <div class="bg-gray-50 p-4 rounded-lg">
-                            <p class="text-sm text-gray-500">Total Qty Terjual</p>
+                            <p class="text-sm text-gray-500">Total Qty Sold</p>
                             <p class="text-2xl font-bold text-gray-900">{{ number_format($totalQty) }}</p>
                         </div>
                         <div class="bg-gray-50 p-4 rounded-lg">
-                            <p class="text-sm text-gray-500">Total HPP</p>
+                            <p class="text-sm text-gray-500">Total COGS</p>
                             <p class="text-2xl font-bold text-gray-900">Rp {{ number_format($total_hpp, 0, ',', '.') }}</p>
                         </div>
                         <div class="bg-gray-50 p-4 rounded-lg">
-                            <p class="text-sm text-gray-500">Total Penjualan</p>
+                            <p class="text-sm text-gray-500">Total Sales</p>
                             <p class="text-2xl font-bold text-gray-900">Rp {{ number_format($total_selling, 0, ',', '.') }}</p>
                         </div>
                         <div class="p-4 rounded-lg {{ $total_laba_rugi >= 0 ? 'bg-green-50' : 'bg-red-50' }}">
-                            <p class="text-sm text-gray-500">Laba / Rugi</p>
+                            <p class="text-sm text-gray-500">Profit / Loss</p>
                             <p class="text-2xl font-bold {{ $total_laba_rugi >= 0 ? 'text-green-600' : 'text-red-600' }}">
                                 {{ $total_laba_rugi >= 0 ? '+' : '' }}Rp {{ number_format($total_laba_rugi, 0, ',', '.') }}
                             </p>
@@ -56,17 +56,17 @@
 
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
                 <div class="p-6 text-gray-900">
-                    <h3 class="text-lg font-semibold mb-4">GPM per Kategori</h3>
+                    <h3 class="text-lg font-semibold mb-4">GPM per Category</h3>
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                                 <tr>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kategori</th>
-                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Qty Terjual</th>
-                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Total HPP</th>
-                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Total Penjualan</th>
-                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Laba / Rugi</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Qty Sold</th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Total COGS</th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Total Sales</th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Profit / Loss</th>
                                 </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
@@ -83,7 +83,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">Belum ada data GPM.</td>
+                                        <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">No GPM data yet.</td>
                                     </tr>
                                 @endforelse
                             </tbody>
@@ -94,20 +94,20 @@
 
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
-                    <h3 class="text-lg font-semibold mb-4">Detail GPM per Item</h3>
+                    <h3 class="text-lg font-semibold mb-4">GPM Detail per Item</h3>
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                                 <tr>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kategori</th>
-                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Qty Terjual</th>
-                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">HPP</th>
-                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Harga Jual</th>
-                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Total HPP</th>
-                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Total Penjualan</th>
-                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Laba / Rugi</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Qty Sold</th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">COGS</th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Selling Price</th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Total COGS</th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Total Sales</th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Profit / Loss</th>
                                 </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
@@ -127,7 +127,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="9" class="px-6 py-4 text-center text-sm text-gray-500">Belum ada data GPM.</td>
+                                        <td colspan="9" class="px-6 py-4 text-center text-sm text-gray-500">No GPM data yet.</td>
                                     </tr>
                                 @endforelse
                             </tbody>

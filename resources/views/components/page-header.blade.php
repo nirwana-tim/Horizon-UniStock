@@ -1,10 +1,10 @@
 {{--
   Page Header Component
   Props:
-    - $title: string — Judul halaman (H1)
-    - $subtitle: string (optional) — Deskripsi singkat
+    - $title: string — Page title (H1)
+    - $subtitle: string (optional) — Short description
   Slots:
-    - $actions (optional) — Tombol / action di sebelah kanan
+    - $actions (optional) — Button / action on the right
     - $breadcrumb (optional) — Override breadcrumb
 --}}
 @props(['title', 'subtitle' => null])

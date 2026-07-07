@@ -30,26 +30,26 @@
                         </x-slot>
                         <x-slot name="content">
                             <x-dropdown-link :href="route('master-data.faculty.index')" :active="request()->routeIs('master-data.faculty.*')">
-                                {{ __('Fakultas') }}
+                                {{ __('Faculty') }}
                             </x-dropdown-link>
                             <x-dropdown-link :href="route('master-data.study-program.index')" :active="request()->routeIs('master-data.study-program.*')">
-                                {{ __('Program Studi') }}
+                                {{ __('Study Program') }}
                             </x-dropdown-link>
                             <x-dropdown-link :href="route('master-data.program-level.index')" :active="request()->routeIs('master-data.program-level.*')">
-                                {{ __('Level Program') }}
+                                {{ __('Program Level') }}
                             </x-dropdown-link>
                             <hr class="my-1 border-gray-200">
                             <x-dropdown-link :href="route('master-data.item-category.index')" :active="request()->routeIs('master-data.item-category.*')">
-                                {{ __('Kategori Item') }}
+                                {{ __('Item Category') }}
                             </x-dropdown-link>
                             <x-dropdown-link :href="route('master-data.item-type.index')" :active="request()->routeIs('master-data.item-type.*')">
-                                {{ __('Tipe Item') }}
+                                {{ __('Item Type') }}
                             </x-dropdown-link>
                             <x-dropdown-link :href="route('master-data.item-department.index')" :active="request()->routeIs('master-data.item-department.*')">
-                                {{ __('Departemen Item') }}
+                                {{ __('Item Department') }}
                             </x-dropdown-link>
                             <x-dropdown-link :href="route('master-data.item-size.index')" :active="request()->routeIs('master-data.item-size.*')">
-                                {{ __('Ukuran Item') }}
+                                {{ __('Item Size') }}
                             </x-dropdown-link>
                             <hr class="my-1 border-gray-200">
                             <x-dropdown-link :href="route('master-data.item.index')" :active="request()->routeIs('master-data.item.*')">
@@ -59,21 +59,21 @@
                                 {{ __('Vendor') }}
                             </x-dropdown-link>
                             <x-dropdown-link :href="route('distribution.distribution-schedule.index')" :active="request()->routeIs('distribution.distribution-schedule.*')">
-                                {{ __('Jadwal Distribusi') }}
+                                {{ __('Distribution Schedule') }}
                             </x-dropdown-link>
                             <x-dropdown-link :href="route('distribution.entitlement.index')" :active="request()->routeIs('distribution.entitlement.*')">
                                 {{ __('Entitlement') }}
                             </x-dropdown-link>
                             <x-dropdown-link :href="route('inventory.stock-receive.index')" :active="request()->routeIs('inventory.stock-receive.*')">
-                                {{ __('Penerimaan Stok') }}
+                                {{ __('Stock Receive') }}
                             </x-dropdown-link>
                         </x-slot>
                     </x-dropdown>
                     <x-nav-link :href="route('students.index')" :active="request()->routeIs('students.*')">
-                        {{ __('Generate Akun') }}
+                        {{ __('Generate Account') }}
                     </x-nav-link>
                     <x-nav-link :href="route('distribution.size-monitor.index')" :active="request()->routeIs('distribution.size-monitor.*')">
-                        {{ __('Monitor Ukuran') }}
+                        {{ __('Size Monitor') }}
                     </x-nav-link>
                     <x-nav-link :href="route('import.index')" :active="request()->routeIs('import.*')">
                         {{ __('Import') }}
@@ -91,16 +91,16 @@
 
                     @hasanyrole(['staff', 'admin'])
                     <x-nav-link :href="route('distribution.scan.index')" :active="request()->routeIs('distribution.scan.*')">
-                        {{ __('Scan & Distribusi') }}
+                        {{ __('Scan & Distribution') }}
                     </x-nav-link>
                     @endhasanyrole
 
                     @role('student')
                     <x-nav-link :href="route('student.sizes.index')" :active="request()->routeIs('student.*')">
-                        {{ __('Input Ukuran') }}
+                        {{ __('Input Size') }}
                     </x-nav-link>
                     <x-nav-link :href="route('student.qr')" :active="request()->routeIs('student.qr')">
-                        {{ __('QR Saya') }}
+                        {{ __('My QR') }}
                     </x-nav-link>
                     @endrole
                 </div>
@@ -166,22 +166,22 @@
 
                     @hasanyrole(['super_admin', 'admin'])
                     <x-responsive-nav-link :href="route('master-data.faculty.index')" :active="request()->routeIs('master-data.faculty.*')">
-                        {{ __('Fakultas') }}
+                        {{ __('Faculty') }}
                     </x-responsive-nav-link>
                     <x-responsive-nav-link :href="route('master-data.study-program.index')" :active="request()->routeIs('master-data.study-program.*')">
-                        {{ __('Program Studi') }}
+                        {{ __('Study Program') }}
                     </x-responsive-nav-link>
                     <x-responsive-nav-link :href="route('master-data.item-category.index')" :active="request()->routeIs('master-data.item-category.*')">
-                        {{ __('Kategori Item') }}
+                        {{ __('Item Category') }}
                     </x-responsive-nav-link>
                     <x-responsive-nav-link :href="route('master-data.item-type.index')" :active="request()->routeIs('master-data.item-type.*')">
-                        {{ __('Tipe Item') }}
+                        {{ __('Item Type') }}
                     </x-responsive-nav-link>
                     <x-responsive-nav-link :href="route('master-data.item-department.index')" :active="request()->routeIs('master-data.item-department.*')">
-                        {{ __('Departemen Item') }}
+                        {{ __('Item Department') }}
                     </x-responsive-nav-link>
                     <x-responsive-nav-link :href="route('master-data.item-size.index')" :active="request()->routeIs('master-data.item-size.*')">
-                        {{ __('Ukuran Item') }}
+                        {{ __('Item Size') }}
                     </x-responsive-nav-link>
                     <x-responsive-nav-link :href="route('master-data.item.index')" :active="request()->routeIs('master-data.item.*')">
                         {{ __('Item / SKU') }}
@@ -190,19 +190,19 @@
                         {{ __('Vendor') }}
                     </x-responsive-nav-link>
                     <x-responsive-nav-link :href="route('distribution.distribution-schedule.index')" :active="request()->routeIs('distribution.distribution-schedule.*')">
-                        {{ __('Jadwal Distribusi') }}
+                        {{ __('Distribution Schedule') }}
                     </x-responsive-nav-link>
                     <x-responsive-nav-link :href="route('distribution.entitlement.index')" :active="request()->routeIs('distribution.entitlement.*')">
                         {{ __('Entitlement') }}
                     </x-responsive-nav-link>
                     <x-responsive-nav-link :href="route('inventory.stock-receive.index')" :active="request()->routeIs('inventory.stock-receive.*')">
-                        {{ __('Penerimaan Stok') }}
+                        {{ __('Stock Receive') }}
                     </x-responsive-nav-link>
                     <x-responsive-nav-link :href="route('students.index')" :active="request()->routeIs('students.*')">
-                        {{ __('Generate Akun') }}
+                        {{ __('Generate Account') }}
                     </x-responsive-nav-link>
                     <x-responsive-nav-link :href="route('distribution.size-monitor.index')" :active="request()->routeIs('distribution.size-monitor.*')">
-                        {{ __('Monitor Ukuran') }}
+                        {{ __('Size Monitor') }}
                     </x-responsive-nav-link>
                     <x-responsive-nav-link :href="route('import.index')" :active="request()->routeIs('import.*')">
                         {{ __('Import') }}
@@ -220,16 +220,16 @@
 
             @hasanyrole(['staff', 'admin'])
             <x-responsive-nav-link :href="route('distribution.scan.index')" :active="request()->routeIs('distribution.scan.*')">
-                {{ __('Scan & Distribusi') }}
+                {{ __('Scan & Distribution') }}
             </x-responsive-nav-link>
             @endhasanyrole
 
             @role('student')
             <x-responsive-nav-link :href="route('student.sizes.index')" :active="request()->routeIs('student.*')">
-                {{ __('Input Ukuran') }}
+                {{ __('Input Size') }}
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('student.qr')" :active="request()->routeIs('student.qr')">
-                {{ __('QR Saya') }}
+                {{ __('My QR') }}
             </x-responsive-nav-link>
             @endrole
         </div>

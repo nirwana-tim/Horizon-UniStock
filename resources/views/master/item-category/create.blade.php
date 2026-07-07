@@ -1,6 +1,6 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ __('Tambah Item Category') }}</h2>
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ __('Add Item Category') }}</h2>
     </x-slot>
 
     <div class="py-12">
@@ -11,8 +11,8 @@
                         @csrf
 
                         <div class="mb-4">
-                            <x-input-label for="code" :value="__('Kode')" />
-                            <x-text-input id="code" name="code" type="text" class="mt-1 block w-full" :value="old('code')" required autofocus maxlength="3" placeholder="Contoh: ALM, CLG, CLC" />
+                            <x-input-label for="code" :value="__('Code')" />
+                            <x-text-input id="code" name="code" type="text" class="mt-1 block w-full" :value="old('code')" required autofocus maxlength="3" placeholder="Example: ALM, CLG, CLC" />
                             <x-input-error :messages="$errors->get('code')" class="mt-2" />
                         </div>
 
@@ -23,9 +23,9 @@
                         </div>
 
                         <div class="flex items-center gap-2 mt-6">
-                            <x-primary-button>{{ __('Simpan') }}</x-primary-button>
+                            <x-primary-button>{{ __('Save') }}</x-primary-button>
                             <a href="{{ route('master-data.item-category.index') }}" class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-25 transition ease-in-out duration-150">
-                                {{ __('Batal') }}
+                                {{ __('Cancel') }}
                             </a>
                         </div>
                     </form>

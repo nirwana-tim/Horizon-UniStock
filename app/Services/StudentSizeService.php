@@ -9,14 +9,9 @@ use App\Models\StudentSizeHistory;
 use App\Models\StudentSizeItem;
 use App\Models\StudentSizeProfile;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Str;
 
 class StudentSizeService
 {
-    /**
-     * Get entitlement items with available sizes for each product.
-     * Returns items grouped by base_code (product level) with their size options.
-     */
     public function getEntitlementItems(Student $student): Collection
     {
         if (!$student->entitlement_code) {
@@ -25,16 +20,35 @@ class StudentSizeService
 
         $entitlement = Entitlement::where('code', '=', $student->entitlement_code, 'and')
             ->where('is_active', '=', true, 'and')
-            ->with(['items.item.variants'])
+            ->with(['items.item'])
             ->first();
 
         if (!$entitlement) {
             return collect();
         }
 
-        return $entitlement->items
+        $items = $entitlement->items
             ->pluck('item')
-            ->filter();
+            ->filter(fn($i) => $i && $i->base_code);
+
+        if ($items->isEmpty()) {
+            return collect();
+        }
+
+        $unique = $items->keyBy('base_code');
+
+        $groupItems = Item::whereIn('base_code', $unique->keys())
+            ->with('variants')
+            ->get()
+            ->groupBy('base_code');
+
+        $unique->each(function ($item) use ($groupItems) {
+            $group = $groupItems->get($item->base_code, collect());
+            $allVariants = $group->flatMap->variants->unique('size')->values();
+            $item->setRelation('variants', $allVariants);
+        });
+
+        return $unique->values();
     }
 
     public function saveSizes(Student $student, array $sizes): void
@@ -90,21 +104,5 @@ class StudentSizeService
             'is_filled' => true,
             'filled_at' => $profile->filled_at ?? now(),
         ]);
-    }
-
-    public function generateQr(Student $student): string
-    {
-        if ($student->qr_token) {
-            return $student->qr_token;
-        }
-
-        $token = (string) Str::uuid();
-
-        $student->update([
-            'qr_token' => $token,
-            'qr_generated_at' => now(),
-        ]);
-
-        return $token;
     }
 }

@@ -7,14 +7,11 @@ use App\Models\User;
 use App\Services\AuditService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 
 class StudentService
 {
     public function store(array $data): Student
     {
-        $data['qr_token'] = Str::uuid();
-
         $student = Student::create($data);
 
         $this->refreshEntitlementCode($student);

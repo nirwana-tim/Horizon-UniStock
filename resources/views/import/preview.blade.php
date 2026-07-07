@@ -10,13 +10,13 @@
                 <div class="p-6 text-gray-900">
 
                     <div class="mb-4 p-4 bg-blue-100 border border-blue-300 text-blue-800 rounded-md">
-                        {{ __('Tipe Import:') }} <strong>{{ ucfirst(str_replace('_', ' ', $importType)) }}</strong> &mdash;
-                        {{ __('Ditemukan') }} <strong>{{ $data->count() }}</strong> {{ __('baris data.') }}
+                        {{ __('Import Type:') }} <strong>{{ ucfirst(str_replace('_', ' ', $importType)) }}</strong> &mdash;
+                        {{ __('Found') }} <strong>{{ $data->count() }}</strong> {{ __('data rows.') }}
                     </div>
 
                     @if($data->isEmpty())
                         <div class="mb-4 p-4 bg-yellow-100 border border-yellow-300 text-yellow-800 rounded-md">
-                            {{ __('Tidak ada data yang ditemukan dalam file.') }}
+                            {{ __('No data found in the file.') }}
                         </div>
                     @else
                         <div class="overflow-x-auto mb-6">
@@ -26,7 +26,7 @@
                                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#</th>
                                         @foreach($data->first() as $colIndex => $cell)
                                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                {{ $colIndex === 0 ? __('Kolom') : 'Kolom ' . ($colIndex + 1) }}
+                                                {{ $colIndex === 0 ? __('Column') : 'Column ' . ($colIndex + 1) }}
                                             </th>
                                         @endforeach
                                     </tr>
@@ -57,12 +57,12 @@
                         <div class="flex items-center gap-4">
                             <a href="{{ route('import.index') }}"
                                class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                                {{ __('Kembali') }}
+                                {{ __('Back') }}
                             </a>
 
                             @if($data->isNotEmpty())
                                 <x-primary-button class="bg-[#980416] hover:bg-[#7a0311]">
-                                    {{ __('Konfirmasi Import') }}
+                                    {{ __('Confirm Import') }}
                                 </x-primary-button>
                             @endif
                         </div>

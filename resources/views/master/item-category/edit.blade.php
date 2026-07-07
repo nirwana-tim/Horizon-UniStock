@@ -12,7 +12,7 @@
                         @method('PUT')
 
                         <div class="mb-4">
-                            <x-input-label :value="__('Kode')" />
+                            <x-input-label :value="__('Code')" />
                             <p class="mt-1 text-sm font-mono text-gray-900 bg-gray-100 p-2.5 rounded-md border border-gray-200">{{ $category->code }}</p>
                         </div>
 
@@ -23,9 +23,9 @@
                         </div>
 
                         <div class="flex items-center gap-2 mt-6">
-                            <x-primary-button>{{ __('Simpan') }}</x-primary-button>
+                            <x-primary-button>{{ __('Save') }}</x-primary-button>
                             <a href="{{ route('master-data.item-category.index') }}" class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-25 transition ease-in-out duration-150">
-                                {{ __('Batal') }}
+                                {{ __('Cancel') }}
                             </a>
                         </div>
                     </form>

@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\VendorRequest;
 use App\Models\Vendor;
 use App\Services\Master\VendorService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class VendorController extends Controller
@@ -15,9 +17,26 @@ class VendorController extends Controller
         protected VendorService $vendorService
     ) {}
 
-    public function index(): View
+    public function index(Request $request): View|JsonResponse
     {
-        $vendors = Vendor::withCount('stockReceives')->latest()->paginate(15);
+        $query = Vendor::withCount('stockReceives');
+
+        if ($search = $request->input('q')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('contact', 'like', "%{$search}%")
+                  ->orWhere('phone', 'like', "%{$search}%");
+            });
+        }
+
+        $vendors = $query->latest()->paginate(20);
+
+        if ($request->ajax()) {
+            return response()->json([
+                'html' => view('master.vendor._table', compact('vendors'))->render(),
+            ]);
+        }
 
         return view('master.vendor.index', compact('vendors'));
     }

@@ -11,7 +11,9 @@ use App\Models\ItemSize;
 use App\Models\ItemType;
 use App\Models\ItemVariant;
 use App\Services\Master\ItemService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class ItemController extends Controller
@@ -20,13 +22,30 @@ class ItemController extends Controller
         protected ItemService $itemService
     ) {}
 
-    public function index(): View
+    public function index(Request $request): View|JsonResponse
     {
-        $variants = ItemVariant::with(['item.category', 'itemSize'])
-            ->orderBy('sku')
-            ->paginate(25);
+        $query = ItemVariant::with(['item.category', 'itemSize']);
 
-        return view('master.item.index', compact('variants'));
+        if ($search = $request->input('q')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('sku', 'like', "%{$search}%")
+                  ->orWhereHas('item', function ($iq) use ($search) {
+                      $iq->where('name', 'like', "%{$search}%")
+                        ->orWhere('code', 'like', "%{$search}%")
+                        ->orWhere('base_code', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        $data = $query->orderBy('sku')->paginate(20);
+
+        if ($request->ajax()) {
+            return response()->json([
+                'html' => view('master.item._table', compact('data'))->render(),
+            ]);
+        }
+
+        return view('master.item.index', compact('data'));
     }
 
     public function create(): View

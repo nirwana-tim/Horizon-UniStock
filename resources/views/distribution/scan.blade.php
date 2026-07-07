@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex items-center justify-between">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ __('Scan QR / Cari Mahasiswa') }}</h2>
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ __('Scan QR / Search Student') }}</h2>
         </div>
     </x-slot>
 
@@ -16,15 +16,15 @@
             @if($activeSchedule)
                 <div class="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-md">
                     <p class="text-sm text-blue-700">
-                        <strong>Jadwal Aktif:</strong> {{ $activeSchedule->name }}<br>
-                        <strong>Lokasi:</strong> {{ $activeSchedule->location }}<br>
-                        <strong>Sesi:</strong> {{ $activeSchedule->session }}
+                        <strong>Active Schedule:</strong> {{ $activeSchedule->name }}<br>
+                        <strong>Location:</strong> {{ $activeSchedule->location }}<br>
+                        <strong>Session:</strong> {{ $activeSchedule->session }}
                     </p>
                 </div>
             @else
                 <div class="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-md">
                     <p class="text-sm text-yellow-700">
-                        <strong>Peringatan:</strong> Tidak ada jadwal distribusi aktif untuk hari ini.
+                        <strong>Warning:</strong> No active distribution schedule for today.
                     </p>
                 </div>
             @endif
@@ -40,31 +40,31 @@
 
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6">
-                        <h3 class="text-lg font-medium text-gray-900 mb-4">Cari Manual (NIM)</h3>
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">Manual Search (NIM)</h3>
                         <form action="{{ route('distribution.search') }}" method="POST">
                             @csrf
                             <div>
-                                <label for="query" class="block text-sm font-medium text-gray-700">NIM Mahasiswa</label>
+                                <label for="query" class="block text-sm font-medium text-gray-700">Student NIM</label>
                                 <input type="text" name="query" id="query" required
                                     class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
-                                    placeholder="Masukkan NIM mahasiswa">
+                                    placeholder="Enter student NIM">
                                 @error('query')
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
                             </div>
                             <div class="mt-4">
                                 <button type="submit" class="inline-flex items-center px-4 py-2 bg-primary-700 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-primary-800 focus:bg-primary-800 active:bg-primary-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                                    {{ __('Cari Mahasiswa') }}
+                                    {{ __('Search Student') }}
                                 </button>
                             </div>
                         </form>
 
                         <div class="mt-6 p-4 bg-gray-50 border border-gray-200 rounded-md">
                             <p class="text-xs text-gray-500">
-                                <strong>Petunjuk:</strong><br>
-                                - Arahkan kamera ke QR Code mahasiswa<br>
-                                - Atau ketik NIM secara manual di kolom atas<br>
-                                - QR Code bersifat permanen (1x seumur hidup)
+<strong>Instructions:</strong><br>
+                                 - Point camera at student's QR Code<br>
+                                 - Or type NIM manually in the field above<br>
+                                 - QR Code is permanent (once in a lifetime)
                             </p>
                         </div>
                     </div>
@@ -77,10 +77,11 @@
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+
             if (typeof Html5Qrcode === 'undefined') {
                 console.warn('Html5Qrcode library not loaded. QR scanning disabled.');
                 document.getElementById('reader').innerHTML =
-                    '<div class="p-4 text-center text-gray-500">QR Scanner tidak tersedia. Gunakan pencarian manual NIM.</div>';
+                    '<div class="p-4 text-center text-gray-500">QR Scanner not available. Use manual NIM search.</div>';
                 return;
             }
 
@@ -96,8 +97,8 @@
                 function onScanSuccess(decodedText) {
                     document.getElementById('scan-result').innerHTML =
                         `<div class="p-4 bg-green-50 border border-green-200 rounded-md">
-                            <p class="text-sm text-green-700">QR terdeteksi: <strong>${decodedText}</strong></p>
-                            <p class="text-xs text-green-600 mt-1">Mencari data mahasiswa...</p>
+<p class="text-sm text-green-700">QR detected: <strong>${decodedText}</strong></p>
+                             <p class="text-xs text-green-600 mt-1">Searching for student data...</p>
                         </div>`;
 
                     html5QrCode.stop().then(() => {
@@ -129,9 +130,10 @@
                 }
             ).catch(err => {
                 document.getElementById('reader').innerHTML =
-                    '<div class="p-4 text-center text-red-500">Gagal mengakses kamera. Gunakan pencarian manual NIM.</div>';
+                    '<div class="p-4 text-center text-red-500">Failed to access camera. Use manual NIM search.</div>';
             });
         });
     </script>
     @endpush
 </x-app-layout>
+

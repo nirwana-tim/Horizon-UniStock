@@ -12,53 +12,42 @@
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
                     <div class="flex items-center justify-between mb-6">
-                        <h3 class="text-lg font-semibold text-gray-800">Harga Item</h3>
+                        <h3 class="text-lg font-semibold text-gray-800">Item Prices</h3>
                         <a href="{{ route('master-data.item-price.create') }}" class="inline-flex items-center px-4 py-2 bg-[#980416] border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-[#7a0311] transition">
-                            {{ __('Tambah Harga') }}
+                            {{ __('Add Price') }}
                         </a>
                     </div>
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">#</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Item</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Kode</th>
-                                    <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Harga Jual</th>
-                                    <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">HPP</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Efektif Dari</th>
-                                    <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
-                                @forelse($itemPrices as $index => $itemPrice)
-                                    <tr>
-                                        <td class="px-4 py-3 text-sm text-gray-500">{{ $itemPrices->firstItem() + $index }}</td>
-                                        <td class="px-4 py-3 text-sm text-gray-900">{{ $itemPrice->item->name ?? '-' }}</td>
-                                        <td class="px-4 py-3 text-sm font-mono text-gray-500">{{ $itemPrice->item->code ?? '-' }}</td>
-                                        <td class="px-4 py-3 text-sm text-right text-gray-900">Rp {{ number_format($itemPrice->selling_price, 0, ',', '.') }}</td>
-                                        <td class="px-4 py-3 text-sm text-right text-gray-900">Rp {{ number_format($itemPrice->hpp, 0, ',', '.') }}</td>
-                                        <td class="px-4 py-3 text-sm text-gray-500">{{ $itemPrice->effective_date?->format('d/m/Y') ?? '-' }}</td>
-                                        <td class="px-4 py-3 text-sm text-right space-x-1.5">
-                                              <a href="{{ route('master-data.item-price.show', $itemPrice) }}" class="inline-flex items-center px-2.5 py-1 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 active:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150">Lihat</a>
-                                            <x-delete-modal
-                                                :route="route('master-data.item-price.destroy', $itemPrice)"
-                                                label="Hapus Harga Item"
-                                                description="Apakah Anda yakin ingin menghapus data harga ini? Data ini tidak dapat dikembalikan."
-                                            />
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="7" class="px-4 py-4 text-center text-sm text-gray-500">Belum ada data harga.</td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
+                    <div x-data="serverTable('{{ route('master-data.item-price.index') }}')">
 
-                    <div class="mt-4">
-                        {{ $itemPrices->links() }}
+                        <div class="mb-4">
+                            <input type="text"
+                                   x-model="search"
+                                   @input.debounce.300ms="page=1; fetchData()"
+                                   placeholder="Search..."
+                                   class="w-72 border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500 text-sm">
+                        </div>
+
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Code</th>
+                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Selling Price</th>
+                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">COGS</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Effective Date</th>
+                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody x-html="tableHtml" class="bg-white divide-y divide-gray-200">
+                                    @include('master.item-price._table')
+                                </tbody>
+                            </table>
+                            <div class="mt-4">
+                                {{ $itemPrices->links() }}
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

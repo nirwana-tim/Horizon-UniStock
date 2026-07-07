@@ -3,8 +3,8 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Horizon UniStock — Sistem Distribusi Seragam Mahasiswa</title>
-    <meta name="description" content="Horizon UniStock adalah sistem distribusi seragam dan manajemen inventori berbasis web untuk mahasiswa baru universitas.">
+    <title>Horizon UniStock — Student Uniform Distribution System</title>
+    <meta name="description" content="Horizon UniStock is a web-based uniform distribution and inventory management system for university freshmen.">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -98,9 +98,9 @@
 
         <!-- Nav links -->
         <nav class="hidden md:flex items-center gap-2">
-            <a href="#" class="px-4 py-1.5 text-xs font-semibold rounded-full active-link">Beranda</a>
-            <a href="#alur" class="px-4 py-1.5 text-xs font-semibold rounded-full">Alur</a>
-            <a href="#fitur" class="px-4 py-1.5 text-xs font-semibold rounded-full">Fitur</a>
+            <a href="#" class="px-4 py-1.5 text-xs font-semibold rounded-full active-link">Home</a>
+            <a href="#alur" class="px-4 py-1.5 text-xs font-semibold rounded-full">Flow</a>
+            <a href="#fitur" class="px-4 py-1.5 text-xs font-semibold rounded-full">Features</a>
         </nav>
 
         <!-- CTA -->
@@ -111,7 +111,7 @@
                 </a>
             @else
                 <a href="{{ route('login') }}" class="cta-btn px-5 py-1.5 bg-white text-primary-700 hover:bg-primary-50 text-xs font-bold rounded-full transition-all shadow-sm">
-                    Masuk
+                    Login
                 </a>
             @endauth
         @endif
@@ -134,12 +134,12 @@
         </div>
 
         <h1 class="text-4xl md:text-5xl font-bold text-white leading-tight mb-5">
-            Distribusi Seragam<br>
-            <span class="text-primary-200">Lebih Cepat & Terstruktur</span>
+            Uniform Distribution<br>
+            <span class="text-primary-200">Faster & More Structured</span>
         </h1>
         <p class="text-primary-100 text-lg leading-relaxed mb-10 max-w-2xl mx-auto">
-            Horizon UniStock menggantikan proses manual Google Form, barcode, dan rekap Excel
-            dengan sistem terintegrasi dari input ukuran hingga laporan distribusi.
+            Horizon UniStock replaces manual Google Form, barcode, and Excel recap processes
+            with an integrated system from size input to distribution reports.
         </p>
 
         <!-- CTAs -->
@@ -147,12 +147,12 @@
             @auth
                 <a href="{{ url('/dashboard') }}"
                    class="w-full sm:w-auto px-8 py-3.5 bg-white text-primary-700 text-sm font-bold rounded-xl hover:bg-primary-50 transition-colors shadow-lg">
-                    Buka Dashboard
+                    Open Dashboard
                 </a>
             @else
                 <a href="{{ route('login') }}"
                    class="w-full sm:w-auto px-8 py-3.5 bg-white text-primary-700 text-sm font-bold rounded-xl hover:bg-primary-50 transition-colors shadow-lg">
-                    Login Mahasiswa
+                    Student Login
                 </a>
                 <a href="{{ route('login') }}"
                    class="w-full sm:w-auto px-8 py-3.5 glass-card text-white text-sm font-medium rounded-xl hover:bg-white/15 transition-all">
@@ -165,9 +165,9 @@
     <!-- Hero visual - stats strip -->
     <div class="max-w-3xl mx-auto mt-16 grid grid-cols-3 gap-4 relative z-10">
         @foreach([
-            ['value' => '< 5 menit', 'label' => 'Per mahasiswa'],
-            ['value' => 'Real-time', 'label' => 'Tracking stok'],
-            ['value' => '4 Role', 'label' => 'Akses terkelola'],
+            ['value' => '< 5 min', 'label' => 'Per student'],
+            ['value' => 'Real-time', 'label' => 'Stock tracking'],
+            ['value' => '4 Roles', 'label' => 'Managed access'],
         ] as $stat)
         <div class="glass-card rounded-xl p-5 text-center">
             <p class="text-xl font-bold text-white">{{ $stat['value'] }}</p>
@@ -182,10 +182,10 @@
 <section id="alur" class="py-20 px-6 bg-white">
     <div class="max-w-4xl mx-auto">
         <div class="text-center mb-14">
-            <p class="text-xs font-semibold text-primary-700 uppercase tracking-widest mb-2">Alur Sistem</p>
-            <h2 class="text-2xl font-bold text-gray-800">Dari Pendaftaran hingga Seragam di Tangan</h2>
+            <p class="text-xs font-semibold text-primary-700 uppercase tracking-widest mb-2">System Flow</p>
+            <h2 class="text-2xl font-bold text-gray-800">From Registration to Uniform in Hand</h2>
             <p class="mt-2 text-sm text-gray-500 max-w-xl mx-auto">
-                Proses yang sebelumnya membutuhkan berjam-jam kini diselesaikan dalam hitungan menit
+                What used to take hours is now completed in minutes
             </p>
         </div>
 
@@ -195,10 +195,10 @@
 
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
                 @foreach([
-                    ['step' => '1', 'icon' => 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z', 'title' => 'Input Ukuran', 'desc' => 'Mahasiswa mengisi profil ukuran seragam & sepatu secara mandiri'],
-                    ['step' => '2', 'icon' => 'M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8H3a2 2 0 00-2 2v8a2 2 0 002 2h14a2 2 0 002-2v-8a2 2 0 00-2-2h-2', 'title' => 'Generate QR', 'desc' => 'Sistem auto-generate QR identitas permanen setelah data lengkap'],
-                    ['step' => '3', 'icon' => 'M15 10l4.553-2.069A1 1 0 0121 8.816V15.18a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z', 'title' => 'Scan & Verifikasi', 'desc' => 'Staff scan QR mahasiswa, verifikasi eligibility & checklist barang'],
-                    ['step' => '4', 'icon' => 'M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z', 'title' => 'Terima Seragam', 'desc' => 'Transaksi tercatat, stok otomatis berkurang, laporan siap dieksport'],
+                    ['step' => '1', 'icon' => 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z', 'title' => 'Input Size', 'desc' => 'Students fill in uniform & shoes size profile independently'],
+                    ['step' => '2', 'icon' => 'M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8H3a2 2 0 00-2 2v8a2 2 0 002 2h14a2 2 0 002-2v-8a2 2 0 00-2-2h-2', 'title' => 'Generate QR', 'desc' => 'System auto-generates permanent identity QR after data is complete'],
+                    ['step' => '3', 'icon' => 'M15 10l4.553-2.069A1 1 0 0121 8.816V15.18a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z', 'title' => 'Scan & Verify', 'desc' => 'Staff scans student QR, verifies eligibility & item checklist'],
+                    ['step' => '4', 'icon' => 'M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z', 'title' => 'Receive Uniform', 'desc' => 'Transaction recorded, stock auto-reduced, reports ready to export'],
                 ] as $item)
                 <div class="flex flex-col items-center text-center">
                     <!-- Icon circle -->
@@ -223,7 +223,7 @@
 <section id="fitur" class="py-20 px-6 bg-gray-50">
     <div class="max-w-4xl mx-auto">
         <div class="text-center mb-14">
-            <p class="text-xs font-semibold text-primary-700 uppercase tracking-widest mb-2">Keunggulan</p>
+            <p class="text-xs font-semibold text-primary-700 uppercase tracking-widest mb-2">Advantages</p>
             <h2 class="text-2xl font-bold text-gray-800">Mengapa Horizon UniStock?</h2>
         </div>
 
@@ -232,20 +232,20 @@
                 [
                     'icon' => 'M13 10V3L4 14h7v7l9-11h-7z',
                     'color' => 'primary',
-                    'title' => 'Cepat & Efisien',
-                    'desc' => 'Kurangi waktu distribusi dari >15 menit menjadi <5 menit per mahasiswa dengan sistem QR permanen.',
+                    'title' => 'Fast & Efficient',
+                    'desc' => 'Reduce distribution time from >15 minutes to <5 minutes per student with permanent QR system.',
                 ],
                 [
                     'icon' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z',
                     'color' => 'green',
-                    'title' => 'Akurat & Anti Duplikat',
-                    'desc' => 'Eliminasi risiko double submit, salah ukuran, dan data hilang. Sistem validasi berjalan real-time.',
+                    'title' => 'Accurate & Anti-Duplicate',
+                    'desc' => 'Eliminate risk of double submit, wrong size, and data loss. Validation runs in real-time.',
                 ],
                 [
                     'icon' => 'M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z',
                     'color' => 'blue',
-                    'title' => 'Laporan Terstruktur',
-                    'desc' => 'Export laporan distribusi, stok, dan GPM dalam format Excel siap kirim kapan saja.',
+                    'title' => 'Structured Reports',
+                    'desc' => 'Export distribution, stock, and GPM reports in Excel format, ready to send anytime.',
                 ],
             ] as $feat)
             @php
@@ -273,18 +273,18 @@
 <section class="py-20 px-6 hero-gradient relative overflow-hidden">
     <div class="absolute inset-0 hero-pattern opacity-50"></div>
     <div class="max-w-2xl mx-auto text-center relative z-10">
-        <h2 class="text-2xl font-bold text-white mb-3">Siap Mulai?</h2>
-        <p class="text-primary-200 text-sm mb-8">Masuk ke sistem sesuai peran Anda</p>
+        <h2 class="text-2xl font-bold text-white mb-3">Ready to Start?</h2>
+        <p class="text-primary-200 text-sm mb-8">Sign in according to your role</p>
         <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
             @auth
                 <a href="{{ url('/dashboard') }}"
                    class="w-full sm:w-auto px-8 py-3 bg-white text-primary-700 text-sm font-bold rounded-xl hover:bg-primary-50 transition-colors">
-                    Buka Dashboard
+                    Open Dashboard
                 </a>
             @else
                 <a href="{{ route('login') }}"
                    class="w-full sm:w-auto px-8 py-3 bg-white text-primary-700 text-sm font-bold rounded-xl hover:bg-primary-50 transition-colors">
-                    Login Sekarang
+                    Login Now
                 </a>
             @endauth
         </div>
@@ -302,7 +302,7 @@
             </div>
             <span class="text-sm font-medium text-primary-200">Horizon UniStock</span>
         </div>
-        <p class="text-xs text-primary-400">&copy; {{ date('Y') }} Sistem Distribusi Seragam Mahasiswa. All rights reserved.</p>
+        <p class="text-xs text-primary-400">&copy; {{ date('Y') }} Student Uniform Distribution System. All rights reserved.</p>
     </div>
 </footer>
 

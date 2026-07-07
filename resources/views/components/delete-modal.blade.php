@@ -1,14 +1,14 @@
 @props([
     'route',
-    'label' => 'Hapus Data',
-    'description' => 'Apakah Anda yakin ingin menghapus data ini? Tindakan ini tidak dapat dibatalkan.',
+    'label' => 'Delete Data',
+    'description' => 'Are you sure you want to delete this data? This action cannot be undone.',
 ])
 
 <div x-data="{ open: false }">
     {{-- Trigger --}}
     <button type="button" @click="open = true"
         class="inline-flex items-center px-2.5 py-1 bg-red-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-700 active:bg-red-800 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition ease-in-out duration-150">
-        {{ __('Hapus') }}
+        {{ __('Delete') }}
     </button>
 
     {{-- Modal --}}
@@ -45,12 +45,12 @@
                     @method('DELETE')
                     <button type="submit"
                         class="inline-flex items-center px-4 py-2 bg-red-600 border border-transparent rounded-lg font-semibold text-sm text-white hover:bg-red-700 active:bg-red-800 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                        {{ __('Ya, Hapus') }}
+                        {{ __('Yes, Delete') }}
                     </button>
                 </form>
                 <button type="button" @click="open = false"
                     class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-lg font-semibold text-sm text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                    {{ __('Batal') }}
+                    {{ __('Cancel') }}
                 </button>
             </div>
         </div>
