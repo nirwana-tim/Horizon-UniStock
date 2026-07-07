@@ -40,8 +40,8 @@
                                     @include('distribution.distribution-schedule._table')
                                 </tbody>
                             </table>
-                            <div class="mt-4">
-                                {{ $schedules->links() }}
+                            <div x-html="paginationHtml" class="mt-4">
+                                @component('components.alpine-pagination', ['paginator' => $schedules])@endcomponent
                             </div>
                         </div>
 

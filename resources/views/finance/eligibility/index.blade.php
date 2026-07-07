@@ -47,8 +47,8 @@
                                     @include('finance.eligibility._table')
                                 </tbody>
                             </table>
-                            <div class="mt-4">
-                                {{ $students->links() }}
+                            <div x-html="paginationHtml" class="mt-4">
+                                @component('components.alpine-pagination', ['paginator' => $students])@endcomponent
                             </div>
                         </div>
                     </div>

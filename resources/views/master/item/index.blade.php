@@ -42,8 +42,8 @@
                                     @include('master.item._table')
                                  </tbody>
                             </table>
-                            <div class="mt-4">
-                                {{ $data->links() }}
+                            <div x-html="paginationHtml" class="mt-4">
+                                @component('components.alpine-pagination', ['paginator' => $data])@endcomponent
                             </div>
                         </div>
                     </div>

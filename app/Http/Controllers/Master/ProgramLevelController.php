@@ -33,6 +33,7 @@ class ProgramLevelController extends Controller
         if ($request->ajax()) {
             return response()->json([
                 'html' => view('master.program-level._table', compact('levels'))->render(),
+                'pagination' => view('components.alpine-pagination', ['paginator' => $levels])->render(),
             ]);
         }
 

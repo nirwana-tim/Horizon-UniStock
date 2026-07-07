@@ -36,6 +36,7 @@ class StockReceiveController extends Controller
         if ($request->ajax()) {
             return response()->json([
                 'html' => view('inventory.stock-receive._table', compact('receives'))->render(),
+                'pagination' => view('components.alpine-pagination', ['paginator' => $receives])->render(),
             ]);
         }
 

@@ -43,8 +43,8 @@
                                     @include('master.study-program._table')
                                 </tbody>
                             </table>
-                            <div class="mt-4">
-                                {{ $programs->links() }}
+                            <div x-html="paginationHtml" class="mt-4">
+                                @component('components.alpine-pagination', ['paginator' => $programs])@endcomponent
                             </div>
                         </div>
 

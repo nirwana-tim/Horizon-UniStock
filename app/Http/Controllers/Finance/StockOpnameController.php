@@ -30,7 +30,8 @@ class StockOpnameController extends Controller
 
         if ($request->ajax()) {
             $html = view('inventory.stock-opname._table', compact('batches'))->render();
-            return response()->json(compact('html'));
+            $pagination = view('components.alpine-pagination', ['paginator' => $batches])->render();
+            return response()->json(compact('html', 'pagination'));
         }
 
         return view('inventory.stock-opname.index', compact('batches'));

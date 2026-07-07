@@ -34,6 +34,7 @@ class StudyProgramController extends Controller
         if ($request->ajax()) {
             return response()->json([
                 'html' => view('master.study-program._table', compact('programs'))->render(),
+                'pagination' => view('components.alpine-pagination', ['paginator' => $programs])->render(),
             ]);
         }
 

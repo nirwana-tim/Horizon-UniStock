@@ -36,8 +36,8 @@
                                     @include('distribution.size-monitor._table')
                                 </tbody>
                             </table>
-                            <div class="mt-4">
-                                {{ $histories->links() }}
+                            <div x-html="paginationHtml" class="mt-4">
+                                @component('components.alpine-pagination', ['paginator' => $histories])@endcomponent
                             </div>
                         </div>
 

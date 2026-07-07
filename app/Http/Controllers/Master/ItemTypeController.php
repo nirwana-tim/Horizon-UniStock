@@ -33,6 +33,7 @@ class ItemTypeController extends Controller
         if ($request->ajax()) {
             return response()->json([
                 'html' => view('master.item-type._table', compact('data'))->render(),
+                'pagination' => view('components.alpine-pagination', ['paginator' => $data])->render(),
             ]);
         }
 

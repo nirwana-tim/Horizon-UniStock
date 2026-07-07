@@ -42,8 +42,8 @@
                                     @include('master.faculty._table')
                                 </tbody>
                             </table>
-                            <div class="mt-4">
-                                {{ $faculties->links() }}
+                            <div x-html="paginationHtml" class="mt-4">
+                                @component('components.alpine-pagination', ['paginator' => $faculties])@endcomponent
                             </div>
                         </div>
 

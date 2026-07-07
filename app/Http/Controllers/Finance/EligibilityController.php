@@ -28,7 +28,8 @@ class EligibilityController extends Controller
 
         if ($request->ajax()) {
             $html = view('finance.eligibility._table', compact('students', 'search'))->render();
-            return response()->json(compact('html'));
+            $pagination = view('components.alpine-pagination', ['paginator' => $students])->render();
+            return response()->json(compact('html', 'pagination'));
         }
 
         return view('finance.eligibility.index', compact('students', 'search'));

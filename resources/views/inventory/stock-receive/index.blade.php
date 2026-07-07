@@ -40,8 +40,8 @@
                                     @include('inventory.stock-receive._table')
                                 </tbody>
                             </table>
-                            <div class="mt-4">
-                                {{ $receives->links() }}
+                            <div x-html="paginationHtml" class="mt-4">
+                                @component('components.alpine-pagination', ['paginator' => $receives])@endcomponent
                             </div>
                         </div>
 
