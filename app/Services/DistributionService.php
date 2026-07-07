@@ -20,8 +20,7 @@ class DistributionService
     public function findStudent(string $query): ?Student
     {
         return Student::with(['studyProgram', 'programLevel'])
-            ->where('nim', '=', $query, 'and')
-            ->orWhere('qr_token', '=', $query, 'or')
+            ->where('nim', $query)
             ->first();
     }
 

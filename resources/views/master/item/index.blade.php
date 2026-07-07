@@ -1,6 +1,5 @@
 <x-app-layout>
 
-
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             @if(session('success'))
@@ -9,60 +8,47 @@
                 </div>
             @endif
 
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
-                    <div class="flex items-center justify-between mb-6">
-                        <h3 class="text-lg font-semibold text-gray-800">Master Item</h3>
-                        <a href="{{ route('master-data.item.create') }}" class="inline-flex items-center px-4 py-2 bg-primary-700 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-primary-800 focus:bg-primary-800 active:bg-primary-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                            {{ __('+ Tambah Item') }}
-                        </a>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SKU</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Item</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kategori</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Satuan</th>
-                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
-                                </tr>
-                             </thead>
-                             <tbody class="bg-white divide-y divide-gray-200">
-                                 @forelse($variants as $variant)
-                                     <tr>
-                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $variants->firstItem() + $loop->index }}</td>
-                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-900">{{ $variant->sku }}</td>
-                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                             {{ $variant->item?->name }}, Size {{ $variant->size_label ?? $variant->size }}
-                                         </td>
-                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                             {{ $variant->item?->category?->label ?? '-' }} ({{ $variant->item?->category?->code ?? '-' }})
-                                         </td>
-                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $variant->item?->unit ?? 'pcs' }}</td>
-                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-right space-x-1.5">
-                                             <a href="{{ route('master-data.item.show', $variant->item?->code ?? '') }}" class="inline-flex items-center px-2.5 py-1 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 active:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150">Lihat</a>
-                                             <x-delete-modal
-                                                 :route="route('master-data.item.variant.destroy', [$variant->item, $variant])"
-                                                 label="Hapus Varian"
-                                                 description="Apakah Anda yakin ingin menghapus varian/SKU {{ $variant->sku }} ini? Data ini tidak dapat dikembalikan."
-                                             />
-                                         </td>
-                                     </tr>
-                                 @empty
-                                     <tr>
-                                         <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">Belum ada data SKU/Varian.</td>
-                                     </tr>
-                                 @endforelse
-                             </tbody>
-                         </table>
-                     </div>
- 
-                     <div class="mt-4">
-                         {{ $variants->links() }}
-                     </div>
+            <div x-data="serverTable('{{ route('master-data.item.index') }}')">
+
+                <div class="mb-4">
+                    <input type="text"
+                           x-model="search"
+                           @input.debounce.300ms="page=1; fetchData()"
+                           placeholder="Search..."
+                           class="w-72 border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500 text-sm">
                 </div>
+
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                    <div class="p-6 text-gray-900">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-lg font-semibold text-gray-800">Items</h3>
+                            <a href="{{ route('master-data.item.create') }}" class="inline-flex items-center px-4 py-2 bg-primary-700 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-primary-800 focus:bg-primary-800 active:bg-primary-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                                {{ __('+ Add Item') }}
+                            </a>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SKU</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item Name</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Unit</th>
+                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+                                    </tr>
+                                 </thead>
+                                 <tbody x-html="tableHtml" class="bg-white divide-y divide-gray-200">
+                                    @include('master.item._table')
+                                 </tbody>
+                            </table>
+                            <div class="mt-4">
+                                {{ $data->links() }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>

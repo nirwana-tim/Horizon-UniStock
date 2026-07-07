@@ -1,12 +1,12 @@
 {{--
   Stat Card Component
   Props:
-    - $title: string — Label statistik
-    - $value: mixed — Nilai utama
+    - $title: string — Statistic label
+    - $value: mixed — Main value
     - $icon: string (optional) — SVG icon HTML string
     - $color: string (optional) — 'primary'|'green'|'amber'|'red'|'blue'
-    - $trend: string (optional) — Teks keterangan tambahan
-    - $href: string (optional) — Link jika card bisa diklik
+    - $trend: string (optional) — Additional description text
+    - $href: string (optional) — Link if card is clickable
 --}}
 @props([
     'title',

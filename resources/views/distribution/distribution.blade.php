@@ -1,9 +1,9 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex items-center justify-between">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ __('Distribusi Barang') }}</h2>
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ __('Item Distribution') }}</h2>
             <a href="{{ route('distribution.scan.index') }}" class="inline-flex items-center px-4 py-2 border border-primary-500 text-primary-700 hover:bg-primary-50 rounded-lg text-sm font-medium transition ease-in-out duration-150">
-                {{ __('Kembali') }}
+                {{ __('Back') }}
             </a>
         </div>
     </x-slot>
@@ -18,10 +18,10 @@
 
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
                 <div class="p-6">
-                    <h3 class="text-lg font-medium text-gray-900 mb-4">Informasi Mahasiswa</h3>
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Student Information</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <p class="text-sm text-gray-500">Nama</p>
+                            <p class="text-sm text-gray-500">Name</p>
                             <p class="font-medium text-gray-900">{{ $student->name }}</p>
                         </div>
                         <div>
@@ -29,19 +29,19 @@
                             <p class="font-medium text-gray-900">{{ $student->nim }}</p>
                         </div>
                         <div>
-                            <p class="text-sm text-gray-500">Program Studi</p>
+                            <p class="text-sm text-gray-500">Study Program</p>
                             <p class="font-medium text-gray-900">{{ $student->studyProgram->name ?? '-' }}</p>
                         </div>
                         <div>
-                            <p class="text-sm text-gray-500">Level / Angkatan</p>
+                            <p class="text-sm text-gray-500">Level / Batch</p>
                             <p class="font-medium text-gray-900">{{ $student->programLevel->name ?? '-' }}</p>
                         </div>
                         <div>
-                            <p class="text-sm text-gray-500">Jenis Mahasiswa</p>
+                            <p class="text-sm text-gray-500">Student Type</p>
                             <p class="font-medium text-gray-900">{{ ucfirst($student->student_type) }}</p>
                         </div>
                         <div>
-                            <p class="text-sm text-gray-500">Email Kampus</p>
+                            <p class="text-sm text-gray-500">Campus Email</p>
                             <p class="font-medium text-gray-900">{{ $student->email_kampus ?? '-' }}</p>
                         </div>
                     </div>
@@ -51,7 +51,7 @@
             @if(!$activeSchedule)
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6 text-center">
-                        <p class="text-gray-500">Tidak ada jadwal distribusi aktif untuk hari ini.</p>
+                        <p class="text-gray-500">No active distribution schedule for today.</p>
                     </div>
                 </div>
             @elseif($eligibility && !$eligibility->is_eligible)
@@ -63,24 +63,24 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/>
                                 </svg>
                             </div>
-                            <h3 class="ml-3 text-lg font-medium text-red-800">Mahasiswa Belum Memenuhi Syarat</h3>
+                            <h3 class="ml-3 text-lg font-medium text-red-800">Student Has Not Met Requirements</h3>
                         </div>
                         <div class="ml-12">
                             <p class="text-sm text-gray-600 mb-3">
-                                Mahasiswa ini <span class="font-semibold text-red-600">belum dapat menerima barang</span> karena belum menyelesaikan pembayaran.
+                                This student <span class="font-semibold text-red-600">cannot receive goods yet</span> because payment has not been completed.
                             </p>
                             <div class="bg-red-50 border border-red-200 rounded-md p-4 mb-4">
                                 <div class="flex items-center">
-                                    <span class="text-sm font-medium text-red-800">Status Pembayaran:</span>
-                                    <span class="ml-2 text-sm text-red-600">{{ $eligibility->payment_status ?? 'Belum Diketahui' }}</span>
+                                    <span class="text-sm font-medium text-red-800">Payment Status:</span>
+                                    <span class="ml-2 text-sm text-red-600">{{ $eligibility->payment_status ?? 'Unknown' }}</span>
                                 </div>
                             </div>
                             <p class="text-xs text-gray-500 mb-4">
-                                Mohon arahkan mahasiswa untuk menyelesaikan pembayaran terlebih dahulu. Setelah pembayaran lunas, data akan diperbarui oleh admin.
+                                Please direct the student to complete the payment first. After full payment, the data will be updated by admin.
                             </p>
                             <a href="{{ route('distribution.scan.index') }}"
                                 class="inline-flex items-center px-4 py-2 border border-primary-500 text-primary-700 hover:bg-primary-50 rounded-lg text-sm font-medium transition ease-in-out duration-150">
-                                {{ __('Kembali ke Scan') }}
+                                {{ __('Back to Scan') }}
                             </a>
                         </div>
                     </div>
@@ -94,15 +94,15 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/>
                                 </svg>
                             </div>
-                            <h3 class="ml-3 text-lg font-medium text-yellow-800">Data Kelayakan Belum Tersedia</h3>
+                            <h3 class="ml-3 text-lg font-medium text-yellow-800">Eligibility Data Not Available</h3>
                         </div>
                         <div class="ml-12">
                             <p class="text-sm text-gray-600 mb-3">
-                                Data kelayakan distribusi untuk mahasiswa ini belum tersedia di sistem. Mohon pastikan data telah diimport oleh admin.
+                                Distribution eligibility data for this student is not yet available in the system. Please ensure the data has been imported by admin.
                             </p>
                             <a href="{{ route('distribution.scan.index') }}"
                                 class="inline-flex items-center px-4 py-2 border border-primary-500 text-primary-700 hover:bg-primary-50 rounded-lg text-sm font-medium transition ease-in-out duration-150">
-                                {{ __('Kembali ke Scan') }}
+                                {{ __('Back to Scan') }}
                             </a>
                         </div>
                     </div>
@@ -116,18 +116,18 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/>
                                 </svg>
                             </div>
-                            <h3 class="ml-3 text-lg font-medium text-yellow-800">Mahasiswa Belum Mengisi Ukuran</h3>
+                            <h3 class="ml-3 text-lg font-medium text-yellow-800">Student Has Not Entered Sizes</h3>
                         </div>
                         <div class="ml-12">
                             <p class="text-sm text-gray-600 mb-3">
-                                Mahasiswa ini <span class="font-semibold text-yellow-600">belum mengisi profil ukuran</span> di akun mereka.
+                                This student <span class="font-semibold text-yellow-600">has not filled in their size profile</span> in their account.
                             </p>
                             <p class="text-xs text-gray-500 mb-4">
-                                Mohon arahkan mahasiswa untuk login terlebih dahulu ke sistem menggunakan NIM mereka dan mengisi form input ukuran sebelum melakukan pengambilan barang.
+                                Please direct the student to log in to the system using their NIM and fill in the size input form before picking up items.
                             </p>
                             <a href="{{ route('distribution.scan.index') }}"
                                 class="inline-flex items-center px-4 py-2 border border-primary-500 text-primary-700 hover:bg-primary-50 rounded-lg text-sm font-medium transition ease-in-out duration-150">
-                                {{ __('Kembali ke Scan') }}
+                                {{ __('Back to Scan') }}
                             </a>
                         </div>
                     </div>
@@ -135,7 +135,7 @@
             @elseif(!$entitlement)
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6 text-center">
-                        <p class="text-gray-500">Mahasiswa ini tidak memiliki hak barang untuk tahap distribusi saat ini.</p>
+                        <p class="text-gray-500">This student does not have any item entitlement for the current distribution stage.</p>
                     </div>
                 </div>
             @else
@@ -147,33 +147,33 @@
                     <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
                         <div class="p-6">
                             <div class="flex items-center justify-between mb-4">
-                                <h3 class="text-lg font-medium text-gray-900">Item yang Berhak Diterima</h3>
+                                <h3 class="text-lg font-medium text-gray-900">Entitled Items</h3>
                                 <div class="text-sm text-gray-500">
                                     {{ $activeSchedule->name }} | {{ $activeSchedule->date?->format('d M Y') ?? '-' }}
                                 </div>
                             </div>
 
                             @if($scheduleItems->isEmpty())
-                                <p class="text-gray-500">Tidak ada item untuk jadwal ini.</p>
+                                <p class="text-gray-500">No items for this schedule.</p>
                             @else
                                 <div class="overflow-x-auto">
                                     <table class="min-w-full divide-y divide-gray-200">
                                         <thead class="bg-gray-50">
                                             <tr>
                                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                    Centang
+                                                    Check
                                                 </th>
                                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                                     Item
                                                 </th>
                                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                    Kode
+                                                    Code
                                                 </th>
                                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                    Ukuran Input
+                                                    Input Size
                                                 </th>
                                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                    Ukuran Aktual
+                                                    Actual Size
                                                 </th>
                                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                                     Qty
@@ -209,9 +209,9 @@
                                                     <td class="px-6 py-4 whitespace-nowrap">
                                                         <div class="text-sm font-medium text-gray-900">{{ $item->name }}</div>
                                                         @if($alreadyTaken)
-                                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-700 mt-1">Sudah Diambil</span>
+                                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-700 mt-1">Already Taken</span>
                                                         @elseif($outOfStock)
-                                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-700 mt-1">Stok Habis</span>
+                                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-700 mt-1">Out of Stock</span>
                                                         @endif
                                                     </td>
                                                     <td class="px-6 py-4 whitespace-nowrap">
@@ -266,11 +266,11 @@
                         <button type="submit" id="submit-btn"
                             class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-700 focus:bg-green-700 active:bg-green-800 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition ease-in-out duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
                             disabled>
-                            {{ __('Konfirmasi Distribusi') }}
+                            {{ __('Confirm Distribution') }}
                         </button>
                             <a href="{{ route('distribution.scan.index') }}"
                                 class="inline-flex items-center px-4 py-2 border border-primary-500 text-primary-700 hover:bg-primary-50 rounded-lg text-sm font-medium transition ease-in-out duration-150">
-                            {{ __('Batal') }}
+                            {{ __('Cancel') }}
                         </a>
                     </div>
                 </form>

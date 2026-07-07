@@ -1,6 +1,6 @@
 <x-guest-layout>
     <div class="mb-4 text-sm text-gray-600">
-        Masukkan kode OTP 6 digit yang telah dikirim ke <strong>{{ $email }}</strong>
+        Enter the 6-digit OTP code sent to <strong>{{ $email }}</strong>
     </div>
 
     @if(session('success'))
@@ -13,18 +13,18 @@
         @csrf
 
         <div>
-            <x-input-label for="code" :value="__('Kode OTP')" />
+            <x-input-label for="code" :value="__('OTP Code')" />
             <x-text-input id="code" class="block mt-1 w-full text-center text-2xl tracking-[0.5em]" type="text" name="code" maxlength="6" required autofocus placeholder="000000" />
             <x-input-error :messages="$errors->get('code')" class="mt-2" />
         </div>
 
         <div class="flex items-center justify-end mt-4">
             <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md" href="{{ route('dashboard') }}">
-                Lewati
+                Skip
             </a>
 
             <x-primary-button class="ms-3">
-                {{ __('Verifikasi') }}
+                {{ __('Verify') }}
             </x-primary-button>
         </div>
     </form>

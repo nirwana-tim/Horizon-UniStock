@@ -3,7 +3,7 @@
   Props:
     - $type: 'success'|'warning'|'danger'|'info'|'neutral'|'primary'
   Usage:
-    <x-badge type="success">Aktif</x-badge>
+    <x-badge type="success">Active</x-badge>
     <x-badge type="warning">Pending</x-badge>
 --}}
 @props(['type' => 'neutral'])

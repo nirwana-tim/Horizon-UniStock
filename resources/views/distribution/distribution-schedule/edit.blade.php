@@ -1,8 +1,8 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex items-center justify-between">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ __('Edit Jadwal Distribusi') }}</h2>
-            <a href="{{ route('distribution.distribution-schedule.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-300 focus:bg-gray-300 active:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition ease-in-out duration-150">{{ __('← Kembali') }}</a>
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ __('Edit Distribution Schedule') }}</h2>
+            <a href="{{ route('distribution.distribution-schedule.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-300 focus:bg-gray-300 active:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition ease-in-out duration-150">{{ __('← Back') }}</a>
         </div>
     </x-slot>
 
@@ -26,13 +26,11 @@
                           x-data="{
                               programLevelId: '{{ old('program_level_id', $distributionSchedule->program_level_id) }}',
                               facultyId: '{{ old('faculty_id', $distributionSchedule->faculty_id) }}',
-                              prodiId: '{{ old('study_program_id', $distributionSchedule->study_program_id) }}',
+                              prodiId: '{{ old('study_program_id', $distributionSchedule->study_program_id ?? 'all') }}',
                               prodiByFaculty: {{ json_encode($prodiByFaculty) }},
                               allProdi: {{ json_encode($allProdi) }},
-                              levelCodes: {{ json_encode($levelCodes) }},
-                              facultyCodes: {{ json_encode($facultyCodes) }},
-                              prodiCodes: {{ json_encode($prodiCodes) }},
-                              entitlementMap: {{ json_encode($entitlementMap) }},
+                              itemHtml: '',
+                              selectedItemIds: @json($distributionSchedule->items->pluck('item_id')->toArray()),
                               get filteredProdi() {
                                   if (this.facultyId && this.prodiByFaculty[this.facultyId]) {
                                       return this.prodiByFaculty[this.facultyId];
@@ -40,45 +38,35 @@
                                   if (!this.facultyId) return this.allProdi;
                                   return [];
                               },
-                              get entitlementCode() {
-                                  let levelCode = this.levelCodes[this.programLevelId] || '';
-                                  let facultyCode = this.facultyCodes[this.facultyId] || '';
-                                  let prodiCode = this.prodiCodes[this.prodiId] || '';
-                                  if (levelCode && facultyCode && prodiCode) {
-                                      return levelCode + facultyCode + prodiCode;
-                                  }
-                                  return '';
-                              },
-                              isItemVisible(itemId) {
-                                  let code = this.entitlementCode;
-                                  if (!code) return true;
-                                  let allowedItems = this.entitlementMap[code] || [];
-                                  return allowedItems.includes(itemId);
-                              },
                               init() {
-                                  this.$watch('entitlementCode', (newCode) => {
-                                      if (newCode) {
-                                          let allowed = this.entitlementMap[newCode] || [];
-                                          document.querySelectorAll('input[name=\'item_ids[]\']').forEach(input => {
-                                              let itemId = parseInt(input.value);
-                                              if (!allowed.includes(itemId)) {
-                                                  input.checked = false;
-                                              }
-                                          });
-                                      }
-                                  });
+                                  this.$watch('prodiId', () => this.fetchItems());
+                                  this.$watch('programLevelId', () => { if (this.prodiId) this.fetchItems(); });
+                                  this.$watch('facultyId', () => { if (this.prodiId) this.fetchItems(); });
+                                  if (this.prodiId) this.fetchItems();
+                              },
+                              fetchItems() {
+                                  let params = {
+                                      program_level_id: this.programLevelId || '',
+                                      faculty_id: this.facultyId || '',
+                                      study_program_id: this.prodiId,
+                                  };
+                                  if (this.selectedItemIds.length) {
+                                      params.checked_ids = this.selectedItemIds.join(',');
+                                  }
+                                  axios.get('{{ route('distribution.distribution-schedule.fetch-items') }}', { params })
+                                      .then(res => this.itemHtml = res.data.html);
                               }
                           }">
                         @csrf @method('PUT')
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <x-input-label for="name" :value="__('Nama Jadwal')" />
+                                <x-input-label for="name" :value="__('Schedule Name')" />
                                 <x-text-input id="name" name="name" type="text" class="mt-1 block w-full" :value="old('name', $distributionSchedule->name)" required autofocus />
                                 <x-input-error :messages="$errors->get('name')" class="mt-2" />
                             </div>
                             <div @change="programLevelId = $event.target.value">
-                                <x-input-label for="program_level_id" :value="__('Angkatan')" />
+                                <x-input-label for="program_level_id" :value="__('Program Level')" />
                                 @php
                                     $levelOptions = $programLevels->map(fn($l) => [
                                         'value' => $l->id,
@@ -86,15 +74,15 @@
                                         'group' => '',
                                     ])->toArray();
                                 @endphp
-                                <x-searchable-select name="program_level_id" :options="$levelOptions" :value="old('program_level_id', $distributionSchedule->program_level_id)" placeholder="-- Semua Angkatan --" />
+                                <x-searchable-select name="program_level_id" :options="$levelOptions" :value="old('program_level_id', $distributionSchedule->program_level_id)" placeholder="-- All Levels --" />
                                 <x-input-error :messages="$errors->get('program_level_id')" class="mt-2" />
                             </div>
                             <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
-                                    <x-input-label for="faculty_id" :value="__('Fakultas')" />
+                                    <x-input-label for="faculty_id" :value="__('Faculty')" />
                                     <select id="faculty_id" name="faculty_id" x-model="facultyId"
                                             class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500">
-                                        <option value="">-- Semua Fakultas --</option>
+                                        <option value="">-- All Faculties --</option>
                                         @foreach($faculties as $f)
                                             <option value="{{ $f->id }}">{{ $f->name }}</option>
                                         @endforeach
@@ -102,10 +90,11 @@
                                     <x-input-error :messages="$errors->get('faculty_id')" class="mt-2" />
                                 </div>
                                 <div>
-                                    <x-input-label for="study_program_id" :value="__('Program Studi')" />
+                                    <x-input-label for="study_program_id" :value="__('Study Program')" />
                                     <select id="study_program_id" name="study_program_id" x-model="prodiId"
                                             class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500">
-                                        <option value="">-- Semua Prodi --</option>
+                                        <option value="">-- Select Study Program --</option>
+                                        <option value="all">All Study Programs</option>
                                         <template x-for="sp in filteredProdi" :key="sp.value">
                                             <option x-bind:value="sp.value" x-text="sp.label"></option>
                                         </template>
@@ -114,60 +103,42 @@
                                 </div>
                             </div>
                             <div>
-                                <x-input-label for="is_active" :value="__('Status Aktif')" />
+                                <x-input-label for="is_active" :value="__('Active Status')" />
                                 <select id="is_active" name="is_active" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500">
-                                    <option value="1" {{ old('is_active', $distributionSchedule->is_active) ? 'selected' : '' }}>Aktif</option>
-                                    <option value="0" {{ !old('is_active', $distributionSchedule->is_active) ? 'selected' : '' }}>Tidak Aktif</option>
+                                    <option value="1" {{ old('is_active', $distributionSchedule->is_active) ? 'selected' : '' }}>Active</option>
+                                    <option value="0" {{ !old('is_active', $distributionSchedule->is_active) ? 'selected' : '' }}>Inactive</option>
                                 </select>
                                 <x-input-error :messages="$errors->get('is_active')" class="mt-2" />
                             </div>
                             <div>
-                                <x-input-label for="date" :value="__('Tanggal')" />
+                                <x-input-label for="date" :value="__('Date')" />
                                 <x-text-input id="date" name="date" type="date" class="mt-1 block w-full" :value="old('date', $distributionSchedule->date->format('Y-m-d'))" required />
                                 <x-input-error :messages="$errors->get('date')" class="mt-2" />
                             </div>
                             <div>
-                                <x-input-label for="location" :value="__('Lokasi')" />
+                                <x-input-label for="location" :value="__('Location')" />
                                 <x-text-input id="location" name="location" type="text" class="mt-1 block w-full" :value="old('location', $distributionSchedule->location)" required />
                                 <x-input-error :messages="$errors->get('location')" class="mt-2" />
                             </div>
                             <div>
-                                <x-input-label for="session" :value="__('Sesi / Jam')" />
+                                <x-input-label for="session" :value="__('Session / Time')" />
                                 <x-text-input id="session" name="session" type="text" class="mt-1 block w-full" :value="old('session', $distributionSchedule->session)" required />
                                 <x-input-error :messages="$errors->get('session')" class="mt-2" />
                             </div>
                             
-                            {{-- Simplified Grid of Checked Items for Schedule --}}
-                            <div class="md:col-span-2">
-                                <x-input-label :value="__('Item yang Dibagikan')" />
-                                <p class="mt-1 mb-4 text-xs text-gray-500">Pilih item yang akan didistribusikan pada jadwal ini.</p>
+                            {{-- Items loaded via AJAX --}}
+                            <div x-show="prodiId" class="md:col-span-2">
+                                <x-input-label :value="__('Distributed Items')" />
+                                <p class="mt-1 mb-4 text-xs text-gray-500">Select items to be distributed in this schedule.</p>
                                 
-                                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                                    @php 
-                                        $selectedItems = old('item_ids', $distributionSchedule->items->pluck('item_id')->toArray());
-                                    @endphp
-                                    @foreach($items as $item)
-                                        @php
-                                            $isChecked = in_array($item->id, $selectedItems);
-                                        @endphp
-                                        <label x-show="isItemVisible({{ $item->id }})"
-                                               class="flex items-center space-x-2 p-3 border rounded-lg bg-gray-50 hover:bg-gray-100 transition cursor-pointer">
-                                            <input type="checkbox" 
-                                                   name="item_ids[]" 
-                                                   value="{{ $item->id }}" 
-                                                   {{ $isChecked ? 'checked' : '' }} 
-                                                   class="rounded border-gray-300 text-primary-700 shadow-sm focus:ring-primary-500">
-                                            <span class="text-sm text-gray-700 font-semibold">{{ $item->name }} ({{ $item->code }})</span>
-                                        </label>
-                                    @endforeach
-                                </div>
+                                <div x-html="itemHtml" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3"></div>
                                 <x-input-error :messages="$errors->get('item_ids')" class="mt-2" />
                             </div>
                         </div>
 
                         <div class="mt-6 flex items-center gap-3">
-                            <x-primary-button>{{ __('Perbarui') }}</x-primary-button>
-                            <a href="{{ route('distribution.distribution-schedule.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-300 focus:bg-gray-300 active:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition ease-in-out duration-150">{{ __('Batal') }}</a>
+                            <x-primary-button>{{ __('Update') }}</x-primary-button>
+                            <a href="{{ route('distribution.distribution-schedule.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-300 focus:bg-gray-300 active:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition ease-in-out duration-150">{{ __('Cancel') }}</a>
                         </div>
                     </form>
                 </div>

@@ -7,7 +7,9 @@ use App\Http\Requests\ItemDepartmentRequest;
 use App\Models\Faculty;
 use App\Models\ItemDepartment;
 use App\Services\Master\ItemDepartmentService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class ItemDepartmentController extends Controller
@@ -16,11 +18,26 @@ class ItemDepartmentController extends Controller
         protected ItemDepartmentService $departmentService
     ) {}
 
-    public function index(): View
+    public function index(Request $request): View|JsonResponse
     {
-        $departments = ItemDepartment::with('studyPrograms')->withCount('items')->orderBy('code')->paginate(15);
+        $query = ItemDepartment::with('studyPrograms')->withCount('items');
 
-        return view('master.item-department.index', compact('departments'));
+        if ($search = $request->input('q')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('label', 'like', "%{$search}%")
+                  ->orWhere('code', 'like', "%{$search}%");
+            });
+        }
+
+        $data = $query->orderBy('code')->paginate(20);
+
+        if ($request->ajax()) {
+            return response()->json([
+                'html' => view('master.item-department._table', compact('data'))->render(),
+            ]);
+        }
+
+        return view('master.item-department.index', compact('data'));
     }
 
     public function create(): View

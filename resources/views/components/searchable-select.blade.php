@@ -2,9 +2,9 @@
     'name',
     'options' => [],          // Array of ['value' => ..., 'label' => ..., 'group' => null]
     'value' => null,
-    'placeholder' => 'Cari dan pilih...',
+    'placeholder' => 'Search and select...',
     'required' => false,
-    'searchPlaceholder' => 'Ketik untuk mencari...',
+    'searchPlaceholder' => 'Type to search...',
 ])
 
 <div x-data="{
@@ -82,7 +82,7 @@
                 </li>
             </template>
             <li x-show="filteredOptions.length === 0" class="px-3 py-2 text-sm text-gray-400 italic text-center">
-                Tidak ditemukan
+                Not found
             </li>
         </ul>
     </div>

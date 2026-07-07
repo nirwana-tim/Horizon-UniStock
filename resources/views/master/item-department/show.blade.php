@@ -1,6 +1,6 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ __('Detail Departemen Item') }}</h2>
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ __('Item Department Details') }}</h2>
     </x-slot>
 
     <div class="py-12">
@@ -9,7 +9,7 @@
                 <div class="p-6 text-gray-900">
                     <div class="space-y-4">
                         <div>
-                            <h3 class="text-sm font-medium text-gray-500">{{ __('Kode') }}</h3>
+                            <h3 class="text-sm font-medium text-gray-500">{{ __('Code') }}</h3>
                             <p class="mt-1 text-sm font-mono text-gray-900">{{ $itemDepartment->code }}</p>
                         </div>
 
@@ -19,7 +19,7 @@
                         </div>
 
                         <div>
-                            <h3 class="text-sm font-medium text-gray-500">{{ __('Program Studi Terkait') }}</h3>
+                            <h3 class="text-sm font-medium text-gray-500">{{ __('Related Study Programs') }}</h3>
                             @if($itemDepartment->studyPrograms->count())
                                 <div class="mt-2 space-y-1">
                                     @foreach($itemDepartment->studyPrograms->groupBy(fn($sp) => $sp->faculty?->name ?? 'Lainnya') as $facultyName => $programs)
@@ -34,23 +34,23 @@
                                     @endforeach
                                 </div>
                             @else
-                                <p class="mt-1 text-sm text-gray-400">Belum ada program studi terkait.</p>
+                                <p class="mt-1 text-sm text-gray-400">No related study programs yet.</p>
                             @endif
                         </div>
 
                         <div>
-                            <h3 class="text-sm font-medium text-gray-500 mb-2">Daftar Item Terkait</h3>
+                            <h3 class="text-sm font-medium text-gray-500 mb-2">Related Items</h3>
                             @if($itemDepartment->items->count())
                                 <div class="overflow-x-auto border border-gray-200 rounded-lg">
                                     <table class="min-w-full divide-y divide-gray-200">
                                         <thead class="bg-gray-50">
                                             <tr>
                                                 <th class="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">#</th>
-                                                <th class="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Kode</th>
-                                                <th class="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Nama Item</th>
-                                                <th class="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Kategori</th>
-                                                <th class="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Satuan</th>
-                                                <th class="px-4 py-2 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Aksi</th>
+                                                <th class="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Code</th>
+                                                <th class="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Item Name</th>
+                                                <th class="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Category</th>
+                                                <th class="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Unit</th>
+                                                <th class="px-4 py-2 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
                                             </tr>
                                         </thead>
                                         <tbody class="bg-white divide-y divide-gray-200">
@@ -63,7 +63,7 @@
                                                     <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">{{ $item->unit }}</td>
                                                     <td class="px-4 py-2 whitespace-nowrap text-sm text-right">
                                                         <a href="{{ route('master-data.item.show', $item->code) }}" class="inline-flex items-center px-2 py-1 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 active:bg-blue-800 transition">
-                                                            Lihat
+                                                            View
                                                         </a>
                                                     </td>
                                                 </tr>
@@ -72,7 +72,7 @@
                                     </table>
                                 </div>
                             @else
-                                <p class="mt-1 text-sm text-gray-400 italic">Belum ada item yang terhubung ke departemen ini.</p>
+                                <p class="mt-1 text-sm text-gray-400 italic">No items linked to this department yet.</p>
                             @endif
                         </div>
                     </div>
@@ -82,7 +82,7 @@
                             {{ __('Edit') }}
                         </a>
                         <a href="{{ route('master-data.item-department.index') }}" class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                            {{ __('Kembali') }}
+                            {{ __('Back') }}
                         </a>
                     </div>
                 </div>

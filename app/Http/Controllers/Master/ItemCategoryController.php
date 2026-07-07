@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\ItemCategoryRequest;
 use App\Models\ItemCategory;
 use App\Services\Master\ItemCategoryService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class ItemCategoryController extends Controller
@@ -15,11 +17,26 @@ class ItemCategoryController extends Controller
         protected ItemCategoryService $categoryService
     ) {}
 
-    public function index(): View
+    public function index(Request $request): View|JsonResponse
     {
-        $categories = ItemCategory::withCount('items')->orderBy('code')->paginate(15);
+        $query = ItemCategory::withCount('items');
 
-        return view('master.item-category.index', compact('categories'));
+        if ($search = $request->input('q')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('code', 'like', "%{$search}%")
+                  ->orWhere('label', 'like', "%{$search}%");
+            });
+        }
+
+        $data = $query->orderBy('code')->paginate(20);
+
+        if ($request->ajax()) {
+            return response()->json([
+                'html' => view('master.item-category._table', compact('data'))->render(),
+            ]);
+        }
+
+        return view('master.item-category.index', compact('data'));
     }
 
     public function create(): View

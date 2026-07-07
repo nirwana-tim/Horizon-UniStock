@@ -69,6 +69,7 @@ Route::middleware(['auth', 'password.changed', 'role:super_admin|admin'])->prefi
 
 Route::middleware(['auth', 'password.changed', 'role:super_admin|admin'])->prefix('distribution')->name('distribution.')->group(function () {
     Route::resource('entitlement', EntitlementController::class);
+    Route::get('distribution-schedule/fetch-items', [DistributionScheduleController::class, 'fetchItems'])->name('distribution-schedule.fetch-items');
     Route::resource('distribution-schedule', DistributionScheduleController::class);
     Route::get('size-monitor', [SizeMonitorController::class, 'index'])->name('size-monitor.index');
     Route::get('/scan', [ScanController::class, 'index'])->name('scan.index');

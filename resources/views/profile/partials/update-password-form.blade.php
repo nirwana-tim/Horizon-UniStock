@@ -13,6 +13,9 @@
         @csrf
         @method('put')
 
+        {{-- Hidden username field for accessibility (screen reader) --}}
+        <input type="text" name="username" autocomplete="username" class="hidden" aria-hidden="true" tabindex="-1">
+
         <div>
             <x-input-label for="update_password_current_password" :value="__('Current Password')" />
             <x-text-input id="update_password_current_password" name="current_password" type="password" class="mt-1 block w-full" autocomplete="current-password" />

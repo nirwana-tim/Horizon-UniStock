@@ -1,13 +1,13 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex items-center justify-between">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ __('Detail Item') }}</h2>
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ __('Item Details') }}</h2>
             <div class="flex gap-2">
                 <a href="{{ route('master-data.item.edit', $item) }}" class="inline-flex items-center px-4 py-2 bg-amber-500 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-amber-600 focus:bg-amber-600 active:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 transition ease-in-out duration-150">
                     {{ __('Edit') }}
                 </a>
                 <a href="{{ route('master-data.item.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-300 focus:bg-gray-300 active:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                    {{ __('Kembali') }}
+                    {{ __('Back') }}
                 </a>
             </div>
         </div>
@@ -25,39 +25,39 @@
                 <div class="p-6 text-gray-900">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                            <h3 class="text-sm font-medium text-gray-500">Kode Item</h3>
+                            <h3 class="text-sm font-medium text-gray-500">Item Code</h3>
                             <p class="mt-1 text-sm font-mono text-gray-900">{{ $item->code }}</p>
                         </div>
                         <div>
-                            <h3 class="text-sm font-medium text-gray-500">Nama Item</h3>
+                            <h3 class="text-sm font-medium text-gray-500">Item Name</h3>
                             <p class="mt-1 text-sm text-gray-900">{{ $item->name }}</p>
                         </div>
                         <div>
-                            <h3 class="text-sm font-medium text-gray-500">Kategori</h3>
+                            <h3 class="text-sm font-medium text-gray-500">Category</h3>
                             <p class="mt-1 text-sm text-gray-900">{{ $item->category->code ?? '' }} - {{ $item->category->label ?? '-' }}</p>
                         </div>
                         <div>
                             <h3 class="text-sm font-medium text-gray-500">Gender</h3>
-                            <p class="mt-1 text-sm text-gray-900">{{ ['L' => 'Laki - Laki', 'P' => 'Perempuan', 'U' => 'Unisex'][$item->gender] ?? $item->gender ?? '-' }}</p>
+                            <p class="mt-1 text-sm text-gray-900">{{ ['L' => 'Male', 'P' => 'Female', 'U' => 'Unisex'][$item->gender] ?? $item->gender ?? '-' }}</p>
                         </div>
                         <div>
-                            <h3 class="text-sm font-medium text-gray-500">Tipe</h3>
+                            <h3 class="text-sm font-medium text-gray-500">Type</h3>
                             <p class="mt-1 text-sm text-gray-900">{{ $item->type?->code ?? '-' }} - {{ $item->type?->label ?? '-' }}</p>
                         </div>
                         <div>
-                            <h3 class="text-sm font-medium text-gray-500">Departemen</h3>
+                            <h3 class="text-sm font-medium text-gray-500">Department</h3>
                             <p class="mt-1 text-sm text-gray-900">{{ $item->department?->code ?? '-' }} - {{ $item->department?->label ?? '-' }}</p>
                         </div>
                         <div>
-                            <h3 class="text-sm font-medium text-gray-500">Satuan</h3>
+                            <h3 class="text-sm font-medium text-gray-500">Unit</h3>
                             <p class="mt-1 text-sm text-gray-900">{{ $item->unit }}</p>
                         </div>
                         <div>
-                            <h3 class="text-sm font-medium text-gray-500">Harga Jual</h3>
+                            <h3 class="text-sm font-medium text-gray-500">Selling Price</h3>
                             <p class="mt-1 text-sm text-gray-900">Rp {{ number_format($item->selling_price, 2) }}</p>
                         </div>
                         <div>
-                            <h3 class="text-sm font-medium text-gray-500">HPP</h3>
+                            <h3 class="text-sm font-medium text-gray-500">COGS</h3>
                             <p class="mt-1 text-sm text-gray-900">Rp {{ number_format($item->hpp, 2) }}</p>
                         </div>
                     </div>
@@ -65,9 +65,9 @@
                     {{-- Varian Section --}}
                     <div class="mt-8 pt-4 border-t border-gray-200" x-data="{ showModal: false, selectedSize: '', generatedSku: '', baseCode: '{{ $item->base_code ?? $item->code }}' }">
                         <div class="flex items-center justify-between mb-4">
-                            <h3 class="text-sm font-medium text-gray-500">Varian</h3>
+                            <h3 class="text-sm font-medium text-gray-500">Variants</h3>
                             <button type="button" @click="showModal = true" class="inline-flex items-center px-4 py-2 bg-[#980416] text-white text-xs font-semibold rounded-lg hover:bg-[#7a0311] transition shadow-sm">
-                                + Tambah Varian
+                                + Add Variant
                             </button>
                         </div>
 
@@ -98,7 +98,7 @@
                                     <form action="{{ route('master-data.item.variant.store', $item) }}" method="POST">
                                         @csrf
                                         <div class="flex items-center justify-between border-b pb-3 mb-4">
-                                            <h3 class="text-base font-bold text-gray-900">Tambah Varian Baru</h3>
+                                            <h3 class="text-base font-bold text-gray-900">Add New Variant</h3>
                                             <button type="button" @click="showModal = false" class="text-gray-400 hover:text-gray-500 transition">
                                                 <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -108,7 +108,7 @@
 
                                         <div class="space-y-4">
                                             <div>
-                                                <x-input-label for="modal_size_id" :value="__('Ukuran')" class="mb-1" />
+                                                <x-input-label for="modal_size_id" :value="__('Size')" class="mb-1" />
                                                 <select name="size_id" id="modal_size_id" required 
                                                         @change="
                                                             const opt = $event.target.options[$event.target.selectedIndex];
@@ -116,7 +116,7 @@
                                                             generatedSku = selectedSize ? (baseCode + '-' + selectedSize) : '';
                                                         "
                                                         class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 text-sm">
-                                                    <option value="">-- Pilih Ukuran --</option>
+                                                    <option value="">-- Select Size --</option>
                                                     @foreach($sizes as $size)
                                                         <option value="{{ $size->id }}" data-code="{{ $size->code }}">{{ $size->code }} - {{ $size->label }}</option>
                                                     @endforeach
@@ -124,24 +124,24 @@
                                             </div>
 
                                             <div>
-                                                <x-input-label for="modal_size" :value="__('Label Ukuran')" class="mb-1" />
+                                                <x-input-label for="modal_size" :value="__('Size Label')" class="mb-1" />
                                                 <x-text-input type="text" name="size" id="modal_size" required x-model="selectedSize" placeholder="S, M, L, XL, 40, 42" class="w-full text-sm" />
                                             </div>
 
                                             <div>
-                                                <x-input-label for="modal_sku" :value="__('SKU (opsional)')" class="mb-1" />
-                                                <x-text-input type="text" name="sku" id="modal_sku" x-model="generatedSku" placeholder="Auto jika kosong" class="w-full text-sm font-mono" />
+                                                <x-input-label for="modal_sku" :value="__('SKU (optional)')" class="mb-1" />
+                                                <x-text-input type="text" name="sku" id="modal_sku" x-model="generatedSku" placeholder="Auto if empty" class="w-full text-sm font-mono" />
                                             </div>
 
                                             <div>
-                                                <x-input-label for="modal_weight" :value="__('Berat (opsional dalam kg)')" class="mb-1" />
+                                                <x-input-label for="modal_weight" :value="__('Weight (optional in kg)')" class="mb-1" />
                                                 <x-text-input type="number" name="weight" id="modal_weight" min="0" step="0.01" placeholder="0" class="w-full text-sm" />
                                             </div>
                                         </div>
 
                                         <div class="mt-6 flex justify-end gap-2 border-t pt-4">
-                                            <button type="button" @click="showModal = false" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold rounded-lg transition">Batal</button>
-                                            <button type="submit" class="px-4 py-2 bg-primary-700 hover:bg-primary-800 text-white text-xs font-semibold rounded-lg transition shadow-sm">Simpan</button>
+                                            <button type="button" @click="showModal = false" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold rounded-lg transition">Cancel</button>
+                                            <button type="submit" class="px-4 py-2 bg-primary-700 hover:bg-primary-800 text-white text-xs font-semibold rounded-lg transition shadow-sm">Save</button>
                                         </div>
                                     </form>
                                 </div>
@@ -154,10 +154,10 @@
                                 <table class="min-w-full divide-y divide-gray-200">
                                     <thead class="bg-gray-50">
                                         <tr>
-                                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Ukuran</th>
+                                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Size</th>
                                             <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">SKU</th>
-                                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Berat</th>
-                                            <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Aksi</th>
+                                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Weight</th>
+                                            <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody class="bg-white divide-y divide-gray-200">
@@ -169,8 +169,8 @@
                                                 <td class="px-4 py-2 text-sm text-right">
                                                     <x-delete-modal
                                                         :route="route('master-data.item.variant.destroy', [$item, $variant])"
-                                                        label="Hapus Varian"
-                                                        description="Apakah Anda yakin ingin menghapus varian {{ $variant->size }} ini? Data ini tidak dapat dikembalikan."
+                                                        label="Delete Variant"
+                                                        description="Are you sure you want to delete variant {{ $variant->size }}? This action cannot be undone."
                                                     />
                                                 </td>
                                             </tr>
@@ -179,7 +179,7 @@
                                 </table>
                             </div>
                         @else
-                            <p class="text-sm text-gray-500">Tidak ada varian.</p>
+                            <p class="text-sm text-gray-500">No variants.</p>
                         @endif
                     </div>
                 </div>

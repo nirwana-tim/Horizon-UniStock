@@ -10,6 +10,7 @@ use App\Models\ProgramLevel;
 use App\Models\Student;
 use App\Models\StudyProgram;
 use App\Services\Master\StudentService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -20,11 +21,25 @@ class StudentController extends Controller
         protected StudentService $studentService
     ) {}
 
-    public function index(): View
+    public function index(Request $request): View|JsonResponse
     {
-        $students = Student::with(['studyProgram', 'programLevel'])
-            ->latest()
-            ->paginate(20);
+        $query = Student::with(['studyProgram', 'programLevel']);
+
+        if ($search = $request->input('q')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('nim', 'like', "%{$search}%")
+                  ->orWhere('email_kampus', 'like', "%{$search}%");
+            });
+        }
+
+        $students = $query->latest()->paginate(20);
+
+        if ($request->ajax()) {
+            return response()->json([
+                'html' => view('master.student._table', compact('students'))->render(),
+            ]);
+        }
 
         $studyPrograms = StudyProgram::with('faculty')->orderBy('name')->get();
         $programLevels = ProgramLevel::orderBy('name')->get();

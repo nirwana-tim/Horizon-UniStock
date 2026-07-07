@@ -1,6 +1,6 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ __('Detail Item Category') }}</h2>
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ __('Item Category Details') }}</h2>
     </x-slot>
 
     <div class="py-12">
@@ -9,7 +9,7 @@
                 <div class="p-6 text-gray-900">
                     <div class="space-y-4">
                         <div>
-                            <h3 class="text-sm font-medium text-gray-500">{{ __('Kode') }}</h3>
+                            <h3 class="text-sm font-medium text-gray-500">{{ __('Code') }}</h3>
                             <p class="mt-1 text-sm font-mono text-gray-900">{{ $category->code }}</p>
                         </div>
 
@@ -20,15 +20,15 @@
                     </div>
 
                     <div class="mt-6 pt-4 border-t border-gray-200">
-                        <h3 class="text-sm font-medium text-gray-500 mb-3">{{ __('Daftar Item') }}</h3>
+                        <h3 class="text-sm font-medium text-gray-500 mb-3">{{ __('Item List') }}</h3>
                         @if($category->items->count())
                             <div class="overflow-x-auto">
                                 <table class="min-w-full divide-y divide-gray-200">
                                     <thead class="bg-gray-50">
                                         <tr>
                                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#</th>
-                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Kode') }}</th>
-                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Nama') }}</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Code') }}</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Name') }}</th>
                                         </tr>
                                     </thead>
                                     <tbody class="bg-white divide-y divide-gray-200">
@@ -43,7 +43,7 @@
                                 </table>
                             </div>
                         @else
-                            <p class="text-sm text-gray-500">Tidak ada item dalam kategori ini.</p>
+                            <p class="text-sm text-gray-500">No items in this category.</p>
                         @endif
                     </div>
 
@@ -52,7 +52,7 @@
                             {{ __('Edit') }}
                         </a>
                         <a href="{{ route('master-data.item-category.index') }}" class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-25 transition ease-in-out duration-150">
-                            {{ __('Kembali') }}
+                            {{ __('Back') }}
                         </a>
                     </div>
                 </div>

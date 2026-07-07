@@ -6,7 +6,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>{{ isset($title) ? $title . ' — ' : '' }}{{ config('app.name', 'Horizon UniStock') }}</title>
-    <meta name="description" content="Sistem Distribusi Seragam & Inventory Management — Horizon UniStock">
+    <meta name="description" content="Uniform Distribution & Inventory Management System — Horizon UniStock">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -20,8 +20,8 @@
 <body class="font-sans antialiased bg-gray-50 text-gray-800">
 
 @php
-    $isSidebarLayout = auth()->check() && auth()->user()->hasAnyRole(['super_admin', 'admin', 'finance', 'student']);
-    $isBottomNavLayout = auth()->check() && auth()->user()->hasAnyRole(['staff']);
+    $isSidebarLayout = auth()->check() && auth()->user()->hasAnyRole(['super_admin', 'admin', 'finance']);
+    $isBottomNavLayout = auth()->check() && auth()->user()->hasAnyRole(['staff', 'student']);
 @endphp
 
 @if($isSidebarLayout)

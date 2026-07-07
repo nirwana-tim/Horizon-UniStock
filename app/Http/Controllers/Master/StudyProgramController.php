@@ -7,7 +7,9 @@ use App\Http\Requests\StudyProgramRequest;
 use App\Models\Faculty;
 use App\Models\StudyProgram;
 use App\Services\Master\StudyProgramService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class StudyProgramController extends Controller
@@ -16,9 +18,24 @@ class StudyProgramController extends Controller
         protected StudyProgramService $studyProgramService
     ) {}
 
-    public function index(): View
+    public function index(Request $request): View|JsonResponse
     {
-        $programs = StudyProgram::with('faculty')->withCount('students')->latest()->paginate(15);
+        $query = StudyProgram::with('faculty')->withCount('students');
+
+        if ($search = $request->input('q')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('code', 'like', "%{$search}%");
+            });
+        }
+
+        $programs = $query->orderBy('code')->paginate(20);
+
+        if ($request->ajax()) {
+            return response()->json([
+                'html' => view('master.study-program._table', compact('programs'))->render(),
+            ]);
+        }
 
         return view('master.study-program.index', compact('programs'));
     }

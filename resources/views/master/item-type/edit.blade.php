@@ -1,6 +1,6 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ __('Edit Tipe Item') }}</h2>
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ __('Edit Item Type') }}</h2>
     </x-slot>
 
     <div class="py-12">
@@ -12,7 +12,7 @@
                         @method('PUT')
 
                         <div class="mb-4">
-                            <x-input-label :value="__('Kode')" />
+                            <x-input-label :value="__('Code')" />
                             <p class="mt-1 text-sm font-mono text-gray-900 bg-gray-100 p-2.5 rounded-md border border-gray-200">{{ $itemType->code }}</p>
                         </div>
 
@@ -22,7 +22,7 @@
                             <x-input-error :messages="$errors->get('label')" class="mt-2" />
                         </div>
                         <div class="mb-4">
-                            <x-input-label :value="__('Kategori')" class="mb-2" />
+                            <x-input-label :value="__('Category')" class="mb-2" />
                             <div class="mt-1 grid grid-cols-2 sm:grid-cols-3 gap-2">
                                 @foreach($categories as $cat)
                                     <label class="inline-flex items-center gap-2 px-3 py-2 bg-gray-50 border border-gray-200 rounded-md cursor-pointer hover:bg-gray-100">
@@ -37,9 +37,9 @@
                         </div>
 
                         <div class="flex items-center gap-2 mt-6">
-                            <x-primary-button>{{ __('Simpan') }}</x-primary-button>
+                            <x-primary-button>{{ __('Save') }}</x-primary-button>
                             <a href="{{ route('master-data.item-type.index') }}" class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-25 transition ease-in-out duration-150">
-                                {{ __('Batal') }}
+                                {{ __('Cancel') }}
                             </a>
                         </div>
                     </form>

@@ -6,7 +6,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>{{ config('app.name', 'Horizon UniStock') }}</title>
-    <meta name="description" content="Login ke Horizon UniStock — Sistem Distribusi Seragam Mahasiswa">
+    <meta name="description" content="Login to Horizon UniStock — Student Uniform Distribution System">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -19,7 +19,7 @@
 
 <div class="min-h-screen lg:flex">
 
-    {{-- ===== KIRI: Branding (Desktop only) ===== --}}
+    {{-- ===== LEFT: Branding (Desktop only) ===== --}}
     <div class="hidden lg:flex lg:w-5/12 xl:w-1/2 bg-primary-700 flex-col items-center justify-center relative overflow-hidden">
 
         {{-- Background pattern --}}
@@ -49,16 +49,16 @@
 
             <h1 class="text-3xl font-bold text-white mb-3">Horizon UniStock</h1>
             <p class="text-primary-200 text-base leading-relaxed mb-10">
-                Sistem distribusi seragam & manajemen inventori untuk mahasiswa baru
+                Uniform distribution & inventory management system for new students
             </p>
 
             {{-- Flow steps --}}
             <div class="space-y-4 text-left">
                 @foreach([
-                    ['step' => '1', 'label' => 'Input Ukuran Seragam'],
-                    ['step' => '2', 'label' => 'Generate QR Identitas'],
-                    ['step' => '3', 'label' => 'Scan & Verifikasi'],
-                    ['step' => '4', 'label' => 'Terima Seragam'],
+                    ['step' => '1', 'label' => 'Input Uniform Size'],
+                    ['step' => '2', 'label' => 'Generate Identity QR'],
+                    ['step' => '3', 'label' => 'Scan & Verify'],
+                    ['step' => '4', 'label' => 'Receive Uniform'],
                 ] as $item)
                 <div class="flex items-center gap-4">
                     <div class="w-8 h-8 bg-white/20 border border-white/30 rounded-full flex items-center justify-center flex-shrink-0 text-white text-sm font-bold">
@@ -71,7 +71,7 @@
         </div>
     </div>
 
-    {{-- ===== KANAN: Form ===== --}}
+    {{-- ===== RIGHT: Form ===== --}}
     <div class="flex-1 flex items-center justify-center p-6 lg:p-12 bg-gray-50">
         <div class="w-full max-w-md">
 
@@ -84,7 +84,7 @@
                 </div>
                 <div>
                     <p class="text-sm font-bold text-gray-900">Horizon UniStock</p>
-                    <p class="text-xs text-primary-700">Sistem Distribusi Seragam</p>
+                    <p class="text-xs text-primary-700">Uniform Distribution System</p>
                 </div>
             </div>
 

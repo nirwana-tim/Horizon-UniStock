@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Student;
 use App\Http\Controllers\Controller;
 use App\Models\DistributionSchedule;
 use App\Models\Student;
+use App\Services\QrCodeService;
 use App\Services\StudentSizeService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -13,7 +14,8 @@ use Illuminate\View\View;
 class SizeController extends Controller
 {
     public function __construct(
-        private readonly StudentSizeService $sizeService
+        private readonly StudentSizeService $sizeService,
+        private readonly QrCodeService $qrCodeService,
     ) {}
 
     public function index(): View
@@ -67,9 +69,7 @@ class SizeController extends Controller
         $user = auth()->user();
         $student = Student::where('user_id', $user->id)->firstOrFail();
 
-        if (!$student->qr_token) {
-            $this->sizeService->generateQr($student);
-        }
+        $qrDataUrl = $this->qrCodeService->getQrPngDataUrl($student);
 
         $activeSchedules = DistributionSchedule::with('programLevel', 'faculty')
             ->where('is_active', true)
@@ -78,6 +78,6 @@ class SizeController extends Controller
             ->take(5)
             ->get();
 
-        return view('student.qr-show', compact('student', 'activeSchedules'));
+        return view('student.qr-show', compact('student', 'activeSchedules', 'qrDataUrl'));
     }
 }

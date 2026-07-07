@@ -16,8 +16,7 @@ class Student extends Authenticatable
         'name',
         'email_kampus',
         'email_pribadi',
-        'qr_token',
-        'qr_generated_at',
+
         'study_program_id',
         'program_level_id',
         'student_type',
@@ -28,7 +27,7 @@ class Student extends Authenticatable
     protected function casts(): array
     {
         return [
-            'qr_generated_at' => 'datetime',
+
             'email_verified_at' => 'datetime',
         ];
     }

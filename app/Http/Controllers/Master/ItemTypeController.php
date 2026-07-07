@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\ItemTypeRequest;
 use App\Models\ItemType;
 use App\Services\Master\ItemTypeService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class ItemTypeController extends Controller
@@ -15,11 +17,26 @@ class ItemTypeController extends Controller
         protected ItemTypeService $typeService
     ) {}
 
-    public function index(): View
+    public function index(Request $request): View|JsonResponse
     {
-        $types = ItemType::with('categories')->withCount('items')->orderBy('code')->paginate(15);
+        $query = ItemType::with('categories')->withCount('items');
 
-        return view('master.item-type.index', compact('types'));
+        if ($search = $request->input('q')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('code', 'like', "%{$search}%")
+                  ->orWhere('label', 'like', "%{$search}%");
+            });
+        }
+
+        $data = $query->orderBy('code')->paginate(20);
+
+        if ($request->ajax()) {
+            return response()->json([
+                'html' => view('master.item-type._table', compact('data'))->render(),
+            ]);
+        }
+
+        return view('master.item-type.index', compact('data'));
     }
 
     public function create(): View

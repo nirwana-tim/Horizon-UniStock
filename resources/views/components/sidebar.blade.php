@@ -1,5 +1,5 @@
 {{--
-  Sidebar Component — Admin & Super Admin only
+  Sidebar Component — Admin, Finance & Super Admin
   Used in layouts/app.blade.php
 --}}
 @php
@@ -45,8 +45,12 @@
     $reportsOpen = request()->routeIs($reportsRoutes) ? 'true' : 'false';
     $systemOpen = request()->routeIs($systemRoutes) ? 'true' : 'false';
 @endphp
-<aside x-data="{ collapsed: false, masterOpen: {{ $masterOpen }}, distributionOpen: {{ $distributionOpen }}, inventoryOpen: {{ $inventoryOpen }}, reportsOpen: {{ $reportsOpen }}, systemOpen: {{ $systemOpen }} }" x-init="setTimeout(() => $el.classList.add('sidebar-transition'), 50)" :class="collapsed ? 'w-16' : 'w-64'"
-    class="flex-shrink-0 bg-white border-r border-gray-200 flex flex-col h-full overflow-hidden">
+<aside x-data="{ collapsed: false, mobileOpen: false, masterOpen: {{ $masterOpen }}, distributionOpen: {{ $distributionOpen }}, inventoryOpen: {{ $inventoryOpen }}, reportsOpen: {{ $reportsOpen }}, systemOpen: {{ $systemOpen }} }"
+    x-init="setTimeout(() => $el.classList.add('sidebar-transition'), 50)"
+    @toggle-sidebar.window="mobileOpen = !mobileOpen"
+    class="fixed inset-y-0 left-0 z-30 flex-shrink-0 bg-white border-r border-gray-200 flex flex-col h-full overflow-hidden transition-transform duration-250
+           -translate-x-full lg:translate-x-0 lg:static lg:z-auto"
+    :class="(collapsed ? 'w-16' : 'w-64') + (mobileOpen ? ' translate-x-0' : ' -translate-x-full')">
 
     {{-- Logo / Brand --}}
     <div class="h-14 border-b border-gray-100 flex-shrink-0 flex items-center overflow-hidden"
@@ -67,7 +71,7 @@
         </a>
 
         {{-- Expanded: Collapse button --}}
-        <button x-show="!collapsed" @click="collapsed = true" title="Collapse sidebar"
+        <button x-show="!collapsed" x-cloak @click="collapsed = true" title="Collapse sidebar"
             class="p-1.5 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors flex-shrink-0">
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -76,7 +80,7 @@
         </button>
 
         {{-- Collapsed: Single centered expand button --}}
-        <button x-show="collapsed" @click="collapsed = false" title="Expand sidebar"
+        <button x-show="collapsed" x-cloak @click="collapsed = false" title="Expand sidebar"
             class="w-10 h-10 flex items-center justify-center rounded-lg text-primary-700 bg-primary-50 hover:bg-primary-100 transition-colors">
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -117,7 +121,7 @@
                     </svg>
                 </button>
 
-                <div x-show="masterOpen && !collapsed" x-collapse
+                <div x-show="masterOpen && !collapsed" x-cloak
                     class="mt-0.5 ml-4 pl-4 border-l border-gray-200 space-y-0.5">
                     {{-- Institution --}}
                     <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider px-2 py-1.5 mt-1">Institution</p>
@@ -187,7 +191,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <span x-show="!collapsed" class="truncate">Kelayakan Mahasiswa</span>
+                <span x-show="!collapsed" class="truncate">Student Eligibility</span>
             </a>
 
             {{-- Students --}}
@@ -216,7 +220,7 @@
                     </svg>
                 </button>
 
-                <div x-show="distributionOpen && !collapsed" x-collapse
+                <div x-show="distributionOpen && !collapsed" x-cloak
                     class="mt-0.5 ml-4 pl-4 border-l border-gray-200 space-y-0.5">
                     <a href="{{ route('distribution.entitlement.index') }}"
                         class="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm {{ request()->routeIs('distribution.entitlement.*') ? 'text-primary-700 font-medium bg-primary-50' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50' }} transition-colors">
@@ -253,7 +257,7 @@
                     </svg>
                 </button>
 
-                <div x-show="inventoryOpen && !collapsed" x-collapse
+                <div x-show="inventoryOpen && !collapsed" x-cloak
                     class="mt-0.5 ml-4 pl-4 border-l border-gray-200 space-y-0.5">
                     <a href="{{ route('inventory.stock-receive.index') }}"
                         class="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm {{ request()->routeIs('inventory.stock-receive.*') ? 'text-primary-700 font-medium bg-primary-50' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50' }} transition-colors">
@@ -282,14 +286,14 @@
                     </svg>
                 </button>
 
-                <div x-show="reportsOpen && !collapsed" x-collapse
+                <div x-show="reportsOpen && !collapsed" x-cloak
                     class="mt-0.5 ml-4 pl-4 border-l border-gray-200 space-y-0.5">
                     <a href="{{ route('report.gpm-cost') }}"
                         class="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm {{ request()->routeIs('report.gpm-cost*') ? 'text-primary-700 font-medium bg-primary-50' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50' }} transition-colors">
                         GPM / Cost
                     </a>
                     <a href="{{ route('report.index') }}"
-                        class="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm {{ request()->routeIs('report.*') ? 'text-primary-700 font-medium bg-primary-50' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50' }} transition-colors">
+                        class="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm {{ request()->routeIs('report.index') ? 'text-primary-700 font-medium bg-primary-50' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50' }} transition-colors">
                         Reports
                     </a>
                 </div>
@@ -319,7 +323,7 @@
                     </svg>
                 </button>
 
-                <div x-show="systemOpen && !collapsed" x-collapse
+                <div x-show="systemOpen && !collapsed" x-cloak
                     class="mt-0.5 ml-4 pl-4 border-l border-gray-200 space-y-0.5">
                     <a href="#"
                         class="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-50 transition-colors">
@@ -365,7 +369,7 @@
                 </div>
                 <div x-show="!collapsed" class="flex-1 text-left min-w-0">
                     <p class="text-sm font-medium text-gray-800 truncate">{{ Auth::user()->name }}</p>
-                    <p class="text-xs text-gray-400 truncate capitalize">
+                    <p class="text-xs text-gray-500 truncate capitalize">
                         {{ Auth::user()->getRoleNames()->first() ?? 'user' }}</p>
                 </div>
                 <svg x-show="!collapsed" class="w-4 h-4 text-gray-400 flex-shrink-0" fill="none"
@@ -406,18 +410,6 @@
 
 </aside>
 
-<!-- Script JS sederhana untuk toggle class -->
-<script>
-    function toggleSidebar() {
-        const sidebar = document.getElementById('mobile-sidebar');
-        const backdrop = document.getElementById('sidebar-backdrop');
-        
-        if (sidebar && backdrop) {
-            sidebar.classList.toggle('-translate-x-full');
-            backdrop.classList.toggle('hidden');
-        }
-    }
-
-    // Listen to toggle-sidebar event dispatched from Topbar
-    document.addEventListener('toggle-sidebar', toggleSidebar);
-</script>
+{{-- Mobile backdrop --}}
+<div x-data="{}" @toggle-sidebar.window="$el.classList.toggle('hidden')"
+     class="fixed inset-0 bg-black/50 z-20 hidden lg:hidden"></div>

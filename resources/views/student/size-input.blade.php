@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex items-center justify-between">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ __('Input Ukuran') }}</h2>
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ __('Size Input') }}</h2>
         </div>
     </x-slot>
 
@@ -24,7 +24,7 @@
                     @if(!$canUpdate)
                         <div class="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-md">
                             <p class="text-sm text-amber-600">
-                                <strong>Catatan:</strong> Anda sudah melakukan perubahan ukuran sebelumnya. Maksimal 1 kali perubahan diperbolehkan.
+                                <strong>Note:</strong> You have already changed your size. A maximum of 1 change is allowed.
                             </p>
                         </div>
                     @endif
@@ -32,7 +32,7 @@
                     @if($entitlementItems->isEmpty())
                         <div class="p-4 bg-yellow-50 border border-yellow-200 rounded-md">
                             <p class="text-sm text-yellow-700">
-                                Anda tidak memiliki hak barang untuk periode ini. Silakan hubungi bagian Finance untuk informasi lebih lanjut.
+                                You do not have any item entitlements for this period. Please contact Finance for more information.
                             </p>
                         </div>
                     @else
@@ -53,8 +53,8 @@
                                         <div class="flex items-start justify-between">
                                             <div>
                                                 <h3 class="text-lg font-medium text-gray-900">{{ $item->name }}</h3>
-                                                <p class="text-sm text-gray-500">Kode: {{ $item->code }}</p>
-                                                <p class="text-sm text-gray-500">Satuan: {{ $item->unit }}</p>
+                                                <p class="text-sm text-gray-500">Code: {{ $item->base_code }}</p>
+                                                <p class="text-sm text-gray-500">Unit: {{ $item->unit }}</p>
                                             </div>
                                             <div class="w-48">
 @if($hasChanged && !$canUpdate)
@@ -66,20 +66,20 @@
         {{ $sizeDisplay }}
     </div>
                                                     <input type="hidden" name="sizes[{{ $item->id }}]" value="{{ $currentSize }}">
-                                                    <p class="mt-1 text-xs text-amber-500">Sudah diubah</p>
+                                                    <p class="mt-1 text-xs text-amber-500">Already changed</p>
                                                 @else
                                                     <label for="size_{{ $item->id }}" class="block text-sm font-medium text-gray-700">
-                                                        Pilih Ukuran <span class="text-red-500">*</span>
+                                                        Select Size <span class="text-red-500">*</span>
                                                     </label>
                                                     <select name="sizes[{{ $item->id }}]" id="size_{{ $item->id }}" required
                                                         class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm">
-                                                        <option value="">-- Pilih Ukuran --</option>
+                                                        <option value="">-- Select Size --</option>
                                                         @forelse($item->variants as $variant)
                                                             <option value="{{ $variant->size }}" {{ $currentSize == $variant->size ? 'selected' : '' }}>
                                                                 {{ $variant->size_label }}
                                                             </option>
                                                         @empty
-                                                            <option value="">Tidak ada varian tersedia</option>
+                                                            <option value="">No variants available</option>
                                                         @endforelse
                                                     </select>
                                                 @endif
@@ -94,7 +94,7 @@
 
                             <div class="mt-8 flex items-center gap-4">
                                 <button type="submit" class="inline-flex items-center px-4 py-2 bg-primary-700 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-primary-800 focus:bg-primary-800 active:bg-primary-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                                    {{ __('Simpan Ukuran') }}
+                                    {{ __('Save Size') }}
                                 </button>
                             </div>
                         </form>

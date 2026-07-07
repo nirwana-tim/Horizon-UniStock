@@ -2,8 +2,8 @@
 
     {{-- Page title --}}
     <div class="mb-6">
-        <h2 class="text-xl font-bold text-gray-800">Masuk ke Akun</h2>
-        <p class="mt-1 text-sm text-gray-500">Masukkan kredensial Anda untuk melanjutkan</p>
+        <h2 class="text-xl font-bold text-gray-800">Sign In</h2>
+        <p class="mt-1 text-sm text-gray-500">Enter your credentials to continue</p>
     </div>
 
     <!-- Session Status -->
@@ -18,7 +18,7 @@
                 Email / NIM <span class="text-red-500">*</span>
             </label>
             <input id="email" type="text" name="email" value="{{ old('email') }}" required autofocus
-                autocomplete="username" placeholder="Email atau NIM mahasiswa"
+                autocomplete="username"                 placeholder="Email or student NIM"
                 class="w-full px-3 py-2.5 h-11 text-sm
                           bg-gray-100 border border-gray-200 rounded-lg
                           text-gray-800 placeholder-gray-400
@@ -26,7 +26,7 @@
                           transition-colors duration-150
                           @error('email') border-red-400 focus:border-red-400 focus:ring-red-100 @enderror">
             <p class="mt-1.5 text-xs text-gray-400">
-                Mahasiswa: gunakan NIM &bull; Staff/Admin: gunakan email
+                Student: use NIM &bull; Staff/Admin: use email
             </p>
             @error('email')
                 <p class="mt-1 text-xs text-red-600 flex items-center gap-1">
@@ -47,7 +47,7 @@
             </label>
             <div class="relative">
                 <input id="password" :type="show ? 'text' : 'password'" name="password" required
-                    autocomplete="current-password" placeholder="Masukkan password"
+                    autocomplete="current-password"                     placeholder="Enter password"
                     class="w-full px-3 py-2.5 h-11 pr-10 text-sm
                               bg-gray-100 border border-gray-200 rounded-lg
                               text-gray-800 placeholder-gray-400
@@ -85,7 +85,7 @@
             <label for="remember_me" class="flex items-center gap-2 cursor-pointer">
                 <input id="remember_me" type="checkbox" name="remember"
                     class="w-4 h-4 text-primary-700 border-gray-300 rounded focus:ring-primary-500">
-                <span class="text-sm text-gray-600">Ingat saya</span>
+                <span class="text-sm text-gray-600">Remember me</span>
             </label>
         </div>
 
@@ -95,13 +95,13 @@
                        hover:bg-primary-800 active:bg-primary-900
                        focus:outline-none focus:ring-2 focus:ring-primary-300
                        transition-colors duration-150 mt-2">
-            Masuk
+            Sign In
         </button>
 
         <!-- Lupa Password -->
         <div class="text-center pt-2">
             <p class="text-sm text-gray-500">
-                Lupa password?
+                Forgot password?
                 @if (Route::has('password.request'))
                     <a href="{{ route('password.request') }}"
                         class="text-primary-700 font-medium hover:text-primary-800">Staff/Admin</a>
@@ -111,7 +111,7 @@
                 @endif
                 @if (Route::has('password.student.forgot'))
                     <a href="{{ route('password.student.forgot') }}"
-                        class="text-primary-700 font-medium hover:text-primary-800">Mahasiswa</a>
+                        class="text-primary-700 font-medium hover:text-primary-800">Student</a>
                 @endif
             </p>
         </div>

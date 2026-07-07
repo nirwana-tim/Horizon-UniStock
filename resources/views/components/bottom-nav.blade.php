@@ -6,14 +6,14 @@
     <div class="flex h-full">
 
         @role('staff')
-        {{-- Staff Tabs: Beranda | Scan QR | Profil --}}
+        {{-- Staff Tabs: Home | Scan QR | Profile --}}
         <a href="{{ route('dashboard') }}"
            class="flex-1 flex flex-col items-center justify-center gap-1 transition-colors
                   {{ request()->routeIs('dashboard') ? 'text-primary-700' : 'text-gray-400 hover:text-gray-600' }}">
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="{{ request()->routeIs('dashboard') ? '2.5' : '2' }}">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
             </svg>
-            <span class="text-xs {{ request()->routeIs('dashboard') ? 'font-semibold' : 'font-normal' }}">Beranda</span>
+            <span class="text-xs {{ request()->routeIs('dashboard') ? 'font-semibold' : 'font-normal' }}">Home</span>
         </a>
 
         <a href="{{ route('distribution.scan.index') }}"
@@ -34,19 +34,19 @@
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="{{ request()->routeIs('profile.*') ? '2.5' : '2' }}">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
             </svg>
-            <span class="text-xs {{ request()->routeIs('profile.*') ? 'font-semibold' : 'font-normal' }}">Akun</span>
+            <span class="text-xs {{ request()->routeIs('profile.*') ? 'font-semibold' : 'font-normal' }}">Account</span>
         </a>
         @endrole
 
         @role('student')
-        {{-- Student Tabs: Beranda | Ukuran | QR Saya | Jadwal | Profil --}}
+        {{-- Student Tabs: Home | Sizes | My QR | Schedule | Profile --}}
         <a href="{{ route('dashboard') }}"
            class="flex-1 flex flex-col items-center justify-center gap-1 transition-colors
                   {{ request()->routeIs('dashboard') ? 'text-primary-700' : 'text-gray-400 hover:text-gray-600' }}">
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="{{ request()->routeIs('dashboard') ? '2.5' : '2' }}">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
             </svg>
-            <span class="text-xs {{ request()->routeIs('dashboard') ? 'font-semibold' : 'font-normal' }}">Beranda</span>
+            <span class="text-xs {{ request()->routeIs('dashboard') ? 'font-semibold' : 'font-normal' }}">Home</span>
         </a>
 
         <a href="{{ route('student.sizes.index') }}"
@@ -55,7 +55,7 @@
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="{{ request()->routeIs('student.sizes.*') ? '2.5' : '2' }}">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/>
             </svg>
-            <span class="text-xs {{ request()->routeIs('student.sizes.*') ? 'font-semibold' : 'font-normal' }}">Ukuran</span>
+            <span class="text-xs {{ request()->routeIs('student.sizes.*') ? 'font-semibold' : 'font-normal' }}">Sizes</span>
         </a>
 
         <a href="{{ route('student.qr') }}"
@@ -75,7 +75,7 @@
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="{{ request()->routeIs('distribution.distribution-schedule.*') ? '2.5' : '2' }}">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
             </svg>
-            <span class="text-xs {{ request()->routeIs('distribution.distribution-schedule.*') ? 'font-semibold' : 'font-normal' }}">Jadwal</span>
+            <span class="text-xs {{ request()->routeIs('distribution.distribution-schedule.*') ? 'font-semibold' : 'font-normal' }}">Schedule</span>
         </a>
 
         <a href="{{ route('profile.edit') }}"
@@ -84,7 +84,7 @@
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="{{ request()->routeIs('profile.*') ? '2.5' : '2' }}">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
             </svg>
-            <span class="text-xs {{ request()->routeIs('profile.*') ? 'font-semibold' : 'font-normal' }}">Akun</span>
+            <span class="text-xs {{ request()->routeIs('profile.*') ? 'font-semibold' : 'font-normal' }}">Account</span>
         </a>
         @endrole
 

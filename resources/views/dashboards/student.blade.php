@@ -11,7 +11,7 @@
                 {{ substr($student->name, 0, 2) }}
             </div>
             <div>
-                <p class="text-primary-200 text-xs">Selamat datang,</p>
+                <p class="text-primary-200 text-xs">Welcome,</p>
                 <h2 class="text-white font-bold text-base leading-tight">{{ $student->name }}</h2>
                 <p class="text-primary-200 text-xs mt-0.5">{{ $student->nim }} &bull; {{ $student->studyProgram?->name ?? '-' }}</p>
             </div>
@@ -20,13 +20,13 @@
 
     {{-- Progress Steps --}}
     <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5 mb-5">
-        <h3 class="text-sm font-semibold text-gray-700 mb-4">Langkah Pengambilan Seragam</h3>
+        <h3 class="text-sm font-semibold text-gray-700 mb-4">Uniform Pickup Steps</h3>
         <div class="space-y-3">
             @php
                 $steps = [
-                    ['label' => 'Input Ukuran Seragam', 'done' => $hasFilledSize, 'href' => route('student.sizes.index'), 'action' => 'Isi Ukuran'],
-                    ['label' => 'Generate QR Identitas', 'done' => $hasQr, 'href' => route('student.qr'), 'action' => 'Lihat QR'],
-                    ['label' => 'Ambil Seragam', 'done' => $recentTransactions->where('status', 'completed')->count() > 0, 'href' => null, 'action' => null],
+                    ['label' => 'Input Uniform Size', 'done' => $hasFilledSize, 'href' => route('student.sizes.index'), 'action' => 'Fill Size'],
+                    ['label' => 'Generate Identity QR', 'done' => $hasQr, 'href' => route('student.qr'), 'action' => 'View QR'],
+                    ['label' => 'Pick Up Uniform', 'done' => $recentTransactions->where('status', 'completed')->count() > 0, 'href' => null, 'action' => null],
                 ];
             @endphp
             @foreach($steps as $i => $step)
@@ -64,28 +64,28 @@
     <div class="grid grid-cols-2 gap-3 mb-5">
         {{-- Email Kampus --}}
         <div class="bg-white rounded-xl border border-gray-200 p-4">
-            <p class="text-xs text-gray-500 mb-1">Email Kampus</p>
+            <p class="text-xs text-gray-500 mb-1">Campus Email</p>
             @if($student->email_kampus)
                 @if($student->email_verified_at)
-                    <x-badge type="success">Terverifikasi</x-badge>
+                    <x-badge type="success">Verified</x-badge>
                 @else
-                    <x-badge type="warning">Belum Verifikasi</x-badge>
+                    <x-badge type="warning">Unverified</x-badge>
                 @endif
             @else
-                <x-badge type="neutral">Belum Diisi</x-badge>
+                <x-badge type="neutral">Not Set</x-badge>
             @endif
         </div>
 
         {{-- Status Pengambilan --}}
         <div class="bg-white rounded-xl border border-gray-200 p-4">
-            <p class="text-xs text-gray-500 mb-1">Status</p>
+            <p class="text-xs text-gray-500 mb-1">Pickup Status</p>
             @php $latestStatus = $recentTransactions->first()?->status ?? null; @endphp
             @if($latestStatus === 'completed')
-                <x-badge type="success">Selesai</x-badge>
+                <x-badge type="success">Completed</x-badge>
             @elseif($latestStatus === 'partial')
-                <x-badge type="warning">Sebagian</x-badge>
+                <x-badge type="warning">Partial</x-badge>
             @else
-                <x-badge type="neutral">Belum Ambil</x-badge>
+                <x-badge type="neutral">Not Picked</x-badge>
             @endif
         </div>
     </div>
@@ -93,7 +93,7 @@
     {{-- Jadwal Aktif --}}
     @if($activeSchedules->count())
     <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5 mb-5">
-        <h3 class="text-sm font-semibold text-gray-700 mb-3">Jadwal Distribusi Aktif</h3>
+        <h3 class="text-sm font-semibold text-gray-700 mb-3">Active Distribution Schedule</h3>
         <div class="space-y-3">
             @foreach($activeSchedules as $schedule)
             <div class="flex items-start gap-3 p-3 bg-primary-50 border border-primary-100 rounded-lg">
@@ -119,7 +119,7 @@
     @if($recentTransactions->count())
     <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden mb-5">
         <div class="px-5 py-3.5 border-b border-gray-100">
-            <h3 class="text-sm font-semibold text-gray-700">Riwayat Pengambilan</h3>
+            <h3 class="text-sm font-semibold text-gray-700">Pickup History</h3>
         </div>
         <div class="divide-y divide-gray-100">
             @foreach($recentTransactions as $tx)
@@ -129,9 +129,9 @@
                     <p class="text-xs text-gray-400">{{ $tx->pickup_time?->format('d/m/Y H:i') ?? '-' }}</p>
                 </div>
                 @if($tx->status === 'completed')
-                    <x-badge type="success">Selesai</x-badge>
+                    <x-badge type="success">Completed</x-badge>
                 @elseif($tx->status === 'partial')
-                    <x-badge type="warning">Sebagian</x-badge>
+                    <x-badge type="warning">Partial</x-badge>
                 @else
                     <x-badge type="danger">{{ $tx->status }}</x-badge>
                 @endif
@@ -144,8 +144,8 @@
     {{-- Email Kampus form (jika belum ada) --}}
     @if(!$student->email_kampus)
     <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
-        <h3 class="text-sm font-semibold text-gray-700 mb-1">Daftarkan Email Kampus</h3>
-        <p class="text-xs text-gray-500 mb-4">Email kampus dibutuhkan untuk menerima notifikasi jadwal & OTP lupa password.</p>
+        <h3 class="text-sm font-semibold text-gray-700 mb-1">Register Campus Email</h3>
+        <p class="text-xs text-gray-500 mb-4">Campus email is needed for receiving schedule notifications and password reset OTP.</p>
         <form action="{{ route('student.email.send-otp') }}" method="POST">
             @csrf
             <div class="space-y-2">
@@ -167,7 +167,7 @@
                 <button type="submit"
                         class="w-full h-11 bg-primary-700 text-white text-sm font-medium rounded-lg
                                hover:bg-primary-800 transition-colors">
-                    Kirim OTP Verifikasi
+                    Send Verification OTP
                 </button>
             </div>
         </form>

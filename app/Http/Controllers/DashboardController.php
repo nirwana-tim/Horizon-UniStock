@@ -88,7 +88,7 @@ class DashboardController extends Controller
         $data = [
             'student' => $student,
             'hasFilledSize' => !is_null($student->activeSizeProfile),
-            'hasQr' => !is_null($student->qr_token),
+            'hasQr' => true,
             'activeSchedules' => DistributionSchedule::query()
                 ->where('is_active', true)
                 ->where('date', '>=', now()->format('Y-m-d'))

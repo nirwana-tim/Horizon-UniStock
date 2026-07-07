@@ -7,7 +7,9 @@ use App\Http\Requests\ItemPriceRequest;
 use App\Models\Item;
 use App\Models\ItemPrice;
 use App\Services\Master\ItemPriceService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class ItemPriceController extends Controller
@@ -16,11 +18,24 @@ class ItemPriceController extends Controller
         protected ItemPriceService $itemPriceService
     ) {}
 
-    public function index(): View
+    public function index(Request $request): View|JsonResponse
     {
-        $itemPrices = ItemPrice::with('item')
-            ->latest('effective_date')
-            ->paginate(15);
+        $query = ItemPrice::with('item');
+
+        if ($search = $request->input('q')) {
+            $query->where(function ($q) use ($search) {
+                $q->whereRelation('item', 'name', 'like', "%{$search}%")
+                  ->orWhereRelation('item', 'code', 'like', "%{$search}%");
+            });
+        }
+
+        $itemPrices = $query->latest('effective_date')->paginate(20);
+
+        if ($request->ajax()) {
+            return response()->json([
+                'html' => view('master.item-price._table', compact('itemPrices'))->render(),
+            ]);
+        }
 
         return view('master.item-price.index', compact('itemPrices'));
     }

@@ -6,23 +6,30 @@ use App\Http\Controllers\Controller;
 use App\Models\EligibilityRecord;
 use App\Models\Student;
 use App\Services\AuditService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class EligibilityController extends Controller
 {
-    public function index(Request $request): View
+    public function index(Request $request): View|JsonResponse
     {
-        $search = $request->input('search');
+        $search = $request->input('q', $request->input('search'));
 
         $students = Student::with(['studyProgram.faculty', 'eligibilityRecords'])
             ->when($search, function ($query) use ($search) {
                 $query->where('name', 'like', "%{$search}%")
-                    ->orWhere('nim', 'like', "%{$search}%");
+                    ->orWhere('nim', 'like', "%{$search}%")
+                    ->orWhere('email_kampus', 'like', "%{$search}%");
             })
             ->orderBy('name')
-            ->paginate(15);
+            ->paginate(20);
+
+        if ($request->ajax()) {
+            $html = view('finance.eligibility._table', compact('students', 'search'))->render();
+            return response()->json(compact('html'));
+        }
 
         return view('finance.eligibility.index', compact('students', 'search'));
     }

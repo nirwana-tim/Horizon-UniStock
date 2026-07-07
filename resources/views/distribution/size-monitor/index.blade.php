@@ -1,49 +1,46 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ __('Monitor Perubahan Ukuran') }}</h2>
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ __('Size Change Monitor') }}</h2>
     </x-slot>
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">No</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Mahasiswa</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">NIM</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Item</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ukuran Lama</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ukuran Baru</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Diubah Oleh</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tanggal</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
-                                @forelse($histories as $index => $history)
-                                <tr class="hover:bg-gray-50">
-                                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{{ $histories->firstItem() + $index }}</td>
-                                    <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $history->sizeItem?->sizeProfile?->student?->name ?? '-' }}</td>
-                                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{{ $history->sizeItem?->sizeProfile?->student?->nim ?? '-' }}</td>
-                                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{{ $history->sizeItem?->item?->name ?? '-' }}</td>
-                                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{{ $history->old_size ?? '-' }}</td>
-                                    <td class="px-4 py-4 whitespace-nowrap text-sm font-semibold text-primary-600">{{ $history->new_size }}</td>
-                                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{{ $history->changedByUser?->name ?? '-' }}</td>
-                                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{{ $history->changed_at?->format('d/m/Y H:i') ?? '-' }}</td>
-                                </tr>
-                                @empty
-                                <tr>
-                                    <td colspan="8" class="px-4 py-4 text-center text-sm text-gray-500">Belum ada riwayat perubahan ukuran.</td>
-                                </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
 
-                    <div class="mt-4">
-                        {{ $histories->links() }}
+                    <div x-data="serverTable('{{ route('distribution.size-monitor.index') }}')">
+
+                        <div class="mb-4">
+                            <input type="text"
+                                   x-model="search"
+                                   @input.debounce.300ms="page=1; fetchData()"
+                                    placeholder="Search by name or NIM..."
+                                   class="w-72 border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500 text-sm">
+                        </div>
+
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">NIM</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Old Size</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">New Size</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Changed By</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody x-html="tableHtml" class="bg-white divide-y divide-gray-200">
+                                    @include('distribution.size-monitor._table')
+                                </tbody>
+                            </table>
+                            <div class="mt-4">
+                                {{ $histories->links() }}
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             </div>

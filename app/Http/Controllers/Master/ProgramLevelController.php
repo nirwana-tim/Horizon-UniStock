@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\ProgramLevelRequest;
 use App\Models\ProgramLevel;
 use App\Services\Master\ProgramLevelService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class ProgramLevelController extends Controller
@@ -15,9 +17,24 @@ class ProgramLevelController extends Controller
         protected ProgramLevelService $programLevelService
     ) {}
 
-    public function index(): View
+    public function index(Request $request): View|JsonResponse
     {
-        $levels = ProgramLevel::withCount('students')->latest()->paginate(15);
+        $query = ProgramLevel::withCount('students');
+
+        if ($search = $request->input('q')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('code', 'like', "%{$search}%");
+            });
+        }
+
+        $levels = $query->orderBy('code')->paginate(20);
+
+        if ($request->ajax()) {
+            return response()->json([
+                'html' => view('master.program-level._table', compact('levels'))->render(),
+            ]);
+        }
 
         return view('master.program-level.index', compact('levels'));
     }

@@ -1,9 +1,9 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex items-center justify-between">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ __('Tambah Item Baru') }}</h2>
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ __('Add New Item') }}</h2>
             <a href="{{ route('master-data.item.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-300 focus:bg-gray-300 active:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                {{ __('Kembali') }}
+                {{ __('Back') }}
             </a>
         </div>
     </x-slot>
@@ -24,10 +24,10 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
                             <div>
-                                <label for="category_id" class="block text-sm font-medium text-gray-700">Kategori <span class="text-red-500">*</span></label>
+                                <label for="category_id" class="block text-sm font-medium text-gray-700">Category <span class="text-red-500">*</span></label>
                                 <select name="category_id" id="category_id" required
                                     class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-gray-500 sm:text-sm">
-                                    <option value="">-- Pilih Kategori --</option>
+                                    <option value="">-- Select Category --</option>
                                     @foreach($categories as $cat)
                                         <option value="{{ $cat->id }}" {{ old('category_id') == $cat->id ? 'selected' : '' }}>
                                             {{ $cat->label }} ({{ $cat->code }})
@@ -43,9 +43,9 @@
                                 <label for="gender" class="block text-sm font-medium text-gray-700">Gender <span class="text-red-500">*</span></label>
                                 <select name="gender" id="gender" required
                                     class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-gray-500 sm:text-sm">
-                                    <option value="">-- Pilih Gender --</option>
-                                    <option value="L" {{ old('gender') == 'L' ? 'selected' : '' }}>Laki - Laki</option>
-                                    <option value="P" {{ old('gender') == 'P' ? 'selected' : '' }}>Perempuan</option>
+                                    <option value="">-- Select Gender --</option>
+                                    <option value="L" {{ old('gender') == 'L' ? 'selected' : '' }}>Male</option>
+                                    <option value="P" {{ old('gender') == 'P' ? 'selected' : '' }}>Female</option>
                                     <option value="U" {{ old('gender') == 'U' ? 'selected' : '' }}>Unisex</option>
                                 </select>
                                 @error('gender')
@@ -54,10 +54,10 @@
                             </div>
 
                             <div>
-                                <label for="type_id" class="block text-sm font-medium text-gray-700">Tipe <span class="text-red-500">*</span></label>
+                                <label for="type_id" class="block text-sm font-medium text-gray-700">Type <span class="text-red-500">*</span></label>
                                 <select name="type_id" id="type_id" required
                                     class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-gray-500 sm:text-sm">
-                                    <option value="">-- Pilih Tipe --</option>
+<option value="">-- Select Type --</option>
                                     @foreach($types as $type)
                                         <option value="{{ $type->id }}" {{ old('type_id') == $type->id ? 'selected' : '' }}>
                                             {{ $type->code }} - {{ $type->label }}
@@ -70,10 +70,10 @@
                             </div>
 
                             <div>
-                                <label for="department_id" class="block text-sm font-medium text-gray-700">Departemen <span class="text-red-500">*</span></label>
+                                <label for="department_id" class="block text-sm font-medium text-gray-700">Department <span class="text-red-500">*</span></label>
                                 <select name="department_id" id="department_id" required
                                     class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-gray-500 sm:text-sm">
-                                    <option value="">-- Pilih Departemen --</option>
+                                    <option value="">-- Select Department --</option>
                                     @foreach($departments as $dept)
                                         <option value="{{ $dept->id }}" {{ old('department_id') == $dept->id ? 'selected' : '' }}>
                                             {{ $dept->code }} - {{ $dept->label }}
@@ -86,10 +86,10 @@
                             </div>
 
                             <div>
-                                <label for="size_id" class="block text-sm font-medium text-gray-700">Ukuran <span class="text-red-500">*</span></label>
+                                <label for="size_id" class="block text-sm font-medium text-gray-700">Size <span class="text-red-500">*</span></label>
                                 <select name="size_id" id="size_id" required
                                     class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-gray-500 sm:text-sm">
-                                    <option value="">-- Pilih Ukuran --</option>
+                                    <option value="">-- Select Size --</option>
                                 </select>
                                 @error('size_id')
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -97,7 +97,7 @@
                             </div>
 
                             <div>
-                                <label for="unit" class="block text-sm font-medium text-gray-700">Satuan</label>
+                                <label for="unit" class="block text-sm font-medium text-gray-700">Unit</label>
                                 <input type="text" name="unit" id="unit" value="{{ old('unit', 'pcs') }}"
                                     class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-gray-500 sm:text-sm">
                                 @error('unit')
@@ -106,7 +106,7 @@
                             </div>
 
                             <div>
-                                <label for="selling_price" class="block text-sm font-medium text-gray-700">Harga Jual</label>
+                                <label for="selling_price" class="block text-sm font-medium text-gray-700">Selling Price</label>
                                 <input type="number" name="selling_price" id="selling_price" value="{{ old('selling_price', 0) }}" min="0" step="100"
                                     class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-gray-500 sm:text-sm">
                                 @error('selling_price')
@@ -115,7 +115,7 @@
                             </div>
 
                             <div>
-                                <label for="hpp" class="block text-sm font-medium text-gray-700">HPP</label>
+                                <label for="hpp" class="block text-sm font-medium text-gray-700">COGS</label>
                                 <input type="number" name="hpp" id="hpp" value="{{ old('hpp', 0) }}" min="0" step="100"
                                     class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-gray-500 sm:text-sm">
                                 @error('hpp')
@@ -127,10 +127,10 @@
 
                         <div class="mt-8 flex items-center gap-4">
                             <button type="submit" class="inline-flex items-center px-4 py-2 bg-primary-700 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-primary-800 focus:bg-primary-800 active:bg-primary-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                                {{ __('Simpan Item') }}
+                                {{ __('Save Item') }}
                             </button>
                             <a href="{{ route('master-data.item.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-300 focus:bg-gray-300 active:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                                {{ __('Batal') }}
+                                {{ __('Cancel') }}
                             </a>
                         </div>
                     </form>
@@ -147,7 +147,7 @@
         const categorySelect = document.getElementById('category_id');
 
         function renderSizes(sizes) {
-            sizeSelect.innerHTML = '<option value="">-- Pilih Ukuran --</option>';
+            sizeSelect.innerHTML = '<option value="">-- Select Size --</option>';
             sizes.forEach(s => {
                 const opt = document.createElement('option');
                 opt.value = s.id;
@@ -157,7 +157,7 @@
         }
 
         function renderTypes(types) {
-            typeSelect.innerHTML = '<option value="">-- Pilih Tipe --</option>';
+            typeSelect.innerHTML = '<option value="">-- Select Type --</option>';
             types.forEach(t => {
                 const opt = document.createElement('option');
                 opt.value = t.id;
