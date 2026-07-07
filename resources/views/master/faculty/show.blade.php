@@ -46,7 +46,7 @@
                     <div class="border-t border-gray-200 pt-6">
                         <h3 class="text-lg font-semibold text-gray-800 mb-4">{{ __('Study Programs') }}</h3>
 
-                        @if($faculty->study_programs->count())
+                        @if($faculty->studyPrograms->count())
                             <div class="overflow-x-auto">
                                 <table class="min-w-full divide-y divide-gray-200">
                                     <thead class="bg-gray-50">
@@ -57,7 +57,7 @@
                                         </tr>
                                     </thead>
                                     <tbody class="bg-white divide-y divide-gray-200">
-                                        @foreach($faculty->study_programs as $program)
+                                        @foreach($faculty->studyPrograms as $program)
                                             <tr class="hover:bg-gray-50">
                                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                     {{ $loop->iteration }}
