@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\Role;
 use App\Models\DistributionSchedule;
 use App\Models\DistributionTransaction;
 use App\Models\Faculty;
@@ -22,15 +23,15 @@ class DashboardController extends Controller
     {
         $user = Auth::user();
 
-        if ($user->hasRole('super_admin')) {
+        if ($user->hasRole(Role::SuperAdmin->value)) {
             return view('dashboards.super-admin');
         }
 
-        if ($user->hasRole('admin')) {
+        if ($user->hasRole(Role::Admin->value)) {
             return view('dashboards.finance');
         }
 
-        if ($user->hasRole('staff')) {
+        if ($user->hasRole(Role::Staff->value)) {
             return $this->staffDashboard();
         }
 
@@ -41,7 +42,7 @@ class DashboardController extends Controller
     {
         $user = Auth::user();
 
-        if ($user->hasRole('super_admin')) {
+        if ($user->hasRole(Role::SuperAdmin->value)) {
             return response()->json([
                 'totalUsers' => User::count(),
                 'totalStudents' => Student::count(),
@@ -81,7 +82,20 @@ class DashboardController extends Controller
 
     private function staffDashboard(): View
     {
-        return view('dashboards.staff');
+        $activeSchedule = DistributionSchedule::with('programLevel', 'faculty')
+            ->where('is_active', true)
+            ->where('date', '>=', now()->format('Y-m-d'))
+            ->orderBy('date')
+            ->first();
+
+        $todayCount = DistributionTransaction::whereDate('created_at', today())->count();
+
+        $recentTransactions = DistributionTransaction::with('student.user', 'schedule')
+            ->latest()
+            ->take(5)
+            ->get();
+
+        return view('dashboards.staff', compact('activeSchedule', 'todayCount', 'recentTransactions'));
     }
 
     private function studentDashboard(): View
@@ -96,6 +110,9 @@ class DashboardController extends Controller
             'activeSchedules' => DistributionSchedule::query()
                 ->where('is_active', true)
                 ->where('date', '>=', now()->format('Y-m-d'))
+                ->where(fn ($q) => $q->whereNull('program_level_id')->orWhere('program_level_id', $student->program_level_id))
+                ->where(fn ($q) => $q->whereNull('faculty_id')->orWhere('faculty_id', $student->studyProgram?->faculty_id))
+                ->where(fn ($q) => $q->whereNull('study_program_id')->orWhere('study_program_id', $student->study_program_id))
                 ->orderBy('date')
                 ->take(5)
                 ->get(),

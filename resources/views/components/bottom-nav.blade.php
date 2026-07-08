@@ -69,13 +69,13 @@
             <span class="text-xs {{ request()->routeIs('student.qr') ? 'font-semibold text-primary-700' : 'font-normal text-gray-400' }} -mt-1">QR</span>
         </a>
 
-        <a href="{{ route('distribution.distribution-schedule.index') }}"
+        <a href="{{ route('student.items.index') }}"
            class="flex-1 flex flex-col items-center justify-center gap-1 transition-colors
-                  {{ request()->routeIs('distribution.distribution-schedule.*') ? 'text-primary-700' : 'text-gray-400 hover:text-gray-600' }}">
-            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="{{ request()->routeIs('distribution.distribution-schedule.*') ? '2.5' : '2' }}">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                  {{ request()->routeIs('student.items.*') ? 'text-primary-700' : 'text-gray-400 hover:text-gray-600' }}">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="{{ request()->routeIs('student.items.*') ? '2.5' : '2' }}">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10"/>
             </svg>
-            <span class="text-xs {{ request()->routeIs('distribution.distribution-schedule.*') ? 'font-semibold' : 'font-normal' }}">Schedule</span>
+            <span class="text-xs {{ request()->routeIs('student.items.*') ? 'font-semibold' : 'font-normal' }}">Items</span>
         </a>
 
         <a href="{{ route('profile.edit') }}"

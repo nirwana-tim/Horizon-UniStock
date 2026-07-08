@@ -41,29 +41,68 @@
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6">
                         <h3 class="text-lg font-medium text-gray-900 mb-4">Manual Search (NIM)</h3>
-                        <form action="{{ route('distribution.search') }}" method="POST">
-                            @csrf
+
+                        <div x-data="{
+                            query: '',
+                            searching: false,
+                            error: '',
+                            doSearch() {
+                                if (!this.query.trim()) return;
+                                this.searching = true;
+                                this.error = '';
+                                axios.post('{{ route('distribution.search') }}', {
+                                    query: this.query,
+                                    _token: '{{ csrf_token() }}'
+                                }).then(r => {
+                                    if (r.data.found) {
+                                        window.location.href = r.data.redirect;
+                                    } else {
+                                        this.error = r.data.message;
+                                        this.searching = false;
+                                    }
+                                }).catch(() => {
+                                    this.error = 'Terjadi kesalahan. Silakan coba lagi.';
+                                    this.searching = false;
+                                });
+                            }
+                        }">
                             <div>
                                 <label for="query" class="block text-sm font-medium text-gray-700">Student NIM</label>
-                                <input type="text" name="query" id="query" required
-                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
-                                    placeholder="Enter student NIM">
-                                @error('query')
-                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                @enderror
+                                <div class="relative mt-1">
+                                    <input type="text" x-model="query" id="query"
+                                        @input.debounce.400ms="if(query.length >= 3) doSearch()"
+                                        @keydown.enter.prevent="doSearch()"
+                                        placeholder="Enter student NIM..."
+                                        class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm pr-10">
+                                    <div x-show="searching" class="absolute right-3 top-1/2 -translate-y-1/2">
+                                        <svg class="animate-spin h-4 w-4 text-primary-700" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                                        </svg>
+                                    </div>
+                                </div>
+                                <p x-show="error" x-text="error" class="mt-1 text-sm text-red-600"></p>
                             </div>
                             <div class="mt-4">
-                                <button type="submit" class="inline-flex items-center px-4 py-2 bg-primary-700 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-primary-800 focus:bg-primary-800 active:bg-primary-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                                <button type="button" @click="doSearch()"
+                                    class="inline-flex items-center px-4 py-2 bg-primary-700 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-primary-800 focus:bg-primary-800 disabled:opacity-50 transition ease-in-out duration-150"
+                                    :disabled="searching || !query.trim()">
+                                    <span x-show="searching" class="mr-2">
+                                        <svg class="animate-spin h-3 w-3 text-white" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                                        </svg>
+                                    </span>
                                     {{ __('Search Student') }}
                                 </button>
                             </div>
-                        </form>
+                        </div>
 
                         <div class="mt-6 p-4 bg-gray-50 border border-gray-200 rounded-md">
                             <p class="text-xs text-gray-500">
 <strong>Instructions:</strong><br>
                                  - Point camera at student's QR Code<br>
-                                 - Or type NIM manually in the field above<br>
+                                 - Or type NIM manually in the field above (min 3 chars)<br>
                                  - QR Code is permanent (once in a lifetime)
                             </p>
                         </div>

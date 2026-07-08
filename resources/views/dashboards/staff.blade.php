@@ -1,7 +1,23 @@
 <x-app-layout>
 
-    {{-- Page title for mobile topbar --}}
-    <h2 class="text-lg font-bold text-gray-800 mb-5">Uniform Distribution</h2>
+    <h2 class="text-lg font-bold text-gray-800 mb-4">Uniform Distribution</h2>
+
+    {{-- Today's Activity Bar --}}
+    <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-4 mb-4 flex items-center justify-between">
+        <div>
+            <p class="text-xs text-gray-500">Distribusi Hari Ini</p>
+            <p class="text-lg font-bold text-gray-800">{{ $todayCount }} transaksi</p>
+        </div>
+        @if($activeSchedule)
+            <div class="text-right">
+                <p class="text-xs text-gray-500">Jadwal Aktif</p>
+                <p class="text-sm font-semibold text-primary-700">{{ $activeSchedule->name }}</p>
+                <p class="text-[10px] text-gray-400">{{ $activeSchedule->date->format('d M Y') }}</p>
+            </div>
+        @else
+            <span class="text-xs text-gray-400 bg-gray-100 px-3 py-1 rounded-full">Tidak ada jadwal aktif</span>
+        @endif
+    </div>
 
     {{-- Main Action Cards --}}
     <div class="grid grid-cols-1 gap-4 mb-6">
@@ -42,7 +58,6 @@
                 </svg>
             </button>
 
-            {{-- NIM Form --}}
             <div x-show="open"
                  x-transition:enter="transition ease-out duration-200"
                  x-transition:enter-start="opacity-0 -translate-y-2"
@@ -72,8 +87,29 @@
 
     </div>
 
-    {{-- Quick Guide --}}
+    {{-- Recent Transactions --}}
+    @if($recentTransactions->isNotEmpty())
     <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+        <h3 class="text-sm font-semibold text-gray-700 mb-3">Transaksi Terbaru</h3>
+        <div class="space-y-2">
+            @foreach($recentTransactions as $tx)
+            <div class="flex items-center gap-3 py-2 border-b border-gray-50 last:border-0">
+                <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <span class="text-xs font-bold text-gray-500">{{ strtoupper(substr($tx->student?->nim ?? '?', -2)) }}</span>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium text-gray-800 truncate">{{ $tx->student?->user?->name ?? 'Unknown' }}</p>
+                    <p class="text-xs text-gray-400">{{ $tx->items_count ?? 0 }} item · {{ $tx->status }}</p>
+                </div>
+                <span class="text-[10px] text-gray-400 flex-shrink-0">{{ $tx->created_at->diffForHumans() }}</span>
+            </div>
+            @endforeach
+        </div>
+    </div>
+    @endif
+
+    {{-- Quick Guide --}}
+    <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5 mt-4">
         <h3 class="text-sm font-semibold text-gray-700 mb-4">Distribution Guide</h3>
         <div class="space-y-3">
             @foreach([

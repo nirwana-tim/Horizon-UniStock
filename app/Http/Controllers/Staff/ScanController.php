@@ -8,6 +8,7 @@ use App\Models\ItemVariant;
 use App\Models\Student;
 use App\Models\StockBalance;
 use App\Services\DistributionService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -27,7 +28,7 @@ class ScanController extends Controller
         return view('distribution.scan', compact('activeSchedule'));
     }
 
-    public function search(Request $request): View|RedirectResponse
+    public function search(Request $request): View|RedirectResponse|JsonResponse
     {
         $request->validate([
             'query' => 'required|string|max:100',
@@ -36,7 +37,17 @@ class ScanController extends Controller
         $student = $this->distributionService->findStudent($request->input('query'));
 
         if (!$student) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['found' => false, 'message' => 'Mahasiswa tidak ditemukan.']);
+            }
             return back()->withErrors(['query' => 'Mahasiswa tidak ditemukan. Pastikan NIM valid.']);
+        }
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'found' => true,
+                'redirect' => route('distribution.search') . '?query=' . $student->nim,
+            ]);
         }
 
         return $this->showDistribution($student);

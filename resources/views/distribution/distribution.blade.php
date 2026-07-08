@@ -203,6 +203,8 @@
                                                             value="{{ $item->id }}"
                                                             class="item-check rounded border-gray-300 text-primary-600 focus:ring-primary-500"
                                                             data-index="{{ $index }}"
+                                                            data-stock="{{ $availableStock }}"
+                                                            data-item-name="{{ $item->name }}"
                                                             {{ $isDisabled ? 'disabled' : '' }}>
                                                         <input type="hidden" name="items[{{ $index }}][expected_size]" value="{{ $expectedSize }}">
                                                     </td>
@@ -278,11 +280,42 @@
         </div>
     </div>
 
+    {{-- Partial Pickup Modal --}}
+    <div id="partial-modal" class="hidden fixed inset-0 z-50 items-center justify-center bg-black/40">
+        <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full mx-4 p-6">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-5 h-5 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-sm font-bold text-gray-800">Stok Tidak Mencukupi</h3>
+                    <p class="text-xs text-gray-500">Beberapa barang memiliki stok lebih sedikit dari permintaan.</p>
+                </div>
+            </div>
+            <div class="partial-list bg-gray-50 rounded-lg p-3 mb-4 space-y-1"></div>
+            <p class="text-xs text-gray-400 mb-4">Stok akan disesuaikan dengan jumlah yang tersedia. Lanjutkan?</p>
+            <div class="flex gap-3">
+                <button type="button" id="partial-cancel"
+                    class="flex-1 px-4 py-2.5 border border-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors">
+                    Batal
+                </button>
+                <button type="button" id="partial-confirm"
+                    class="flex-1 px-4 py-2.5 bg-amber-600 text-white rounded-lg text-sm font-medium hover:bg-amber-700 transition-colors">
+                    Berikan Sebagian
+                </button>
+            </div>
+        </div>
+    </div>
+
     @push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const checkboxes = document.querySelectorAll('.item-check');
             const submitBtn = document.getElementById('submit-btn');
+            const form = document.querySelector('form');
+            const partialModal = document.getElementById('partial-modal');
 
             function updateSubmitState() {
                 const anyChecked = Array.from(checkboxes).some(cb => cb.checked);
@@ -290,30 +323,74 @@
             }
 
             checkboxes.forEach(function (cb) {
-                cb.addEventListener('change', function () {
-                    const index = this.dataset.index;
-                    const sizeSelect = document.querySelector(`.item-size[data-index="${index}"]`);
-                    const qtyInput = document.querySelector(`.item-qty[data-index="${index}"]`);
-
-                    if (sizeSelect) {
-                        sizeSelect.disabled = !this.checked;
-                    }
-                    if (qtyInput) {
-                        qtyInput.disabled = !this.checked;
-                    }
-
-                    updateSubmitState();
-                });
-
                 const index = cb.dataset.index;
                 const sizeSelect = document.querySelector(`.item-size[data-index="${index}"]`);
                 const qtyInput = document.querySelector(`.item-qty[data-index="${index}"]`);
+
+                cb.addEventListener('change', function () {
+                    if (sizeSelect) sizeSelect.disabled = !this.checked;
+                    if (qtyInput) qtyInput.disabled = !this.checked;
+                    updateSubmitState();
+                });
 
                 if (sizeSelect) sizeSelect.disabled = true;
                 if (qtyInput) qtyInput.disabled = true;
             });
 
             updateSubmitState();
+
+            if (form && partialModal) {
+                form.addEventListener('submit', function (e) {
+                    const understocked = [];
+
+                    checkboxes.forEach(function (cb) {
+                        if (!cb.checked) return;
+                        const idx = cb.dataset.index;
+                        const qty = parseInt(document.querySelector(`.item-qty[data-index="${idx}"]`)?.value || '0', 10);
+                        const stock = parseInt(cb.dataset.stock || '0', 10);
+                        if (qty > stock) {
+                            understocked.push({
+                                name: cb.dataset.itemName,
+                                qty, stock
+                            });
+                        }
+                    });
+
+                    if (understocked.length > 0) {
+                        e.preventDefault();
+                        const list = partialModal.querySelector('.partial-list');
+                        list.innerHTML = understocked.map(u =>
+                            `<div class="flex justify-between text-sm py-1 border-b border-gray-100 last:border-0">
+                                <span class="text-gray-700">${u.name}</span>
+                                <span class="text-gray-500">minta ${u.qty}, stok ${u.stock}</span>
+                            </div>`
+                        ).join('');
+                        partialModal.classList.remove('hidden');
+                        partialModal.classList.add('flex');
+                    }
+                });
+
+                document.getElementById('partial-cancel')?.addEventListener('click', function () {
+                    partialModal.classList.add('hidden');
+                    partialModal.classList.remove('flex');
+                });
+
+                document.getElementById('partial-confirm')?.addEventListener('click', function () {
+                    checkboxes.forEach(function (cb) {
+                        if (!cb.checked) return;
+                        const idx = cb.dataset.index;
+                        const qtyInput = document.querySelector(`.item-qty[data-index="${idx}"]`);
+                        const stock = parseInt(cb.dataset.stock || '0', 10);
+                        if (parseInt(qtyInput?.value || '0', 10) > stock) {
+                            qtyInput.value = Math.max(0, stock);
+                        }
+                    });
+                    partialModal.classList.add('hidden');
+                    partialModal.classList.remove('flex');
+                    // adjust quantities and submit
+                    HTMLFormElement.prototype.submit.call(form);
+                });
+            }
         });
     </script>
     @endpush

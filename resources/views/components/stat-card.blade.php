@@ -11,7 +11,7 @@
 @props([
     'title',
     'value',
-    'icon' => null,
+    'iconPath' => null,
     'color' => 'primary',
     'trend' => null,
     'href' => null,
@@ -43,11 +43,11 @@ $tag = $href ? 'a' : 'div';
             @endif
         </div>
 
-        @if($icon)
+        @if($iconPath)
             <div class="{{ $c['icon_bg'] }} w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ml-3">
-                <div class="{{ $c['text'] }} w-5 h-5">
-                    {!! $icon !!}
-                </div>
+                <svg class="{{ $c['text'] }} w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $iconPath }}" />
+                </svg>
             </div>
         @endif
     </div>
