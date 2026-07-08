@@ -26,6 +26,7 @@ class StudentController extends Controller
         $query = Student::with(['studyProgram', 'programLevel']);
 
         if ($search = $request->input('q')) {
+            $search = str_replace(['%', '_'], ['\%', '\_'], $search);
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                   ->orWhere('nim', 'like', "%{$search}%")
@@ -176,7 +177,11 @@ class StudentController extends Controller
 
         foreach ($students as $student) {
             [$user, $password] = $this->studentService->generateAccount($student);
-            $generated[] = "{$student->name} (NIM: {$student->nim}) -> Password: <strong>{$password}</strong>";
+            $generated[] = [
+                'name' => $student->name,
+                'nim' => $student->nim,
+                'password' => $password,
+            ];
         }
 
         if (empty($generated)) {
@@ -184,10 +189,11 @@ class StudentController extends Controller
                 ->with('info', 'Tidak ada akun baru yang digenerate.');
         }
 
-        $message = "Berhasil membuat " . count($generated) . " akun mahasiswa:<br>" . implode('<br>', $generated);
+        $message = "Berhasil membuat " . count($generated) . " akun mahasiswa. Password hanya ditampilkan sekali di bawah.";
 
         return redirect()->route('students.index', ['tab' => 'generate-akun'])
-            ->with('success', $message);
+            ->with('success', $message)
+            ->with('generated_passwords', $generated);
     }
 
     public function generateAll(Request $request): RedirectResponse
@@ -203,12 +209,17 @@ class StudentController extends Controller
 
         foreach ($students as $student) {
             [$user, $password] = $this->studentService->generateAccount($student);
-            $generated[] = "{$student->name} (NIM: {$student->nim}) -> Password: <strong>{$password}</strong>";
+            $generated[] = [
+                'name' => $student->name,
+                'nim' => $student->nim,
+                'password' => $password,
+            ];
         }
 
-        $message = "Berhasil membuat " . count($generated) . " akun mahasiswa:<br>" . implode('<br>', $generated);
+        $message = "Berhasil membuat " . count($generated) . " akun mahasiswa. Password hanya ditampilkan sekali di bawah.";
 
         return redirect()->route('students.index', ['tab' => 'generate-akun'])
-            ->with('success', $message);
+            ->with('success', $message)
+            ->with('generated_passwords', $generated);
     }
 }

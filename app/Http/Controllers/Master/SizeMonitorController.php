@@ -18,6 +18,7 @@ class SizeMonitorController extends Controller
             'changedByUser',
         ])
             ->when($request->input('q'), function ($query, $search) {
+                $search = str_replace(['%', '_'], ['\%', '\_'], $search);
                 $query->where(function ($q) use ($search) {
                     $q->whereHas('sizeItem.sizeProfile.student', function ($sq) use ($search) {
                         $sq->where('name', 'like', "%{$search}%")

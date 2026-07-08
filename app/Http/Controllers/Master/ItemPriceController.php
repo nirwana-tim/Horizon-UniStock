@@ -23,6 +23,7 @@ class ItemPriceController extends Controller
         $query = ItemPrice::with('item');
 
         if ($search = $request->input('q')) {
+            $search = str_replace(['%', '_'], ['\%', '\_'], $search);
             $query->where(function ($q) use ($search) {
                 $q->whereRelation('item', 'name', 'like', "%{$search}%")
                   ->orWhereRelation('item', 'code', 'like', "%{$search}%");

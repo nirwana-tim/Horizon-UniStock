@@ -20,22 +20,15 @@ class ImportController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        $rules = [
+        $validated = $request->validate([
             'import_type' => ['required', 'string', 'in:student,eligibility,item,stock_opname,item_price,entitlement'],
             'stock_opname_id' => ['required_if:import_type,stock_opname', 'nullable', 'integer', 'exists:stock_opnames,id'],
-        ];
+            'file' => ['required', 'file', 'mimes:xlsx,xls,csv', 'max:10240'],
+        ]);
 
-        if ($request->has('file_path')) {
-            $rules['file_path'] = ['required', 'string'];
-            $validated = $request->validate($rules);
-            $filePath = $validated['file_path'];
-        } else {
-            $rules['file'] = ['required', 'file', 'mimes:xlsx,xls,csv', 'max:10240'];
-            $validated = $request->validate($rules);
-            $file = $request->file('file');
-            $fileName = time() . '_' . $file->getClientOriginalName();
-            $filePath = $file->storeAs('imports', $fileName, 'local');
-        }
+        $file = $request->file('file');
+        $fileName = time() . '_' . preg_replace('/[^a-zA-Z0-9._-]/', '', $file->getClientOriginalName());
+        $filePath = $file->storeAs('imports', $fileName, 'local');
 
         $batch = $this->importService->processImport(
             $validated['import_type'],
@@ -62,7 +55,7 @@ class ImportController extends Controller
         ]);
 
         $file = $request->file('file');
-        $fileName = time() . '_' . $file->getClientOriginalName();
+        $fileName = time() . '_' . preg_replace('/[^a-zA-Z0-9._-]/', '', $file->getClientOriginalName());
         $filePath = $file->storeAs('imports', $fileName, 'local');
 
         $data = \Maatwebsite\Excel\Facades\Excel::toCollection(

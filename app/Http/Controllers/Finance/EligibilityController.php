@@ -16,6 +16,7 @@ class EligibilityController extends Controller
     public function index(Request $request): View|JsonResponse
     {
         $search = $request->input('q', $request->input('search'));
+        $search = str_replace(['%', '_'], ['\%', '\_'], $search ?? '');
 
         $students = Student::with(['studyProgram.faculty', 'eligibilityRecords'])
             ->when($search, function ($query) use ($search) {

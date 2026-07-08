@@ -25,13 +25,16 @@ Alpine.data('serverTable', (url) => ({
             },
         })
         .then((res) => {
-            this.tableHtml = res.data.html;
-            if (res.data.pagination) {
+            if (res.data && res.data.html) {
+                this.tableHtml = res.data.html;
+            }
+            if (res.data && res.data.pagination) {
                 this.paginationHtml = res.data.pagination;
             }
         })
         .catch((err) => {
-            console.error('Server table error:', err);
+            this.tableHtml = '<div class="p-6 text-center"><p class="text-sm text-red-500">Gagal memuat data. Silakan muat ulang halaman.</p></div>';
+            this.paginationHtml = '';
         });
     },
 

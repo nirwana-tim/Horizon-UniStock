@@ -27,6 +27,7 @@ class ItemController extends Controller
         $query = ItemVariant::with(['item.category', 'itemSize']);
 
         if ($search = $request->input('q')) {
+            $search = str_replace(['%', '_'], ['\%', '\_'], $search);
             $query->where(function ($q) use ($search) {
                 $q->where('sku', 'like', "%{$search}%")
                   ->orWhereHas('item', function ($iq) use ($search) {

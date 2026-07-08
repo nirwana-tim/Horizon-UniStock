@@ -36,18 +36,23 @@ class ScanController extends Controller
 
         $student = $this->distributionService->findStudent($request->input('query'));
 
-        if (!$student) {
-            if ($request->ajax() || $request->wantsJson()) {
-                return response()->json(['found' => false, 'message' => 'Mahasiswa tidak ditemukan.']);
-            }
-            return back()->withErrors(['query' => 'Mahasiswa tidak ditemukan. Pastikan NIM valid.']);
-        }
-
         if ($request->ajax() || $request->wantsJson()) {
+            if (!$student) {
+                // Uniform response — same structure regardless of existence
+                return response()->json([
+                    'found' => false,
+                    'message' => 'Mahasiswa tidak ditemukan.',
+                ]);
+            }
+
             return response()->json([
                 'found' => true,
-                'redirect' => route('distribution.search') . '?query=' . $student->nim,
+                'redirect' => route('distribution.search') . '?query=' . urlencode($student->nim),
             ]);
+        }
+
+        if (!$student) {
+            return back()->withErrors(['query' => 'Mahasiswa tidak ditemukan. Pastikan NIM valid.']);
         }
 
         return $this->showDistribution($student);
