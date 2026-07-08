@@ -22,6 +22,7 @@ class ItemTypeController extends Controller
         $query = ItemType::with('categories')->withCount('items');
 
         if ($search = $request->input('q')) {
+            $search = str_replace(['%', '_'], ['\%', '\_'], $search);
             $query->where(function ($q) use ($search) {
                 $q->where('code', 'like', "%{$search}%")
                   ->orWhere('label', 'like', "%{$search}%");

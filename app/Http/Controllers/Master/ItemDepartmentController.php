@@ -23,6 +23,7 @@ class ItemDepartmentController extends Controller
         $query = ItemDepartment::with('studyPrograms')->withCount('items');
 
         if ($search = $request->input('q')) {
+            $search = str_replace(['%', '_'], ['\%', '\_'], $search);
             $query->where(function ($q) use ($search) {
                 $q->where('label', 'like', "%{$search}%")
                   ->orWhere('code', 'like', "%{$search}%");

@@ -23,6 +23,8 @@ class EmailVerificationOtpController extends Controller
 
         OtpCode::where('nim', $student->nim)->whereNull('used_at')->where('expires_at', '>', now())->update(['used_at' => now()]);
 
+        session()->forget(['pending_email', 'otp_attempts']);
+
         $code = str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
 
         OtpCode::create([
@@ -72,6 +74,14 @@ class EmailVerificationOtpController extends Controller
                 ->withErrors(['error' => 'Session tidak valid. Silakan mulai ulang.']);
         }
 
+        $attempts = (int) session('otp_attempts', 0);
+        if ($attempts >= 5) {
+            session()->forget(['pending_email', 'otp_attempts']);
+            OtpCode::where('nim', $student->nim)->whereNull('used_at')->update(['used_at' => now()]);
+            return redirect()->route('student.email.send-otp')
+                ->withErrors(['error' => 'Terlalu banyak percobaan. Silakan kirim ulang OTP.']);
+        }
+
         $otp = OtpCode::where('nim', $student->nim)
             ->where('email', $pendingEmail)
             ->where('code', $validated['code'])
@@ -82,8 +92,11 @@ class EmailVerificationOtpController extends Controller
             ->first();
 
         if (!$otp) {
+            session(['otp_attempts' => $attempts + 1]);
             return back()->withErrors(['code' => 'Kode OTP tidak valid atau sudah kedaluwarsa.']);
         }
+
+        session()->forget(['pending_email', 'otp_attempts']);
 
         $otp->update(['used_at' => now()]);
 
@@ -91,8 +104,6 @@ class EmailVerificationOtpController extends Controller
             'email_kampus' => $pendingEmail,
             'email_verified_at' => now(),
         ]);
-
-        session()->forget('pending_email');
 
         return redirect()->route('dashboard')
             ->with('email_success', 'Email kampus berhasil diverifikasi!');

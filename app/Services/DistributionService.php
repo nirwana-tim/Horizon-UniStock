@@ -105,11 +105,13 @@ class DistributionService
                 if ($variant) {
                     $stockBalance = StockBalance::where('item_id', '=', $item->id, 'and')
                         ->where('variant_id', '=', $variant->id, 'and')
+                        ->lockForUpdate()
                         ->first();
 
                     $availableStock = $stockBalance ? $stockBalance->quantity - $stockBalance->reserved : 0;
 
                     if ($availableStock < $quantity) {
+                        // Not enough stock — deduct whatever is available
                         $allFullyStocked = false;
                     }
 

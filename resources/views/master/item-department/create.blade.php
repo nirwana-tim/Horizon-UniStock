@@ -20,15 +20,24 @@
 
                         <div class="mb-4">
                             <x-input-label :value="__('Related Study Programs')" />
-                            <div class="mt-2 space-y-4" x-data="{ loadedFaculties: {} }">
+                            <div class="mt-2 space-y-4" x-data="{
+                                loadedFaculties: {},
+                                facultyHtml: {},
+                                loadStudyPrograms(facultyId, url) {
+                                    if (this.loadedFaculties[facultyId]) return;
+                                    this.loadedFaculties[facultyId] = true;
+                                    axios.get(url).then(r => {
+                                        this.facultyHtml[facultyId] = r.data;
+                                    });
+                                }
+                            }">
                                 @foreach($faculties as $faculty)
                                     <div class="border border-gray-200 rounded-md p-3">
                                         <div class="flex items-center mb-2">
                                             <input type="checkbox" id="faculty-{{ $faculty->id }}" class="faculty-check rounded border-gray-300 text-primary-600 focus:ring-primary-500" data-faculty="{{ $faculty->id }}">
-                                            <label for="faculty-{{ $faculty->id }}" @click="if (!loadedFaculties[{{ $faculty->id }}]) { loadedFaculties[{{ $faculty->id }}] = true; $nextTick(() => { axios.get('{{ route('master-data.item-department.study-programs', $faculty) }}').then(r => { $refs['prodi-{{ $faculty->id }}'].innerHTML = r.data; }); }); }" class="ml-2 text-sm font-semibold text-gray-700 cursor-pointer">{{ $faculty->name }}</label>
+                                            <label for="faculty-{{ $faculty->id }}" @click="loadStudyPrograms({{ $faculty->id }}, '{{ route('master-data.item-department.study-programs', $faculty) }}')" class="ml-2 text-sm font-semibold text-gray-700 cursor-pointer">{{ $faculty->name }}</label>
                                         </div>
-                                        <div class="ml-6 space-y-1" x-ref="prodi-{{ $faculty->id }}">
-                                            <p class="text-xs text-gray-400 italic">Click faculty name to load study programs...</p>
+                                        <div class="ml-6 space-y-1" x-html="facultyHtml[{{ $faculty->id }}] || '<p class=\'text-xs text-gray-400 italic\'>Click faculty name to load study programs...</p>'">
                                         </div>
                                     </div>
                                 @endforeach

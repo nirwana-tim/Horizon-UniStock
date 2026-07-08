@@ -45,11 +45,11 @@
     $reportsOpen = request()->routeIs($reportsRoutes) ? 'true' : 'false';
     $systemOpen = request()->routeIs($systemRoutes) ? 'true' : 'false';
 @endphp
-<aside x-data="{ collapsed: false, mobileOpen: false, masterOpen: {{ $masterOpen }}, distributionOpen: {{ $distributionOpen }}, inventoryOpen: {{ $inventoryOpen }}, reportsOpen: {{ $reportsOpen }}, systemOpen: {{ $systemOpen }} }"
+<aside x-data="{ collapsed: false, mobileOpen: false, userMenuOpen: false, masterOpen: {{ $masterOpen }}, distributionOpen: {{ $distributionOpen }}, inventoryOpen: {{ $inventoryOpen }}, reportsOpen: {{ $reportsOpen }}, systemOpen: {{ $systemOpen }} }"
     x-init="setTimeout(() => $el.classList.add('sidebar-transition'), 50)"
     @toggle-sidebar.window="mobileOpen = !mobileOpen"
-    class="fixed inset-y-0 left-0 z-30 flex-shrink-0 bg-white border-r border-gray-200 flex flex-col h-full overflow-hidden transition-transform duration-250
-           -translate-x-full lg:translate-x-0 lg:static lg:z-auto"
+    class="fixed inset-y-0 left-0 z-30 flex-shrink-0 bg-white border-r border-gray-200 flex flex-col h-full overflow-hidden lg:overflow-visible transition-transform duration-250
+           -translate-x-full lg:transform-none lg:static lg:z-auto"
     :class="(collapsed ? 'w-16' : 'w-64') + (mobileOpen ? ' translate-x-0' : ' -translate-x-full')">
 
     {{-- Logo / Brand --}}
@@ -107,7 +107,7 @@
 
             {{-- Master Data (Collapsible) --}}
             <div>
-                <button @click="masterOpen = !masterOpen"
+                <button @click="collapsed ? (collapsed=false, masterOpen=true) : masterOpen = !masterOpen"
                     class="w-full flex items-center gap-3 px-2 py-2 rounded-lg text-sm {{ request()->routeIs($masterDataRoutes) ? 'sidebar-item-active' : 'sidebar-item' }}">
                     <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -206,7 +206,7 @@
 
             {{-- Distribution (Collapsible) --}}
             <div>
-                <button @click="distributionOpen = !distributionOpen"
+                <button @click="collapsed ? (collapsed=false, distributionOpen=true) : distributionOpen = !distributionOpen"
                     class="w-full flex items-center gap-3 px-2 py-2 rounded-lg text-sm {{ request()->routeIs($distributionRoutes) ? 'sidebar-item-active' : 'sidebar-item' }}">
                     <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -243,7 +243,7 @@
 
             {{-- Inventory (Collapsible) --}}
             <div>
-                <button @click="inventoryOpen = !inventoryOpen"
+                <button @click="collapsed ? (collapsed=false, inventoryOpen=true) : inventoryOpen = !inventoryOpen"
                     class="w-full flex items-center gap-3 px-2 py-2 rounded-lg text-sm {{ request()->routeIs($inventoryRoutes) ? 'sidebar-item-active' : 'sidebar-item' }}">
                     <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -272,7 +272,7 @@
 
             {{-- Reports (Collapsible) --}}
             <div>
-                <button @click="reportsOpen = !reportsOpen"
+                <button @click="collapsed ? (collapsed=false, reportsOpen=true) : reportsOpen = !reportsOpen"
                     class="w-full flex items-center gap-3 px-2 py-2 rounded-lg text-sm {{ request()->routeIs($reportsRoutes) ? 'sidebar-item-active' : 'sidebar-item' }}">
                     <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -307,7 +307,7 @@
 
             {{-- System (Collapsible) --}}
             <div>
-                <button @click="systemOpen = !systemOpen"
+                <button @click="collapsed ? (collapsed=false, systemOpen=true) : systemOpen = !systemOpen"
                     class="w-full flex items-center gap-3 px-2 py-2 rounded-lg text-sm {{ request()->routeIs($systemRoutes) ? 'sidebar-item-active' : 'sidebar-item' }}">
                     <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -359,8 +359,8 @@
 
     {{-- Bottom: User Info --}}
     <div class="flex-shrink-0 border-t border-gray-100 p-3">
-        <div x-data="{ open: false }" class="relative">
-            <button @click="open = !open"
+        <div class="relative">
+            <button @click="userMenuOpen = !userMenuOpen"
                 class="w-full flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-gray-50 transition-colors">
                 {{-- Avatar --}}
                 <div
@@ -380,10 +380,11 @@
             </button>
 
             {{-- User Dropdown --}}
-            <div x-show="open" @click.away="open = false" x-transition:enter="transition ease-out duration-100"
+            <div x-show="userMenuOpen" @click.away="userMenuOpen = false" x-transition:enter="transition ease-out duration-100"
                 x-transition:enter-start="opacity-0 transform scale-95"
                 x-transition:enter-end="opacity-100 transform scale-100"
-                class="absolute bottom-full left-0 right-0 mb-1 bg-white rounded-lg border border-gray-200 shadow-lg py-1 z-50">
+                :class="collapsed ? 'fixed bottom-2 left-[72px] w-56' : 'absolute bottom-full left-0 right-0 mb-1'"
+                class="bg-white rounded-lg border border-gray-200 shadow-lg py-1 z-50">
                 <a href="{{ route('profile.edit') }}"
                     class="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
                     <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">

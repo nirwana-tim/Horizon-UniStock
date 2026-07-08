@@ -70,8 +70,8 @@ Route::middleware(['auth', 'password.changed', 'role:super_admin|admin'])->prefi
     Route::get('/{student}/entitlement', [StudentController::class, 'entitlement'])->name('entitlement');
     Route::get('/{student}/received-items', [StudentController::class, 'receivedItems'])->name('received-items');
     Route::get('/{student}/transactions', [StudentController::class, 'transactions'])->name('transactions');
-    Route::post('/generate', [StudentController::class, 'generate'])->name('generate');
-    Route::post('/generate-all', [StudentController::class, 'generateAll'])->name('generateAll');
+    Route::post('/generate', [StudentController::class, 'generate'])->middleware('throttle:5,1')->name('generate');
+    Route::post('/generate-all', [StudentController::class, 'generateAll'])->middleware('throttle:2,1')->name('generateAll');
 });
 
 Route::middleware(['auth', 'password.changed', 'role:super_admin|admin'])->prefix('distribution')->name('distribution.')->group(function () {
@@ -85,11 +85,11 @@ Route::middleware(['auth', 'password.changed', 'role:super_admin|admin'])->prefi
 
 Route::middleware(['auth', 'password.changed', 'role:super_admin|admin|staff'])->prefix('distribution')->name('distribution.')->group(function () {
     Route::get('/scan', [ScanController::class, 'index'])->name('scan.index');
-    Route::post('/search', [ScanController::class, 'search'])->name('search');
+    Route::post('/search', [ScanController::class, 'search'])->middleware('throttle:30,1')->name('search');
     Route::get('/search', function () {
         return redirect()->route('distribution.scan.index');
     });
-    Route::post('/process', [ScanController::class, 'process'])->name('process');
+    Route::post('/process', [ScanController::class, 'process'])->middleware('throttle:10,1')->name('process');
 });
 
 Route::middleware(['auth', 'password.changed', 'role:super_admin|admin'])->prefix('inventory')->name('inventory.')->group(function () {
@@ -98,8 +98,8 @@ Route::middleware(['auth', 'password.changed', 'role:super_admin|admin'])->prefi
     Route::get('stock-receive/variants-by-base-code/{baseCode}', [StockReceiveController::class, 'variantsByBaseCode'])->name('stock-receive.variants-by-base-code')->where('baseCode', '.*');
     Route::resource('stock-receive', StockReceiveController::class)->except(['edit', 'update']);
     Route::resource('stock-opname', StockOpnameController::class)->except(['edit', 'update', 'destroy']);
-    Route::post('stock-opname/{stockOpname}/upload', [StockOpnameController::class, 'upload'])->name('stock-opname.upload');
-    Route::post('stock-opname/{stockOpname}/approve', [StockOpnameController::class, 'approve'])->name('stock-opname.approve');
+    Route::post('stock-opname/{stockOpname}/upload', [StockOpnameController::class, 'upload'])->middleware('throttle:5,1')->name('stock-opname.upload');
+    Route::post('stock-opname/{stockOpname}/approve', [StockOpnameController::class, 'approve'])->middleware('throttle:5,1')->name('stock-opname.approve');
 });
 
 Route::middleware(['auth', 'password.changed', 'role:super_admin|admin'])->prefix('report')->name('report.')->group(function () {
@@ -121,31 +121,31 @@ Route::middleware(['auth', 'password.changed', 'role:super_admin|admin'])->group
 
 Route::middleware(['auth', 'password.changed', 'role:super_admin|admin'])->prefix('import')->name('import.')->group(function () {
     Route::get('/', [ImportController::class, 'index'])->name('index');
-    Route::post('/', [ImportController::class, 'store'])->name('store');
-    Route::post('/preview', [ImportController::class, 'preview'])->name('preview');
+    Route::post('/', [ImportController::class, 'store'])->middleware('throttle:5,1')->name('store');
+    Route::post('/preview', [ImportController::class, 'preview'])->middleware('throttle:10,1')->name('preview');
 });
 
 Route::middleware(['auth', 'password.changed', 'role:super_admin|admin'])->prefix('finance')->name('finance.')->group(function () {
     Route::get('eligibility', [EligibilityController::class, 'index'])->name('eligibility.index');
-    Route::post('eligibility/{student}/toggle', [EligibilityController::class, 'toggle'])->name('eligibility.toggle');
+    Route::post('eligibility/{student}/toggle', [EligibilityController::class, 'toggle'])->middleware('throttle:10,1')->name('eligibility.toggle');
 });
 
 Route::middleware(['auth', 'password.changed', 'role:student'])->prefix('student')->name('student.')->group(function () {
     Route::get('/sizes', [SizeController::class, 'index'])->name('sizes.index');
     Route::post('/sizes', [SizeController::class, 'store'])->name('sizes.store');
-    Route::post('/email/send-otp', [EmailVerificationOtpController::class, 'sendOtp'])->name('email.send-otp');
+    Route::post('/email/send-otp', [EmailVerificationOtpController::class, 'sendOtp'])->middleware('throttle:3,1')->name('email.send-otp');
     Route::get('/email/verify', [EmailVerificationOtpController::class, 'showVerifyForm'])->name('email.verify-form');
-    Route::post('/email/verify-otp', [EmailVerificationOtpController::class, 'verifyOtp'])->name('email.verify-otp');
+    Route::post('/email/verify-otp', [EmailVerificationOtpController::class, 'verifyOtp'])->middleware('throttle:5,1')->name('email.verify-otp');
     Route::get('/qr', [SizeController::class, 'qr'])->name('qr');
     Route::get('/items', [SizeController::class, 'items'])->name('items.index');
 });
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/password/change', [PasswordChangeController::class, 'create'])->name('password.change');
-    Route::post('/password/change', [PasswordChangeController::class, 'store'])->name('password.change.store');
+    Route::post('/password/change', [PasswordChangeController::class, 'store'])->middleware('throttle:5,1')->name('password.change.store');
 });
 
 Route::get('/forgot-password/student', [ForgotPasswordStudentController::class, 'create'])->name('password.student.forgot');
-Route::post('/forgot-password/student/reset', [ForgotPasswordStudentController::class, 'sendResetLink'])->name('password.student.send-reset');
+Route::post('/forgot-password/student/reset', [ForgotPasswordStudentController::class, 'sendResetLink'])->middleware('throttle:3,1')->name('password.student.send-reset');
 
 require __DIR__.'/auth.php';

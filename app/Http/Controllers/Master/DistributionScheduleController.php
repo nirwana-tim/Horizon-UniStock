@@ -21,6 +21,7 @@ class DistributionScheduleController extends Controller
     {
         $schedules = DistributionSchedule::with('programLevel', 'faculty', 'studyProgram')
             ->when($request->input('q'), function ($query, $search) {
+                $search = str_replace(['%', '_'], ['\%', '\_'], $search);
                 $query->where('name', 'like', "%{$search}%")
                       ->orWhere('location', 'like', "%{$search}%");
             })
@@ -102,6 +103,7 @@ class DistributionScheduleController extends Controller
         $query = $distributionSchedule->transactions()->with('student');
 
         if ($search = $request->input('q')) {
+            $search = str_replace(['%', '_'], ['\%', '\_'], $search);
             $query->whereHas('student', fn($q) => $q->where('name', 'like', "%{$search}%")->orWhere('nim', 'like', "%{$search}%"));
         }
 

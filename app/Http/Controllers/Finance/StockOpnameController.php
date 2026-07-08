@@ -22,6 +22,7 @@ class StockOpnameController extends Controller
     {
         $batches = StockOpname::with('creator')
             ->when($request->input('q'), function ($query, $search) {
+                $search = str_replace(['%', '_'], ['\%', '\_'], $search);
                 $query->where('period', 'like', "%{$search}%")
                       ->orWhere('status', 'like', "%{$search}%");
             })

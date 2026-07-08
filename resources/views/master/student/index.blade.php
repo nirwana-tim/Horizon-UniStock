@@ -2,18 +2,6 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            @if(session('success'))
-                <div class="mb-4 px-4 py-3 bg-green-100 border border-green-300 text-green-700 rounded-md">
-                    {!! session('success') !!}
-                </div>
-            @endif
-
-            @if(session('info'))
-                <div class="mb-4 px-4 py-3 bg-blue-100 border border-blue-300 text-blue-700 rounded-md">
-                    {{ session('info') }}
-                </div>
-            @endif
-
             <div x-data="{ activeTab: '{{ request('tab') === 'generate-akun' ? 'generate' : 'data' }}' }">
                 {{-- Tab Header --}}
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-4">
@@ -34,7 +22,7 @@
 
                         <div class="ml-auto flex gap-2">
                             <template x-if="activeTab === 'data'">
-                                <a href="{{ route('students.create') }}" class="inline-flex items-center px-4 py-2 bg-[#980416] border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-[#7a0311] transition">
+                                <a href="{{ route('students.create') }}" class="inline-flex items-center px-4 py-2 bg-primary-700 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-primary-800 transition">
                                     {{ __('Add Student') }}
                                 </a>
                             </template>
@@ -58,7 +46,7 @@
                                 <table class="min-w-full divide-y divide-gray-200">
                                     <thead class="bg-gray-50">
                                         <tr>
-                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No</th>
                                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">NIM</th>
                                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
                                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Study Program</th>

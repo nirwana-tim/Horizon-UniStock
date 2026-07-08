@@ -53,6 +53,27 @@
                     <x-alert type="info">{{ session('info') }}</x-alert>
                 @endif
 
+                @if(session('generated_passwords'))
+                    <div x-data="{ showPasswords: false }" class="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-xl" x-init="showPasswords = true">
+                        <div class="flex items-center justify-between mb-2">
+                            <p class="text-sm text-yellow-800 font-medium">
+                                <strong>Perhatian:</strong> Password berikut hanya ditampilkan sekali. Simpan dengan aman.
+                            </p>
+                            <button type="button" @click="showPasswords = !showPasswords" class="text-sm text-yellow-700 underline hover:text-yellow-900 focus:outline-none">
+                                <span x-text="showPasswords ? 'Sembunyikan Password' : 'Tampilkan Password'"></span>
+                            </button>
+                        </div>
+                        <div x-show="showPasswords" x-transition class="bg-white border border-yellow-300 rounded-lg p-3 text-xs space-y-1 max-h-60 overflow-y-auto font-mono">
+                            @foreach(session('generated_passwords') as $item)
+                                <div class="flex justify-between border-b border-yellow-100 last:border-0 py-1">
+                                    <span class="text-gray-700">{{ $item['name'] }} ({{ $item['nim'] }})</span>
+                                    <span class="text-red-700 font-bold ml-4 break-all">{{ $item['password'] }}</span>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
+
                 {{ $slot }}
             </main>
         </div>
@@ -80,6 +101,27 @@
             @endif
             @if(session('info'))
                 <x-alert type="info">{{ session('info') }}</x-alert>
+            @endif
+
+            @if(session('generated_passwords'))
+                <div x-data="{ showPasswords: false }" class="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-xl" x-init="showPasswords = true">
+                    <div class="flex items-center justify-between mb-2">
+                        <p class="text-sm text-yellow-800 font-medium">
+                            <strong>Perhatian:</strong> Password berikut hanya ditampilkan sekali. Simpan dengan aman.
+                        </p>
+                        <button type="button" @click="showPasswords = !showPasswords" class="text-sm text-yellow-700 underline hover:text-yellow-900 focus:outline-none">
+                            <span x-text="showPasswords ? 'Sembunyikan Password' : 'Tampilkan Password'"></span>
+                        </button>
+                    </div>
+                    <div x-show="showPasswords" x-transition class="bg-white border border-yellow-300 rounded-lg p-3 text-xs space-y-1 max-h-60 overflow-y-auto font-mono">
+                        @foreach(session('generated_passwords') as $item)
+                            <div class="flex justify-between border-b border-yellow-100 last:border-0 py-1">
+                                <span class="text-gray-700">{{ $item['name'] }} ({{ $item['nim'] }})</span>
+                                <span class="text-red-700 font-bold ml-4 break-all">{{ $item['password'] }}</span>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
             @endif
 
             {{ $slot }}

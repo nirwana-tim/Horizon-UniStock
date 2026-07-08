@@ -24,6 +24,7 @@ class EntitlementController extends Controller
     {
         $entitlements = Entitlement::with('items.item')
             ->when($request->input('q'), function ($query, $search) {
+                $search = str_replace(['%', '_'], ['\%', '\_'], $search);
                 $query->where('code', 'like', "%{$search}%")
                       ->orWhere('description', 'like', "%{$search}%");
             })
@@ -83,7 +84,8 @@ class EntitlementController extends Controller
         $entitlement = null;
 
         if ($entitlementId = $request->input('entitlement_id')) {
-            $entitlement = Entitlement::with('items')->find($entitlementId);
+            $entitlement = Entitlement::with('items')->findOrFail($entitlementId);
+            $this->authorize('view', $entitlement);
         }
 
         return view('distribution.entitlement._items-grid', compact('items', 'entitlement'));

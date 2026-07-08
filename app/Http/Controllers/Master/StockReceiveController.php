@@ -24,6 +24,7 @@ class StockReceiveController extends Controller
         $query = StockReceive::with('vendor', 'items');
 
         if ($search = $request->input('q')) {
+            $search = str_replace(['%', '_'], ['\%', '\_'], $search);
             $query->where(function ($q) use ($search) {
                 $q->where('reference_number', 'like', "%{$search}%")
                   ->orWhereRelation('vendor', 'name', 'like', "%{$search}%")
@@ -58,6 +59,7 @@ class StockReceiveController extends Controller
             ->orderBy('base_code');
 
         if ($q = $request->input('q')) {
+            $q = str_replace(['%', '_'], ['\%', '\_'], $q);
             $query->where(function ($qry) use ($q) {
                 $qry->where('name', 'like', "%{$q}%")
                     ->orWhere('base_code', 'like', "%{$q}%");
