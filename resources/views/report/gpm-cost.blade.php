@@ -95,56 +95,87 @@
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
                     <h3 class="text-lg font-semibold mb-4">GPM Detail per Item</h3>
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
-                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Qty Sold</th>
-                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">COGS</th>
-                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Selling Price</th>
-                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Total COGS</th>
-                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Total Sales</th>
-                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Profit / Loss</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
-                                @forelse($gpmData as $index => $item)
+
+                    @php $gpmArray = $gpmData->values()->toArray(); @endphp
+
+                    <div x-data="{
+                        search: '',
+                        items: {{ Js::from($gpmArray) }},
+                        get filtered() {
+                            if (!this.search.trim()) return this.items;
+                            const q = this.search.toLowerCase();
+                            return this.items.filter(i =>
+                                i.item_name.toLowerCase().includes(q) ||
+                                i.category_name.toLowerCase().includes(q) ||
+                                i.item_code.toLowerCase().includes(q)
+                            );
+                        },
+                        get totalQty() { return this.filtered.reduce((s, i) => s + Number(i.qty_sold), 0); },
+                        get totalHpp() { return this.filtered.reduce((s, i) => s + Number(i.total_hpp), 0); },
+                        get totalSell() { return this.filtered.reduce((s, i) => s + Number(i.total_selling_price), 0); },
+                        get totalPl() { return this.totalSell - this.totalHpp; },
+                        fmt(n) { return 'Rp ' + Number(n).toLocaleString('id-ID'); },
+                        num(n) { return Number(n).toLocaleString('id-ID'); },
+                    }">
+                        <div class="mb-4 flex items-center gap-3">
+                            <input type="text"
+                                   x-model="search"
+                                   placeholder="Search items..."
+                                   class="w-72 border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500 text-sm">
+                            <span class="text-xs text-gray-400" x-text="`${filtered.length} items`"></span>
+                        </div>
+
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
                                     <tr>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $index + 1 }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $item['item_name'] }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $item['category_name'] }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right">{{ number_format($item['qty_sold']) }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right">Rp {{ number_format($item['hpp'], 0, ',', '.') }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right">Rp {{ number_format($item['selling_price'], 0, ',', '.') }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right">Rp {{ number_format($item['total_hpp'], 0, ',', '.') }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right">Rp {{ number_format($item['total_selling_price'], 0, ',', '.') }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-right font-semibold {{ $item['laba_rugi'] >= 0 ? 'text-green-600' : 'text-red-600' }}">
-                                            {{ $item['laba_rugi'] >= 0 ? '+' : '' }}Rp {{ number_format($item['laba_rugi'], 0, ',', '.') }}
-                                        </td>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
+                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Qty Sold</th>
+                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">COGS</th>
+                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Selling Price</th>
+                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Total COGS</th>
+                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Total Sales</th>
+                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Profit / Loss</th>
                                     </tr>
-                                @empty
-                                    <tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    <template x-for="(item, index) in filtered" :key="item.item_id">
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" x-text="index + 1"></td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900" x-text="item.item_name"></td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" x-text="item.category_name"></td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right" x-text="num(item.qty_sold)"></td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right" x-text="fmt(item.hpp)"></td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right" x-text="fmt(item.selling_price)"></td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right" x-text="fmt(item.total_hpp)"></td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right" x-text="fmt(item.total_selling_price)"></td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-right font-semibold"
+                                                :class="item.laba_rugi >= 0 ? 'text-green-600' : 'text-red-600'"
+                                                x-text="(item.laba_rugi >= 0 ? '+' : '') + fmt(item.laba_rugi)"></td>
+                                        </tr>
+                                    </template>
+                                    <tr x-show="filtered.length === 0">
                                         <td colspan="9" class="px-6 py-4 text-center text-sm text-gray-500">No GPM data yet.</td>
                                     </tr>
-                                @endforelse
-                            </tbody>
-                            <tfoot class="bg-gray-50">
-                                <tr>
-                                    <td colspan="3" class="px-6 py-4 text-sm font-semibold text-gray-900">TOTAL</td>
-                                    <td class="px-6 py-4 text-sm font-semibold text-gray-900 text-right">{{ number_format($totalQty) }}</td>
-                                    <td colspan="2"></td>
-                                    <td class="px-6 py-4 text-sm font-semibold text-gray-900 text-right">Rp {{ number_format($total_hpp, 0, ',', '.') }}</td>
-                                    <td class="px-6 py-4 text-sm font-semibold text-gray-900 text-right">Rp {{ number_format($total_selling, 0, ',', '.') }}</td>
-                                    <td class="px-6 py-4 text-sm font-bold text-right {{ $total_laba_rugi >= 0 ? 'text-green-600' : 'text-red-600' }}">
-                                        {{ $total_laba_rugi >= 0 ? '+' : '' }}Rp {{ number_format($total_laba_rugi, 0, ',', '.') }}
-                                    </td>
-                                </tr>
-                            </tfoot>
-                        </table>
+                                </tbody>
+                                <tfoot class="bg-gray-50" x-show="filtered.length > 0">
+                                    <tr>
+                                        <td colspan="3" class="px-6 py-4 text-sm font-semibold text-gray-900">TOTAL</td>
+                                        <td class="px-6 py-4 text-sm font-semibold text-gray-900 text-right" x-text="num(totalQty)"></td>
+                                        <td colspan="2"></td>
+                                        <td class="px-6 py-4 text-sm font-semibold text-gray-900 text-right" x-text="fmt(totalHpp)"></td>
+                                        <td class="px-6 py-4 text-sm font-semibold text-gray-900 text-right" x-text="fmt(totalSell)"></td>
+                                        <td class="px-6 py-4 text-sm font-bold text-right"
+                                            :class="totalPl >= 0 ? 'text-green-600' : 'text-red-600'"
+                                            x-text="(totalPl >= 0 ? '+' : '') + fmt(totalPl)"></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
                     </div>
+
                 </div>
             </div>
         </div>

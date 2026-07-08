@@ -75,12 +75,15 @@ Route::middleware(['auth', 'password.changed', 'role:super_admin|admin'])->prefi
 });
 
 Route::middleware(['auth', 'password.changed', 'role:super_admin|admin'])->prefix('distribution')->name('distribution.')->group(function () {
-    Route::resource('entitlement', EntitlementController::class);
     Route::get('entitlement/items-grid', [EntitlementController::class, 'itemsGrid'])->name('entitlement.items-grid');
+    Route::resource('entitlement', EntitlementController::class);
     Route::get('distribution-schedule/fetch-items', [DistributionScheduleController::class, 'fetchItems'])->name('distribution-schedule.fetch-items');
     Route::get('distribution-schedule/{distributionSchedule}/transactions', [DistributionScheduleController::class, 'transactions'])->name('distribution-schedule.transactions');
     Route::resource('distribution-schedule', DistributionScheduleController::class);
     Route::get('size-monitor', [SizeMonitorController::class, 'index'])->name('size-monitor.index');
+});
+
+Route::middleware(['auth', 'password.changed', 'role:super_admin|admin|staff'])->prefix('distribution')->name('distribution.')->group(function () {
     Route::get('/scan', [ScanController::class, 'index'])->name('scan.index');
     Route::post('/search', [ScanController::class, 'search'])->name('search');
     Route::get('/search', function () {
@@ -90,9 +93,10 @@ Route::middleware(['auth', 'password.changed', 'role:super_admin|admin'])->prefi
 });
 
 Route::middleware(['auth', 'password.changed', 'role:super_admin|admin'])->prefix('inventory')->name('inventory.')->group(function () {
-    Route::resource('stock-receive', StockReceiveController::class)->except(['edit', 'update']);
     Route::get('stock-receive/search-items', [StockReceiveController::class, 'searchItems'])->name('stock-receive.search-items');
     Route::get('stock-receive/variants-by-item/{item}', [StockReceiveController::class, 'variantsByItem'])->name('stock-receive.variants-by-item');
+    Route::get('stock-receive/variants-by-base-code/{baseCode}', [StockReceiveController::class, 'variantsByBaseCode'])->name('stock-receive.variants-by-base-code')->where('baseCode', '.*');
+    Route::resource('stock-receive', StockReceiveController::class)->except(['edit', 'update']);
     Route::resource('stock-opname', StockOpnameController::class)->except(['edit', 'update', 'destroy']);
     Route::post('stock-opname/{stockOpname}/upload', [StockOpnameController::class, 'upload'])->name('stock-opname.upload');
     Route::post('stock-opname/{stockOpname}/approve', [StockOpnameController::class, 'approve'])->name('stock-opname.approve');
@@ -133,6 +137,7 @@ Route::middleware(['auth', 'password.changed', 'role:student'])->prefix('student
     Route::get('/email/verify', [EmailVerificationOtpController::class, 'showVerifyForm'])->name('email.verify-form');
     Route::post('/email/verify-otp', [EmailVerificationOtpController::class, 'verifyOtp'])->name('email.verify-otp');
     Route::get('/qr', [SizeController::class, 'qr'])->name('qr');
+    Route::get('/items', [SizeController::class, 'items'])->name('items.index');
 });
 
 Route::middleware(['auth'])->group(function () {

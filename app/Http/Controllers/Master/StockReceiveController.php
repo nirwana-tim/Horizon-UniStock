@@ -52,22 +52,45 @@ class StockReceiveController extends Controller
 
     public function searchItems(Request $request): JsonResponse
     {
-        $query = Item::with('category');
+        $query = Item::whereNotNull('base_code')
+            ->select('base_code')
+            ->distinct()
+            ->orderBy('base_code');
 
         if ($q = $request->input('q')) {
             $query->where(function ($qry) use ($q) {
                 $qry->where('name', 'like', "%{$q}%")
-                    ->orWhere('code', 'like', "%{$q}%")
                     ->orWhere('base_code', 'like', "%{$q}%");
             });
         }
 
-        $items = $query->orderBy('name')->limit(20)->get()->map(fn ($item) => [
-            'id' => $item->id,
-            'label' => $item->name . ' (' . ($item->category?->code ?? '-') . ')',
-        ]);
+        $items = $query->limit(20)->get()->map(function ($row) {
+            $rep = Item::where('base_code', $row->base_code)->first();
+            return [
+                'id' => $row->base_code,
+                'label' => ($rep->name ?? '?') . ' (' . $row->base_code . ')',
+            ];
+        });
 
         return response()->json($items);
+    }
+
+    public function variantsByBaseCode(string $baseCode): JsonResponse
+    {
+        $items = Item::with('variants')->where('base_code', $baseCode)->get();
+
+        $variants = collect();
+        foreach ($items as $item) {
+            foreach ($item->variants as $variant) {
+                $variants->push([
+                    'id' => $variant->id,
+                    'item_id' => $item->id,
+                    'label' => $variant->size_label . ' (' . $variant->sku . ')',
+                ]);
+            }
+        }
+
+        return response()->json($variants->sortBy('label')->values());
     }
 
     public function variantsByItem(Item $item): JsonResponse

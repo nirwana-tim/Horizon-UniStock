@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
 use App\Models\DistributionSchedule;
+use App\Models\DistributionTransaction;
 use App\Models\Student;
 use App\Services\QrCodeService;
 use App\Services\StudentSizeService;
@@ -79,5 +80,33 @@ class SizeController extends Controller
             ->get();
 
         return view('student.qr-show', compact('student', 'activeSchedules', 'qrDataUrl'));
+    }
+
+    public function items(): View
+    {
+        $student = Student::where('user_id', auth()->id())->firstOrFail();
+        $student->load(['activeSizeProfile.sizeItems.item', 'studyProgram', 'programLevel']);
+
+        $entitlementItems = $this->sizeService->getEntitlementItems($student);
+
+        $receivedTransactions = DistributionTransaction::with(['items.item', 'schedule'])
+            ->where('student_id', $student->id)
+            ->whereIn('status', ['completed', 'partial'])
+            ->latest()
+            ->get();
+
+        $selectedSizes = [];
+        if ($student->activeSizeProfile) {
+            foreach ($student->activeSizeProfile->sizeItems as $si) {
+                $selectedSizes[$si->item_id] = $si->size;
+            }
+        }
+
+        $receivedItemIds = $receivedTransactions->flatMap->items->pluck('item_id')->unique()->toArray();
+
+        return view('student.items', compact(
+            'student', 'entitlementItems', 'receivedTransactions',
+            'selectedSizes', 'receivedItemIds'
+        ));
     }
 }

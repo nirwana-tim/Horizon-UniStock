@@ -9,36 +9,43 @@
     <div class="py-12" x-data="{
         items: {{ json_encode(old('items', [])) }},
         showModal: false,
-        searchQuery: '',
-        searchResults: [],
-        loading: false,
+        itemOpen: false,
+        itemSearch: '',
+        itemSearchResults: [],
+        itemSearchLoading: false,
         searchItemsUrl: '{{ route('inventory.stock-receive.search-items') }}',
-        variantUrlBase: '{{ url('inventory/stock-receive/variants-by-item') }}',
-        newItem: { item_id: '', item_label: '', variant_id: '', variant_label: '', quantity: 1, unit_price: 0, hpp: 0 },
+        variantUrlBase: '{{ url('inventory/stock-receive/variants-by-base-code') }}',
+        newItem: { item_id: '', item_label: '', item_label_display: '', variant_id: '', variant_label: '', quantity: 1, unit_price: 0, hpp: 0 },
         variantOptions: [],
         debounceTimer: null,
+        highlightedIdx: -1,
 
         addItem() {
-            if (!this.newItem.item_id || !this.newItem.variant_id) {
+            if (!this.newItem.item_label_display || !this.newItem.variant_id) {
                 alert('Please select an item and variant first.');
                 return;
             }
 
             const varOpt = this.variantOptions.find(o => o.id == this.newItem.variant_id);
 
+            if (!varOpt) {
+                alert('Selected variant not found.');
+                return;
+            }
+
             this.items.push({
-                item_id: this.newItem.item_id,
+                item_id: varOpt.item_id,
                 item_label: this.newItem.item_label,
                 variant_id: this.newItem.variant_id,
-                variant_label: varOpt ? varOpt.label : '',
+                variant_label: varOpt.label,
                 quantity: this.newItem.quantity,
                 unit_price: this.newItem.unit_price,
                 hpp: this.newItem.hpp
             });
 
-            this.newItem = { item_id: '', item_label: '', variant_id: '', variant_label: '', quantity: 1, unit_price: 0, hpp: 0 };
-            this.searchQuery = '';
-            this.searchResults = [];
+            this.newItem = { item_id: '', item_label: '', item_label_display: '', variant_id: '', variant_label: '', quantity: 1, unit_price: 0, hpp: 0 };
+            this.itemSearch = '';
+            this.itemSearchResults = [];
             this.variantOptions = [];
             this.showModal = false;
         },
@@ -47,29 +54,31 @@
             this.items.splice(index, 1);
         },
 
-        searchItems() {
+        doItemSearch() {
             if (this.debounceTimer) clearTimeout(this.debounceTimer);
-            if (!this.searchQuery || this.searchQuery.length < 2) {
-                this.searchResults = [];
+            if (!this.itemSearch || this.itemSearch.length < 2) {
+                this.itemSearchResults = [];
                 return;
             }
             this.debounceTimer = setTimeout(() => {
-                this.loading = true;
-                axios.get(this.searchItemsUrl, { params: { q: this.searchQuery } })
-                    .then(res => { this.searchResults = res.data; })
-                    .finally(() => { this.loading = false; });
+                this.itemSearchLoading = true;
+                axios.get(this.searchItemsUrl, { params: { q: this.itemSearch } })
+                    .then(res => { this.itemSearchResults = res.data; })
+                    .finally(() => { this.itemSearchLoading = false; });
             }, 300);
         },
 
         selectItem(item) {
-            this.newItem.item_id = item.id;
             this.newItem.item_label = item.label;
-            this.searchQuery = item.label;
-            this.searchResults = [];
+            this.newItem.item_label_display = item.label;
+            this.newItem.item_id = '';
+            this.itemSearch = '';
+            this.itemSearchResults = [];
+            this.itemOpen = false;
             this.newItem.variant_id = '';
             this.variantOptions = [];
 
-            axios.get(this.variantUrlBase + '/' + item.id)
+            axios.get(this.variantUrlBase + '/' + encodeURIComponent(item.id))
                 .then(res => { this.variantOptions = res.data; });
         }
     }">
@@ -200,22 +209,35 @@
                     </div>
 
                     <div class="space-y-4">
-                        <div class="relative">
-                            <x-input-label :value="__('Search Item')" class="mb-1" />
-                            <input type="text" x-model="searchQuery" @input="searchItems()"
-                                placeholder="Type item name or code..."
-                                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500 text-sm">
-
-                            <div x-show="searchResults.length > 0" class="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg max-h-48 overflow-y-auto">
-                                <template x-for="item in searchResults" :key="item.id">
-                                    <button type="button" @click="selectItem(item)"
-                                        class="w-full text-left px-3 py-2 text-sm hover:bg-primary-50 focus:bg-primary-50 transition"
-                                        x-text="item.label">
-                                    </button>
-                                </template>
+                        <div class="relative" @click.outside="itemOpen = false">
+                            <x-input-label :value="__('Select Item Variant')" class="mb-1" />
+                            <div @click="itemOpen = !itemOpen; if(itemOpen) $nextTick(() => $refs.itemInput.focus())"
+                                 class="mt-1 block w-full border-gray-300 rounded-md shadow-sm text-sm cursor-pointer bg-white flex items-center justify-between px-3 py-2"
+                                 :class="itemOpen ? 'ring-2 ring-primary-500 border-primary-500' : ''">
+                                <span x-text="newItem.item_label_display || '-- Select Item --'"
+                                      :class="newItem.item_label_display ? 'text-gray-900' : 'text-gray-400'"></span>
+                                <svg class="w-4 h-4 text-gray-400 transition-transform" :class="itemOpen ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                             </div>
 
-                            <div x-show="loading" class="mt-1 text-xs text-gray-400">Searching...</div>
+                            <div x-show="itemOpen" x-cloak
+                                 class="absolute z-20 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-hidden">
+                                <div class="sticky top-0 bg-white p-2 border-b border-gray-100">
+                                    <input x-ref="itemInput" x-model="itemSearch" @input="doItemSearch()" @keydown.escape="itemOpen = false"
+                                           type="text" placeholder="Type item name or code..."
+                                           class="w-full px-3 py-1.5 text-sm border border-gray-200 rounded-md focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none" />
+                                </div>
+                                <ul class="overflow-y-auto max-h-48 py-1">
+                                    <li x-show="itemSearchLoading" class="px-3 py-2 text-sm text-gray-400 italic">Searching...</li>
+                                    <template x-for="item in itemSearchResults" :key="item.id">
+                                        <li @click="selectItem(item)" @mouseenter="highlightedIdx = $index"
+                                            class="px-3 py-2 text-sm cursor-pointer hover:bg-primary-50 hover:text-primary-700 text-gray-900">
+                                            <span x-text="item.label"></span>
+                                        </li>
+                                    </template>
+                                    <li x-show="!itemSearchLoading && itemSearch.length >= 2 && itemSearchResults.length === 0"
+                                        class="px-3 py-2 text-sm text-gray-400 italic text-center">Not found</li>
+                                </ul>
+                            </div>
                         </div>
 
                         <div>

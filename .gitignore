@@ -24,3 +24,7 @@ Homestead.yaml
 Thumbs.db
 /storage/app/private/
 /database/database.sqlite
+ward-report.html
+ward-report.json
+ward-report.md
+ward-report.sarif

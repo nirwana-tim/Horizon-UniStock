@@ -13,6 +13,7 @@ use App\Models\StockBalance;
 use App\Models\StockMovement;
 use App\Models\Student;
 use App\Models\User;
+use App\Services\AuditService;
 use Illuminate\Support\Facades\DB;
 
 class DistributionService
@@ -149,6 +150,20 @@ class DistributionService
                 $transaction->update(['status' => 'partial']);
             }
 
+            AuditService::log(
+                'distribution.created',
+                DistributionTransaction::class,
+                $transaction->id,
+                null,
+                [
+                    'student_id' => $student->id,
+                    'schedule_id' => $schedule->id,
+                    'staff_id' => $staff->id,
+                    'status' => $transaction->status,
+                    'item_count' => count($items),
+                ]
+            );
+
             return $transaction->fresh(['items.item', 'student', 'schedule']);
         });
     }
@@ -174,6 +189,14 @@ class DistributionService
             ]);
 
             $sizeItem->update(['size' => $newSize]);
+
+            AuditService::log(
+                'size.updated',
+                \App\Models\StudentSizeItem::class,
+                $sizeItem->id,
+                ['size' => $oldSize],
+                ['size' => $newSize, 'changed_by' => $staff->id, 'item_id' => $item->id]
+            );
         }
     }
 }
