@@ -65,7 +65,8 @@ class DistributionService
         Student $student,
         DistributionSchedule $schedule,
         User $staff,
-        array $items
+        array $items,
+        ?string $manualNote = null
     ): DistributionTransaction {
         if (!$this->isStudentEligible($student)) {
             throw new \Exception('Mahasiswa ini belum memenuhi syarat distribusi. Status pembayaran belum lunas.');
@@ -79,16 +80,18 @@ class DistributionService
             throw new \Exception('Transaksi distribusi untuk mahasiswa ini pada jadwal ini sudah ada.');
         }
 
-        return DB::transaction(function () use ($student, $schedule, $staff, $items) {
+        return DB::transaction(function () use ($student, $schedule, $staff, $items, $manualNote) {
             $transaction = DistributionTransaction::create([
                 'student_id' => $student->id,
                 'schedule_id' => $schedule->id,
                 'staff_id' => $staff->id,
                 'status' => 'completed',
                 'pickup_time' => now(),
+                'notes' => $manualNote,
             ]);
 
             $allFullyStocked = true;
+            $autoNotes = [];
 
             foreach ($items as $itemData) {
                 $item = Item::find($itemData['item_id'], ['*']);
@@ -113,6 +116,8 @@ class DistributionService
                     if ($availableStock < $quantity) {
                         // Not enough stock — deduct whatever is available
                         $allFullyStocked = false;
+                        $shortage = $quantity - $availableStock;
+                        $autoNotes[] = "Stok {$item->name} (Ukuran {$variant->size}) habis/kurang (kurang {$shortage} pcs)";
                     }
 
                     $deductedQty = min($quantity, $availableStock);
@@ -148,8 +153,37 @@ class DistributionService
                 }
             }
 
+            // Check if there are items in entitlement that were not checked (deferred)
+            $checkedItemIds = array_column($items, 'item_id');
+            $entitlement = $this->getEntitlementForStudent($student, $schedule);
+            if ($entitlement) {
+                $studentSizes = [];
+                $sizeProfile = $student->activeSizeProfile;
+                if ($sizeProfile) {
+                    foreach ($sizeProfile->sizeItems as $sizeItem) {
+                        $studentSizes[$sizeItem->item_id] = $sizeItem->size;
+                    }
+                }
+                
+                foreach ($entitlement->items as $entitlementItem) {
+                    if (!in_array($entitlementItem->item_id, $checkedItemIds)) {
+                        $allFullyStocked = false;
+                        $expectedSize = $studentSizes[$entitlementItem->item_id] ?? '-';
+                        $autoNotes[] = "{$entitlementItem->item->name} (Ukuran {$expectedSize}) ditunda/belum diambil";
+                    }
+                }
+            }
+
             if (!$allFullyStocked) {
-                $transaction->update(['status' => 'partial']);
+                $finalNotes = $manualNote;
+                if (!empty($autoNotes)) {
+                    $autoNotesStr = 'Sistem: ' . implode(' | ', $autoNotes);
+                    $finalNotes = $finalNotes ? $finalNotes . ' | ' . $autoNotesStr : $autoNotesStr;
+                }
+                $transaction->update([
+                    'status' => 'partial',
+                    'notes' => $finalNotes
+                ]);
             }
 
             AuditService::log(

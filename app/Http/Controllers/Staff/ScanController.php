@@ -69,6 +69,7 @@ class ScanController extends Controller
         $request->validate([
             'student_id' => 'required|integer',
             'schedule_id' => 'required|integer',
+            'notes' => 'nullable|string|max:1000',
             'items' => 'required|array|min:1',
             'items.*.item_id' => 'required|integer',
             'items.*.actual_size' => 'required|string|max:10',
@@ -87,7 +88,8 @@ class ScanController extends Controller
             $student,
             $schedule,
             $staff,
-            $request->input('items')
+            $request->input('items'),
+            $request->input('notes')
         );
 
         return redirect()->route('distribution.scan.index')
