@@ -8,17 +8,19 @@ use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\WithTitle;
+use Maatwebsite\Excel\Concerns\WithCustomStartCell;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class MahasiswaTemplateExport extends BaseExport implements FromArray, WithHeadings, WithStyles, WithTitle
+class MahasiswaTemplateExport extends BaseExport implements FromArray, WithHeadings, WithStyles, WithTitle, WithCustomStartCell
 {
+    public function startCell(): string
+    {
+        return 'A4';
+    }
+
     public function array(): array
     {
-        return [
-            ['4112714401250002', 'NABILA LUTHFIYYAH SETIAWAN', 'D3 KEPERAWATAN 1', 'Perempuan', 'M', '38', 'nabila@krw.horizon.ac.id', 'nabila@gmail.com', 'Freshman'],
-            ['4112715401240002', 'BUNGA CITRA ANDINI', 'D3 KEBIDANAN 2', 'Perempuan', 'M', '36', 'bunga@krw.horizon.ac.id', 'bunga@gmail.com', 'Continuing'],
-            ['', '', '', '', '', '', '', '', ''],
-        ];
+        return [];
     }
 
     public function headings(): array
@@ -41,22 +43,22 @@ class MahasiswaTemplateExport extends BaseExport implements FromArray, WithHeadi
         $colCount = 9;
 
         $this->setTitle($sheet, 'TEMPLATE IMPORT MAHASISWA', $colCount);
-        $this->setSubtitle($sheet, 'Isi data sesuai format. Kolom dengan * wajib diisi. Baris pertama adalah contoh.', $colCount);
+        $this->setSubtitle($sheet, 'Isi data sesuai format. Kolom dengan * wajib diisi.', $colCount);
+
+        // Write Contoh Format in Row 3
+        $sheet->mergeCells('A3:I3');
+        $sheet->setCellValue('A3', 'Contoh Format: 4112714401250002 | NABILA LUTHFIYYAH SETIAWAN | D3 KEPERAWATAN 1 | Perempuan | M | 38 | nabila@krw.horizon.ac.id | nabila@gmail.com | Freshman');
+        $sheet->getStyle('A3')->applyFromArray([
+            'font' => ['italic' => true, 'color' => ['rgb' => '888888'], 'size' => 10],
+            'alignment' => [
+                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT,
+                'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+            ],
+        ]);
+        $sheet->getRowDimension(3)->setRowHeight(20);
 
         $headerRow = $this->headerRow();
         $this->applyHeaderStyle($sheet, $headerRow, $colCount);
-
-        $dataStart = $this->dataStartRow();
-        $dataEnd = $dataStart + 2;
-        $this->applyDataStyle($sheet, $dataStart, $dataEnd, $colCount);
-
-        $sheet->getStyle('A' . $dataStart . ':I' . $dataStart)->applyFromArray([
-            'font' => ['italic' => true, 'color' => ['rgb' => '999999']],
-            'fill' => [
-                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
-                'startColor' => ['rgb' => 'F5F5F5'],
-            ],
-        ]);
 
         $this->setColumnWidths($sheet, [
             'A' => 20, 'B' => 35, 'C' => 22, 'D' => 16,
