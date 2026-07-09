@@ -7,17 +7,19 @@ use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\WithTitle;
+use Maatwebsite\Excel\Concerns\WithCustomStartCell;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class HargaTemplateExport extends BaseExport implements FromArray, WithHeadings, WithStyles, WithTitle
+class HargaTemplateExport extends BaseExport implements FromArray, WithHeadings, WithStyles, WithTitle, WithCustomStartCell
 {
+    public function startCell(): string
+    {
+        return 'A4';
+    }
+
     public function array(): array
     {
-        return [
-            ['UNF-L-SCB-02-03', '', '24/25', '190000', '150000'],
-            ['SHO-P-CLC-02-37', '', '24/25', '280000', '200000'],
-            ['', '', '', '', ''],
-        ];
+        return [];
     }
 
     public function headings(): array
@@ -38,20 +40,23 @@ class HargaTemplateExport extends BaseExport implements FromArray, WithHeadings,
         $this->setTitle($sheet, 'TEMPLATE IMPORT HARGA BARANG', $colCount);
         $this->setSubtitle($sheet, 'Tahun Akademik: 22/23 / 23/24 / 24/25 / 25/26. Nama Barang akan terisi otomatis jika kode valid.', $colCount);
 
+        // Write Contoh Format in Row 3
+        $sheet->mergeCells('A3:E3');
+        $sheet->setCellValue('A3', 'Contoh Format: UNF-L-SCB-02-03 | (Nama Kosong) | 24/25 | 190000 | 150000');
+        $sheet->getStyle('A3')->applyFromArray([
+            'font' => ['italic' => true, 'color' => ['rgb' => '888888'], 'size' => 10],
+            'alignment' => [
+                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT,
+                'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+            ],
+        ]);
+        $sheet->getRowDimension(3)->setRowHeight(20);
+
         $headerRow = $this->headerRow();
         $this->applyHeaderStyle($sheet, $headerRow, $colCount);
 
         $dataStart = $this->dataStartRow();
-        $dataEnd = $dataStart + 2;
-        $this->applyDataStyle($sheet, $dataStart, $dataEnd, $colCount);
-
-        $sheet->getStyle('A' . $dataStart . ':E' . $dataStart)->applyFromArray([
-            'font' => ['italic' => true, 'color' => ['rgb' => '999999']],
-            'fill' => [
-                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
-                'startColor' => ['rgb' => 'F5F5F5'],
-            ],
-        ]);
+        $dataEnd = 1000;
 
         $this->setColumnWidths($sheet, [
             'A' => 22, 'B' => 40, 'C' => 18, 'D' => 20, 'E' => 20,

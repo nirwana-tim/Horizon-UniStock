@@ -10,6 +10,11 @@ use Maatwebsite\Excel\Concerns\WithValidation;
 
 class ItemPriceImport implements ToModel, WithHeadingRow, WithValidation
 {
+    public function headingRow(): int
+    {
+        return 4;
+    }
+
     public function model(array $row): ?ItemPrice
     {
         $item = Item::where('code', $row['kode_barang'])->first();

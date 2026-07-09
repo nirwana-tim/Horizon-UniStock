@@ -10,6 +10,11 @@ use Maatwebsite\Excel\Concerns\WithValidation;
 
 class EligibilityImport implements ToModel, WithHeadingRow, WithValidation
 {
+    public function headingRow(): int
+    {
+        return 4;
+    }
+
     public function model(array $row): EligibilityRecord
     {
         $student = Student::where('nim', $row['nim'])->first();

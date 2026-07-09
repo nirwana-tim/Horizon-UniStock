@@ -110,14 +110,13 @@ class StudentImport implements ToCollection, WithMultipleSheets
 
         foreach ($records as &$record) {
             $validator = Validator::make($record, [
-                'nim' => ['required', 'string', 'regex:/^\d{16}$/', 'unique:students,nim'],
+                'nim' => ['required', 'string', 'max:20', 'unique:students,nim'],
                 'name' => ['required', 'string', 'max:255'],
                 'program' => ['required', 'string'],
                 'email_kampus' => ['required', 'email', 'max:255', 'unique:students,email_kampus'],
                 'email_pribadi' => ['nullable', 'email', 'max:255'],
                 'student_type_raw' => ['required', 'string', 'in:Freshman,Continuing,freshman,continuing'],
             ], [
-                'nim.regex' => 'The nim field must be a 16 digit number.',
                 'student_type_raw.in' => 'The tipe field must be Freshman or Continuing.',
             ]);
 
@@ -167,6 +166,8 @@ class StudentImport implements ToCollection, WithMultipleSheets
             'ISI DATA',
             'URUTAN KOLOM',
             'NIM',
+            'CONTOH FORMAT',
+            'CONTOH',
         ]);
     }
 
@@ -189,14 +190,28 @@ class StudentImport implements ToCollection, WithMultipleSheets
 
     private function resolveProgramLevel(?string $nim): ?ProgramLevel
     {
-        if (! $nim || ! preg_match('/(\d{2})\d{4}$/', $nim, $matches)) {
+        if (! $nim) {
             return null;
         }
 
-        $year = (int) $matches[1];
-        $code = sprintf('%02d%02d', $year, $year + 1);
+        // 1. Try to match a 4-digit year prefix (e.g. 2024, 2025, 2026) at the start of NIM
+        if (preg_match('/^(20\d{2})/', $nim, $matches)) {
+            $year = (int) substr($matches[1], 2, 2); // e.g. "26"
+            $code = sprintf('%02d%02d', $year, $year + 1);
+            $level = ProgramLevel::where('code', $code)->first();
+            if ($level) {
+                return $level;
+            }
+        }
 
-        return ProgramLevel::where('code', $code)->first();
+        // 2. Fallback to standard format: 2-digit year before the last 4 digits (e.g. 25xxxx)
+        if (preg_match('/(\d{2})\d{4}$/', $nim, $matches)) {
+            $year = (int) $matches[1];
+            $code = sprintf('%02d%02d', $year, $year + 1);
+            return ProgramLevel::where('code', $code)->first();
+        }
+
+        return null;
     }
 
     private function normalizeProgramName(string $value): string
@@ -217,7 +232,12 @@ class StudentImport implements ToCollection, WithMultipleSheets
             return null;
         }
 
-        $value = trim((string) $value);
+        // Handle scientific notation / float strings from Excel large numbers
+        if (is_numeric($value) && (str_contains(strtolower((string)$value), 'e+') || is_float($value))) {
+            $value = number_format((float)$value, 0, '', '');
+        }
+
+        $value = ltrim(trim((string) $value), "'");
 
         return $value === '' ? null : $value;
     }

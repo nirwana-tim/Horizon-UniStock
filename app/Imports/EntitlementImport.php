@@ -14,6 +14,11 @@ use Illuminate\Support\Collection;
 
 class EntitlementImport implements ToCollection, WithHeadingRow, WithValidation
 {
+    public function headingRow(): int
+    {
+        return 4;
+    }
+
     public function collection(Collection $rows): void
     {
         foreach ($rows as $row) {

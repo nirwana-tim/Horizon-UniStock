@@ -8,16 +8,19 @@ use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\WithTitle;
+use Maatwebsite\Excel\Concerns\WithCustomStartCell;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class HakBarangTemplateExport extends BaseExport implements FromArray, WithHeadings, WithStyles, WithTitle
+class HakBarangTemplateExport extends BaseExport implements FromArray, WithHeadings, WithStyles, WithTitle, WithCustomStartCell
 {
+    public function startCell(): string
+    {
+        return 'A4';
+    }
+
     public function array(): array
     {
-        return [
-            ['D3 KEPERAWATAN 1', 'Freshman', 1, 1, 1, 0, 0, 1, 1, 0, 1, 1, 0, 0],
-            ['D3 KEBIDANAN 2', 'Continuing', 0, 1, 1, 0, 0, 0, 1, 0, 1, 1, 0, 0],
-        ];
+        return [];
     }
 
     public function headings(): array
@@ -47,20 +50,20 @@ class HakBarangTemplateExport extends BaseExport implements FromArray, WithHeadi
         $this->setTitle($sheet, 'TEMPLATE IMPORT HAK BARANG (ENTITLEMENT)', $colCount);
         $this->setSubtitle($sheet, 'Isi 1 jika prodi berhak mendapat barang, 0 jika tidak. Tipe: Freshman / Continuing.', $colCount);
 
-        $headerRow = $this->headerRow();
-        $this->applyHeaderStyle($sheet, $headerRow, $colCount);
-
-        $dataStart = $this->dataStartRow();
-        $dataEnd = $dataStart + 1;
-        $this->applyDataStyle($sheet, $dataStart, $dataEnd, $colCount);
-
-        $sheet->getStyle('A' . $dataStart . ':N' . $dataStart)->applyFromArray([
-            'font' => ['italic' => true, 'color' => ['rgb' => '999999']],
-            'fill' => [
-                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
-                'startColor' => ['rgb' => 'F5F5F5'],
+        // Write Contoh Format in Row 3
+        $sheet->mergeCells('A3:N3');
+        $sheet->setCellValue('A3', 'Contoh Format: D3 KEPERAWATAN 1 | Freshman | 1 | 1 | 1 | 0 | 0 | 1 | 1 | 0 | 1 | 1 | 0 | 0');
+        $sheet->getStyle('A3')->applyFromArray([
+            'font' => ['italic' => true, 'color' => ['rgb' => '888888'], 'size' => 10],
+            'alignment' => [
+                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT,
+                'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
             ],
         ]);
+        $sheet->getRowDimension(3)->setRowHeight(20);
+
+        $headerRow = $this->headerRow();
+        $this->applyHeaderStyle($sheet, $headerRow, $colCount);
 
         $this->setColumnWidths($sheet, [
             'A' => 24, 'B' => 16,

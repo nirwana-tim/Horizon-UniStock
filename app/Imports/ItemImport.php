@@ -10,6 +10,11 @@ use Maatwebsite\Excel\Concerns\WithValidation;
 
 class ItemImport implements ToModel, WithHeadingRow, WithValidation
 {
+    public function headingRow(): int
+    {
+        return 4;
+    }
+
     public function model(array $row): Item
     {
         $category = ItemCategory::firstOrCreate([
