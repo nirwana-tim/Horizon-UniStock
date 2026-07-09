@@ -4,7 +4,7 @@
         <td class="px-6 py-4 whitespace-nowrap"><a href="{{ route('distribution.distribution-schedule.show', $schedule) }}" class="text-sm font-medium text-primary-600 hover:text-primary-900">{{ $schedule->name }}</a></td>
         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $schedule->programLevel?->name ?? '-' }}</td>
         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $schedule->faculty?->name ?? '-' }}{{ $schedule->studyProgram ? ' / ' . $schedule->studyProgram->name : '' }}</td>
-        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $schedule->period ?? '-' }}</td>
+        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $schedule->period ?? '-' }}{{ $schedule->semester ? ' - ' . $schedule->semester : '' }}</td>
         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $schedule->date?->format('d/m/Y') ?? '-' }}</td>
         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $schedule->location }}</td>
         <td class="px-6 py-4 whitespace-nowrap">

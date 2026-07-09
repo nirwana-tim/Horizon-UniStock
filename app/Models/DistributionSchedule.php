@@ -10,6 +10,8 @@ class DistributionSchedule extends Model
 {
     protected $fillable = [
         'name',
+        'period',
+        'semester',
         'date',
         'location',
         'session',

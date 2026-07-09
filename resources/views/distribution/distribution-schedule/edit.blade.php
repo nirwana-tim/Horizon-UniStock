@@ -77,6 +77,20 @@
                                 <x-searchable-select name="program_level_id" :options="$levelOptions" :value="old('program_level_id', $distributionSchedule->program_level_id)" placeholder="-- All Levels --" />
                                 <x-input-error :messages="$errors->get('program_level_id')" class="mt-2" />
                             </div>
+                            <div>
+                                <x-input-label for="period" :value="__('Period (Academic Year)')" />
+                                <x-text-input id="period" name="period" type="text" class="mt-1 block w-full" :value="old('period', $distributionSchedule->period)" required placeholder="e.g. 2025/2026" />
+                                <x-input-error :messages="$errors->get('period')" class="mt-2" />
+                            </div>
+                            <div>
+                                <x-input-label for="semester" :value="__('Semester')" />
+                                <select id="semester" name="semester" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500" required>
+                                    <option value="">-- Select Semester --</option>
+                                    <option value="Ganjil" {{ old('semester', $distributionSchedule->semester) == 'Ganjil' ? 'selected' : '' }}>Ganjil</option>
+                                    <option value="Genap" {{ old('semester', $distributionSchedule->semester) == 'Genap' ? 'selected' : '' }}>Genap</option>
+                                </select>
+                                <x-input-error :messages="$errors->get('semester')" class="mt-2" />
+                            </div>
                             <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
                                     <x-input-label for="faculty_id" :value="__('Faculty')" />
