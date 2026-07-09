@@ -22,6 +22,10 @@
                                 <dd class="mt-1 text-sm text-gray-900 font-semibold">{{ $distributionSchedule->period ?? '-' }}</dd>
                             </div>
                             <div class="bg-gray-50 p-4 rounded-lg">
+                                <dt class="text-sm font-medium text-gray-500">{{ __('Semester') }}</dt>
+                                <dd class="mt-1 text-sm text-gray-900 font-semibold">{{ $distributionSchedule->semester ?? '-' }}</dd>
+                            </div>
+                            <div class="bg-gray-50 p-4 rounded-lg">
                                 <dt class="text-sm font-medium text-gray-500">{{ __('Program Level') }}</dt>
                                 <dd class="mt-1 text-sm text-gray-900 font-semibold">{{ $distributionSchedule->programLevel?->name ?? '-' }}</dd>
                             </div>
