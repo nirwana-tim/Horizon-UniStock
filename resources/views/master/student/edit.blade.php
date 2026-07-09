@@ -75,6 +75,14 @@
                                 </select>
                                 <x-input-error :messages="$errors->get('student_type')" class="mt-2" />
                             </div>
+
+                            @if($student->user_id)
+                            <div>
+                                <x-input-label for="password" :value="__('Reset Password (Optional)')" />
+                                <x-text-input id="password" name="password" type="password" class="mt-1 block w-full" placeholder="Leave blank to keep current password" />
+                                <x-input-error :messages="$errors->get('password')" class="mt-2" />
+                            </div>
+                            @endif
                         </div>
 
                         <div class="mt-6 flex items-center gap-3">

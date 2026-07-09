@@ -27,6 +27,25 @@ class StudentService
         $old = $student->toArray();
         $student->update($data);
 
+        if ($student->user_id) {
+            $user = User::find($student->user_id);
+            if ($user) {
+                $userUpdates = [];
+                if (isset($data['name'])) {
+                    $userUpdates['name'] = $data['name'];
+                }
+                if (isset($data['email_kampus'])) {
+                    $userUpdates['email'] = $data['email_kampus'];
+                }
+                if (!empty($data['password'])) {
+                    $userUpdates['password'] = Hash::make($data['password']);
+                }
+                if (!empty($userUpdates)) {
+                    $user->update($userUpdates);
+                }
+            }
+        }
+
         if (isset($data['study_program_id'], $data['program_level_id'])) {
             $this->refreshEntitlementCode($student);
         }

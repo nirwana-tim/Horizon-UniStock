@@ -19,6 +19,7 @@
         </td>
         <td class="px-6 py-4 whitespace-nowrap text-sm text-right space-x-1.5">
             <a href="{{ route('students.show', $student) }}" class="inline-flex items-center px-2.5 py-1 bg-primary-700 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-primary-800 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition ease-in-out duration-150">View</a>
+            <a href="{{ route('students.edit', $student) }}" class="inline-flex items-center px-2.5 py-1 bg-amber-500 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-amber-600 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 transition ease-in-out duration-150">Edit</a>
             <x-delete-modal
                 :route="route('students.destroy', $student)"
                 label="Delete Student"
