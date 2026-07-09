@@ -24,6 +24,7 @@ class StudentRequest extends FormRequest
             'study_program_id' => ['required', 'integer', 'exists:study_programs,id'],
             'program_level_id' => ['required', 'integer', 'exists:program_levels,id'],
             'student_type' => ['required', 'string', 'in:freshman,continuing'],
+            'password' => ['nullable', 'string', 'min:8'],
         ];
     }
 }
