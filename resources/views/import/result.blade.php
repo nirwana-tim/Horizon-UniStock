@@ -45,7 +45,13 @@
                         </div>
                     </div>
 
-                    @if($batch->error_log && count($errors = json_decode($batch->error_log, true)) > 0)
+                    @php
+                        $errors = is_array($batch->error_log)
+                            ? $batch->error_log
+                            : json_decode($batch->error_log ?? '[]', true);
+                    @endphp
+
+                    @if($errors && count($errors) > 0)
                         <div class="mt-6">
                             <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-3">{{ __('Error Log') }}</h3>
                             <div class="overflow-x-auto">
@@ -63,7 +69,13 @@
                                                     {{ $error['row'] ?? $index + 1 }}
                                                 </td>
                                                 <td class="px-6 py-4 text-sm text-red-600">
-                                                    {{ $error['message'] ?? $error }}
+                                                    @if(isset($error['message']))
+                                                        {{ $error['message'] }}
+                                                    @elseif(isset($error['errors']) && is_array($error['errors']))
+                                                        {{ implode(' ', $error['errors']) }}
+                                                    @else
+                                                        {{ is_array($error) ? json_encode($error) : $error }}
+                                                    @endif
                                                 </td>
                                             </tr>
                                         @endforeach

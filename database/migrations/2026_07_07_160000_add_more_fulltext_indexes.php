@@ -8,6 +8,10 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (! $this->supportsFullTextIndexes()) {
+            return;
+        }
+
         Schema::table('items', function (Blueprint $table) {
             $table->fullText(['code', 'base_code']);
         });
@@ -19,6 +23,10 @@ return new class extends Migration
 
     public function down(): void
     {
+        if (! $this->supportsFullTextIndexes()) {
+            return;
+        }
+
         Schema::table('items', function (Blueprint $table) {
             $table->dropFullText(['code', 'base_code']);
         });
@@ -26,5 +34,10 @@ return new class extends Migration
         Schema::table('vendors', function (Blueprint $table) {
             $table->dropFullText(['email', 'contact']);
         });
+    }
+
+    private function supportsFullTextIndexes(): bool
+    {
+        return in_array(Schema::getConnection()->getDriverName(), ['mysql', 'pgsql'], true);
     }
 };

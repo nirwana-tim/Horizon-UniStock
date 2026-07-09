@@ -5,43 +5,220 @@ namespace App\Imports;
 use App\Models\ProgramLevel;
 use App\Models\Student;
 use App\Models\StudyProgram;
-use Maatwebsite\Excel\Concerns\ToModel;
-use Maatwebsite\Excel\Concerns\WithHeadingRow;
-use Maatwebsite\Excel\Concerns\WithValidation;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException as IlluminateValidationException;
+use Maatwebsite\Excel\Concerns\ToCollection;
+use Maatwebsite\Excel\Concerns\WithMultipleSheets;
+use Maatwebsite\Excel\Validators\Failure;
+use Maatwebsite\Excel\Validators\ValidationException;
 
-class StudentImport implements ToModel, WithHeadingRow, WithValidation
+class StudentImport implements ToCollection, WithMultipleSheets
 {
-    public function model(array $row): Student
-    {
-        $studyProgram = StudyProgram::where('code', $row['program_studi'])->first();
-        $programLevel = ProgramLevel::where('code', $row['level'])->first();
+    private int $totalRows = 0;
 
-        $entitlementCode = null;
-        if ($programLevel && $studyProgram?->faculty) {
-            $entitlementCode = $programLevel->code . $studyProgram->faculty->code . $studyProgram->code;
+    private int $importedCount = 0;
+
+    public function collection(Collection $rows): void
+    {
+        $records = $this->recordsFromRows($rows);
+        $this->totalRows = count($records);
+
+        $failures = $this->validateRecords($records);
+
+        if ($failures !== []) {
+            throw new ValidationException(
+                IlluminateValidationException::withMessages([]),
+                $failures
+            );
         }
 
-        return new Student([
-            'nim' => $row['nim'],
-            'name' => $row['nama'],
-            'email_kampus' => $row['email_kampus'],
-            'email_pribadi' => $row['email_pribadi'] ?? null,
-            'study_program_id' => $studyProgram?->id,
-            'program_level_id' => $programLevel?->id,
-            'student_type' => $row['student_type'] ?? 'freshman',
-            'entitlement_code' => $entitlementCode,
+        foreach ($records as $record) {
+            Student::create([
+                'nim' => $record['nim'],
+                'name' => $record['name'],
+                'email_kampus' => $record['email_kampus'],
+                'email_pribadi' => $record['email_pribadi'],
+                'study_program_id' => $record['study_program']->id,
+                'program_level_id' => $record['program_level']->id,
+                'student_type' => $record['student_type'],
+                'entitlement_code' => $record['program_level']->code
+                    . $record['study_program']->faculty->code
+                    . $record['study_program']->code,
+            ]);
+
+            $this->importedCount++;
+        }
+    }
+
+    public function sheets(): array
+    {
+        return [
+            'Data' => $this,
+        ];
+    }
+
+    public function getTotalRows(): int
+    {
+        return $this->totalRows;
+    }
+
+    public function getImportedCount(): int
+    {
+        return $this->importedCount;
+    }
+
+    public function countRows(Collection $rows): int
+    {
+        return count($this->recordsFromRows($rows));
+    }
+
+    private function recordsFromRows(Collection $rows): array
+    {
+        $records = [];
+
+        foreach ($rows as $index => $row) {
+            $values = array_values($row instanceof Collection ? $row->toArray() : (array) $row);
+
+            if ($this->shouldSkipRow($values)) {
+                continue;
+            }
+
+            $records[] = [
+                'row' => $index + 1,
+                'nim' => $this->clean($values[0] ?? null),
+                'name' => $this->clean($values[1] ?? null),
+                'program' => $this->clean($values[2] ?? null),
+                'gender' => $this->clean($values[3] ?? null),
+                'shirt_size' => $this->clean($values[4] ?? null),
+                'shoe_size' => $this->clean($values[5] ?? null),
+                'email_kampus' => $this->clean($values[6] ?? null),
+                'email_pribadi' => $this->clean($values[7] ?? null),
+                'student_type_raw' => $this->clean($values[8] ?? null),
+            ];
+        }
+
+        return $records;
+    }
+
+    private function validateRecords(array &$records): array
+    {
+        $failures = [];
+        $seenNims = [];
+        $seenCampusEmails = [];
+
+        foreach ($records as &$record) {
+            $validator = Validator::make($record, [
+                'nim' => ['required', 'string', 'regex:/^\d{16}$/', 'unique:students,nim'],
+                'name' => ['required', 'string', 'max:255'],
+                'program' => ['required', 'string'],
+                'email_kampus' => ['required', 'email', 'max:255', 'unique:students,email_kampus'],
+                'email_pribadi' => ['nullable', 'email', 'max:255'],
+                'student_type_raw' => ['required', 'string', 'in:Freshman,Continuing,freshman,continuing'],
+            ], [
+                'nim.regex' => 'The nim field must be a 16 digit number.',
+                'student_type_raw.in' => 'The tipe field must be Freshman or Continuing.',
+            ]);
+
+            foreach ($validator->errors()->messages() as $attribute => $messages) {
+                $failures[] = new Failure($record['row'], $attribute, $messages, $record);
+            }
+
+            if ($record['nim'] && in_array($record['nim'], $seenNims, true)) {
+                $failures[] = new Failure($record['row'], 'nim', ['The nim field has a duplicate value in this file.'], $record);
+            }
+
+            if ($record['email_kampus'] && in_array(Str::lower($record['email_kampus']), $seenCampusEmails, true)) {
+                $failures[] = new Failure($record['row'], 'email_kampus', ['The email kampus field has a duplicate value in this file.'], $record);
+            }
+
+            $seenNims[] = $record['nim'];
+            $seenCampusEmails[] = Str::lower((string) $record['email_kampus']);
+
+            $record['study_program'] = $this->resolveStudyProgram($record['program']);
+            if (! $record['study_program']) {
+                $failures[] = new Failure($record['row'], 'program', ["Program studi '{$record['program']}' tidak ditemukan."], $record);
+            }
+
+            $record['program_level'] = $this->resolveProgramLevel($record['nim']);
+            if (! $record['program_level']) {
+                $failures[] = new Failure($record['row'], 'level', ['Level/angkatan tidak ditemukan dari NIM.'], $record);
+            }
+
+            $record['student_type'] = Str::lower((string) $record['student_type_raw']) === 'continuing'
+                ? 'continuing'
+                : 'freshman';
+        }
+
+        return $failures;
+    }
+
+    private function shouldSkipRow(array $values): bool
+    {
+        $firstCell = $this->clean($values[0] ?? null);
+
+        if ($firstCell === null) {
+            return collect($values)->filter(fn ($value): bool => $this->clean($value) !== null)->isEmpty();
+        }
+
+        return Str::startsWith(Str::upper($firstCell), [
+            'TEMPLATE IMPORT',
+            'ISI DATA',
+            'URUTAN KOLOM',
+            'NIM',
         ]);
     }
 
-    public function rules(): array
+    private function resolveStudyProgram(?string $value): ?StudyProgram
     {
-        return [
-            'nim' => ['required', 'string', 'max:20', 'unique:students,nim'],
-            'nama' => ['required', 'string', 'max:255'],
-            'email_kampus' => ['required', 'email', 'max:255', 'unique:students,email_kampus'],
-            'email_pribadi' => ['nullable', 'email', 'max:255'],
-            'program_studi' => ['required', 'string', 'exists:study_programs,code'],
-            'level' => ['required', 'string', 'exists:program_levels,code'],
-        ];
+        if (! $value) {
+            return null;
+        }
+
+        $normalized = $this->normalizeProgramName($value);
+
+        return StudyProgram::query()
+            ->with('faculty')
+            ->get()
+            ->first(function (StudyProgram $program) use ($value, $normalized): bool {
+                return $program->code === $value
+                    || $this->normalizeProgramName($program->name) === $normalized;
+            });
+    }
+
+    private function resolveProgramLevel(?string $nim): ?ProgramLevel
+    {
+        if (! $nim || ! preg_match('/(\d{2})\d{4}$/', $nim, $matches)) {
+            return null;
+        }
+
+        $year = (int) $matches[1];
+        $code = sprintf('%02d%02d', $year, $year + 1);
+
+        return ProgramLevel::where('code', $code)->first();
+    }
+
+    private function normalizeProgramName(string $value): string
+    {
+        $value = Str::of($value)
+            ->upper()
+            ->replaceMatches('/\s+\d+$/', '')
+            ->replaceMatches('/\s+/', ' ')
+            ->trim()
+            ->toString();
+
+        return $value;
+    }
+
+    private function clean(mixed $value): ?string
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        $value = trim((string) $value);
+
+        return $value === '' ? null : $value;
     }
 }
