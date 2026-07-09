@@ -258,6 +258,16 @@
                         </div>
                     </div>
 
+                    <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
+                        <div class="p-6">
+                            <x-input-label for="notes" :value="__('Distribution Notes (Optional)')" />
+                            <textarea id="notes" name="notes" rows="2" 
+                                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
+                                placeholder="Contoh: Mahasiswa buru-buru, minta ganti ukuran, dll."></textarea>
+                            <p class="mt-1 text-xs text-gray-500">Catatan manual ini akan digabungkan dengan log otomatis dari sistem jika terjadi penundaan/kekurangan barang.</p>
+                        </div>
+                    </div>
+
                     @error('items')
                         <div class="mb-4 px-4 py-3 bg-red-100 border border-red-300 text-red-700 rounded-md">
                             {{ $message }}
