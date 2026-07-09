@@ -15,29 +15,16 @@
         'master-data.item-price.*',
         'master-data.vendor.*',
     ];
-    $studentsRoutes = [
-        'students.*',
-    ];
+    $studentsRoutes = ['students.*'];
     $distributionRoutes = [
         'distribution.entitlement.*',
         'distribution.distribution-schedule.*',
         'distribution.scan.*',
         'distribution.size-monitor.*',
     ];
-    $inventoryRoutes = [
-        'inventory.stock-receive.*',
-        'inventory.stock-opname.*',
-    ];
-    $reportsRoutes = [
-        'report.gpm-cost',
-        'report.gpm-cost.*',
-        'report.*',
-    ];
-    $systemRoutes = [
-        'admin.user.*',
-        'admin.audit-log.*',
-        'admin.system-config.*',
-    ];
+    $inventoryRoutes = ['inventory.stock-receive.*', 'inventory.stock-opname.*'];
+    $reportsRoutes = ['report.gpm-cost', 'report.gpm-cost.*', 'report.*'];
+    $systemRoutes = ['admin.user.*', 'admin.audit-log.*', 'admin.system-config.*'];
 
     $masterOpen = request()->routeIs($masterDataRoutes) ? 'true' : 'false';
     $distributionOpen = request()->routeIs($distributionRoutes) ? 'true' : 'false';
@@ -45,12 +32,14 @@
     $reportsOpen = request()->routeIs($reportsRoutes) ? 'true' : 'false';
     $systemOpen = request()->routeIs($systemRoutes) ? 'true' : 'false';
 @endphp
-<aside x-data="{ collapsed: false, mobileOpen: false, userMenuOpen: false, masterOpen: {{ $masterOpen }}, distributionOpen: {{ $distributionOpen }}, inventoryOpen: {{ $inventoryOpen }}, reportsOpen: {{ $reportsOpen }}, systemOpen: {{ $systemOpen }} }"
-    x-init="setTimeout(() => $el.classList.add('sidebar-transition'), 50)"
-    @toggle-sidebar.window="mobileOpen = !mobileOpen"
-    class="fixed inset-y-0 left-0 z-30 flex-shrink-0 bg-white border-r border-gray-200 flex flex-col h-full overflow-hidden lg:overflow-visible transition-transform duration-250
-           -translate-x-full lg:transform-none lg:static lg:z-auto"
-    :class="(collapsed ? 'w-16' : 'w-64') + (mobileOpen ? ' translate-x-0' : ' -translate-x-full')">
+<aside x-data="{ collapsed: false, mobileOpen: false, userMenuOpen: false, masterOpen: {{ $masterOpen }}, distributionOpen: {{ $distributionOpen }}, inventoryOpen: {{ $inventoryOpen }}, reportsOpen: {{ $reportsOpen }}, systemOpen: {{ $systemOpen }} }" x-init="setTimeout(() => $el.classList.add('sidebar-transition'), 50)" @toggle-sidebar.window="mobileOpen = !mobileOpen"
+    class="fixed inset-y-0 left-0 z-30 flex-shrink-0 bg-white border-r border-gray-200 flex flex-col h-full overflow-hidden lg:overflow-visible transition-transform duration-250 lg:transform-none lg:static lg:z-auto"
+    :class="{
+        'w-16': collapsed,
+        'w-64': !collapsed,
+        'translate-x-0': mobileOpen,
+        '-translate-x-full': !mobileOpen
+    }">
 
     {{-- Logo / Brand --}}
     <div class="h-14 border-b border-gray-100 flex-shrink-0 flex items-center overflow-hidden"
@@ -104,7 +93,6 @@
 
         {{-- ===== ADMIN / FINANCE MENU ===== --}}
         @hasanyrole(['admin', 'finance', 'super_admin'])
-
             {{-- Master Data (Collapsible) --}}
             <div>
                 <button @click="collapsed ? (collapsed=false, masterOpen=true) : masterOpen = !masterOpen"
@@ -206,7 +194,8 @@
 
             {{-- Distribution (Collapsible) --}}
             <div>
-                <button @click="collapsed ? (collapsed=false, distributionOpen=true) : distributionOpen = !distributionOpen"
+                <button
+                    @click="collapsed ? (collapsed=false, distributionOpen=true) : distributionOpen = !distributionOpen"
                     class="w-full flex items-center gap-3 px-2 py-2 rounded-lg text-sm {{ request()->routeIs($distributionRoutes) ? 'sidebar-item-active' : 'sidebar-item' }}">
                     <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -214,8 +203,8 @@
                     </svg>
                     <span x-show="!collapsed" class="flex-1 text-left truncate">Distribution</span>
                     <svg x-show="!collapsed" :class="distributionOpen ? 'rotate-180' : ''"
-                        class="w-4 h-4 flex-shrink-0 transition-transform duration-200" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
+                        class="w-4 h-4 flex-shrink-0 transition-transform duration-200" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                     </svg>
                 </button>
@@ -251,8 +240,8 @@
                     </svg>
                     <span x-show="!collapsed" class="flex-1 text-left truncate">Inventory</span>
                     <svg x-show="!collapsed" :class="inventoryOpen ? 'rotate-180' : ''"
-                        class="w-4 h-4 flex-shrink-0 transition-transform duration-200" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
+                        class="w-4 h-4 flex-shrink-0 transition-transform duration-200" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                     </svg>
                 </button>
@@ -280,8 +269,8 @@
                     </svg>
                     <span x-show="!collapsed" class="flex-1 text-left truncate">Reports</span>
                     <svg x-show="!collapsed" :class="reportsOpen ? 'rotate-180' : ''"
-                        class="w-4 h-4 flex-shrink-0 transition-transform duration-200" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
+                        class="w-4 h-4 flex-shrink-0 transition-transform duration-200" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                     </svg>
                 </button>
@@ -302,7 +291,6 @@
                     </a>
                 </div>
             </div>
-
         @endhasanyrole
 
         {{-- ===== SUPER ADMIN ONLY ===== --}}
@@ -321,8 +309,8 @@
                     </svg>
                     <span x-show="!collapsed" class="flex-1 text-left truncate">System</span>
                     <svg x-show="!collapsed" :class="systemOpen ? 'rotate-180' : ''"
-                        class="w-4 h-4 flex-shrink-0 transition-transform duration-200" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
+                        class="w-4 h-4 flex-shrink-0 transition-transform duration-200" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                     </svg>
                 </button>
@@ -384,7 +372,8 @@
             </button>
 
             {{-- User Dropdown --}}
-            <div x-show="userMenuOpen" @click.away="userMenuOpen = false" x-transition:enter="transition ease-out duration-100"
+            <div x-show="userMenuOpen" @click.away="userMenuOpen = false"
+                x-transition:enter="transition ease-out duration-100"
                 x-transition:enter-start="opacity-0 transform scale-95"
                 x-transition:enter-end="opacity-100 transform scale-100"
                 :class="collapsed ? 'fixed bottom-2 left-[72px] w-56' : 'absolute bottom-full left-0 right-0 mb-1'"
@@ -417,4 +406,4 @@
 
 {{-- Mobile backdrop --}}
 <div x-data="{}" @toggle-sidebar.window="$el.classList.toggle('hidden')"
-     class="fixed inset-0 bg-black/50 z-20 hidden lg:hidden"></div>
+    @click="$dispatch('toggle-sidebar')" class="fixed inset-0 bg-black/50 z-20 hidden lg:hidden cursor-pointer"></div>
