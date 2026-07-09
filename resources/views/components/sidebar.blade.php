@@ -288,6 +288,10 @@
 
                 <div x-show="reportsOpen && !collapsed" x-cloak
                     class="mt-0.5 ml-4 pl-4 border-l border-gray-200 space-y-0.5">
+                    <a href="{{ route('report.sales-dashboard') }}"
+                        class="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm {{ request()->routeIs('report.sales-dashboard*') ? 'text-primary-700 font-medium bg-primary-50' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50' }} transition-colors">
+                        Sales Dashboard
+                    </a>
                     <a href="{{ route('report.gpm-cost') }}"
                         class="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm {{ request()->routeIs('report.gpm-cost*') ? 'text-primary-700 font-medium bg-primary-50' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50' }} transition-colors">
                         GPM / Cost

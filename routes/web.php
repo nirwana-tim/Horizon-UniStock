@@ -38,6 +38,7 @@ Route::get('/', function () {
 Route::get('/dashboard', DashboardController::class)->middleware(['auth', 'verified'])->name('dashboard');
 Route::get('/dashboard/stats', [DashboardController::class, 'stats'])->middleware(['auth', 'verified'])->name('dashboard.stats');
 Route::get('/dashboard/low-stock', [DashboardController::class, 'lowStock'])->middleware(['auth', 'verified'])->name('dashboard.low-stock');
+Route::get('/dashboard/sales-chart', [DashboardController::class, 'salesChart'])->middleware(['auth', 'verified'])->name('dashboard.sales-chart');
 
 Route::middleware(['auth', 'password.changed'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -112,6 +113,7 @@ Route::middleware(['auth', 'password.changed', 'role:super_admin|admin'])->prefi
     Route::get('stock-card', [ReportController::class, 'stockCard'])->name('stock-card');
     Route::get('loss', [ReportController::class, 'loss'])->name('loss');
     Route::get('gpm-cost', [GpmController::class, 'index'])->name('gpm-cost');
+    Route::get('sales-dashboard', [ReportController::class, 'salesDashboard'])->name('sales-dashboard');
     Route::get('size-recap', [ReportController::class, 'sizeRecap'])->name('size-recap');
 });
 

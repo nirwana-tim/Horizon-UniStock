@@ -16,6 +16,7 @@ use App\Models\ProgramLevel;
 use App\Models\StudyProgram;
 use App\Models\ItemCategory;
 use App\Models\StockOpname;
+use App\Services\ReportService;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\View\View;
@@ -130,6 +131,28 @@ class ReportController extends Controller
             ),
             $filename
         );
+    }
+
+    public function salesDashboard(Request $request): View
+    {
+        $request->validate([
+            'month' => 'nullable|integer|between:1,12',
+            'year' => 'nullable|integer|min:2020|max:2099',
+        ]);
+
+        $month = $request->input('month', now()->month);
+        $year = $request->input('year', now()->year);
+
+        $data = app(ReportService::class)->getSalesDashboardData((int) $month, (int) $year);
+
+        $months = [];
+        for ($m = 1; $m <= 12; $m++) {
+            $months[$m] = \Carbon\Carbon::create()->month($m)->format('M');
+        }
+
+        $years = range(now()->year, 2020);
+
+        return view('report.sales-dashboard', compact('month', 'year', 'months', 'years') + $data);
     }
 
     public function loss(Request $request)
