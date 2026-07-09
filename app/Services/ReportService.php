@@ -102,6 +102,110 @@ class ReportService
         return $query->get();
     }
 
+    public function getSalesDashboardData(int $month, int $year): array
+    {
+        $soldSub = DB::table('distribution_items as di')
+            ->select('di.item_id', DB::raw('SUM(di.quantity) as total_sold'))
+            ->join('distribution_transactions as dt', 'dt.id', '=', 'di.transaction_id')
+            ->whereYear('dt.pickup_time', $year)
+            ->whereMonth('dt.pickup_time', $month)
+            ->groupBy('di.item_id');
+
+        $receiveSub = DB::table('stock_receive_items')
+            ->select('item_id',
+                DB::raw('SUM(quantity) as total_received'),
+                DB::raw('COALESCE(AVG(unit_price), 0) as avg_unit_price')
+            )
+            ->groupBy('item_id');
+
+        $balanceSub = DB::table('stock_balances')
+            ->select('item_id', DB::raw('SUM(quantity) as stock_sum'))
+            ->groupBy('item_id');
+
+        $categories = DB::table('item_categories as ic')
+            ->select(
+                'ic.id', 'ic.label', 'ic.code',
+                DB::raw('COALESCE(SUM(di.quantity), 0) as unit_sold'),
+                DB::raw('COALESCE(SUM(sb.stock_sum), 0) as stock_avail')
+            )
+            ->leftJoin('items as i', 'i.category_id', '=', 'ic.id')
+            ->leftJoin('distribution_items as di', 'di.item_id', '=', 'i.id')
+            ->leftJoin('distribution_transactions as dt', function ($join) use ($month, $year) {
+                $join->on('dt.id', '=', 'di.transaction_id')
+                    ->whereYear('dt.pickup_time', '=', $year)
+                    ->whereMonth('dt.pickup_time', '=', $month);
+            })
+            ->leftJoinSub($balanceSub, 'sb', 'sb.item_id', '=', 'i.id')
+            ->groupBy('ic.id', 'ic.label', 'ic.code')
+            ->orderBy('ic.code')
+            ->get();
+
+        $revenueItems = DB::table('distribution_items as di')
+            ->select(
+                'i.id', 'i.name', 'i.code',
+                DB::raw('SUM(di.quantity) as unit_sold'),
+                DB::raw('SUM(di.quantity * i.selling_price) as revenue')
+            )
+            ->join('items as i', 'i.id', '=', 'di.item_id')
+            ->join('distribution_transactions as dt', function ($join) use ($month, $year) {
+                $join->on('dt.id', '=', 'di.transaction_id')
+                    ->whereYear('dt.pickup_time', '=', $year)
+                    ->whereMonth('dt.pickup_time', '=', $month);
+            })
+            ->groupBy('i.id', 'i.name', 'i.code')
+            ->orderBy('i.name')
+            ->get();
+
+        $monthlyRecap = DB::table('distribution_items as di')
+            ->select(
+                DB::raw('SUM(di.quantity) as unit_sold'),
+                DB::raw('SUM(di.quantity * i.selling_price) as total_revenue')
+            )
+            ->join('items as i', 'i.id', '=', 'di.item_id')
+            ->join('distribution_transactions as dt', function ($join) use ($month, $year) {
+                $join->on('dt.id', '=', 'di.transaction_id')
+                    ->whereYear('dt.pickup_time', '=', $year)
+                    ->whereMonth('dt.pickup_time', '=', $month);
+            })
+            ->first();
+
+        $stockDetails = DB::table('items as i')
+            ->select(
+                'i.id', 'i.name', 'i.code',
+                DB::raw('COALESCE(sb.stock_sum, 0) as available_stock'),
+                DB::raw('COALESCE(sb.stock_sum * i.hpp, 0) as stock_value'),
+                DB::raw('COALESCE(sri.total_received, 0) as stock_receive'),
+                DB::raw('COALESCE(di.total_sold, 0) as sum_sold'),
+                DB::raw('COALESCE(di.total_sold * sri.avg_unit_price, 0) as expense'),
+                DB::raw('CASE WHEN COALESCE(sri.total_received, 0) > 0 THEN ROUND((COALESCE(di.total_sold, 0) / sri.total_received) * 100, 2) ELSE 0 END as pct_sold')
+            )
+            ->leftJoinSub($balanceSub, 'sb', 'sb.item_id', '=', 'i.id')
+            ->leftJoinSub($receiveSub, 'sri', 'sri.item_id', '=', 'i.id')
+            ->leftJoinSub($soldSub, 'di', 'di.item_id', '=', 'i.id')
+            ->orderBy('i.name')
+            ->get();
+
+        return compact('categories', 'revenueItems', 'monthlyRecap', 'stockDetails');
+    }
+
+    public function getMonthlySalesTrend(int $months = 6): Collection
+    {
+        return DB::table('distribution_items as di')
+            ->select(
+                DB::raw('YEAR(dt.pickup_time) as year'),
+                DB::raw('MONTH(dt.pickup_time) as month'),
+                DB::raw('SUM(di.quantity) as unit_sold'),
+                DB::raw('SUM(di.quantity * i.selling_price) as revenue')
+            )
+            ->join('items as i', 'i.id', '=', 'di.item_id')
+            ->join('distribution_transactions as dt', 'dt.id', '=', 'di.transaction_id')
+            ->whereRaw('dt.pickup_time >= DATE_SUB(NOW(), INTERVAL ? MONTH)', [$months])
+            ->groupBy(DB::raw('YEAR(dt.pickup_time)'), DB::raw('MONTH(dt.pickup_time)'))
+            ->orderBy('year')
+            ->orderBy('month')
+            ->get();
+    }
+
     public function getSizeDistributionData(): Collection
     {
         return DB::table('student_size_items')

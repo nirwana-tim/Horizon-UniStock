@@ -57,34 +57,196 @@
     {{-- Low Stock Alert --}}
     <div x-html="lowStockHtml"></div>
 
-    {{-- Quick Actions --}}
-    <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
-        <h3 class="text-sm font-semibold text-gray-700 mb-4">Quick Menu</h3>
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
-            @foreach([
-                ['href' => route('master-data.faculty.index'),            'icon' => 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4', 'label' => 'Master Data'],
-                ['href' => route('import.index'),                    'icon' => 'M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10', 'label' => 'Import'],
-                ['href' => route('inventory.stock-receive.index'),      'icon' => 'M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4', 'label' => 'Stock Receive'],
-                ['href' => route('distribution.entitlement.index'),        'icon' => 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z', 'label' => 'Entitlement'],
-                ['href' => route('distribution.distribution-schedule.index'), 'icon' => 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z', 'label' => 'Schedule'],
-                ['href' => route('students.index'),    'icon' => 'M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z', 'label' => 'Generate Account'],
-                ['href' => route('distribution.size-monitor.index'),       'icon' => 'M15 12a3 3 0 11-6 0 3 3 0 016 0zM2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z', 'label' => 'Size Monitor'],
-                ['href' => route('inventory.stock-opname.index'),        'icon' => 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4', 'label' => 'Stock Opname'],
-                ['href' => route('report.gpm-cost'),                 'icon' => 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z', 'label' => 'GPM'],
-                ['href' => route('report.index'),                   'icon' => 'M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z', 'label' => 'Reports'],
-            ] as $item)
-            <a href="{{ $item['href'] }}"
-               class="flex flex-col items-center gap-2 p-4 rounded-xl border border-gray-200 hover:border-primary-200 hover:bg-primary-50 transition-all group">
-                <div class="w-9 h-9 bg-gray-100 group-hover:bg-primary-100 rounded-lg flex items-center justify-center transition-colors">
-                    <svg class="w-5 h-5 text-gray-500 group-hover:text-primary-700 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $item['icon'] }}"/>
-                    </svg>
-                </div>
-                <span class="text-xs font-medium text-gray-600 group-hover:text-primary-700 text-center transition-colors">{{ $item['label'] }}</span>
-            </a>
-            @endforeach
+    {{-- Sales Charts — 6 Chart Grid 2×3 --}}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+
+        {{-- Chart 1: Unit Sold by Item (kolom) --}}
+        <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+            <h4 class="text-xs font-semibold text-gray-600 mb-3">Unit Sold by Item</h4>
+            <div class="relative" style="height:170px">
+                <canvas id="c1Chart"></canvas>
+                <div id="c1Empty" class="hidden absolute inset-0 flex items-center justify-center text-gray-400 text-xs">Belum ada data</div>
+            </div>
         </div>
+
+        {{-- Chart 2: Revenue by Category (barang bertumpuk) --}}
+        <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+            <h4 class="text-xs font-semibold text-gray-600 mb-3">Revenue by Category</h4>
+            <div class="relative" style="height:170px">
+                <canvas id="c2Chart"></canvas>
+                <div id="c2Empty" class="hidden absolute inset-0 flex items-center justify-center text-gray-400 text-xs">Belum ada data</div>
+            </div>
+        </div>
+
+        {{-- Chart 3: Revenue + Unit Sold by Month (kombinasi) --}}
+        <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+            <h4 class="text-xs font-semibold text-gray-600 mb-3">Monthly Revenue &amp; Unit Sold</h4>
+            <div class="relative" style="height:170px">
+                <canvas id="c3Chart"></canvas>
+                <div id="c3Empty" class="hidden absolute inset-0 flex items-center justify-center text-gray-400 text-xs">Belum ada data</div>
+            </div>
+        </div>
+
+        {{-- Chart 4: Available Stock by Item (kolom) --}}
+        <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+            <h4 class="text-xs font-semibold text-gray-600 mb-3">Available Stock by Item</h4>
+            <div class="relative" style="height:170px">
+                <canvas id="c4Chart"></canvas>
+                <div id="c4Empty" class="hidden absolute inset-0 flex items-center justify-center text-gray-400 text-xs">Belum ada data</div>
+            </div>
+        </div>
+
+        {{-- Chart 5: Value Stock by Category (batang bertumpuk) --}}
+        <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+            <h4 class="text-xs font-semibold text-gray-600 mb-3">Value Stock by Category</h4>
+            <div class="relative" style="height:170px">
+                <canvas id="c5Chart"></canvas>
+                <div id="c5Empty" class="hidden absolute inset-0 flex items-center justify-center text-gray-400 text-xs">Belum ada data</div>
+            </div>
+        </div>
+
+        {{-- Chart 6: % Unit Sold by Item (lingkaran) --}}
+        <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+            <h4 class="text-xs font-semibold text-gray-600 mb-3">% Unit Sold by Item</h4>
+            <div class="relative" style="height:170px">
+                <canvas id="c6Chart"></canvas>
+                <div id="c6Empty" class="hidden absolute inset-0 flex items-center justify-center text-gray-400 text-xs">Belum ada data</div>
+            </div>
+        </div>
+
     </div>
 
     </div>
+    @push('scripts')
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        axios.get('{{ route('dashboard.sales-chart') }}').then(res => {
+            const primary = '#980416';
+            const palette = ['#980416','#C0392B','#E74C3C','#F1948A','#FADBD8','#6B0000','#A93226','#7B241C','#D98880','#F5B7B1'];
+
+            // --- Chart 1: Unit Sold by Item (kolom) ---
+            if (res.data.c1Labels?.length) {
+                new Chart(document.getElementById('c1Chart'), {
+                    type: 'bar',
+                    data: {
+                        labels: res.data.c1Labels,
+                        datasets: [{ label: 'Unit Sold', data: res.data.c1Data, backgroundColor: primary, borderRadius: 3 }]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: { y: { ticks: { font: { size: 9 } } }, x: { ticks: { font: { size: 8 }, maxRotation: 45 } } }
+                    }
+                });
+            } else { toggleEmpty('c1'); }
+
+            // --- Chart 2: Revenue by Category (barang bertumpuk) ---
+            if (res.data.c2Categories?.length) {
+                const ds = res.data.c2Datasets;
+                new Chart(document.getElementById('c2Chart'), {
+                    type: 'bar',
+                    data: {
+                        labels: res.data.c2Categories,
+                        datasets: ds.map((d, i) => ({ label: d.label, data: d.data, backgroundColor: palette[i % palette.length], borderRadius: 2 }))
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        scales: {
+                            x: { stacked: true },
+                            y: { stacked: true, ticks: { font: { size: 9 }, callback: v => 'Rp' + (v/1000000).toFixed(0) + 'jt' } }
+                        },
+                        plugins: { legend: { display: false } }
+                    }
+                });
+            } else { toggleEmpty('c2'); }
+
+            // --- Chart 3: Revenue + Unit Sold by Month (kombinasi) ---
+            if (res.data.months?.length) {
+                new Chart(document.getElementById('c3Chart'), {
+                    type: 'bar',
+                    data: {
+                        labels: res.data.months,
+                        datasets: [
+                            { label: 'Revenue', type: 'bar', data: res.data.revenue, backgroundColor: primary, borderRadius: 3, yAxisID: 'y' },
+                            { label: 'Unit Sold', type: 'line', data: res.data.units, borderColor: '#2563EB', backgroundColor: 'transparent', tension: 0.3, pointRadius: 3, yAxisID: 'y1' }
+                        ]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        scales: {
+                            y: { position: 'left', ticks: { font: { size: 9 }, callback: v => (v/1000000).toFixed(0) + 'jt' } },
+                            y1: { position: 'right', grid: { drawOnChartArea: false }, ticks: { font: { size: 9 } } }
+                        },
+                        plugins: { legend: { position: 'top', labels: { boxWidth: 10, font: { size: 9 } } } }
+                    }
+                });
+            } else { toggleEmpty('c3'); }
+
+            // --- Chart 4: Available Stock by Item (kolom) ---
+            if (res.data.c4Labels?.length) {
+                new Chart(document.getElementById('c4Chart'), {
+                    type: 'bar',
+                    data: {
+                        labels: res.data.c4Labels,
+                        datasets: [{ label: 'Stock', data: res.data.c4Data, backgroundColor: primary, borderRadius: 3 }]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: { y: { ticks: { font: { size: 9 } } }, x: { ticks: { font: { size: 8 }, maxRotation: 45 } } }
+                    }
+                });
+            } else { toggleEmpty('c4'); }
+
+            // --- Chart 5: Value Stock by Category (batang bertumpuk) ---
+            if (res.data.c5Categories?.length) {
+                const ds5 = res.data.c5Datasets;
+                new Chart(document.getElementById('c5Chart'), {
+                    type: 'bar',
+                    data: {
+                        labels: res.data.c5Categories,
+                        datasets: ds5.map((d, i) => ({ label: d.label, data: d.data, backgroundColor: palette[i % palette.length], borderRadius: 2 }))
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        scales: {
+                            x: { stacked: true },
+                            y: { stacked: true, ticks: { font: { size: 9 }, callback: v => 'Rp' + (v/1000000).toFixed(0) + 'jt' } }
+                        },
+                        plugins: { legend: { display: false } }
+                    }
+                });
+            } else { toggleEmpty('c5'); }
+
+            // --- Chart 6: % Unit Sold by Item (lingkaran) ---
+            if (res.data.c6Labels?.length) {
+                new Chart(document.getElementById('c6Chart'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: res.data.c6Labels,
+                        datasets: [{
+                            data: res.data.c6Data,
+                            backgroundColor: palette.slice(0, res.data.c6Labels.length),
+                            borderWidth: 1,
+                            borderColor: '#fff',
+                        }]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        cutout: '55%',
+                        plugins: {
+                            legend: { position: 'bottom', labels: { boxWidth: 8, padding: 4, font: { size: 8 } } }
+                        }
+                    }
+                });
+            } else { toggleEmpty('c6'); }
+
+            function toggleEmpty(prefix) {
+                document.getElementById(prefix + 'Chart').classList.add('hidden');
+                document.getElementById(prefix + 'Empty').classList.remove('hidden');
+            }
+        }).catch(e => console.error('salesChart:', e));
+    });
+    </script>
+    @endpush
 </x-app-layout>
