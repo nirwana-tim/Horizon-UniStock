@@ -18,6 +18,9 @@ class ImportService
 {
     public function processImport(string $type, string $filePath, int $userId): ImportBatch
     {
+        $totalRows = 0;
+        $importer = null;
+
         $batch = ImportBatch::create([
             'import_type' => $type,
             'file_name' => basename($filePath),
@@ -31,16 +34,23 @@ class ImportService
         try {
             $importer = $this->resolveImporter($type, $filePath);
 
-            $collection = Excel::toCollection($importer, $filePath)->first();
-            $totalRows = $collection->count();
+            $collection = Excel::toCollection(null, $filePath)->first() ?? collect();
+            $totalRows = method_exists($importer, 'countRows')
+                ? $importer->countRows($collection)
+                : $collection->count();
 
             $batch->update(['total_rows' => $totalRows]);
 
             Excel::import($importer, $filePath);
 
+            $successRows = method_exists($importer, 'getImportedCount')
+                ? $importer->getImportedCount()
+                : $totalRows;
+
             $batch->update([
                 'status' => 'completed',
-                'success_rows' => $totalRows,
+                'total_rows' => method_exists($importer, 'getTotalRows') ? $importer->getTotalRows() : $totalRows,
+                'success_rows' => $successRows,
             ]);
         } catch (ValidationException $e) {
             $failures = $e->failures();
@@ -52,8 +62,11 @@ class ImportService
 
             $batch->update([
                 'status' => 'failed',
+                'total_rows' => method_exists($importer, 'getTotalRows') && $importer->getTotalRows() > 0
+                    ? $importer->getTotalRows()
+                    : $totalRows,
                 'failed_rows' => count($failures),
-                'success_rows' => $totalRows - count($failures),
+                'success_rows' => 0,
                 'error_log' => $errorLog,
             ]);
 

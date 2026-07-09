@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ImportBatch;
 use App\Services\ImportService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class ImportController extends Controller
@@ -16,6 +18,13 @@ class ImportController extends Controller
     public function index(): View
     {
         return view('import.index');
+    }
+
+    public function result(ImportBatch $importBatch): View
+    {
+        return view('import.result', [
+            'batch' => $importBatch,
+        ]);
     }
 
     public function store(Request $request): RedirectResponse
@@ -32,18 +41,18 @@ class ImportController extends Controller
 
         $batch = $this->importService->processImport(
             $validated['import_type'],
-            storage_path("app/{$filePath}"),
+            Storage::disk('local')->path($filePath),
             $request->user()->id
         );
 
         if ($batch->status === 'completed') {
             return redirect()
-                ->route('import.index')
+                ->route('import.result', $batch)
                 ->with('success', "Import berhasil. {$batch->success_rows} dari {$batch->total_rows} baris diproses.");
         }
 
         return redirect()
-            ->route('import.index')
+            ->route('import.result', $batch)
             ->with('error', "Import gagal. Lihat log untuk detail.");
     }
 
@@ -60,7 +69,7 @@ class ImportController extends Controller
 
         $data = \Maatwebsite\Excel\Facades\Excel::toCollection(
             null,
-            storage_path("app/{$filePath}")
+            Storage::disk('local')->path($filePath)
         )->first();
 
         return view('import.preview', [

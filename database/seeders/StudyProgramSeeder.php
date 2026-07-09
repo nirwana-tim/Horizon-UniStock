@@ -18,8 +18,12 @@ class StudyProgramSeeder extends Seeder
         $programs = [
             ['name' => 'D3 Keperawatan', 'code' => 'D3-KEP', 'faculty_id' => $fhs?->id],
             ['name' => 'D3 Kebidanan', 'code' => 'D3-KEB', 'faculty_id' => $fhs?->id],
+            ['name' => 'D3 Farmasi', 'code' => 'D3-FAR', 'faculty_id' => $fhs?->id],
             ['name' => 'S1 Keperawatan', 'code' => 'S1-KEP', 'faculty_id' => $fhs?->id],
             ['name' => 'S1 Kebidanan', 'code' => 'S1-KEB', 'faculty_id' => $fhs?->id],
+            ['name' => 'S1 Farmasi', 'code' => 'S1-FAR', 'faculty_id' => $fhs?->id],
+            ['name' => 'S1 Gizi', 'code' => 'S1-GIZ', 'faculty_id' => $fhs?->id],
+            ['name' => 'S1 Kesehatan Masyarakat', 'code' => 'S1-KESMAS', 'faculty_id' => $fhs?->id],
             ['name' => 'Profesi Ners', 'code' => 'PROF-NERS', 'faculty_id' => $fhs?->id],
             ['name' => 'Profesi Bidan', 'code' => 'PROF-BIDAN', 'faculty_id' => $fhs?->id],
             ['name' => 'S1 Informatika', 'code' => 'S1-INF', 'faculty_id' => $fcs?->id],
