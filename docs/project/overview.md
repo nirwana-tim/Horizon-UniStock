@@ -1,10 +1,10 @@
-# Horizon-UniStock — Overview
+# UniStock — Overview
 
 Sistem Distribusi Seragam & Inventory Management — Berbasis Web untuk Admin Universitas.
 
 ## 1. Tentang
 
-**Horizon-UniStock** adalah sistem berbasis web untuk mengelola proses distribusi seragam mahasiswa. Dibangun untuk menggantikan proses manual yang sebelumnya menggunakan:
+**UniStock** adalah sistem berbasis web untuk mengelola proses distribusi seragam mahasiswa. Dibangun untuk menggantikan proses manual yang sebelumnya menggunakan:
 
 - Google Form
 - Google Sheet

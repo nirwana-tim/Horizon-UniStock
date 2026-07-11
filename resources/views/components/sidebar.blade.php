@@ -54,8 +54,7 @@
                 </svg>
             </div>
             <div class="min-w-0">
-                <p class="text-sm font-bold text-gray-900 leading-tight truncate">Horizon</p>
-                <p class="text-xs font-medium text-primary-700 truncate">UniStock</p>
+                <p class="text-sm font-bold text-gray-900 leading-tight truncate">UniStock</p>
             </div>
         </a>
 

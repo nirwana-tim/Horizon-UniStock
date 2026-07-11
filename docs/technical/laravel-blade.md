@@ -4,7 +4,7 @@
 
 Laravel 13 adalah framework PHP untuk membangun web app. Blade adalah template engine bawaan Laravel yang memungkinkan Anda menulis HTML dengan logika PHP sederhana.
 
-## Fitur Blade yg Terinstall di Horizon-UniStock
+## Fitur Blade yg Terinstall di UniStock
 
 | Fitur | Untuk Apa |
 |-------|-----------|
@@ -22,7 +22,7 @@ Breeze Blade Stack pake **component pattern**, bukan `@extends`:
 <!DOCTYPE html>
 <html>
 <head>
-    <title>{{ config('app.name', 'Horizon-UniStock') }}</title>
+    <title>{{ config('app.name', 'UniStock') }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body>

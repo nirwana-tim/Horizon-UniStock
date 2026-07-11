@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ config('app.name', 'Horizon UniStock') }}</title>
-    <meta name="description" content="Login to Horizon UniStock — Student Uniform Distribution System">
+    <title>{{ config('app.name', 'UniStock') }}</title>
+    <meta name="description" content="Login to UniStock — Student Uniform Distribution System">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -47,7 +47,7 @@
                 </svg>
             </div>
 
-            <h1 class="text-3xl font-bold text-white mb-3">Horizon UniStock</h1>
+            <h1 class="text-3xl font-bold text-white mb-3">UniStock</h1>
             <p class="text-primary-200 text-base leading-relaxed mb-10">
                 Uniform distribution & inventory management system for new students
             </p>
@@ -83,7 +83,7 @@
                     </svg>
                 </div>
                 <div>
-                    <p class="text-sm font-bold text-gray-900">Horizon UniStock</p>
+                    <p class="text-sm font-bold text-gray-900">UniStock</p>
                     <p class="text-xs text-primary-700">Uniform Distribution System</p>
                 </div>
             </div>
@@ -95,7 +95,7 @@
 
             {{-- Footer --}}
             <p class="mt-6 text-center text-xs text-gray-400">
-                &copy; {{ date('Y') }} Horizon UniStock. All rights reserved.
+                &copy; {{ date('Y') }} UniStock. All rights reserved.
             </p>
         </div>
     </div>

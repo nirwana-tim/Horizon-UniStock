@@ -1,4 +1,4 @@
-# Horizon-UniStock — Daftar Kasus Bisnis & Pilihan Keputusan Finance
+# UniStock — Daftar Kasus Bisnis & Pilihan Keputusan Finance
 
 Dokumen ini merangkum seluruh skenario kasus bisnis (*business cases*), aturan validasi, keputusan arsitektur yang sudah diimplementasikan, serta **pilihan keputusan (opsi kebijakan)** untuk kasus-kasus yang masih memerlukan persetujuan akhir dari tim Finance saat presentasi prototype.
 

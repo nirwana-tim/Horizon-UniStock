@@ -1,6 +1,6 @@
-# Horizon-UniStock — Panduan Skenario Pengujian MVP (End-to-End)
+# UniStock — Panduan Skenario Pengujian MVP (End-to-End)
 
-Dokumen ini berisi tutorial langkah-demi-langkah (*step-by-step*) untuk menguji seluruh alur kerja (*flow*) utama sistem Horizon-UniStock dari awal pembuatan data hingga barang diterima oleh mahasiswa.
+Dokumen ini berisi tutorial langkah-demi-langkah (*step-by-step*) untuk menguji seluruh alur kerja (*flow*) utama sistem UniStock dari awal pembuatan data hingga barang diterima oleh mahasiswa.
 
 ---
 

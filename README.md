@@ -2,7 +2,7 @@
   <img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="300" alt="Laravel Logo">
 </p>
 
-<h1 align="center">Horizon-UniStock</h1>
+<h1 align="center">UniStock</h1>
 
 <p align="center">
   Sistem Distribusi Seragam & Inventory Management — Berbasis Web untuk Admin Universitas
@@ -10,7 +10,7 @@
 
 ---
 
-**Horizon-UniStock** adalah sistem berbasis web untuk mengelola proses distribusi seragam mahasiswa. Menggantikan proses manual (Google Form, Google Sheet, barcode manual, checklist manual, rekap Excel) dengan sistem terintegrasi.
+**UniStock** adalah sistem berbasis web untuk mengelola proses distribusi seragam mahasiswa. Menggantikan proses manual (Google Form, Google Sheet, barcode manual, checklist manual, rekap Excel) dengan sistem terintegrasi.
 
 **Alur utama:** Student Data → Size Management → QR Identity → Staff Distribution → Inventory Movement → Admin Report
 

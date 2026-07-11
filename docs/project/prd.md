@@ -1,5 +1,5 @@
 # Product Requirements Document (PRD)
-# Horizon-UniStock — Sistem Distribusi Seragam & Inventory Admin
+# UniStock — Sistem Distribusi Seragam & Inventory Admin
 
 ---
 

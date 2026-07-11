@@ -3,8 +3,8 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Horizon UniStock — Student Uniform Distribution System</title>
-    <meta name="description" content="Horizon UniStock is a web-based uniform distribution and inventory management system for university freshmen.">
+    <title>UniStock — Student Uniform Distribution System</title>
+    <meta name="description" content="UniStock is a web-based uniform distribution and inventory management system for university freshmen.">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -92,7 +92,7 @@
                 </svg>
             </div>
             <span class="text-sm font-bold text-white">
-                Horizon <span class="text-primary-200">UniStock</span>
+                UniStock
             </span>
         </div>
 
@@ -138,7 +138,7 @@
             <span class="text-primary-200">Faster & More Structured</span>
         </h1>
         <p class="text-primary-100 text-lg leading-relaxed mb-10 max-w-2xl mx-auto">
-            Horizon UniStock replaces manual Google Form, barcode, and Excel recap processes
+            UniStock replaces manual Google Form, barcode, and Excel recap processes
             with an integrated system from size input to distribution reports.
         </p>
 
@@ -224,7 +224,7 @@
     <div class="max-w-4xl mx-auto">
         <div class="text-center mb-14">
             <p class="text-xs font-semibold text-primary-700 uppercase tracking-widest mb-2">Advantages</p>
-            <h2 class="text-2xl font-bold text-gray-800">Mengapa Horizon UniStock?</h2>
+            <h2 class="text-2xl font-bold text-gray-800">Mengapa UniStock?</h2>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -300,7 +300,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10"/>
                 </svg>
             </div>
-            <span class="text-sm font-medium text-primary-200">Horizon UniStock</span>
+            <span class="text-sm font-medium text-primary-200">UniStock</span>
         </div>
         <p class="text-xs text-primary-400">&copy; {{ date('Y') }} Student Uniform Distribution System. All rights reserved.</p>
     </div>
