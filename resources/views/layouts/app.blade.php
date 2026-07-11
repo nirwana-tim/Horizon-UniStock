@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ isset($title) ? $title . ' — ' : '' }}{{ config('app.name', 'Horizon UniStock') }}</title>
-    <meta name="description" content="Uniform Distribution & Inventory Management System — Horizon UniStock">
+    <title>{{ isset($title) ? $title . ' — ' : '' }}{{ config('app.name', 'UniStock') }}</title>
+    <meta name="description" content="Uniform Distribution & Inventory Management System — UniStock">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">

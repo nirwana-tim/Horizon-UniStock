@@ -8,7 +8,7 @@
         }
     }">
 
-    <x-page-header title="Dashboard Super Admin" subtitle="Monitor semua aktivitas dan sistem Horizon UniStock">
+    <x-page-header title="Dashboard Super Admin" subtitle="Monitor semua aktivitas dan sistem UniStock">
         <x-slot name="breadcrumb">
             <span class="text-gray-800 font-medium">Dashboard</span>
         </x-slot>

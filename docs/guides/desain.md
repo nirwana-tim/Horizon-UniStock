@@ -1,4 +1,4 @@
-# Panduan Desain — Horizon-UniStock
+# Panduan Desain — UniStock
 
 > **Warna Primer:** `#980416` (Maroon) — Monochromatic Harmony
 > **Framework CSS:** Tailwind CSS

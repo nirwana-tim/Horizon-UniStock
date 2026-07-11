@@ -1,4 +1,4 @@
-# Dokumentasi Horizon-UniStock
+# Dokumentasi UniStock
 
 Seluruh dokumentasi project ini diorganisir dalam 3 kategori.
 

@@ -38,7 +38,7 @@ class EmailVerificationOtpController extends Controller
         try {
             Mail::raw("Kode verifikasi email kampus Anda: $code\n\nKode berlaku 10 menit.", function ($message) use ($validated) {
                 $message->to($validated['email_kampus'])
-                    ->subject('Verifikasi Email Kampus - Horizon Unistock');
+                    ->subject('Verifikasi Email Kampus - UniStock');
             });
         } catch (\Exception $e) {
             return redirect()->route('dashboard')

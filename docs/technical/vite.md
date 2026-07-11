@@ -138,7 +138,7 @@ Jika Blade berubah → browser full refresh
 Variabel environment dengan prefix `VITE_` bisa diakses di JavaScript:
 
 ```env
-VITE_APP_NAME=Horizon-UniStock
+VITE_APP_NAME=UniStock
 ```
 
 ```js

@@ -53,7 +53,7 @@ $user = User::find(1);
 $user->assignRole('admin');
 ```
 
-> **Untuk implementasi project ini**, lihat `database/seeders/RolePermissionSeeder.php` yang berisi role & permission spesifik Horizon-UniStock (super_admin, finance, staff, student).
+> **Untuk implementasi project ini**, lihat `database/seeders/RolePermissionSeeder.php` yang berisi role & permission spesifik UniStock (super_admin, finance, staff, student).
 
 ## 3. Middleware di Route
 

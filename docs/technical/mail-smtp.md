@@ -83,7 +83,7 @@ class SendCredentialsMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Akun Horizon-UniStock Anda',
+            subject: 'Akun UniStock Anda',
         );
     }
 
@@ -113,12 +113,12 @@ class SendCredentialsMail extends Mailable
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Akun Horizon-UniStock</title>
+    <title>Akun UniStock</title>
 </head>
 <body style="font-family: Arial, sans-serif;">
     <h2>Halo {{ $user->name }}!</h2>
 
-    <p>Akun Anda telah dibuat di <strong>Horizon-UniStock</strong>.</p>
+    <p>Akun Anda telah dibuat di <strong>UniStock</strong>.</p>
 
     <p>Berikut kredensial login Anda:</p>
     <ul>
