@@ -251,35 +251,32 @@
             } else { toggleEmpty('c1'); }
 
             if (res.data.c2Categories?.length) {
-                const ds = res.data.c2Datasets;
+                const totalRevenue = res.data.c2Categories.map((_, i) =>
+                    res.data.c2Datasets.reduce((sum, ds) => sum + (ds.data[i] || 0), 0)
+                );
                 new Chart(document.getElementById('c2Chart'), {
                     type: 'line',
                     data: {
                         labels: res.data.c2Categories,
-                        datasets: ds.map((d, i) => ({
-                            label: d.label,
-                            data: d.data,
-                            borderColor: palette[i % palette.length],
-                            backgroundColor: palette[i % palette.length],
+                        datasets: [{
+                            label: 'Revenue',
+                            data: totalRevenue,
+                            borderColor: primary,
+                            backgroundColor: primary,
                             fill: false,
                             tension: 0.4,
                             pointStyle: 'circle',
                             pointRadius: 4,
-                            pointHoverRadius: 7,
-                            pointBackgroundColor: palette[i % palette.length],
+                            pointHoverRadius: 8,
+                            pointBackgroundColor: primary,
                             pointBorderColor: '#fff',
                             pointBorderWidth: 2,
-                        }))
+                        }]
                     },
                     options: {
                         ...sharedOpts,
-                        scales: {
-                            y: { ticks: { font: tickFont, callback: v => 'Rp' + (v/1000000).toFixed(1) + 'jt' } }
-                        },
-                        plugins: {
-                            ...sharedOpts.plugins,
-                            legend: { position: 'top', labels: { boxWidth: 12, font: { size: 9 }, padding: 8 } }
-                        }
+                        scales: { y: { ticks: { font: tickFont, callback: v => 'Rp' + (v/1000000).toFixed(1) + 'jt' } } },
+                        plugins: { ...sharedOpts.plugins, legend: { display: false } }
                     }
                 });
             } else { toggleEmpty('c2'); }
