@@ -55,7 +55,7 @@
     <input type="hidden" name="{{ $name }}" x-ref="hiddenInput" :value="selectedValue" @if($required) required @endif>
 
     <div @click="open = !open; if(open) $nextTick(() => $refs.searchInput.focus())"
-         class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500 text-sm cursor-pointer bg-white flex items-center justify-between px-3 py-2"
+         class="mt-1 block w-full border-gray-300 rounded-md shadow-sm text-sm cursor-pointer bg-white flex items-center justify-between px-3 py-2"
          :class="open ? 'ring-2 ring-primary-500 border-primary-500' : ''">
         <span x-text="selectedLabel || '{{ addslashes($placeholder) }}'" :class="selectedLabel ? 'text-gray-900' : 'text-gray-400'"></span>
         <svg class="w-4 h-4 text-gray-400 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
@@ -66,7 +66,7 @@
         <div class="sticky top-0 bg-white p-2 border-b border-gray-100">
             <input x-ref="searchInput" x-model="search" @keydown="handleKeydown($event)"
                    type="text" placeholder="{{ addslashes($searchPlaceholder) }}"
-                   class="w-full px-3 py-1.5 text-sm border border-gray-200 rounded-md focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none" />
+                   class="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-md focus:border-primary-500 focus:ring-primary-500 outline-none" />
         </div>
         <ul class="overflow-y-auto max-h-48 py-1">
             <template x-for="(opt, index) in filteredOptions" :key="opt.value">

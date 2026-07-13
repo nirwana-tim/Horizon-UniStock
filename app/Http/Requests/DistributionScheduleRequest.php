@@ -23,7 +23,6 @@ class DistributionScheduleRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:255',
-            'period' => 'required|string|max:50',
             'semester' => 'required|string|in:Ganjil,Genap',
             'student_type' => 'nullable|string|in:freshman,continuing',
             'date' => 'required|date',

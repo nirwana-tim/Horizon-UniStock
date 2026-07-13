@@ -101,14 +101,13 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                                 <x-input-label for="vendor_id" :value="__('Vendor')" />
-                                @php
-                                    $vendorOptions = $vendors->map(fn($v) => [
-                                        'value' => $v->id,
-                                        'label' => $v->name,
-                                        'group' => '',
-                                    ])->toArray();
-                                @endphp
-                                <x-searchable-select name="vendor_id" :options="$vendorOptions" :value="old('vendor_id')" placeholder="-- Select Vendor --" :required="true" />
+                                <select id="vendor_id" name="vendor_id" required
+                                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500">
+                                    <option value="">-- Select Vendor --</option>
+                                    @foreach($vendors as $v)
+                                        <option value="{{ $v->id }}" {{ old('vendor_id') == $v->id ? 'selected' : '' }}>{{ $v->name }}</option>
+                                    @endforeach
+                                </select>
                                 <x-input-error :messages="$errors->get('vendor_id')" class="mt-2" />
                             </div>
                             <div>
