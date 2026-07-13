@@ -224,16 +224,28 @@
 
             if (res.data.c1Labels?.length) {
                 new Chart(document.getElementById('c1Chart'), {
-                    type: 'bar',
+                    type: 'line',
                     data: {
                         labels: res.data.c1Labels,
-                        datasets: [{ label: 'Unit Sold', data: res.data.c1Data, backgroundColor: primary, borderRadius: 4, barThickness: 18 }]
+                        datasets: [{
+                            label: 'Unit Sold',
+                            data: res.data.c1Data,
+                            borderColor: primary,
+                            backgroundColor: primary,
+                            fill: false,
+                            tension: 0.4,
+                            pointStyle: 'circle',
+                            pointRadius: 4,
+                            pointHoverRadius: 8,
+                            pointBackgroundColor: primary,
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2,
+                        }]
                     },
                     options: {
                         ...sharedOpts,
-                        indexAxis: 'y',
-                        plugins: { ...sharedOpts.plugins, legend: { display: false } },
-                        scales: { x: { ticks: { font: tickFont } }, y: { ticks: { font: labelFont } } }
+                        scales: { y: { ticks: { font: tickFont } } },
+                        plugins: { ...sharedOpts.plugins, legend: { display: false } }
                     }
                 });
             } else { toggleEmpty('c1'); }
@@ -250,7 +262,7 @@
                             borderColor: palette[i % palette.length],
                             backgroundColor: palette[i % palette.length],
                             fill: false,
-                            tension: 0.3,
+                            tension: 0.4,
                             pointStyle: 'circle',
                             pointRadius: 4,
                             pointHoverRadius: 7,
@@ -321,22 +333,28 @@
 
             if (res.data.c4Labels?.length) {
                 new Chart(document.getElementById('c4Chart'), {
-                    type: 'polarArea',
+                    type: 'line',
                     data: {
                         labels: res.data.c4Labels,
                         datasets: [{
+                            label: 'Stock',
                             data: res.data.c4Data,
-                            backgroundColor: palette.slice(0, res.data.c4Labels.length),
-                            borderColor: '#fff',
-                            borderWidth: 2
+                            borderColor: primary,
+                            backgroundColor: primary,
+                            fill: false,
+                            tension: 0.4,
+                            pointStyle: 'circle',
+                            pointRadius: 4,
+                            pointHoverRadius: 8,
+                            pointBackgroundColor: primary,
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2,
                         }]
                     },
                     options: {
                         ...sharedOpts,
-                        plugins: {
-                            ...sharedOpts.plugins,
-                            legend: { position: 'bottom', labels: { boxWidth: 10, padding: 6, font: { size: 10 } } }
-                        }
+                        scales: { y: { ticks: { font: tickFont } } },
+                        plugins: { ...sharedOpts.plugins, legend: { display: false } }
                     }
                 });
             } else { toggleEmpty('c4'); }
