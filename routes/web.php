@@ -20,6 +20,7 @@ use App\Http\Controllers\Master\VendorController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ImportController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Profile\EmailController as ProfileEmailController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\TemplateController;
 use App\Http\Controllers\Auth\EmailVerificationOtpController;
@@ -44,6 +45,15 @@ Route::middleware(['auth', 'password.changed'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    Route::prefix('profile/email')->name('profile.email.')->group(function () {
+        Route::get('/change', [ProfileEmailController::class, 'showChangeForm'])->name('change');
+        Route::post('/verify-password', [ProfileEmailController::class, 'verifyPassword'])->name('verify-password');
+        Route::get('/input-email', [ProfileEmailController::class, 'showEmailForm'])->name('input-email');
+        Route::post('/send-otp', [ProfileEmailController::class, 'sendOtp'])->middleware('throttle:3,1')->name('send-otp');
+        Route::get('/verify', [ProfileEmailController::class, 'showOtpForm'])->name('verify-otp');
+        Route::post('/verify', [ProfileEmailController::class, 'verifyOtp'])->middleware('throttle:5,1')->name('verify-otp.post');
+    });
 });
 
 Route::middleware(['auth', 'password.changed', 'role:super_admin|admin'])->prefix('master-data')->name('master-data.')->group(function () {
@@ -86,8 +96,13 @@ Route::middleware(['auth', 'password.changed', 'role:super_admin|admin'])->prefi
 
 Route::middleware(['auth', 'password.changed', 'role:super_admin|admin|staff'])->prefix('distribution')->name('distribution.')->group(function () {
     Route::get('/scan', [ScanController::class, 'index'])->name('scan.index');
+    Route::get('/student/{nim}', [ScanController::class, 'showByNim'])->name('scan.student');
     Route::post('/search', [ScanController::class, 'search'])->middleware('throttle:30,1')->name('search');
-    Route::get('/search', function () {
+    Route::get('/search', function (Request $request) {
+        $nim = $request->query('query');
+        if ($nim) {
+            return redirect()->route('distribution.scan.student', $nim);
+        }
         return redirect()->route('distribution.scan.index');
     });
     Route::post('/process', [ScanController::class, 'process'])->middleware('throttle:10,1')->name('process');
@@ -106,6 +121,7 @@ Route::middleware(['auth', 'password.changed', 'role:super_admin|admin'])->prefi
 Route::middleware(['auth', 'password.changed', 'role:super_admin|admin'])->prefix('report')->name('report.')->group(function () {
     Route::get('/', [ReportController::class, 'index'])->name('index');
     Route::get('distribution', [ReportController::class, 'distribution'])->name('distribution');
+    Route::get('distribution-recap', [ReportController::class, 'distributionRecap'])->name('distribution-recap');
     Route::get('inventory', [ReportController::class, 'inventory'])->name('inventory');
     Route::get('gpm', [ReportController::class, 'gpm'])->name('gpm');
     Route::get('stock', [ReportController::class, 'stock'])->name('stock');

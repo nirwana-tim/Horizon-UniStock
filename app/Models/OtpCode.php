@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class OtpCode extends Model
 {
     protected $fillable = [
+        'user_id',
         'nim',
         'email',
         'code',

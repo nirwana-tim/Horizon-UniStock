@@ -2,11 +2,9 @@
 
 namespace App\Services;
 
-use App\Models\AuditLog;
 use App\Models\Entitlement;
 use App\Models\EntitlementItem;
 use App\Models\Student;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class EntitlementService
@@ -50,14 +48,13 @@ class EntitlementService
                 }
             }
 
-            AuditLog::create([
-                'user_id' => Auth::id(),
-                'action' => 'create',
-                'model_type' => Entitlement::class,
-                'model_id' => $entitlement->id,
-                'new_values' => $entitlement->toArray(),
-                'ip_address' => request()->ip(),
-            ]);
+            AuditService::log(
+                'entitlement.created',
+                Entitlement::class,
+                $entitlement->id,
+                null,
+                $entitlement->toArray()
+            );
 
             return $entitlement->fresh(['items.item']);
         });
@@ -86,15 +83,13 @@ class EntitlementService
                 }
             }
 
-            AuditLog::create([
-                'user_id' => Auth::id(),
-                'action' => 'update',
-                'model_type' => Entitlement::class,
-                'model_id' => $entitlement->id,
-                'old_values' => $oldValues,
-                'new_values' => $entitlement->fresh()->toArray(),
-                'ip_address' => request()->ip(),
-            ]);
+            AuditService::log(
+                'entitlement.updated',
+                Entitlement::class,
+                $entitlement->id,
+                $oldValues,
+                $entitlement->fresh()->toArray()
+            );
 
             return $entitlement->fresh(['items.item']);
         });
@@ -103,14 +98,13 @@ class EntitlementService
     public function deleteEntitlement(Entitlement $entitlement): void
     {
         DB::transaction(function () use ($entitlement) {
-            AuditLog::create([
-                'user_id' => Auth::id(),
-                'action' => 'delete',
-                'model_type' => Entitlement::class,
-                'model_id' => $entitlement->id,
-                'old_values' => $entitlement->toArray(),
-                'ip_address' => request()->ip(),
-            ]);
+            AuditService::log(
+                'entitlement.deleted',
+                Entitlement::class,
+                $entitlement->id,
+                $entitlement->toArray(),
+                null
+            );
 
             $entitlement->items()->delete();
             $entitlement->delete();

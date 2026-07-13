@@ -81,7 +81,7 @@
                     <x-nav-link :href="route('inventory.stock-opname.index')" :active="request()->routeIs('inventory.stock-opname.*')">
                         {{ __('Stock Opname') }}
                     </x-nav-link>
-                    <x-nav-link :href="route('report.gpm-cost')" :active="request()->routeIs('report.gpm-cost.*')">
+                    <x-nav-link :href="route('report.gpm-cost')" :active="request()->routeIs('report.gpm-cost')">
                         {{ __('GPM') }}
                     </x-nav-link>
                     <x-nav-link :href="route('report.index')" :active="request()->routeIs('report.*')">
@@ -210,7 +210,7 @@
                     <x-responsive-nav-link :href="route('inventory.stock-opname.index')" :active="request()->routeIs('inventory.stock-opname.*')">
                         {{ __('Stock Opname') }}
                     </x-responsive-nav-link>
-                    <x-responsive-nav-link :href="route('report.gpm-cost')" :active="request()->routeIs('report.gpm-cost.*')">
+                    <x-responsive-nav-link :href="route('report.gpm-cost')" :active="request()->routeIs('report.gpm-cost')">
                         {{ __('GPM') }}
                     </x-responsive-nav-link>
                     <x-responsive-nav-link :href="route('report.index')" :active="request()->routeIs('report.*')">

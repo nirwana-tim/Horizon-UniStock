@@ -47,6 +47,21 @@
             @endif
         </div>
 
+        @if(isset($student) && $student)
+        <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-700">Email Pribadi</p>
+                    <p class="text-sm text-gray-500">{{ $student->email_pribadi ?? 'Belum diisi' }}</p>
+                </div>
+                <a href="{{ route('profile.email.change') }}"
+                   class="text-sm font-medium text-primary-700 hover:text-primary-800 underline">
+                    Ubah
+                </a>
+            </div>
+        </div>
+        @endif
+
         <div class="flex items-center gap-4">
             <x-primary-button>{{ __('Save') }}</x-primary-button>
 

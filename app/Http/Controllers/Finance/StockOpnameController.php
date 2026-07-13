@@ -53,7 +53,7 @@ class StockOpnameController extends Controller
 
         $batch = $this->service->createBatch($validated);
 
-        return redirect()->route('finance.stock-opname.show', $batch)
+        return redirect()->route('inventory.stock-opname.show', $batch)
             ->with('success', 'Batch stock opname berhasil dibuat.');
     }
 
@@ -78,7 +78,7 @@ class StockOpnameController extends Controller
 
         $stockOpname->update(['status' => 'counted']);
 
-        return redirect()->route('finance.stock-opname.show', $stockOpname)
+        return redirect()->route('inventory.stock-opname.show', $stockOpname)
             ->with('success', 'Data stock opname berhasil diupload.')
             ->with('total_imported', $import->getImportedRows());
     }
@@ -87,7 +87,7 @@ class StockOpnameController extends Controller
     {
         $this->service->createAdjustments($stockOpname, Auth::user());
 
-        return redirect()->route('finance.stock-opname.show', $stockOpname)
+        return redirect()->route('inventory.stock-opname.show', $stockOpname)
             ->with('success', 'Stock opname berhasil disetujui dan adjustment telah dibuat.');
     }
 }

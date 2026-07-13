@@ -125,7 +125,7 @@ class EntitlementController extends Controller
                         ->map(fn($code, $id) => [
                             'id' => $id,
                             'code' => $code,
-                            'label' => Item::find($id, ['*'])->variants->first()->size_label ?? $code,
+                            'label' => Item::find($id)?->variants?->first()?->size_label ?? $code,
                         ]),
                 ];
             });

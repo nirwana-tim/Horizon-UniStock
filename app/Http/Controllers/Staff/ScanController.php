@@ -24,7 +24,6 @@ class ScanController extends Controller
     {
         $activeSchedule = DistributionSchedule::where('is_active', true)
             ->where('date', today())
-            ->forStudent($student)
             ->first();
 
         return view('distribution.scan', compact('activeSchedule'));
@@ -49,12 +48,24 @@ class ScanController extends Controller
 
             return response()->json([
                 'found' => true,
-                'redirect' => route('distribution.search').'?query='.urlencode($student->nim),
+                'redirect' => route('distribution.scan.student', $student->nim),
             ]);
         }
 
         if (! $student) {
             return back()->withErrors(['query' => 'Mahasiswa tidak ditemukan. Pastikan NIM valid.']);
+        }
+
+        return $this->showDistribution($student);
+    }
+
+    public function showByNim(string $nim): View|RedirectResponse
+    {
+        $student = $this->distributionService->findStudent($nim);
+
+        if (! $student) {
+            return redirect()->route('distribution.scan.index')
+                ->with('error', 'Mahasiswa dengan NIM ' . $nim . ' tidak ditemukan.');
         }
 
         return $this->showDistribution($student);

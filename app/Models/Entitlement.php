@@ -9,6 +9,7 @@ class Entitlement extends Model
 {
     protected $fillable = [
         'code',
+        'student_type',
         'description',
         'is_active',
     ];

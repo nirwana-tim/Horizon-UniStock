@@ -161,7 +161,7 @@
                         form.submit();
                     }).catch(err => {
                         console.error('Failed to stop scanner:', err);
-                        window.location.href = `{{ route("distribution.search") }}?query=${encodeURIComponent(decodedText)}`;
+                        window.location.href = `{{ route("distribution.scan.student", "") }}${encodeURIComponent(decodedText)}`;
                     });
                 },
                 function onScanFailure(error) {
