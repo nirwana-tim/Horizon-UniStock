@@ -11,12 +11,21 @@ class DistributionScheduleRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'is_active' => $this->boolean('is_active'),
+            'student_type' => $this->input('student_type') ?: null,
+        ]);
+    }
+
     public function rules(): array
     {
         return [
             'name' => 'required|string|max:255',
             'period' => 'required|string|max:50',
             'semester' => 'required|string|in:Ganjil,Genap',
+            'student_type' => 'nullable|string|in:freshman,continuing',
             'date' => 'required|date',
             'location' => 'required|string|max:255',
             'session' => 'required|string|max:100',

@@ -5,12 +5,13 @@ namespace App\Http\Controllers\Staff;
 use App\Http\Controllers\Controller;
 use App\Models\DistributionSchedule;
 use App\Models\ItemVariant;
-use App\Models\Student;
 use App\Models\StockBalance;
+use App\Models\Student;
 use App\Services\DistributionService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class ScanController extends Controller
@@ -23,6 +24,7 @@ class ScanController extends Controller
     {
         $activeSchedule = DistributionSchedule::where('is_active', true)
             ->where('date', today())
+            ->forStudent($student)
             ->first();
 
         return view('distribution.scan', compact('activeSchedule'));
@@ -37,7 +39,7 @@ class ScanController extends Controller
         $student = $this->distributionService->findStudent($request->input('query'));
 
         if ($request->ajax() || $request->wantsJson()) {
-            if (!$student) {
+            if (! $student) {
                 // Uniform response — same structure regardless of existence
                 return response()->json([
                     'found' => false,
@@ -47,11 +49,11 @@ class ScanController extends Controller
 
             return response()->json([
                 'found' => true,
-                'redirect' => route('distribution.search') . '?query=' . urlencode($student->nim),
+                'redirect' => route('distribution.search').'?query='.urlencode($student->nim),
             ]);
         }
 
-        if (!$student) {
+        if (! $student) {
             return back()->withErrors(['query' => 'Mahasiswa tidak ditemukan. Pastikan NIM valid.']);
         }
 
@@ -62,7 +64,7 @@ class ScanController extends Controller
     {
         // Filter out items that are not checked (they won't have item_id submitted)
         $items = array_filter($request->input('items', []), function ($item) {
-            return isset($item['item_id']) && !empty($item['item_id']);
+            return isset($item['item_id']) && ! empty($item['item_id']);
         });
         $request->merge(['items' => $items]);
 
@@ -123,17 +125,17 @@ class ScanController extends Controller
                     ->where('size', $sizeItem->size)
                     ->first();
                 $studentSizes[$sizeItem->item_id] = [
-                    'size'        => $sizeItem->size,
-                    'size_label'  => $variant?->size_label ?? $sizeItem->size,
-                    'change_count'=> $sizeItem->change_count,
+                    'size' => $sizeItem->size,
+                    'size_label' => $variant?->size_label ?? $sizeItem->size,
+                    'change_count' => $sizeItem->change_count,
                 ];
             }
         }
 
-        $distributedItems = \Illuminate\Support\Facades\DB::table('distribution_items')
+        $distributedItems = DB::table('distribution_items')
             ->join('distribution_transactions', 'distribution_items.transaction_id', '=', 'distribution_transactions.id')
             ->where('distribution_transactions.student_id', '=', $student->id)
-            ->select('distribution_items.item_id', \Illuminate\Support\Facades\DB::raw('SUM(distribution_items.quantity) as total_qty'))
+            ->select('distribution_items.item_id', DB::raw('SUM(distribution_items.quantity) as total_qty'))
             ->groupBy('distribution_items.item_id')
             ->pluck('total_qty', 'item_id')
             ->toArray();

@@ -29,8 +29,8 @@ class StudentController extends Controller
             $search = str_replace(['%', '_'], ['\%', '\_'], $search);
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('nim', 'like', "%{$search}%")
-                  ->orWhere('email_kampus', 'like', "%{$search}%");
+                    ->orWhere('nim', 'like', "%{$search}%")
+                    ->orWhere('email_kampus', 'like', "%{$search}%");
             });
         }
 
@@ -92,33 +92,32 @@ class StudentController extends Controller
         $entitlement = $student->entitlement_code
             ? Entitlement::where('code', $student->entitlement_code)
                 ->where('is_active', true)
+                ->where('student_type', $student->student_type)
                 ->with('items.item')
                 ->first()
             : null;
 
-        $receivedItems = DistributionItem::whereHas('transaction', fn($q) =>
-            $q->where('student_id', $student->id)
+        $receivedItems = DistributionItem::whereHas('transaction', fn ($q) => $q->where('student_id', $student->id)
         )
             ->with('item')
             ->get()
-            ->groupBy(fn($di) => $di->item->base_code ?? $di->item_id)
-            ->map(fn($items) => ['total_qty' => $items->sum('quantity')]);
+            ->groupBy(fn ($di) => $di->item->base_code ?? $di->item_id)
+            ->map(fn ($items) => ['total_qty' => $items->sum('quantity')]);
 
         return view('master.student._entitlement', compact('student', 'entitlement', 'receivedItems'));
     }
 
     public function receivedItems(Student $student): View
     {
-        $receivedItems = DistributionItem::whereHas('transaction', fn($q) =>
-            $q->where('student_id', $student->id)
+        $receivedItems = DistributionItem::whereHas('transaction', fn ($q) => $q->where('student_id', $student->id)
         )
             ->with(['item', 'transaction.schedule'])
             ->get()
-            ->groupBy(fn($di) => $di->item->base_code ?? $di->item_id)
-            ->map(fn($items) => [
+            ->groupBy(fn ($di) => $di->item->base_code ?? $di->item_id)
+            ->map(fn ($items) => [
                 'item' => $items->first()->item,
                 'total_qty' => $items->sum('quantity'),
-                'details' => $items->map(fn($di) => [
+                'details' => $items->map(fn ($di) => [
                     'quantity' => $di->quantity,
                     'schedule' => $di->transaction?->schedule?->name ?? '-',
                     'date' => $di->transaction?->pickup_time?->format('d/m/Y H:i:s') ?? '-',
@@ -132,7 +131,7 @@ class StudentController extends Controller
     public function transactions(Student $student): View
     {
         $student->load([
-            'distributionTransactions' => fn($q) => $q->latest(),
+            'distributionTransactions' => fn ($q) => $q->latest(),
             'distributionTransactions.items.item',
             'distributionTransactions.schedule',
         ]);
@@ -189,7 +188,7 @@ class StudentController extends Controller
                 ->with('info', 'Tidak ada akun baru yang digenerate.');
         }
 
-        $message = "Berhasil membuat " . count($generated) . " akun mahasiswa. Password hanya ditampilkan sekali di bawah.";
+        $message = 'Berhasil membuat '.count($generated).' akun mahasiswa. Password hanya ditampilkan sekali di bawah.';
 
         return redirect()->route('students.index', ['tab' => 'generate-akun'])
             ->with('success', $message)
@@ -216,7 +215,7 @@ class StudentController extends Controller
             ];
         }
 
-        $message = "Berhasil membuat " . count($generated) . " akun mahasiswa. Password hanya ditampilkan sekali di bawah.";
+        $message = 'Berhasil membuat '.count($generated).' akun mahasiswa. Password hanya ditampilkan sekali di bawah.';
 
         return redirect()->route('students.index', ['tab' => 'generate-akun'])
             ->with('success', $message)
