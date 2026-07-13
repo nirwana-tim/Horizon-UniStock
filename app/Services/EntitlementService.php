@@ -13,12 +13,13 @@ class EntitlementService
 {
     public function getEntitlement(Student $student): ?Entitlement
     {
-        if (!$student->entitlement_code) {
+        if (! $student->entitlement_code) {
             return null;
         }
 
         return Entitlement::where('code', $student->entitlement_code)
             ->where('is_active', true)
+            ->where('student_type', $student->student_type)
             ->with('items.item')
             ->first();
     }

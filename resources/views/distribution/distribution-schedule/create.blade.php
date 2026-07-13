@@ -27,6 +27,7 @@
                               programLevelId: '{{ old('program_level_id') }}',
                               facultyId: '{{ old('faculty_id') }}',
                               prodiId: '{{ old('study_program_id') }}',
+                              studentType: '{{ old('student_type') }}',
                               prodiByFaculty: {{ json_encode($prodiByFaculty) }},
                               allProdi: {{ json_encode($allProdi) }},
                               itemHtml: '',
@@ -41,6 +42,7 @@
                                   this.$watch('prodiId', () => this.fetchItems());
                                   this.$watch('programLevelId', () => { if (this.prodiId) this.fetchItems(); });
                                   this.$watch('facultyId', () => { if (this.prodiId) this.fetchItems(); });
+                                  this.$watch('studentType', () => { if (this.prodiId) this.fetchItems(); });
                                   if (this.prodiId) this.fetchItems();
                               },
                               fetchItems() {
@@ -49,6 +51,7 @@
                                           program_level_id: this.programLevelId || '',
                                           faculty_id: this.facultyId || '',
                                           study_program_id: this.prodiId,
+                                          student_type: this.studentType || '',
                                       },
                                   }).then(res => this.itemHtml = res.data.html);
                               }
@@ -86,6 +89,16 @@
                                     <option value="Genap" {{ old('semester') == 'Genap' ? 'selected' : '' }}>Genap</option>
                                 </select>
                                 <x-input-error :messages="$errors->get('semester')" class="mt-2" />
+                            </div>
+                            <div>
+                                <x-input-label for="student_type" :value="__('Student Type')" />
+                                <select id="student_type" name="student_type" x-model="studentType"
+                                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500">
+                                    <option value="">All Student Types</option>
+                                    <option value="freshman">Freshman</option>
+                                    <option value="continuing">Continuing</option>
+                                </select>
+                                <x-input-error :messages="$errors->get('student_type')" class="mt-2" />
                             </div>
                             <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>

@@ -14,6 +14,7 @@ use App\Models\Student;
 use App\Models\StudyProgram;
 use App\Models\User;
 use App\Services\ReportService;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -74,7 +75,7 @@ class DashboardController extends Controller
         $units = [];
 
         foreach ($trend as $row) {
-            $months[] = \Carbon\Carbon::create()->month($row->month)->format('M') . '-' . substr($row->year, -2);
+            $months[] = Carbon::create()->month($row->month)->format('M').'-'.substr($row->year, -2);
             $revenue[] = (int) $row->revenue;
             $units[] = (int) $row->unit_sold;
         }
@@ -138,7 +139,7 @@ class DashboardController extends Controller
             ->orderByDesc('total')
             ->limit(8)
             ->get()
-            ->map(fn($row) => [
+            ->map(fn ($row) => [
                 'name' => $row->name,
                 'pct' => $totalSoldAll > 0 ? round(($row->total / $totalSoldAll) * 100, 1) : 0,
             ]);
@@ -146,23 +147,23 @@ class DashboardController extends Controller
         return response()->json([
             // Chart 1 — Unit Sold by Item
             'c1Labels' => $unitSold->pluck('name'),
-            'c1Data'   => $unitSold->pluck('total')->map(fn($v) => (int) $v),
+            'c1Data' => $unitSold->pluck('total')->map(fn ($v) => (int) $v),
             // Chart 2 — Revenue by Category (stacked)
             'c2Categories' => $revByCatItem->pluck('category')->unique()->values(),
-            'c2Datasets'   => $this->buildStacked($revByCatItem, 'category', 'item', 'total'),
+            'c2Datasets' => $this->buildStacked($revByCatItem, 'category', 'item', 'total'),
             // Chart 3 — Revenue + Unit Sold by Month (combo)
-            'months'  => $months,
+            'months' => $months,
             'revenue' => $revenue,
-            'units'   => $units,
+            'units' => $units,
             // Chart 4 — Available Stock by Item
             'c4Labels' => $availStock->pluck('name'),
-            'c4Data'   => $availStock->pluck('total')->map(fn($v) => (int) $v),
+            'c4Data' => $availStock->pluck('total')->map(fn ($v) => (int) $v),
             // Chart 5 — Value Stock by Category (stacked)
             'c5Categories' => $valByCatItem->pluck('category')->unique()->values(),
-            'c5Datasets'   => $this->buildStacked($valByCatItem, 'category', 'item', 'total'),
+            'c5Datasets' => $this->buildStacked($valByCatItem, 'category', 'item', 'total'),
             // Chart 6 — % Unit Sold by Item
             'c6Labels' => $pctSold->pluck('name'),
-            'c6Data'   => $pctSold->pluck('pct'),
+            'c6Data' => $pctSold->pluck('pct'),
         ]);
     }
 
@@ -174,7 +175,7 @@ class DashboardController extends Controller
         $itemMap = [];
         foreach ($rows as $row) {
             $name = $row->$itemField;
-            if (!isset($itemMap[$name])) {
+            if (! isset($itemMap[$name])) {
                 $itemMap[$name] = array_fill(0, count($categories), 0);
             }
             $idx = $catIndex[$row->$catField] ?? null;
@@ -234,14 +235,12 @@ class DashboardController extends Controller
 
         $data = [
             'student' => $student,
-            'hasFilledSize' => !is_null($student->activeSizeProfile),
+            'hasFilledSize' => ! is_null($student->activeSizeProfile),
             'hasQr' => true,
             'activeSchedules' => DistributionSchedule::query()
                 ->where('is_active', true)
                 ->where('date', '>=', now()->format('Y-m-d'))
-                ->where(fn ($q) => $q->whereNull('program_level_id')->orWhere('program_level_id', $student->program_level_id))
-                ->where(fn ($q) => $q->whereNull('faculty_id')->orWhere('faculty_id', $student->studyProgram?->faculty_id))
-                ->where(fn ($q) => $q->whereNull('study_program_id')->orWhere('study_program_id', $student->study_program_id))
+                ->forStudent($student)
                 ->orderBy('date')
                 ->take(5)
                 ->get(),

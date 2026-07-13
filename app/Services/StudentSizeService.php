@@ -14,22 +14,23 @@ class StudentSizeService
 {
     public function getEntitlementItems(Student $student): Collection
     {
-        if (!$student->entitlement_code) {
+        if (! $student->entitlement_code) {
             return collect();
         }
 
         $entitlement = Entitlement::where('code', '=', $student->entitlement_code, 'and')
             ->where('is_active', '=', true, 'and')
+            ->where('student_type', '=', $student->student_type, 'and')
             ->with(['items.item'])
             ->first();
 
-        if (!$entitlement) {
+        if (! $entitlement) {
             return collect();
         }
 
         $items = $entitlement->items
             ->pluck('item')
-            ->filter(fn($i) => $i && $i->base_code);
+            ->filter(fn ($i) => $i && $i->base_code);
 
         if ($items->isEmpty()) {
             return collect();

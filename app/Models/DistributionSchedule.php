@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -12,6 +13,7 @@ class DistributionSchedule extends Model
         'name',
         'period',
         'semester',
+        'student_type',
         'date',
         'location',
         'session',
@@ -27,6 +29,15 @@ class DistributionSchedule extends Model
             'date' => 'date',
             'is_active' => 'boolean',
         ];
+    }
+
+    public function scopeForStudent(Builder $query, Student $student): Builder
+    {
+        return $query
+            ->where(fn (Builder $q) => $q->whereNull('student_type')->orWhere('student_type', $student->student_type))
+            ->where(fn (Builder $q) => $q->whereNull('program_level_id')->orWhere('program_level_id', $student->program_level_id))
+            ->where(fn (Builder $q) => $q->whereNull('faculty_id')->orWhere('faculty_id', $student->studyProgram?->faculty_id))
+            ->where(fn (Builder $q) => $q->whereNull('study_program_id')->orWhere('study_program_id', $student->study_program_id));
     }
 
     public function programLevel(): BelongsTo

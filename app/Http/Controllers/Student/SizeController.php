@@ -75,6 +75,7 @@ class SizeController extends Controller
         $activeSchedules = DistributionSchedule::with('programLevel', 'faculty')
             ->where('is_active', true)
             ->where('date', '>=', now()->format('Y-m-d'))
+            ->forStudent($student)
             ->orderBy('date')
             ->take(5)
             ->get();

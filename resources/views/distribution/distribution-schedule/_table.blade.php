@@ -5,6 +5,13 @@
         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $schedule->programLevel?->name ?? '-' }}</td>
         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $schedule->faculty?->name ?? '-' }}{{ $schedule->studyProgram ? ' / ' . $schedule->studyProgram->name : '' }}</td>
         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $schedule->period ?? '-' }}{{ $schedule->semester ? ' - ' . $schedule->semester : '' }}</td>
+        <td class="px-6 py-4 whitespace-nowrap">
+            @if($schedule->student_type)
+                <x-badge type="primary">{{ ucfirst($schedule->student_type) }}</x-badge>
+            @else
+                <x-badge type="neutral">All</x-badge>
+            @endif
+        </td>
         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $schedule->date?->format('d/m/Y') ?? '-' }}</td>
         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $schedule->location }}</td>
         <td class="px-6 py-4 whitespace-nowrap">
@@ -20,6 +27,5 @@
         </td>
     </tr>
 @empty
-    <tr><td colspan="8" class="px-6 py-4 text-center text-sm text-gray-500">{{ __('No distribution schedule found.') }}</td></tr>
+    <tr><td colspan="9" class="px-6 py-4 text-center text-sm text-gray-500">{{ __('No distribution schedule found.') }}</td></tr>
 @endforelse
-

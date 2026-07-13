@@ -12,8 +12,9 @@ use App\Models\ItemVariant;
 use App\Models\StockBalance;
 use App\Models\StockMovement;
 use App\Models\Student;
+use App\Models\StudentSizeHistory;
+use App\Models\StudentSizeItem;
 use App\Models\User;
-use App\Services\AuditService;
 use Illuminate\Support\Facades\DB;
 
 class DistributionService
@@ -39,12 +40,13 @@ class DistributionService
 
     public function getEntitlementForStudent(Student $student, DistributionSchedule $schedule): ?Entitlement
     {
-        if (!$student->entitlement_code) {
+        if (! $student->entitlement_code) {
             return null;
         }
 
         return Entitlement::where('code', '=', $student->entitlement_code, 'and')
             ->where('is_active', '=', true, 'and')
+            ->where('student_type', '=', $student->student_type, 'and')
             ->with('items.item')
             ->first();
     }
@@ -56,7 +58,7 @@ class DistributionService
     public function findItemByBaseCodeAndSize(string $baseCode, string $size): ?Item
     {
         return Item::where('base_code', '=', $baseCode, 'and')
-            ->whereHas('variants', fn($q) => $q->where('size', '=', $size, 'and'))
+            ->whereHas('variants', fn ($q) => $q->where('size', '=', $size, 'and'))
             ->with('variants')
             ->first();
     }
@@ -68,8 +70,12 @@ class DistributionService
         array $items,
         ?string $manualNote = null
     ): DistributionTransaction {
-        if (!$this->isStudentEligible($student)) {
+        if (! $this->isStudentEligible($student)) {
             throw new \Exception('Mahasiswa ini belum memenuhi syarat distribusi. Status pembayaran belum lunas.');
+        }
+
+        if (! DistributionSchedule::whereKey($schedule->id)->forStudent($student)->exists()) {
+            throw new \Exception('Jadwal distribusi ini tidak sesuai dengan tipe, angkatan, fakultas, atau prodi mahasiswa.');
         }
 
         $existingTransaction = DistributionTransaction::where('student_id', '=', $student->id, 'and')
@@ -95,7 +101,7 @@ class DistributionService
 
             foreach ($items as $itemData) {
                 $item = Item::find($itemData['item_id'], ['*']);
-                if (!$item) {
+                if (! $item) {
                     continue;
                 }
 
@@ -164,9 +170,9 @@ class DistributionService
                         $studentSizes[$sizeItem->item_id] = $sizeItem->size;
                     }
                 }
-                
+
                 foreach ($entitlement->items as $entitlementItem) {
-                    if (!in_array($entitlementItem->item_id, $checkedItemIds)) {
+                    if (! in_array($entitlementItem->item_id, $checkedItemIds)) {
                         $allFullyStocked = false;
                         $expectedSize = $studentSizes[$entitlementItem->item_id] ?? '-';
                         $autoNotes[] = "{$entitlementItem->item->name} (Ukuran {$expectedSize}) ditunda/belum diambil";
@@ -174,15 +180,15 @@ class DistributionService
                 }
             }
 
-            if (!$allFullyStocked) {
+            if (! $allFullyStocked) {
                 $finalNotes = $manualNote;
-                if (!empty($autoNotes)) {
-                    $autoNotesStr = 'Sistem: ' . implode(' | ', $autoNotes);
-                    $finalNotes = $finalNotes ? $finalNotes . ' | ' . $autoNotesStr : $autoNotesStr;
+                if (! empty($autoNotes)) {
+                    $autoNotesStr = 'Sistem: '.implode(' | ', $autoNotes);
+                    $finalNotes = $finalNotes ? $finalNotes.' | '.$autoNotesStr : $autoNotesStr;
                 }
                 $transaction->update([
                     'status' => 'partial',
-                    'notes' => $finalNotes
+                    'notes' => $finalNotes,
                 ]);
             }
 
@@ -207,7 +213,7 @@ class DistributionService
     private function logSizeChange(Student $student, Item $item, string $oldSize, string $newSize, User $staff): void
     {
         $sizeProfile = $student->activeSizeProfile;
-        if (!$sizeProfile) {
+        if (! $sizeProfile) {
             return;
         }
 
@@ -216,7 +222,7 @@ class DistributionService
             ->first();
 
         if ($sizeItem) {
-            \App\Models\StudentSizeHistory::create([
+            StudentSizeHistory::create([
                 'size_item_id' => $sizeItem->id,
                 'old_size' => $oldSize,
                 'new_size' => $newSize,
@@ -228,7 +234,7 @@ class DistributionService
 
             AuditService::log(
                 'size.updated',
-                \App\Models\StudentSizeItem::class,
+                StudentSizeItem::class,
                 $sizeItem->id,
                 ['size' => $oldSize],
                 ['size' => $newSize, 'changed_by' => $staff->id, 'item_id' => $item->id]
