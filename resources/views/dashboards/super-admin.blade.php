@@ -241,15 +241,27 @@
             if (res.data.c2Categories?.length) {
                 const ds = res.data.c2Datasets;
                 new Chart(document.getElementById('c2Chart'), {
-                    type: 'bar',
+                    type: 'line',
                     data: {
                         labels: res.data.c2Categories,
-                        datasets: ds.map((d, i) => ({ label: d.label, data: d.data, backgroundColor: palette[i % palette.length], borderRadius: 3, barThickness: 14 }))
+                        datasets: ds.map((d, i) => ({
+                            label: d.label,
+                            data: d.data,
+                            borderColor: palette[i % palette.length],
+                            backgroundColor: palette[i % palette.length],
+                            fill: false,
+                            tension: 0.3,
+                            pointStyle: 'circle',
+                            pointRadius: 4,
+                            pointHoverRadius: 7,
+                            pointBackgroundColor: palette[i % palette.length],
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2,
+                        }))
                     },
                     options: {
                         ...sharedOpts,
                         scales: {
-                            x: { ticks: { font: labelFont } },
                             y: { ticks: { font: tickFont, callback: v => 'Rp' + (v/1000000).toFixed(1) + 'jt' } }
                         },
                         plugins: {
