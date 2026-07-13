@@ -1,13 +1,3 @@
-{{--
-  Stat Card Component
-  Props:
-    - $title: string — Statistic label
-    - $value: mixed — Main value
-    - $icon: string (optional) — SVG icon HTML string
-    - $color: string (optional) — 'primary'|'green'|'amber'|'red'|'blue'
-    - $trend: string (optional) — Additional description text
-    - $href: string (optional) — Link if card is clickable
---}}
 @props([
     'title',
     'value',
@@ -16,6 +6,7 @@
     'trend' => null,
     'href' => null,
     'xValue' => null,
+    'loading' => false,
 ])
 
 @php
@@ -25,6 +16,7 @@ $colorMap = [
     'amber'   => ['bg' => 'bg-amber-50',   'text' => 'text-amber-700',   'icon_bg' => 'bg-amber-100'],
     'red'     => ['bg' => 'bg-red-50',     'text' => 'text-red-700',     'icon_bg' => 'bg-red-100'],
     'blue'    => ['bg' => 'bg-blue-50',    'text' => 'text-blue-700',    'icon_bg' => 'bg-blue-100'],
+    'teal'    => ['bg' => 'bg-teal-50',    'text' => 'text-teal-700',    'icon_bg' => 'bg-teal-100'],
 ];
 $c = $colorMap[$color] ?? $colorMap['primary'];
 $tag = $href ? 'a' : 'div';
@@ -34,6 +26,15 @@ $tag = $href ? 'a' : 'div';
     @if($href) href="{{ $href }}" @endif
     class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm {{ $href ? 'hover:shadow-md hover:border-gray-300 transition-all duration-150 cursor-pointer' : '' }}">
 
+    @if($loading)
+        <div class="animate-pulse">
+            <div class="h-3 w-24 bg-gray-200 rounded mb-3"></div>
+            <div class="h-8 w-16 bg-gray-200 rounded mb-2"></div>
+            @if($trend)
+                <div class="h-3 w-32 bg-gray-200 rounded"></div>
+            @endif
+        </div>
+    @else
     <div class="flex items-start justify-between">
         <div class="flex-1 min-w-0">
             <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider truncate">{{ $title }}</p>
@@ -51,5 +52,6 @@ $tag = $href ? 'a' : 'div';
             </div>
         @endif
     </div>
+    @endif
 
 </{{ $tag }}>
