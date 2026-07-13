@@ -19,12 +19,12 @@
                                 <select id="level_select" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500 text-sm">
                                     <option value="">-- Select Program Level --</option>
                                     @foreach($programLevels as $level)
-                                        <option value="{{ $level->code }}">{{ $level->label }} ({{ $level->code }})</option>
+                                        <option value="{{ $level->code }}">{{ $level->name }} ({{ $level->code }})</option>
                                     @endforeach
                                 </select>
                             </div>
                             <div>
-                                <x-input-label for="prodi_select" :value="__('Study Program') />
+                                <x-input-label for="prodi_select" :value="__('Study Program')" />
                                 <select id="prodi_select" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500 text-sm">
                                     <option value="">-- Select Study Program --</option>
                                     @foreach($studyPrograms as $prodi)
@@ -35,7 +35,7 @@
                                 </select>
                             </div>
                             <div>
-                                <x-input-label for="code" :value="__('Entitlement Code (Auto)') />
+                                <x-input-label for="code" :value="__('Entitlement Code (Auto)')" />
                                 <x-text-input id="code" name="code" type="text" class="mt-1 block w-full bg-gray-50 text-gray-500 font-mono" :value="old('code')" placeholder="Auto-generated..." required readonly />
                                 <x-input-error :messages="$errors->get('code')" class="mt-2" />
                             </div>

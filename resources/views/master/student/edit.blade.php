@@ -43,27 +43,25 @@
 
                             <div>
                                 <x-input-label for="study_program_id" :value="__('Study Program')" />
-                                @php
-                                    $prodiOptions = $studyPrograms->map(fn($p) => [
-                                        'value' => $p->id,
-                                        'label' => $p->name,
-                                        'group' => $p->faculty->code ?? '',
-                                    ])->toArray();
-                                @endphp
-                                <x-searchable-select name="study_program_id" :options="$prodiOptions" :value="old('study_program_id', $student->study_program_id)" placeholder="-- Select Study Program --" :required="true" />
+                                <select id="study_program_id" name="study_program_id" required
+                                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500">
+                                    <option value="">-- Select Study Program --</option>
+                                    @foreach($studyPrograms as $p)
+                                        <option value="{{ $p->id }}" {{ old('study_program_id', $student->study_program_id) == $p->id ? 'selected' : '' }}>{{ $p->name }}</option>
+                                    @endforeach
+                                </select>
                                 <x-input-error :messages="$errors->get('study_program_id')" class="mt-2" />
                             </div>
 
                             <div>
                                 <x-input-label for="program_level_id" :value="__('Level / Batch')" />
-                                @php
-                                    $levelOptions = $programLevels->map(fn($l) => [
-                                        'value' => $l->id,
-                                        'label' => $l->name,
-                                        'group' => '',
-                                    ])->toArray();
-                                @endphp
-                                <x-searchable-select name="program_level_id" :options="$levelOptions" :value="old('program_level_id', $student->program_level_id)" placeholder="-- Select Level --" :required="true" />
+                                <select id="program_level_id" name="program_level_id" required
+                                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500">
+                                    <option value="">-- Select Level --</option>
+                                    @foreach($programLevels as $l)
+                                        <option value="{{ $l->id }}" {{ old('program_level_id', $student->program_level_id) == $l->id ? 'selected' : '' }}>{{ $l->name }}</option>
+                                    @endforeach
+                                </select>
                                 <x-input-error :messages="$errors->get('program_level_id')" class="mt-2" />
                             </div>
 

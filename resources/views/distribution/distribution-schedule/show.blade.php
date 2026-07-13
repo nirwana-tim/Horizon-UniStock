@@ -18,10 +18,6 @@
                                 <dd class="mt-1 text-sm text-gray-900 font-semibold">{{ $distributionSchedule->name }}</dd>
                             </div>
                             <div class="bg-gray-50 p-4 rounded-lg">
-                                <dt class="text-sm font-medium text-gray-500">{{ __('Period') }}</dt>
-                                <dd class="mt-1 text-sm text-gray-900 font-semibold">{{ $distributionSchedule->period ?? '-' }}</dd>
-                            </div>
-                            <div class="bg-gray-50 p-4 rounded-lg">
                                 <dt class="text-sm font-medium text-gray-500">{{ __('Semester') }}</dt>
                                 <dd class="mt-1 text-sm text-gray-900 font-semibold">{{ $distributionSchedule->semester ?? '-' }}</dd>
                             </div>
