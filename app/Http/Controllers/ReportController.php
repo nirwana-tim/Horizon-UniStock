@@ -18,6 +18,7 @@ use App\Models\ItemCategory;
 use App\Models\StockOpname;
 use App\Services\ReportService;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\View\View;
 
@@ -153,6 +154,24 @@ class ReportController extends Controller
         $years = range(now()->year, 2020);
 
         return view('report.sales-dashboard', compact('month', 'year', 'months', 'years') + $data);
+    }
+
+    public function distributionRecap(Request $request): View|JsonResponse
+    {
+        $period = $request->input('period');
+        $studyProgramId = $request->input('study_program_id');
+
+        $data = app(ReportService::class)->getDistributionRecap($period, $studyProgramId);
+
+        if ($request->ajax()) {
+            $html = view('report.distribution-recap', compact('data'))->render();
+            return response()->json(compact('html'));
+        }
+
+        $periods = DistributionSchedule::select('period')->whereNotNull('period')->groupBy('period')->orderBy('period', 'desc')->pluck('period', 'period');
+        $studyPrograms = StudyProgram::orderBy('name', 'asc')->get();
+
+        return view('report.distribution-recap', compact('data', 'periods', 'studyPrograms', 'period', 'studyProgramId'));
     }
 
     public function loss(Request $request)

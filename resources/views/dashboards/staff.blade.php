@@ -68,7 +68,7 @@
                     <label class="block text-xs font-semibold text-gray-700 mb-1.5">Student NIM</label>
                     <div class="flex gap-2">
                         <input type="text"
-                               name="nim"
+                               name="query"
                                placeholder="Type student NIM..."
                                required
                                class="flex-1 px-3 py-2.5 h-11 text-sm bg-white border border-gray-200 rounded-lg

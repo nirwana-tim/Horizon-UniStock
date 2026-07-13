@@ -39,6 +39,28 @@
                     </div>
                 </div>
 
+                {{-- Distribution Recap --}}
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border border-primary-100 shadow-primary-50">
+                    <div class="p-6 text-gray-900">
+                        <div class="flex items-center mb-4">
+                            <div class="flex-shrink-0 w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center">
+                                <svg class="w-6 h-6 text-primary-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+                                </svg>
+                            </div>
+                            <h3 class="ml-4 text-lg font-semibold text-gray-900">Rekap Pembagian</h3>
+                        </div>
+                        <p class="text-sm text-gray-500 mb-4">Distribution recap: eligible, received, and remaining per study program.</p>
+                        <a href="{{ route('report.distribution-recap') }}" class="w-full inline-flex items-center justify-center px-4 py-2 bg-primary-700 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-primary-800 transition ease-in-out duration-150">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                            </svg>
+                            View Recap
+                        </a>
+                    </div>
+                </div>
+
                 {{-- Stok Inventaris --}}
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6 text-gray-900">

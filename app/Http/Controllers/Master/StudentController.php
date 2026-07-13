@@ -113,9 +113,9 @@ class StudentController extends Controller
         )
             ->with(['item', 'transaction.schedule'])
             ->get()
-            ->groupBy(fn ($di) => $di->item->base_code ?? $di->item_id)
+            ->groupBy(fn ($di) => $di->item?->base_code ?? $di->item_id)
             ->map(fn ($items) => [
-                'item' => $items->first()->item,
+                'item' => $items->first()?->item,
                 'total_qty' => $items->sum('quantity'),
                 'details' => $items->map(fn ($di) => [
                     'quantity' => $di->quantity,

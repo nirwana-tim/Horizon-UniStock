@@ -206,6 +206,52 @@ class ReportService
             ->get();
     }
 
+    public function getDistributionRecap(?string $period = null, ?int $studyProgramId = null): Collection
+    {
+        $receivedSub = DB::table('distribution_transactions')
+            ->select('students.study_program_id',
+                DB::raw('COUNT(DISTINCT distribution_transactions.student_id) as total_received'))
+            ->join('students', 'students.id', '=', 'distribution_transactions.student_id')
+            ->whereIn('distribution_transactions.status', ['completed', 'partial']);
+
+        if ($period) {
+            $receivedSub->whereExists(function ($q) use ($period) {
+                $q->select(DB::raw(1))
+                    ->from('distribution_schedules')
+                    ->whereColumn('distribution_schedules.id', '=', 'distribution_transactions.schedule_id')
+                    ->where('distribution_schedules.period', '=', $period);
+            });
+        }
+
+        $receivedSub->groupBy('students.study_program_id');
+
+        $query = DB::table('study_programs')
+            ->select(
+                'study_programs.id',
+                'study_programs.name as study_program_name',
+                DB::raw('COALESCE(eligible.total_eligible, 0) as total_eligible'),
+                DB::raw('COALESCE(received.total_received, 0) as total_received'),
+                DB::raw('COALESCE(eligible.total_eligible, 0) - COALESCE(received.total_received, 0) as not_received')
+            )
+            ->leftJoin(DB::raw('(
+                SELECT students.study_program_id, COUNT(DISTINCT students.id) as total_eligible
+                FROM eligibility_records
+                JOIN students ON students.id = eligibility_records.student_id
+                WHERE eligibility_records.is_eligible = 1
+                GROUP BY students.study_program_id
+            ) as eligible'), 'eligible.study_program_id', '=', 'study_programs.id')
+            ->leftJoinSub($receivedSub, 'received', 'received.study_program_id', '=', 'study_programs.id')
+            ->where(function ($q) {
+                $q->whereNotNull('eligible.total_eligible')->orWhereNotNull('received.total_received');
+            });
+
+        if ($studyProgramId) {
+            $query->where('study_programs.id', $studyProgramId);
+        }
+
+        return $query->orderBy('study_programs.name')->get();
+    }
+
     public function getSizeDistributionData(): Collection
     {
         return DB::table('student_size_items')

@@ -13,8 +13,10 @@
             @include('profile.partials.update-password-form')
         </div>
 
+        @unless($student)
         <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
             @include('profile.partials.delete-user-form')
         </div>
+        @endunless
     </div>
 </x-app-layout>
