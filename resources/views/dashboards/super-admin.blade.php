@@ -212,16 +212,26 @@
             const tickFont = { size: 10 };
             const labelFont = { size: 10 };
 
+            const sharedOpts = {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: { duration: 800, easing: 'easeOutQuart' },
+                interaction: { mode: 'nearest', axis: 'x', intersect: false },
+                plugins: {
+                    tooltip: { usePointStyle: true, backgroundColor: '#1F2937', titleFont: { size: 11 }, bodyFont: { size: 10 }, padding: 8, cornerRadius: 6 }
+                }
+            };
+
             if (res.data.c1Labels?.length) {
                 new Chart(document.getElementById('c1Chart'), {
                     type: 'bar',
                     data: {
                         labels: res.data.c1Labels,
-                        datasets: [{ label: 'Unit Sold', data: res.data.c1Data, backgroundColor: primary, borderRadius: 4 }]
+                        datasets: [{ label: 'Unit Sold', data: res.data.c1Data, backgroundColor: primary, borderRadius: 4, barThickness: 20 }]
                     },
                     options: {
-                        responsive: true, maintainAspectRatio: false,
-                        plugins: { legend: { display: false } },
+                        ...sharedOpts,
+                        plugins: { ...sharedOpts.plugins, legend: { display: false } },
                         scales: { y: { ticks: { font: tickFont } }, x: { ticks: { font: labelFont, maxRotation: 45 } } }
                     }
                 });
@@ -236,12 +246,15 @@
                         datasets: ds.map((d, i) => ({ label: d.label, data: d.data, backgroundColor: palette[i % palette.length], borderRadius: 3 }))
                     },
                     options: {
-                        responsive: true, maintainAspectRatio: false,
+                        ...sharedOpts,
                         scales: {
                             x: { stacked: true },
                             y: { stacked: true, ticks: { font: tickFont, callback: v => 'Rp' + (v/1000000).toFixed(1) + 'jt' } }
                         },
-                        plugins: { legend: { display: false } }
+                        plugins: {
+                            ...sharedOpts.plugins,
+                            legend: { position: 'top', labels: { boxWidth: 12, font: { size: 9 }, padding: 8 } }
+                        }
                     }
                 });
             } else { toggleEmpty('c2'); }
@@ -252,17 +265,43 @@
                     data: {
                         labels: res.data.months,
                         datasets: [
-                            { label: 'Revenue', type: 'bar', data: res.data.revenue, backgroundColor: primary, borderRadius: 4, yAxisID: 'y' },
-                            { label: 'Unit Sold', type: 'line', data: res.data.units, borderColor: '#2563EB', backgroundColor: 'rgba(37,99,235,0.08)', fill: true, tension: 0.3, pointRadius: 3, pointBackgroundColor: '#2563EB', yAxisID: 'y1' }
+                            {
+                                label: 'Revenue',
+                                type: 'bar',
+                                data: res.data.revenue,
+                                backgroundColor: primary,
+                                borderRadius: 4,
+                                yAxisID: 'y',
+                                barThickness: 16
+                            },
+                            {
+                                label: 'Unit Sold',
+                                type: 'line',
+                                data: res.data.units,
+                                borderColor: '#2563EB',
+                                backgroundColor: 'rgba(37,99,235,0.10)',
+                                fill: 'origin',
+                                tension: 0.4,
+                                pointStyle: 'circle',
+                                pointRadius: 4,
+                                pointHoverRadius: 8,
+                                pointBackgroundColor: '#2563EB',
+                                pointBorderColor: '#fff',
+                                pointBorderWidth: 2,
+                                yAxisID: 'y1'
+                            }
                         ]
                     },
                     options: {
-                        responsive: true, maintainAspectRatio: false,
+                        ...sharedOpts,
                         scales: {
                             y: { position: 'left', ticks: { font: tickFont, callback: v => (v/1000000).toFixed(1) + 'jt' } },
                             y1: { position: 'right', grid: { drawOnChartArea: false }, ticks: { font: tickFont } }
                         },
-                        plugins: { legend: { position: 'top', labels: { boxWidth: 12, font: { size: 10 }, padding: 12 } } }
+                        plugins: {
+                            ...sharedOpts.plugins,
+                            legend: { position: 'top', labels: { boxWidth: 12, font: { size: 10 }, padding: 12 } }
+                        }
                     }
                 });
             } else { toggleEmpty('c3'); }
@@ -272,12 +311,13 @@
                     type: 'bar',
                     data: {
                         labels: res.data.c4Labels,
-                        datasets: [{ label: 'Stock', data: res.data.c4Data, backgroundColor: primary, borderRadius: 4 }]
+                        datasets: [{ label: 'Stock', data: res.data.c4Data, backgroundColor: primary, borderRadius: 4, barThickness: 16 }]
                     },
                     options: {
-                        responsive: true, maintainAspectRatio: false,
-                        plugins: { legend: { display: false } },
-                        scales: { y: { ticks: { font: tickFont } }, x: { ticks: { font: labelFont, maxRotation: 45 } } }
+                        ...sharedOpts,
+                        indexAxis: 'y',
+                        plugins: { ...sharedOpts.plugins, legend: { display: false } },
+                        scales: { x: { ticks: { font: tickFont } }, y: { ticks: { font: labelFont } } }
                     }
                 });
             } else { toggleEmpty('c4'); }
@@ -285,18 +325,23 @@
             if (res.data.c5Categories?.length) {
                 const ds5 = res.data.c5Datasets;
                 new Chart(document.getElementById('c5Chart'), {
-                    type: 'bar',
+                    type: 'doughnut',
                     data: {
                         labels: res.data.c5Categories,
-                        datasets: ds5.map((d, i) => ({ label: d.label, data: d.data, backgroundColor: palette[i % palette.length], borderRadius: 3 }))
+                        datasets: [{
+                            data: ds5.map(d => d.data.reduce((a, b) => a + b, 0)),
+                            backgroundColor: palette.slice(0, ds5.length),
+                            borderWidth: 2,
+                            borderColor: '#fff',
+                        }]
                     },
                     options: {
-                        responsive: true, maintainAspectRatio: false,
-                        scales: {
-                            x: { stacked: true },
-                            y: { stacked: true, ticks: { font: tickFont, callback: v => 'Rp' + (v/1000000).toFixed(1) + 'jt' } }
-                        },
-                        plugins: { legend: { display: false } }
+                        ...sharedOpts,
+                        cutout: '65%',
+                        plugins: {
+                            ...sharedOpts.plugins,
+                            legend: { position: 'bottom', labels: { boxWidth: 10, padding: 6, font: { size: 10 } } }
+                        }
                     }
                 });
             } else { toggleEmpty('c5'); }
@@ -311,12 +356,14 @@
                             backgroundColor: palette.slice(0, res.data.c6Labels.length),
                             borderWidth: 2,
                             borderColor: '#fff',
+                            spacing: 4,
                         }]
                     },
                     options: {
-                        responsive: true, maintainAspectRatio: false,
+                        ...sharedOpts,
                         cutout: '60%',
                         plugins: {
+                            ...sharedOpts.plugins,
                             legend: { position: 'bottom', labels: { boxWidth: 10, padding: 6, font: { size: 10 } } }
                         }
                     }
