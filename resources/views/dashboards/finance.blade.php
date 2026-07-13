@@ -227,12 +227,13 @@
                     type: 'bar',
                     data: {
                         labels: res.data.c1Labels,
-                        datasets: [{ label: 'Unit Sold', data: res.data.c1Data, backgroundColor: primary, borderRadius: 4, barThickness: 20 }]
+                        datasets: [{ label: 'Unit Sold', data: res.data.c1Data, backgroundColor: primary, borderRadius: 4, barThickness: 18 }]
                     },
                     options: {
                         ...sharedOpts,
+                        indexAxis: 'y',
                         plugins: { ...sharedOpts.plugins, legend: { display: false } },
-                        scales: { y: { ticks: { font: tickFont } }, x: { ticks: { font: labelFont, maxRotation: 45 } } }
+                        scales: { x: { ticks: { font: tickFont } }, y: { ticks: { font: labelFont } } }
                     }
                 });
             } else { toggleEmpty('c1'); }
@@ -243,13 +244,13 @@
                     type: 'bar',
                     data: {
                         labels: res.data.c2Categories,
-                        datasets: ds.map((d, i) => ({ label: d.label, data: d.data, backgroundColor: palette[i % palette.length], borderRadius: 3 }))
+                        datasets: ds.map((d, i) => ({ label: d.label, data: d.data, backgroundColor: palette[i % palette.length], borderRadius: 3, barThickness: 14 }))
                     },
                     options: {
                         ...sharedOpts,
                         scales: {
-                            x: { stacked: true },
-                            y: { stacked: true, ticks: { font: tickFont, callback: v => 'Rp' + (v/1000000).toFixed(1) + 'jt' } }
+                            x: { ticks: { font: labelFont } },
+                            y: { ticks: { font: tickFont, callback: v => 'Rp' + (v/1000000).toFixed(1) + 'jt' } }
                         },
                         plugins: {
                             ...sharedOpts.plugins,
@@ -308,16 +309,22 @@
 
             if (res.data.c4Labels?.length) {
                 new Chart(document.getElementById('c4Chart'), {
-                    type: 'bar',
+                    type: 'polarArea',
                     data: {
                         labels: res.data.c4Labels,
-                        datasets: [{ label: 'Stock', data: res.data.c4Data, backgroundColor: primary, borderRadius: 4, barThickness: 16 }]
+                        datasets: [{
+                            data: res.data.c4Data,
+                            backgroundColor: palette.slice(0, res.data.c4Labels.length),
+                            borderColor: '#fff',
+                            borderWidth: 2
+                        }]
                     },
                     options: {
                         ...sharedOpts,
-                        indexAxis: 'y',
-                        plugins: { ...sharedOpts.plugins, legend: { display: false } },
-                        scales: { x: { ticks: { font: tickFont } }, y: { ticks: { font: labelFont } } }
+                        plugins: {
+                            ...sharedOpts.plugins,
+                            legend: { position: 'bottom', labels: { boxWidth: 10, padding: 6, font: { size: 10 } } }
+                        }
                     }
                 });
             } else { toggleEmpty('c4'); }
