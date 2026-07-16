@@ -40,6 +40,8 @@ Route::get('/dashboard', DashboardController::class)->middleware(['auth', 'verif
 Route::get('/dashboard/stats', [DashboardController::class, 'stats'])->middleware(['auth', 'verified'])->name('dashboard.stats');
 Route::get('/dashboard/low-stock', [DashboardController::class, 'lowStock'])->middleware(['auth', 'verified'])->name('dashboard.low-stock');
 Route::get('/dashboard/sales-chart', [DashboardController::class, 'salesChart'])->middleware(['auth', 'verified'])->name('dashboard.sales-chart');
+Route::get('/dashboard/stock-out', [DashboardController::class, 'stockOut'])->middleware(['auth', 'verified'])->name('dashboard.stock-out');
+Route::get('/dashboard/stock-balance', [DashboardController::class, 'stockBalance'])->middleware(['auth', 'verified'])->name('dashboard.stock-balance');
 
 Route::middleware(['auth', 'password.changed'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
