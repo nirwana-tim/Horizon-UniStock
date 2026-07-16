@@ -9,6 +9,7 @@ use App\Models\Faculty;
 use App\Models\Item;
 use App\Models\StockBalance;
 use App\Models\StockOpname;
+use App\Models\StockMovement;
 use App\Models\StockReceive;
 use App\Models\Student;
 use App\Models\StudyProgram;
@@ -16,6 +17,7 @@ use App\Models\User;
 use App\Services\ReportService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
@@ -31,7 +33,17 @@ class DashboardController extends Controller
         }
 
         if ($user->hasRole(Role::Admin->value)) {
-            return view('dashboards.finance');
+            $stockOuts = StockMovement::with('item')
+                ->where('type', 'OUT')
+                ->latest()
+                ->paginate(20);
+
+            $stockBalances = Item::with('category')
+                ->withSum('stockBalances', 'quantity')
+                ->orderBy('name')
+                ->paginate(20);
+
+            return view('dashboards.finance', compact('stockOuts', 'stockBalances'));
         }
 
         if ($user->hasRole(Role::Staff->value)) {
@@ -56,12 +68,12 @@ class DashboardController extends Controller
         }
 
         return response()->json([
-            'totalFaculties' => Faculty::count(),
-            'totalStudyPrograms' => StudyProgram::count(),
             'totalItems' => Item::count(),
-            'monthlyReceives' => StockReceive::whereMonth('receive_date', now()->month)->count(),
-            'draftOpnames' => StockOpname::where('status', 'draft')->count(),
-            'outOfStockItems' => StockBalance::where('quantity', '<=', 0)->count(),
+            'totalStockIn' => StockMovement::where('type', 'IN')->sum('quantity'),
+            'totalStockOut' => StockMovement::where('type', 'OUT')->sum('quantity'),
+            'criticalItems' => StockBalance::where('quantity', '>', 0)
+                ->where('quantity', '<=', 5)
+                ->count(),
         ]);
     }
 
@@ -210,6 +222,50 @@ class DashboardController extends Controller
         return view('dashboards._low-stock', compact('lowStockItems'));
     }
 
+    public function stockOut(Request $request): View|JsonResponse
+    {
+        $query = StockMovement::with('item')
+            ->where('type', 'OUT');
+
+        if ($search = $request->input('q')) {
+            $search = str_replace(['%', '_'], ['\%', '\_'], $search);
+            $query->whereHas('item', fn($q) => $q->where('name', 'like', "%{$search}%"));
+        }
+
+        $stockOuts = $query->latest()->paginate(20);
+
+        if ($request->ajax()) {
+            return response()->json([
+                'html' => view('dashboards._stock-out-table', compact('stockOuts'))->render(),
+                'pagination' => view('components.alpine-pagination', ['paginator' => $stockOuts])->render(),
+            ]);
+        }
+
+        return view('dashboards._stock-out-table', compact('stockOuts'));
+    }
+
+    public function stockBalance(Request $request): View|JsonResponse
+    {
+        $query = Item::with('category')
+            ->withSum('stockBalances', 'quantity');
+
+        if ($search = $request->input('q')) {
+            $search = str_replace(['%', '_'], ['\%', '\_'], $search);
+            $query->where('name', 'like', "%{$search}%");
+        }
+
+        $stockBalances = $query->orderBy('name')->paginate(20);
+
+        if ($request->ajax()) {
+            return response()->json([
+                'html' => view('dashboards._stock-balance-table', compact('stockBalances'))->render(),
+                'pagination' => view('components.alpine-pagination', ['paginator' => $stockBalances])->render(),
+            ]);
+        }
+
+        return view('dashboards._stock-balance-table', compact('stockBalances'));
+    }
+
     private function staffDashboard(): View
     {
         $activeSchedule = DistributionSchedule::with('programLevel', 'faculty')
@@ -231,11 +287,19 @@ class DashboardController extends Controller
     private function studentDashboard(): View
     {
         $student = Student::where('user_id', Auth::id())->firstOrFail();
-        $student->load(['activeSizeProfile', 'studyProgram', 'programLevel']);
+        $student->load(['activeSizeProfile.sizeItems.item', 'studyProgram', 'programLevel']);
+
+        $selectedSizes = [];
+        if ($student->activeSizeProfile) {
+            foreach ($student->activeSizeProfile->sizeItems as $si) {
+                $selectedSizes[$si->item_id] = ['size' => $si->size, 'name' => $si->item?->name ?? 'Item'];
+            }
+        }
 
         $data = [
             'student' => $student,
             'hasFilledSize' => ! is_null($student->activeSizeProfile),
+            'selectedSizes' => $selectedSizes,
             'hasQr' => true,
             'activeSchedules' => DistributionSchedule::query()
                 ->where('is_active', true)

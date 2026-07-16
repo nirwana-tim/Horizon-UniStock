@@ -1,410 +1,115 @@
 <x-app-layout>
-    <div x-data="{
-        loading: true,
-        stats: { totalFaculties: 0, totalStudyPrograms: 0, totalItems: 0, monthlyReceives: 0, draftOpnames: 0, outOfStockItems: 0 },
-        lowStockHtml: '',
-        init() {
-            axios.get('{{ route('dashboard.stats') }}').then(res => {
-                this.stats = res.data;
-                this.loading = false;
-            });
-            axios.get('{{ route('dashboard.low-stock') }}').then(res => {
-                this.lowStockHtml = res.data.html;
-            });
-        }
-    }">
+    <div class="max-w-7xl mx-auto">
 
-    <x-page-header title="Finance Dashboard" subtitle="Monitor uniform distribution, stock, and system activity">
-        <x-slot name="breadcrumb">
-            <span class="text-gray-800 font-medium">Dashboard</span>
-        </x-slot>
-    </x-page-header>
+        <x-page-header title="Dashboard Inventaris" subtitle="Pantau stok keluar dan sisa stok terkini">
+            <x-slot name="breadcrumb">
+                <span class="text-gray-800 font-medium">Dashboard</span>
+            </x-slot>
+        </x-page-header>
 
-    {{-- Stat Cards --}}
-    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
-
-        <x-stat-card
-            title="Faculties"
-            value="0"
-            color="primary"
-            xValue="stats.totalFaculties"
-            :loading="false"
-            x-show="!loading"
-            iconPath="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-
-        <x-stat-card
-            title="Faculties"
-            value="0"
-            color="primary"
-            loading
-            x-show="loading"
-            iconPath="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-
-        <x-stat-card
-            title="Study Programs"
-            value="0"
-            color="blue"
-            xValue="stats.totalStudyPrograms"
-            :loading="false"
-            x-show="!loading"
-            iconPath="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-
-        <x-stat-card
-            title="Study Programs"
-            value="0"
-            color="blue"
-            loading
-            x-show="loading"
-            iconPath="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-
-        <x-stat-card
-            title="Total Item"
-            value="0"
-            color="green"
-            xValue="stats.totalItems"
-            :loading="false"
-            x-show="!loading"
-            iconPath="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10" />
-
-        <x-stat-card
-            title="Total Item"
-            value="0"
-            color="green"
-            loading
-            x-show="loading"
-            iconPath="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10" />
-
-        <x-stat-card
-            title="This Month Receives"
-            value="0"
-            color="teal"
-            xValue="stats.monthlyReceives"
-            :loading="false"
-            x-show="!loading"
-            iconPath="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-
-        <x-stat-card
-            title="This Month Receives"
-            value="0"
-            color="teal"
-            loading
-            x-show="loading"
-            iconPath="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-
-        <x-stat-card
-            title="Opname Draft"
-            value="0"
-            color="amber"
-            xValue="stats.draftOpnames"
-            :loading="false"
-            x-show="!loading"
-            iconPath="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-
-        <x-stat-card
-            title="Opname Draft"
-            value="0"
-            color="amber"
-            loading
-            x-show="loading"
-            iconPath="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-
-    </div>
-
-    {{-- Low Stock Alert --}}
-    <div x-html="lowStockHtml"></div>
-
-    {{-- Section Label --}}
-    <div class="flex items-center gap-3 mb-4">
-        <h3 class="text-sm font-semibold text-gray-700">Sales &amp; Stock Overview</h3>
-        <div class="flex-1 h-px bg-gray-200"></div>
-    </div>
-
-    {{-- Charts Grid 2×3 --}}
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-
-        {{-- Chart 1: Unit Sold by Item --}}
-        <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
-            <h4 class="text-sm font-semibold text-gray-700 mb-3">Unit Sold by Item</h4>
-            <div class="relative" style="height:220px">
-                <canvas id="c1Chart"></canvas>
-                <div id="c1Empty" class="hidden absolute inset-0 flex flex-col items-center justify-center text-gray-400">
-                    <svg class="w-8 h-8 mb-2 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-                    <span class="text-xs">Belum ada data</span>
-                </div>
-            </div>
-        </div>
-
-        {{-- Chart 2: Revenue by Category --}}
-        <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
-            <h4 class="text-sm font-semibold text-gray-700 mb-3">Revenue by Category</h4>
-            <div class="relative" style="height:220px">
-                <canvas id="c2Chart"></canvas>
-                <div id="c2Empty" class="hidden absolute inset-0 flex flex-col items-center justify-center text-gray-400">
-                    <svg class="w-8 h-8 mb-2 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-                    <span class="text-xs">Belum ada data</span>
-                </div>
-            </div>
-        </div>
-
-        {{-- Chart 3: Monthly Revenue & Unit Sold --}}
-        <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
-            <h4 class="text-sm font-semibold text-gray-700 mb-3">Monthly Revenue &amp; Unit Sold</h4>
-            <div class="relative" style="height:220px">
-                <canvas id="c3Chart"></canvas>
-                <div id="c3Empty" class="hidden absolute inset-0 flex flex-col items-center justify-center text-gray-400">
-                    <svg class="w-8 h-8 mb-2 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-                    <span class="text-xs">Belum ada data</span>
-                </div>
-            </div>
-        </div>
-
-        {{-- Chart 4: Available Stock by Item --}}
-        <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
-            <h4 class="text-sm font-semibold text-gray-700 mb-3">Available Stock by Item</h4>
-            <div class="relative" style="height:220px">
-                <canvas id="c4Chart"></canvas>
-                <div id="c4Empty" class="hidden absolute inset-0 flex flex-col items-center justify-center text-gray-400">
-                    <svg class="w-8 h-8 mb-2 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10"/></svg>
-                    <span class="text-xs">Belum ada data</span>
-                </div>
-            </div>
-        </div>
-
-        {{-- Chart 5: Value Stock by Category --}}
-        <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
-            <h4 class="text-sm font-semibold text-gray-700 mb-3">Value Stock by Category</h4>
-            <div class="relative" style="height:220px">
-                <canvas id="c5Chart"></canvas>
-                <div id="c5Empty" class="hidden absolute inset-0 flex flex-col items-center justify-center text-gray-400">
-                    <svg class="w-8 h-8 mb-2 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10"/></svg>
-                    <span class="text-xs">Belum ada data</span>
-                </div>
-            </div>
-        </div>
-
-        {{-- Chart 6: % Unit Sold by Item --}}
-        <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
-            <h4 class="text-sm font-semibold text-gray-700 mb-3">% Unit Sold by Item</h4>
-            <div class="relative" style="height:220px">
-                <canvas id="c6Chart"></canvas>
-                <div id="c6Empty" class="hidden absolute inset-0 flex flex-col items-center justify-center text-gray-400">
-                    <svg class="w-8 h-8 mb-2 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/></svg>
-                    <span class="text-xs">Belum ada data</span>
-                </div>
-            </div>
-        </div>
-
-    </div>
-
-    </div>
-    @push('scripts')
-    <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        axios.get('{{ route('dashboard.sales-chart') }}').then(res => {
-            const primary = '#980416';
-            const palette = ['#980416','#2563EB','#059669','#D97706','#7C3AED','#DC2626','#0891B2','#DB2777','#65A30D','#EA580C'];
-
-            function toggleEmpty(prefix) {
-                document.getElementById(prefix + 'Chart').classList.add('hidden');
-                document.getElementById(prefix + 'Empty').classList.remove('hidden');
+        {{-- Stat Cards --}}
+        <div x-data="{
+            loading: true,
+            stats: { totalItems: 0, totalStockIn: 0, totalStockOut: 0, criticalItems: 0 },
+            init() {
+                axios.get('{{ route('dashboard.stats') }}').then(res => {
+                    this.stats = res.data;
+                    this.loading = false;
+                });
             }
+        }">
+            <div x-show="!loading" x-cloak class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                <x-stat-card title="Total Item" value="0" color="primary" xValue="stats.totalItems" iconPath="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10" />
+                <x-stat-card title="Stok Masuk" value="0" color="blue" xValue="stats.totalStockIn" iconPath="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                <x-stat-card title="Stok Keluar" value="0" color="amber" xValue="stats.totalStockOut" iconPath="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                <x-stat-card title="Item Kritis" value="0" color="red" xValue="stats.criticalItems" iconPath="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </div>
+            <div x-show="loading" x-cloak class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                <x-stat-card title="Total Item" value="0" color="primary" loading />
+                <x-stat-card title="Stok Masuk" value="0" color="blue" loading />
+                <x-stat-card title="Stok Keluar" value="0" color="amber" loading />
+                <x-stat-card title="Item Kritis" value="0" color="red" loading />
+            </div>
+        </div>
 
-            const tickFont = { size: 10 };
-            const labelFont = { size: 10 };
+        {{-- Stok Keluar --}}
+        <div class="mb-8">
+            <h3 class="text-sm font-semibold text-gray-800 mb-4">Stok Keluar</h3>
 
-            const sharedOpts = {
-                responsive: true,
-                maintainAspectRatio: false,
-                animation: { duration: 800, easing: 'easeOutQuart' },
-                interaction: { mode: 'nearest', axis: 'x', intersect: false },
-                plugins: {
-                    tooltip: { usePointStyle: true, backgroundColor: '#1F2937', titleFont: { size: 11 }, bodyFont: { size: 10 }, padding: 8, cornerRadius: 6 }
-                }
-            };
+            <div x-data="serverTable('{{ route('dashboard.stock-out') }}')">
+                <div class="mb-3">
+                    <input type="text"
+                           x-model="search"
+                           @input.debounce.300ms="page=1; fetchData()"
+                           placeholder="Cari barang..."
+                           class="w-full lg:w-72 px-3 py-2 text-sm bg-white border border-gray-200 rounded-lg
+                                  text-gray-800 placeholder-gray-400
+                                  focus:border-primary-500 focus:ring-2 focus:ring-primary-100
+                                  transition-colors">
+                </div>
 
-            if (res.data.c1Labels?.length) {
-                new Chart(document.getElementById('c1Chart'), {
-                    type: 'line',
-                    data: {
-                        labels: res.data.c1Labels,
-                        datasets: [{
-                            label: 'Unit Sold',
-                            data: res.data.c1Data,
-                            borderColor: primary,
-                            backgroundColor: primary,
-                            fill: false,
-                            tension: 0.4,
-                            pointStyle: 'circle',
-                            pointRadius: 4,
-                            pointHoverRadius: 8,
-                            pointBackgroundColor: primary,
-                            pointBorderColor: '#fff',
-                            pointBorderWidth: 2,
-                        }]
-                    },
-                    options: {
-                        ...sharedOpts,
-                        scales: { y: { ticks: { font: tickFont } } },
-                        plugins: { ...sharedOpts.plugins, legend: { display: false } }
-                    }
-                });
-            } else { toggleEmpty('c1'); }
+                <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead>
+                                <tr class="bg-gray-50 border-b border-gray-200">
+                                    <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider w-10">#</th>
+                                    <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Barang</th>
+                                    <th class="px-5 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Jumlah</th>
+                                    <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Keterangan</th>
+                                    <th class="px-5 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Tanggal</th>
+                                </tr>
+                            </thead>
+                            <tbody x-html="tableHtml" class="divide-y divide-gray-100">
+                                @include('dashboards._stock-out-table')
+                            </tbody>
+                        </table>
+                    </div>
+                    <div x-html="paginationHtml" class="px-5 py-3 border-t border-gray-100">
+                        @component('components.alpine-pagination', ['paginator' => $stockOuts])@endcomponent
+                    </div>
+                </div>
+            </div>
+        </div>
 
-            if (res.data.c2Categories?.length) {
-                const totalRevenue = res.data.c2Categories.map((_, i) =>
-                    res.data.c2Datasets.reduce((sum, ds) => sum + (ds.data[i] || 0), 0)
-                );
-                new Chart(document.getElementById('c2Chart'), {
-                    type: 'line',
-                    data: {
-                        labels: res.data.c2Categories,
-                        datasets: [{
-                            label: 'Revenue',
-                            data: totalRevenue,
-                            borderColor: primary,
-                            backgroundColor: primary,
-                            fill: false,
-                            tension: 0.4,
-                            pointStyle: 'circle',
-                            pointRadius: 4,
-                            pointHoverRadius: 8,
-                            pointBackgroundColor: primary,
-                            pointBorderColor: '#fff',
-                            pointBorderWidth: 2,
-                        }]
-                    },
-                    options: {
-                        ...sharedOpts,
-                        scales: { y: { ticks: { font: tickFont, callback: v => 'Rp' + (v/1000000).toFixed(1) + 'jt' } } },
-                        plugins: { ...sharedOpts.plugins, legend: { display: false } }
-                    }
-                });
-            } else { toggleEmpty('c2'); }
+        {{-- Sisa Stok Per Item --}}
+        <div class="mb-8">
+            <h3 class="text-sm font-semibold text-gray-800 mb-4">Sisa Stok Per Item</h3>
 
-            if (res.data.months?.length) {
-                new Chart(document.getElementById('c3Chart'), {
-                    type: 'bar',
-                    data: {
-                        labels: res.data.months,
-                        datasets: [
-                            {
-                                label: 'Revenue',
-                                type: 'bar',
-                                data: res.data.revenue,
-                                backgroundColor: primary,
-                                borderRadius: 4,
-                                yAxisID: 'y',
-                                barThickness: 16
-                            },
-                            {
-                                label: 'Unit Sold',
-                                type: 'line',
-                                data: res.data.units,
-                                borderColor: '#2563EB',
-                                backgroundColor: 'rgba(37,99,235,0.10)',
-                                fill: 'origin',
-                                tension: 0.4,
-                                pointStyle: 'circle',
-                                pointRadius: 4,
-                                pointHoverRadius: 8,
-                                pointBackgroundColor: '#2563EB',
-                                pointBorderColor: '#fff',
-                                pointBorderWidth: 2,
-                                yAxisID: 'y1'
-                            }
-                        ]
-                    },
-                    options: {
-                        ...sharedOpts,
-                        scales: {
-                            y: { position: 'left', ticks: { font: tickFont, callback: v => (v/1000000).toFixed(1) + 'jt' } },
-                            y1: { position: 'right', grid: { drawOnChartArea: false }, ticks: { font: tickFont } }
-                        },
-                        plugins: {
-                            ...sharedOpts.plugins,
-                            legend: { position: 'top', labels: { boxWidth: 12, font: { size: 10 }, padding: 12 } }
-                        }
-                    }
-                });
-            } else { toggleEmpty('c3'); }
+            <div x-data="serverTable('{{ route('dashboard.stock-balance') }}')">
+                <div class="mb-3">
+                    <input type="text"
+                           x-model="search"
+                           @input.debounce.300ms="page=1; fetchData()"
+                           placeholder="Cari barang..."
+                           class="w-full lg:w-72 px-3 py-2 text-sm bg-white border border-gray-200 rounded-lg
+                                  text-gray-800 placeholder-gray-400
+                                  focus:border-primary-500 focus:ring-2 focus:ring-primary-100
+                                  transition-colors">
+                </div>
 
-            if (res.data.c4Labels?.length) {
-                new Chart(document.getElementById('c4Chart'), {
-                    type: 'line',
-                    data: {
-                        labels: res.data.c4Labels,
-                        datasets: [{
-                            label: 'Stock',
-                            data: res.data.c4Data,
-                            borderColor: primary,
-                            backgroundColor: primary,
-                            fill: false,
-                            tension: 0.4,
-                            pointStyle: 'circle',
-                            pointRadius: 4,
-                            pointHoverRadius: 8,
-                            pointBackgroundColor: primary,
-                            pointBorderColor: '#fff',
-                            pointBorderWidth: 2,
-                        }]
-                    },
-                    options: {
-                        ...sharedOpts,
-                        scales: { y: { ticks: { font: tickFont } } },
-                        plugins: { ...sharedOpts.plugins, legend: { display: false } }
-                    }
-                });
-            } else { toggleEmpty('c4'); }
+                <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead>
+                                <tr class="bg-gray-50 border-b border-gray-200">
+                                    <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider w-10">#</th>
+                                    <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Barang</th>
+                                    <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Kategori</th>
+                                    <th class="px-5 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Stok</th>
+                                </tr>
+                            </thead>
+                            <tbody x-html="tableHtml" class="divide-y divide-gray-100">
+                                @include('dashboards._stock-balance-table')
+                            </tbody>
+                        </table>
+                    </div>
+                    <div x-html="paginationHtml" class="px-5 py-3 border-t border-gray-100">
+                        @component('components.alpine-pagination', ['paginator' => $stockBalances])@endcomponent
+                    </div>
+                </div>
+            </div>
+        </div>
 
-            if (res.data.c5Categories?.length) {
-                const ds5 = res.data.c5Datasets;
-                new Chart(document.getElementById('c5Chart'), {
-                    type: 'doughnut',
-                    data: {
-                        labels: res.data.c5Categories,
-                        datasets: [{
-                            data: ds5.map(d => d.data.reduce((a, b) => a + b, 0)),
-                            backgroundColor: palette.slice(0, ds5.length),
-                            borderWidth: 2,
-                            borderColor: '#fff',
-                        }]
-                    },
-                    options: {
-                        ...sharedOpts,
-                        cutout: '65%',
-                        plugins: {
-                            ...sharedOpts.plugins,
-                            legend: { position: 'bottom', labels: { boxWidth: 10, padding: 6, font: { size: 10 } } }
-                        }
-                    }
-                });
-            } else { toggleEmpty('c5'); }
-
-            if (res.data.c6Labels?.length) {
-                new Chart(document.getElementById('c6Chart'), {
-                    type: 'doughnut',
-                    data: {
-                        labels: res.data.c6Labels,
-                        datasets: [{
-                            data: res.data.c6Data,
-                            backgroundColor: palette.slice(0, res.data.c6Labels.length),
-                            borderWidth: 2,
-                            borderColor: '#fff',
-                            spacing: 4,
-                        }]
-                    },
-                    options: {
-                        ...sharedOpts,
-                        cutout: '60%',
-                        plugins: {
-                            ...sharedOpts.plugins,
-                            legend: { position: 'bottom', labels: { boxWidth: 10, padding: 6, font: { size: 10 } } }
-                        }
-                    }
-                });
-            } else { toggleEmpty('c6'); }
-        }).catch(e => console.error('salesChart:', e));
-    });
-    </script>
-    @endpush
+    </div>
 </x-app-layout>

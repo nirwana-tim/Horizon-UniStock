@@ -78,7 +78,7 @@ class ItemController extends Controller
 
     public function show(Item $item): View
     {
-        $item->load(['category', 'type', 'department', 'variants.itemSize']);
+        $item->load(['category', 'type', 'department', 'variants.itemSize', 'stockBalances.variant']);
         $sizes = $item->category ? $item->category->sizes()->orderBy('code')->get() : collect();
 
         return view('master.item.show', compact('item', 'sizes'));

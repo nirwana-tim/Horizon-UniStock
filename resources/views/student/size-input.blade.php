@@ -7,10 +7,28 @@
         <x-alert type="error">{{ session('error') }}</x-alert>
     @endif
 
+    @php
+        $filledCount = $entitlementItems->filter(fn($i) => !empty($existingSizes[$i->id] ?? ''))->count();
+        $totalCount = $entitlementItems->count();
+    @endphp
+
     <div class="mb-5">
         <h2 class="text-lg font-bold text-gray-800">Input Ukuran Seragam</h2>
         <p class="text-xs text-gray-500 mt-0.5">Pilih ukuran untuk setiap item seragam kamu</p>
     </div>
+
+    @if($totalCount > 0)
+    <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-4 mb-5">
+        <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-medium text-gray-600">Progress pengisian</span>
+            <span class="text-xs font-semibold text-primary-700">{{ $filledCount }}/{{ $totalCount }} ukuran</span>
+        </div>
+        <div class="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+            <div class="h-full bg-primary-600 rounded-full transition-all duration-500"
+                 style="width: {{ $totalCount > 0 ? ($filledCount / $totalCount) * 100 : 0 }}%"></div>
+        </div>
+    </div>
+    @endif
 
     @if(!$canUpdate)
         <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-5">
@@ -42,9 +60,19 @@
                     @endphp
 
                     <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
-                        <div class="mb-3">
-                            <h3 class="text-sm font-semibold text-gray-800">{{ $item->name }}</h3>
-                            <p class="text-xs text-gray-400">{{ $item->base_code }} &bull; {{ $item->unit }}</p>
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="w-9 h-9 bg-primary-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <svg class="w-5 h-5 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10"/>
+                                </svg>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <h3 class="text-sm font-semibold text-gray-800 truncate">{{ $item->name }}</h3>
+                                <p class="text-xs text-gray-400 truncate">{{ $item->base_code }} &bull; {{ $item->unit }}</p>
+                            </div>
+                            @if(!empty($currentSize) && !($hasChanged && !$canUpdate))
+                                <span class="text-xs font-medium text-primary-600 bg-primary-50 px-2.5 py-1 rounded-full flex-shrink-0">Terisi</span>
+                            @endif
                         </div>
 
                         @if($hasChanged && !$canUpdate)
@@ -53,34 +81,45 @@
                                 $sizeDisplay = $currentVariant ? $currentVariant->size_label : $currentSize;
                             @endphp
                             <div class="flex items-center justify-between bg-gray-50 rounded-lg px-4 py-3">
-                                <span class="text-sm text-gray-600">Ukuran terpilih:</span>
-                                <span class="text-sm font-semibold text-gray-800">{{ $sizeDisplay }}</span>
+                                <span class="text-sm text-gray-500">Ukuran terpilih:</span>
+                                <span class="inline-flex items-center px-3 py-1 bg-primary-100 text-primary-700 rounded-full text-sm font-semibold">{{ $sizeDisplay }}</span>
                             </div>
                             <input type="hidden" name="sizes[{{ $item->id }}]" value="{{ $currentSize }}">
-                        @else
-                            <select name="sizes[{{ $item->id }}]" id="size_{{ $item->id }}" required
-                                class="w-full h-11 px-3 text-sm bg-gray-100 border border-gray-200 rounded-lg text-gray-800 focus:bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-100 transition-colors @error('sizes.{{ $item->id }}') border-red-400 @enderror">
-                                <option value="">-- Pilih Ukuran --</option>
-                                @forelse($item->variants as $variant)
-                                    <option value="{{ $variant->size }}" {{ $currentSize == $variant->size ? 'selected' : '' }}>
-                                        {{ $variant->size_label }}
-                                    </option>
-                                @empty
-                                    <option value="">Tidak ada varian</option>
-                                @endforelse
-                            </select>
+                        @elseif($item->variants->isNotEmpty())
+                            <div class="flex flex-wrap gap-2" x-data="{ selected: '{{ $currentSize }}' }">
+                                @foreach($item->variants as $variant)
+                                    <label class="relative cursor-pointer">
+                                        <input type="radio"
+                                               name="sizes[{{ $item->id }}]"
+                                               value="{{ $variant->size }}"
+                                               class="sr-only peer"
+                                               {{ $currentSize == $variant->size ? 'checked' : '' }}
+                                               {{ !$currentSize && $loop->first ? '' : '' }}
+                                               required>
+                                        <span class="inline-flex items-center justify-center min-w-[3rem] h-10 px-3 text-sm font-medium rounded-lg border-2 transition-all
+                                                     peer-checked:border-primary-700 peer-checked:bg-primary-50 peer-checked:text-primary-700 peer-checked:font-semibold
+                                                     {{ $currentSize == $variant->size ? 'border-primary-700 bg-primary-50 text-primary-700 font-semibold' : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300 hover:bg-gray-50' }}">
+                                            {{ $variant->size_label }}
+                                        </span>
+                                    </label>
+                                @endforeach
+                            </div>
                             @error("sizes.{$item->id}")
                                 <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
                             @enderror
+                        @else
+                            <p class="text-sm text-gray-400 italic">Tidak tersedia varian ukuran</p>
                         @endif
                     </div>
                 @endforeach
             </div>
 
+            @if($canUpdate || $filledCount < $totalCount)
             <button type="submit"
                 class="w-full h-12 bg-primary-700 text-white text-sm font-semibold rounded-lg hover:bg-primary-800 active:bg-primary-900 focus:outline-none focus:ring-2 focus:ring-primary-300 transition-colors">
                 Simpan Ukuran
             </button>
+            @endif
         </form>
     @endif
 </x-app-layout>
