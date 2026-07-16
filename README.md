@@ -113,3 +113,4 @@ Seluruh dokumentasi tersedia di folder [`docs/`](docs/):
 ## Lisensi
 
 [MIT License](https://opensource.org/licenses/MIT)
+.
