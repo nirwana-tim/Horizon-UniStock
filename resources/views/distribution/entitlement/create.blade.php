@@ -15,11 +15,11 @@
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <x-input-label for="level_select" :value="__('Program Level')" />
+                                <x-input-label for="level_select" :value="__('Program Level')" :required="true" />
                                 <select id="level_select" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500 text-sm">
                                     <option value="">-- Select Program Level --</option>
                                     @foreach($programLevels as $level)
-                                        <option value="{{ $level->code }}">{{ $level->name }} ({{ $level->code }})</option>
+                                        <option value="{{ $level->code }}">{{ $level->label }} ({{ $level->code }})</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -35,9 +35,21 @@
                                 </select>
                             </div>
                             <div>
-                                <x-input-label for="code" :value="__('Entitlement Code (Auto)')" />
+                                <x-input-label for="code" :value="__('Entitlement Code (Auto)')" :required="true" />
                                 <x-text-input id="code" name="code" type="text" class="mt-1 block w-full bg-gray-50 text-gray-500 font-mono" :value="old('code')" placeholder="Auto-generated..." required readonly />
                                 <x-input-error :messages="$errors->get('code')" class="mt-2" />
+                            </div>
+                            <div>
+                                <x-input-label for="student_type" :value="__('Student Type')" :required="true" />
+                                <select id="student_type" name="student_type" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500 text-sm">
+                                    <option value="">-- Select Type --</option>
+                                    <option value="year_1_sem_1" {{ old('student_type') == 'year_1_sem_1' ? 'selected' : '' }}>Year 1 Sem 1</option>
+                                    <option value="year_1_sem_2" {{ old('student_type') == 'year_1_sem_2' ? 'selected' : '' }}>Year 1 Sem 2</option>
+                                    <option value="year_2_sem_3" {{ old('student_type') == 'year_2_sem_3' ? 'selected' : '' }}>Year 2 Sem 3</option>
+                                    <option value="year_2_sem_4" {{ old('student_type') == 'year_2_sem_4' ? 'selected' : '' }}>Year 2 Sem 4</option>
+                                    <option value="continuing" {{ old('student_type') == 'continuing' ? 'selected' : '' }}>Continuing</option>
+                                </select>
+                                <x-input-error :messages="$errors->get('student_type')" class="mt-2" />
                             </div>
                             <div>
                                 <x-input-label for="is_active" :value="__('Status')" />

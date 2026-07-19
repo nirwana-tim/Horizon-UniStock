@@ -21,6 +21,7 @@ class TemplateController extends Controller
             'katalog' => KatalogTemplateExport::class,
             'harga' => HargaTemplateExport::class,
             'hak_barang' => HakBarangTemplateExport::class,
+            'penerimaan' => \App\Exports\Templates\StockReceiveTemplateExport::class,
         ];
 
         if (!isset($validTypes[$type])) {

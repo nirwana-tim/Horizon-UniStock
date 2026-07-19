@@ -33,7 +33,6 @@ class StockReport extends BaseExport implements FromCollection, WithHeadings, Wi
                 'items.name as item_name',
                 'items.code as item_code',
                 'items.selling_price',
-                'items.hpp',
                 'items.unit',
                 'item_categories.label as category_name',
                 'item_categories.code as category_code',
@@ -87,7 +86,7 @@ class StockReport extends BaseExport implements FromCollection, WithHeadings, Wi
             $totalIn,
             $totalOut,
             $balance->quantity,
-            $balance->quantity * ($balance->item->hpp ?? 0),
+            $balance->quantity * ($balance->last_hpp ?? 0),
         ];
     }
 

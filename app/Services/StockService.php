@@ -45,6 +45,7 @@ class StockService
                     'variant_id' => $variant->id,
                     'type' => 'IN',
                     'quantity' => $itemData['quantity'],
+                    'hpp' => $receiveItem->hpp,
                     'reference_type' => StockReceive::class,
                     'reference_id' => $receive->id,
                     'notes' => "Penerimaan dari vendor: {$receive->reference_number}",
@@ -55,8 +56,19 @@ class StockService
                     'variant_id' => $variant->id,
                 ]);
 
-                $balance->quantity = ($balance->quantity ?? 0) + $itemData['quantity'];
-                $balance->last_hpp = $receiveItem->hpp;
+                $oldQty = $balance->quantity ?? 0;
+                $oldHpp = $balance->last_hpp ?? 0;
+                $newQty = $itemData['quantity'];
+                $newHpp = $receiveItem->hpp;
+
+                // Weighted-average HPP
+                $totalQty = $oldQty + $newQty;
+                $avgHpp = $totalQty > 0
+                    ? (($oldQty * $oldHpp) + ($newQty * $newHpp)) / $totalQty
+                    : $newHpp;
+
+                $balance->quantity = $totalQty;
+                $balance->last_hpp = round($avgHpp, 2);
                 $balance->save();
             }
 
@@ -97,7 +109,6 @@ class StockService
                 'stock_balances.*',
                 'items.name as item_name',
                 'items.code as item_code',
-                'items.hpp',
                 'items.selling_price',
                 'items.unit',
                 'item_categories.label as category_name',
@@ -136,23 +147,28 @@ class StockService
         return $query->get();
     }
 
-    public function deductStock(int $itemId, int $variantId, int $quantity, string $referenceType, int $referenceId, string $notes = null): void
+    public function deductStock(int $itemId, int $variantId, int $quantity, string $referenceType, int $referenceId, ?float $hpp = null, ?string $notes = null): void
     {
-        DB::transaction(function () use ($itemId, $variantId, $quantity, $referenceType, $referenceId, $notes) {
-            $updated = StockBalance::where('item_id', $itemId)
+        DB::transaction(function () use ($itemId, $variantId, $quantity, $referenceType, $referenceId, $hpp, $notes) {
+            $balance = StockBalance::where('item_id', $itemId)
                 ->where('variant_id', $variantId)
-                ->where('quantity', '>=', $quantity)
-                ->decrement('quantity', $quantity);
+                ->lockForUpdate()
+                ->first();
 
-            if (!$updated) {
+            if (!$balance || $balance->quantity < $quantity) {
                 throw new \Exception("Stok tidak mencukupi untuk item #{$itemId} varian #{$variantId}.");
             }
+
+            $actualHpp = $hpp ?? $balance->last_hpp ?? 0;
+
+            $balance->decrement('quantity', $quantity);
 
             StockMovement::create([
                 'item_id' => $itemId,
                 'variant_id' => $variantId,
                 'type' => 'OUT',
                 'quantity' => $quantity,
+                'hpp' => $actualHpp,
                 'reference_type' => $referenceType,
                 'reference_id' => $referenceId,
                 'notes' => $notes ?? 'Pengeluaran stok',

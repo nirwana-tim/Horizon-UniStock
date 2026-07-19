@@ -17,7 +17,10 @@ class EntitlementService
 
         return Entitlement::where('code', $student->entitlement_code)
             ->where('is_active', true)
-            ->where('student_type', $student->student_type)
+            ->where(function ($q) use ($student) {
+                $q->where('student_type', $student->student_type)
+                  ->orWhereNull('student_type');
+            })
             ->with('items.item')
             ->first();
     }
@@ -34,17 +37,20 @@ class EntitlementService
         return DB::transaction(function () use ($data) {
             $entitlement = Entitlement::create([
                 'code' => $data['code'],
+                'student_type' => $data['student_type'] ?? null,
                 'description' => $data['description'] ?? null,
                 'is_active' => $data['is_active'] ?? true,
             ]);
 
             if (isset($data['items']) && is_array($data['items'])) {
                 foreach ($data['items'] as $itemData) {
-                    EntitlementItem::create([
-                        'entitlement_id' => $entitlement->id,
-                        'item_id' => $itemData['item_id'],
-                        'quantity' => $itemData['quantity'] ?? 1,
-                    ]);
+                    EntitlementItem::updateOrCreate(
+                        [
+                            'entitlement_id' => $entitlement->id,
+                            'item_id' => $itemData['item_id'],
+                        ],
+                        ['quantity' => $itemData['quantity'] ?? 1]
+                    );
                 }
             }
 
@@ -67,6 +73,7 @@ class EntitlementService
 
             $entitlement->update([
                 'code' => $data['code'] ?? $entitlement->code,
+                'student_type' => $data['student_type'] ?? $entitlement->student_type,
                 'description' => $data['description'] ?? $entitlement->description,
                 'is_active' => $data['is_active'] ?? $entitlement->is_active,
             ]);

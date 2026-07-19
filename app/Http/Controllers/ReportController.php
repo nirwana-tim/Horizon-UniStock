@@ -134,26 +134,34 @@ class ReportController extends Controller
         );
     }
 
-    public function salesDashboard(Request $request): View
+    public function salesDashboard(Request $request): View|JsonResponse
     {
-        $request->validate([
-            'month' => 'nullable|integer|between:1,12',
-            'year' => 'nullable|integer|min:2020|max:2099',
-        ]);
-
-        $month = $request->input('month', now()->month);
-        $year = $request->input('year', now()->year);
-
-        $data = app(ReportService::class)->getSalesDashboardData((int) $month, (int) $year);
-
-        $months = [];
-        for ($m = 1; $m <= 12; $m++) {
-            $months[$m] = \Carbon\Carbon::create()->month($m)->format('M');
+        if ($request->has('get_items') && $request->has('category_id')) {
+            $items = Item::where('category_id', $request->input('category_id'))
+                ->orderBy('name')
+                ->get(['id', 'name']);
+            return response()->json($items);
         }
 
-        $years = range(now()->year, 2020);
+        if ($request->wantsJson() || $request->has('ajax')) {
+            $processed = app(ReportService::class)->getSalesDashboardProcessedData(
+                $request->input('start_date'),
+                $request->input('end_date'),
+                $request->input('category_id') ? (int) $request->input('category_id') : null,
+                $request->input('item_id') ? (int) $request->input('item_id') : null
+            );
+            return response()->json($processed);
+        }
 
-        return view('report.sales-dashboard', compact('month', 'year', 'months', 'years') + $data);
+        $minDate = \Illuminate\Support\Facades\DB::table('distribution_transactions')->whereNotNull('pickup_time')->min('pickup_time');
+        $maxDate = \Illuminate\Support\Facades\DB::table('distribution_transactions')->whereNotNull('pickup_time')->max('pickup_time');
+
+        $defaultStart = $minDate ? \Carbon\Carbon::parse($minDate)->toDateString() : now()->startOfMonth()->toDateString();
+        $defaultEnd = $maxDate ? \Carbon\Carbon::parse($maxDate)->toDateString() : now()->toDateString();
+
+        $categories = ItemCategory::orderBy('code', 'asc')->get(['id', 'code', 'label']);
+
+        return view('report.sales-dashboard', compact('defaultStart', 'defaultEnd', 'categories'));
     }
 
     public function distributionRecap(Request $request): View|JsonResponse

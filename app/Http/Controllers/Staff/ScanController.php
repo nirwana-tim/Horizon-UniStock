@@ -26,7 +26,13 @@ class ScanController extends Controller
             ->where('date', today())
             ->first();
 
-        return view('distribution.scan', compact('activeSchedule'));
+        $staff = auth()->user();
+
+        $todayCount = \App\Models\DistributionTransaction::whereDate('created_at', today())
+            ->whereHas('schedule', fn ($q) => $q->where('is_active', true))
+            ->count();
+
+        return view('distribution.scan', compact('activeSchedule', 'staff', 'todayCount'));
     }
 
     public function search(Request $request): View|RedirectResponse|JsonResponse
@@ -118,10 +124,11 @@ class ScanController extends Controller
         $entitlement = null;
         $scheduleItems = collect();
         $studentSizes = [];
+        $variantOptions = [];
         $eligibility = null;
 
         if ($activeSchedule) {
-            $entitlement = $this->distributionService->getEntitlementForStudent($student, $activeSchedule);
+            $entitlement = $this->distributionService->getEntitlementForStudent($student);
             $activeSchedule->load('items.item.variants');
             $scheduleItems = $activeSchedule->items->pluck('item')->filter();
         }
@@ -130,12 +137,14 @@ class ScanController extends Controller
 
         $sizeProfile = $student->activeSizeProfile;
         if ($sizeProfile) {
+            $sizeProfile->load('sizeItems.item');
             foreach ($sizeProfile->sizeItems as $sizeItem) {
-                // Cari size_label dari variant yang cocok
+                $baseCode = $sizeItem->item->base_code;
+                if (!$baseCode) continue;
                 $variant = ItemVariant::where('item_id', $sizeItem->item_id)
                     ->where('size', $sizeItem->size)
                     ->first();
-                $studentSizes[$sizeItem->item_id] = [
+                $studentSizes[$baseCode] = [
                     'size' => $sizeItem->size,
                     'size_label' => $variant?->size_label ?? $sizeItem->size,
                     'change_count' => $sizeItem->change_count,
@@ -145,26 +154,46 @@ class ScanController extends Controller
 
         $distributedItems = DB::table('distribution_items')
             ->join('distribution_transactions', 'distribution_items.transaction_id', '=', 'distribution_transactions.id')
-            ->where('distribution_transactions.student_id', '=', $student->id)
-            ->select('distribution_items.item_id', DB::raw('SUM(distribution_items.quantity) as total_qty'))
-            ->groupBy('distribution_items.item_id')
-            ->pluck('total_qty', 'item_id')
+            ->join('items', 'distribution_items.item_id', '=', 'items.id')
+            ->where('distribution_transactions.student_id', $student->id)
+            ->whereIn('distribution_transactions.status', ['completed', 'partial'])
+            ->where('distribution_transactions.schedule_id', $activeSchedule?->id)
+            ->select('items.base_code', DB::raw('SUM(distribution_items.quantity) as total_qty'))
+            ->whereNotNull('items.base_code')
+            ->groupBy('items.base_code')
+            ->pluck('total_qty', 'base_code')
             ->toArray();
 
         $entitledQuantities = $entitlement
-            ? $entitlement->items->pluck('quantity', 'item_id')->toArray()
+            ? $entitlement->items->pluck('quantity', 'item_id')->mapWithKeys(function ($qty, $itemId) {
+                $baseCode = Item::where('id', $itemId)->value('base_code');
+                return $baseCode ? [$baseCode => $qty] : [];
+            })->toArray()
             : [];
 
         $stockInfo = [];
         if ($activeSchedule) {
             foreach ($scheduleItems as $item) {
-                $variants = ItemVariant::where('item_id', '=', $item->id, 'and')->get();
-                foreach ($variants as $variant) {
-                    $balance = StockBalance::where('item_id', '=', $item->id, 'and')
-                        ->where('variant_id', '=', $variant->id, 'and')
+                $baseCode = $item->base_code ?? $item->code;
+                foreach ($item->variants as $variant) {
+                    $balance = StockBalance::where('item_id', $item->id)
+                        ->where('variant_id', $variant->id)
                         ->first();
-                    $stockInfo[$item->id][$variant->size] = $balance ? $balance->quantity : 0;
+                    $stockInfo[$baseCode][$variant->size] = ($stockInfo[$baseCode][$variant->size] ?? 0)
+                        + ($balance ? $balance->quantity : 0);
                 }
+            }
+        }
+
+        foreach ($scheduleItems as $item) {
+            $baseCode = $item->base_code ?? $item->code;
+            if (isset($variantOptions[$baseCode])) continue;
+            if ($item->base_code) {
+                $variantOptions[$baseCode] = ItemVariant::whereIn('item_id',
+                    Item::where('base_code', $item->base_code)->pluck('id')
+                )->get();
+            } else {
+                $variantOptions[$baseCode] = $item->variants;
             }
         }
 
@@ -174,6 +203,7 @@ class ScanController extends Controller
             'entitlement',
             'scheduleItems',
             'studentSizes',
+            'variantOptions',
             'stockInfo',
             'eligibility',
             'distributedItems',

@@ -11,13 +11,13 @@
                         @csrf
 
                         <div class="mb-4">
-                            <x-input-label for="name" :value="__('Name')" />
+                            <x-input-label for="name" :value="__('Name')" :required="true" />
                             <x-text-input id="name" name="name" type="text" class="mt-1 block w-full" :value="old('name')" required autofocus />
                             <x-input-error :messages="$errors->get('name')" class="mt-2" />
                         </div>
 
                         <div class="mb-4">
-                            <x-input-label for="code" :value="__('Code')" />
+                            <x-input-label for="code" :value="__('Code')" :required="true" />
                             <x-text-input id="code" name="code" type="text" class="mt-1 block w-full" :value="old('code')" required />
                             <x-input-error :messages="$errors->get('code')" class="mt-2" />
                         </div>

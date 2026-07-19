@@ -13,6 +13,7 @@ class DistributionSchedule extends Model
         'name',
         'period',
         'semester',
+        'stage_id',
         'student_type',
         'date',
         'location',
@@ -31,6 +32,11 @@ class DistributionSchedule extends Model
         ];
     }
 
+    public function stage(): BelongsTo
+    {
+        return $this->belongsTo(DistributionStage::class, 'stage_id');
+    }
+
     public function scopeForStudent(Builder $query, Student $student): Builder
     {
         return $query
@@ -38,6 +44,18 @@ class DistributionSchedule extends Model
             ->where(fn (Builder $q) => $q->whereNull('program_level_id')->orWhere('program_level_id', $student->program_level_id))
             ->where(fn (Builder $q) => $q->whereNull('faculty_id')->orWhere('faculty_id', $student->studyProgram?->faculty_id))
             ->where(fn (Builder $q) => $q->whereNull('study_program_id')->orWhere('study_program_id', $student->study_program_id));
+    }
+
+    public function getStudentTypeLabelAttribute(): string
+    {
+        return match ($this->student_type) {
+            'year_1_sem_1' => 'Year 1 Sem 1',
+            'year_1_sem_2' => 'Year 1 Sem 2',
+            'year_2_sem_3' => 'Year 2 Sem 3',
+            'year_2_sem_4' => 'Year 2 Sem 4',
+            'continuing' => 'Continuing',
+            default => $this->student_type ? ucfirst(str_replace('_', ' ', $this->student_type)) : 'All',
+        };
     }
 
     public function programLevel(): BelongsTo

@@ -34,11 +34,11 @@
                         </div>
                         <div>
                             <p class="text-sm text-gray-500">Level / Batch</p>
-                            <p class="font-medium text-gray-900">{{ $student->programLevel->name ?? '-' }}</p>
+                            <p class="font-medium text-gray-900">{{ $student->programLevel->label ?? '-' }}</p>
                         </div>
                         <div>
                             <p class="text-sm text-gray-500">Student Type</p>
-                            <p class="font-medium text-gray-900">{{ ucfirst($student->student_type) }}</p>
+                            <p class="font-medium text-gray-900">{{ $student->student_type_label }}</p>
                         </div>
                         <div>
                             <p class="text-sm text-gray-500">Campus Email</p>
@@ -186,13 +186,14 @@
                                         <tbody class="bg-white divide-y divide-gray-200">
                                             @foreach($scheduleItems as $index => $item)
                                                 @php
-                                                    $sizeInfo       = $studentSizes[$item->id] ?? null;
+                                                    $baseCode       = $item->base_code ?? $item->code;
+                                                    $sizeInfo       = $studentSizes[$baseCode] ?? null;
                                                     $expectedSize   = $sizeInfo['size'] ?? '-';
                                                     $expectedLabel  = $sizeInfo['size_label'] ?? $expectedSize;
-                                                    $availableStock = $stockInfo[$item->id][$expectedSize] ?? 0;
+                                                    $availableStock = $stockInfo[$baseCode][$expectedSize] ?? 0;
                                                     $outOfStock     = $availableStock <= 0;
-                                                    $takenQty       = $distributedItems[$item->id] ?? 0;
-                                                    $entitledQty    = $entitledQuantities[$item->id] ?? 0;
+                                                    $takenQty       = $distributedItems[$baseCode] ?? 0;
+                                                    $entitledQty    = $entitledQuantities[$baseCode] ?? 0;
                                                     $alreadyTaken   = $entitledQty > 0 && $takenQty >= $entitledQty;
                                                     $isDisabled     = $outOfStock || $alreadyTaken;
                                                 @endphp
@@ -207,6 +208,7 @@
                                                             data-item-name="{{ $item->name }}"
                                                             {{ $isDisabled ? 'disabled' : '' }}>
                                                         <input type="hidden" name="items[{{ $index }}][expected_size]" value="{{ $expectedSize }}">
+                                                        <input type="hidden" name="items[{{ $index }}][base_code]" value="{{ $baseCode }}">
                                                     </td>
                                                     <td class="px-6 py-4 whitespace-nowrap">
                                                         <div class="text-sm font-medium text-gray-900">{{ $item->name }}</div>
@@ -227,7 +229,7 @@
                                                             class="block w-28 border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm item-size"
                                                             data-index="{{ $index }}"
                                                             {{ $isDisabled ? 'disabled' : '' }}>
-                                                            @forelse($item->variants as $variant)
+                                                            @forelse(($variantOptions[$baseCode] ?? $item->variants) as $variant)
                                                                 <option value="{{ $variant->size }}" {{ $expectedSize == $variant->size ? 'selected' : '' }}>
                                                                     {{ $variant->size_label }}
                                                                 </option>

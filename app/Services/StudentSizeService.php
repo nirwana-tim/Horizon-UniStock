@@ -18,9 +18,9 @@ class StudentSizeService
             return collect();
         }
 
-        $entitlement = Entitlement::where('code', '=', $student->entitlement_code, 'and')
-            ->where('is_active', '=', true, 'and')
-            ->where('student_type', '=', $student->student_type, 'and')
+        $entitlement = Entitlement::where('code', $student->entitlement_code)
+            ->where('is_active', true)
+            ->where('student_type', $student->student_type)
             ->with(['items.item'])
             ->first();
 
@@ -68,8 +68,8 @@ class StudentSizeService
                 continue;
             }
 
-            $sizeItem = StudentSizeItem::where('size_profile_id', '=', $profile->id, 'and')
-                ->where('item_id', '=', $itemId, 'and')
+            $sizeItem = StudentSizeItem::where('size_profile_id', $profile->id)
+                ->where('item_id', $itemId)
                 ->first();
 
             if ($sizeItem) {

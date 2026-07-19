@@ -13,6 +13,17 @@
                 </div>
             @endif
 
+            <div class="mb-4 flex items-center gap-4">
+                <div class="flex items-center gap-2 text-sm text-gray-600">
+                    <svg class="w-4 h-4 text-primary-700" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                    <span><strong>{{ $staff->name }}</strong></span>
+                </div>
+                <div class="flex items-center gap-2 text-sm text-gray-600">
+                    <svg class="w-4 h-4 text-primary-700" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                    <span>Today: <strong>{{ $todayCount }}</strong> distributions</span>
+                </div>
+            </div>
+
             @if($activeSchedule)
                 <div class="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-md">
                     <p class="text-sm text-blue-700">

@@ -17,11 +17,11 @@
                             <td class="px-4 py-2 text-sm text-gray-900">{{ $tx->schedule->name ?? '-' }}</td>
                             <td class="px-4 py-2 text-sm">
                                 @if($tx->status === 'completed')
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Completed</span>
+                                    <x-badge type="success">Completed</x-badge>
                                 @elseif($tx->status === 'partial')
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">Partial</span>
+                                    <x-badge type="warning">Partial</x-badge>
                                 @else
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">Cancelled</span>
+                                    <x-badge type="danger">Cancelled</x-badge>
                                 @endif
                             </td>
                             <td class="px-4 py-2 text-sm text-gray-500">{{ $tx->items->pluck('item.name')->implode(', ') }}</td>

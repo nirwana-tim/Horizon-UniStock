@@ -1,7 +1,7 @@
 @forelse($levels as $level)
     <tr class="hover:bg-gray-50">
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $loop->iteration }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $level->name }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $level->label }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $level->code }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $level->students_count ?? 0 }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-right space-x-1">

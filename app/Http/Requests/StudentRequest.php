@@ -23,7 +23,7 @@ class StudentRequest extends FormRequest
             'email_pribadi' => ['nullable', 'email', 'max:255'],
             'study_program_id' => ['required', 'integer', 'exists:study_programs,id'],
             'program_level_id' => ['required', 'integer', 'exists:program_levels,id'],
-            'student_type' => ['required', 'string', 'in:freshman,continuing'],
+            'student_type' => ['required', 'string', 'in:year_1_sem_1,year_1_sem_2,year_2_sem_3,year_2_sem_4,continuing'],
             'password' => ['nullable', 'string', 'min:8'],
         ];
     }

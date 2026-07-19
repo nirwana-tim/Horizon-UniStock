@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Master;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\DistributionScheduleRequest;
 use App\Models\DistributionSchedule;
+use App\Models\DistributionStage;
 use App\Models\Entitlement;
 use App\Models\Faculty;
 use App\Models\Item;
@@ -20,12 +21,17 @@ class DistributionScheduleController extends Controller
 {
     public function index(Request $request): View|JsonResponse
     {
-        $schedules = DistributionSchedule::with('programLevel', 'faculty', 'studyProgram')
+        $schedules = DistributionSchedule::with('programLevel', 'faculty', 'studyProgram', 'stage')
             ->when($request->input('q'), function ($query, $search) {
                 $search = str_replace(['%', '_'], ['\%', '\_'], $search);
-                $query->where('name', 'like', "%{$search}%")
-                    ->orWhere('location', 'like', "%{$search}%");
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                        ->orWhere('location', 'like', "%{$search}%");
+                });
             })
+            ->when($request->input('period'), fn ($query, $p) => $query->where('period', $p))
+            ->when($request->input('faculty_id'), fn ($query, $f) => $query->where('faculty_id', $f))
+            ->when($request->input('study_program_id'), fn ($query, $s) => $query->where('study_program_id', $s))
             ->latest()
             ->paginate(20);
 
@@ -36,7 +42,11 @@ class DistributionScheduleController extends Controller
             return response()->json(compact('html', 'pagination'));
         }
 
-        return view('distribution.distribution-schedule.index', compact('schedules'));
+        $periods = DistributionSchedule::whereNotNull('period')->distinct()->orderBy('period', 'desc')->pluck('period');
+        $faculties = Faculty::orderBy('name')->get();
+        $studyPrograms = StudyProgram::with('faculty')->orderBy('name')->get();
+
+        return view('distribution.distribution-schedule.index', compact('schedules', 'periods', 'faculties', 'studyPrograms'));
     }
 
     public function create(): View
@@ -44,9 +54,10 @@ class DistributionScheduleController extends Controller
         $programLevels = ProgramLevel::orderBy('name', 'asc')->get();
         $faculties = Faculty::orderBy('name', 'asc')->get();
         $studyPrograms = StudyProgram::with('faculty')->orderBy('name', 'asc')->get();
+        $stages = DistributionStage::orderBy('stage_order')->get();
 
         return view('distribution.distribution-schedule.create', compact(
-            'programLevels', 'faculties', 'studyPrograms'
+            'programLevels', 'faculties', 'studyPrograms', 'stages'
         ));
     }
 
@@ -141,9 +152,10 @@ class DistributionScheduleController extends Controller
         $programLevels = ProgramLevel::orderBy('name', 'asc')->get();
         $faculties = Faculty::orderBy('name', 'asc')->get();
         $studyPrograms = StudyProgram::with('faculty')->orderBy('name', 'asc')->get();
+        $stages = DistributionStage::orderBy('stage_order')->get();
 
         return view('distribution.distribution-schedule.edit', compact(
-            'distributionSchedule', 'programLevels', 'faculties', 'studyPrograms'
+            'distributionSchedule', 'programLevels', 'faculties', 'studyPrograms', 'stages'
         ));
     }
 

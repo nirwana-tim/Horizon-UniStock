@@ -4,17 +4,15 @@
         <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-900">{{ $student->nim }}</td>
         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $student->name }}</td>
         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $student->studyProgram->name ?? '-' }}</td>
-        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $student->programLevel->name ?? '-' }}</td>
-        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $student->student_type === 'freshman' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800' }}">
-                {{ ucfirst($student->student_type) }}
-            </span>
+        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $student->programLevel->label ?? '-' }}</td>
+        <td class="px-6 py-4 whitespace-nowrap">
+            <x-badge type="info">{{ $student->student_type_label }}</x-badge>
         </td>
-        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+        <td class="px-6 py-4 whitespace-nowrap">
             @if($student->user_id)
-                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Active</span>
+                <x-badge type="success">Active</x-badge>
             @else
-                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">Inactive</span>
+                <x-badge type="warning">Inactive</x-badge>
             @endif
         </td>
         <td class="px-6 py-4 whitespace-nowrap text-sm text-right space-x-1">
@@ -34,7 +32,7 @@
     </tr>
 @empty
     <tr>
-        <td colspan="8" class="px-6 py-4 text-center text-sm text-gray-500">No student data found.</td>
+        <td colspan="8" class="px-6 py-4 text-center text-sm text-gray-500">No students found.</td>
     </tr>
 @endforelse
 

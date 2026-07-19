@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
@@ -25,10 +24,5 @@ class RolePermissionSeeder extends Seeder
         $staff->givePermissionTo('manage-students');
 
         Role::firstOrCreate(['name' => 'student']);
-
-        $user = User::findOrFail(1);
-        if ($user && !$user->hasRole('super_admin')) {
-            $user->assignRole('super_admin');
-        }
     }
 }

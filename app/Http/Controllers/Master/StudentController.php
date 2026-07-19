@@ -34,7 +34,18 @@ class StudentController extends Controller
             });
         }
 
-        $students = $query->latest()->paginate(20);
+        if ($studyProgramId = $request->input('study_program_id')) {
+            $query->where('study_program_id', $studyProgramId);
+        }
+
+        if ($programLevelId = $request->input('program_level_id')) {
+            $query->where('program_level_id', $programLevelId);
+        }
+
+        $perPage = (int) $request->input('per_page', 20);
+        $perPage = in_array($perPage, [10, 20, 50, 100]) ? $perPage : 20;
+
+        $students = $query->latest()->paginate($perPage);
 
         if ($request->ajax()) {
             return response()->json([
@@ -62,6 +73,7 @@ class StudentController extends Controller
             'totalStudents',
             'totalWithAccount',
             'totalWithoutAccount',
+            'perPage',
         ));
     }
 
@@ -193,6 +205,53 @@ class StudentController extends Controller
         return redirect()->route('students.index', ['tab' => 'generate-akun'])
             ->with('success', $message)
             ->with('generated_passwords', $generated);
+    }
+
+    public function export(Request $request): \Symfony\Component\HttpFoundation\BinaryFileResponse
+    {
+        return (new \App\Exports\StudentExport(
+            search: $request->input('q'),
+            studyProgramId: $request->input('study_program_id'),
+            programLevelId: $request->input('program_level_id'),
+        ))->download('students-' . now()->format('Ymd') . '.xlsx');
+    }
+
+    public function promoteForm(Request $request): View
+    {
+        $query = Student::with(['studyProgram.faculty', 'programLevel'])
+            ->whereIn('student_type', ['year_1_sem_1', 'year_1_sem_2', 'year_2_sem_3', 'year_2_sem_4']);
+
+        if ($search = $request->input('q')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('nim', 'like', "%{$search}%");
+            });
+        }
+
+        $students = $query->latest()->paginate(20);
+        $programLevels = ProgramLevel::orderBy('name')->get();
+        $studyPrograms = StudyProgram::with('faculty')->orderBy('name')->get();
+
+        return view('master.student.promote', compact('students', 'programLevels', 'studyPrograms'));
+    }
+
+    public function promote(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'student_ids' => ['required', 'array'],
+            'student_ids.*' => ['required', 'integer', 'exists:students,id'],
+            'target_level_id' => ['required', 'integer', 'exists:program_levels,id'],
+            'target_study_program_id' => ['nullable', 'integer', 'exists:study_programs,id'],
+        ]);
+
+        $count = $this->studentService->promoteStudents(
+            $validated['student_ids'],
+            $validated['target_level_id'],
+            $validated['target_study_program_id'] ?? null,
+        );
+
+        return redirect()->route('students.index')
+            ->with('success', "{$count} mahasiswa berhasil dipromosikan ke level berikutnya.");
     }
 
     public function generateAll(Request $request): RedirectResponse

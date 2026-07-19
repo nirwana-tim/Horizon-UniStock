@@ -23,14 +23,16 @@ class ItemPriceImport implements ToModel, WithHeadingRow, WithValidation
             return null;
         }
 
+        $effectiveDate = $row['tahun_akademik'] ?? now()->startOfYear()->toDateString();
+
         return ItemPrice::updateOrCreate(
             [
                 'item_id' => $item->id,
+                'effective_date' => $effectiveDate,
             ],
             [
                 'selling_price' => $row['harga_jual'],
                 'hpp' => $row['hpp'],
-                'effective_date' => $row['tahun_akademik'] ?? now()->startOfYear(),
             ]
         );
     }

@@ -22,6 +22,11 @@
 
                         <div class="ml-auto flex gap-2">
                             <template x-if="activeTab === 'data'">
+                                <a href="{{ route('students.promote.form') }}" class="inline-flex items-center px-4 py-2 border border-primary-500 text-primary-700 rounded-md font-semibold text-xs uppercase tracking-widest hover:bg-primary-50 transition">
+                                    Promote
+                                </a>
+                            </template>
+                            <template x-if="activeTab === 'data'">
                                 <a href="{{ route('students.create') }}" class="inline-flex items-center px-4 py-2 bg-primary-700 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-primary-800 transition">
                                     {{ __('Add Student') }}
                                 </a>
@@ -35,12 +40,44 @@
                      x-data="serverTable('{{ route('students.index') }}')">
                     <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                         <div class="p-6 text-gray-900">
-                            <div class="mb-4">
-                                <input type="text"
-                                       x-model="search"
-                                       @input.debounce.300ms="page=1; fetchData()"
-                                       placeholder="Search..."
-                                       class="w-72 border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500 text-sm">
+                            <div class="mb-4 space-y-3">
+                                <div class="flex items-center gap-3">
+                                    <input type="text"
+                                           x-model="search"
+                                           @input.debounce.300ms="page=1; fetchData()"
+                                           placeholder="Search..."
+                                           class="w-72 border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500 text-sm">
+                                    <div class="flex items-center gap-2 ml-auto">
+                                        <label class="text-xs text-gray-500">Per page:</label>
+                                        <select x-model="perPage" @change="page=1; fetchData()"
+                                            class="border-gray-300 rounded-md shadow-sm text-sm focus:border-primary-500 focus:ring-primary-500">
+                                            <option value="10">10</option>
+                                            <option value="20" selected>20</option>
+                                            <option value="50">50</option>
+                                            <option value="100">100</option>
+                                        </select>
+                                        <a href="{{ route('students.export', request()->only(['q'])) }}"
+                                            class="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-xs font-semibold text-gray-700 uppercase tracking-widest hover:bg-gray-50 transition">
+                                            Export
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <select x-model="studyProgramId" @change="page=1; fetchData()"
+                                        class="w-56 border-gray-300 rounded-md shadow-sm text-sm focus:border-primary-500 focus:ring-primary-500">
+                                        <option value="">All Study Programs</option>
+                                        @foreach($studyPrograms as $program)
+                                            <option value="{{ $program->id }}">{{ $program->faculty->code }} - {{ $program->name }}</option>
+                                        @endforeach
+                                    </select>
+                                    <select x-model="programLevelId" @change="page=1; fetchData()"
+                                        class="w-56 border-gray-300 rounded-md shadow-sm text-sm focus:border-primary-500 focus:ring-primary-500">
+                                        <option value="">All Levels</option>
+                                        @foreach($programLevels as $level)
+                                            <option value="{{ $level->id }}">{{ $level->label }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
                             </div>
                             <div class="overflow-x-auto">
                                 <table class="min-w-full divide-y divide-gray-200">
@@ -74,9 +111,9 @@
                         <div class="p-6 text-gray-900">
                             {{-- Stats --}}
                             <div class="flex gap-2 mb-4">
-                                <span class="inline-flex items-center px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-semibold">{{ $totalWithAccount }} Has Account</span>
-                                <span class="inline-flex items-center px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-semibold">{{ $totalWithoutAccount }} No Account</span>
-                                <span class="inline-flex items-center px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-xs font-semibold">{{ $totalStudents }} Total</span>
+                                <x-badge type="success">{{ $totalWithAccount }} Has Account</x-badge>
+                                <x-badge type="warning">{{ $totalWithoutAccount }} No Account</x-badge>
+                                <x-badge type="neutral">{{ $totalStudents }} Total</x-badge>
                             </div>
 
                             @if($totalWithoutAccount > 0)
@@ -115,7 +152,7 @@
                                                     <td class="px-3 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $student->nim }}</td>
                                                     <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-700">{{ $student->name }}</td>
                                                     <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-500">{{ $student->studyProgram?->name ?? '-' }}</td>
-                                                    <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-500">{{ $student->programLevel?->name ?? '-' }}</td>
+                                                    <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-500">{{ $student->programLevel?->label ?? '-' }}</td>
                                                     <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-500">{{ $student->email_kampus ?? '-' }}</td>
                                                 </tr>
                                                 @endforeach

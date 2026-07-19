@@ -13,6 +13,7 @@ class StockMovement extends Model
         'variant_id',
         'type',
         'quantity',
+        'hpp',
         'reference_type',
         'reference_id',
         'notes',
@@ -22,6 +23,7 @@ class StockMovement extends Model
     {
         return [
             'quantity' => 'integer',
+            'hpp' => 'decimal:2',
         ];
     }
 
