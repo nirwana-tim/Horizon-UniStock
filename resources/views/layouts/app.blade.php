@@ -11,18 +11,18 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 
     <!-- Scripts & Styles -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     @stack('styles')
-</head>
-<body class="font-sans antialiased bg-gray-50 text-gray-800">
-
 @php
-    $isSidebarLayout = auth()->check() && auth()->user()->hasAnyRole(['super_admin', 'admin', 'finance']);
-    $isBottomNavLayout = auth()->check() && auth()->user()->hasAnyRole(['staff', 'student']);
+    $isSidebarLayout = auth()->check() && auth()->user()->hasAnyRole(['super_admin', 'admin', 'staff']);
+    $isBottomNavLayout = auth()->check() && auth()->user()->hasRole('student');
 @endphp
+</head>
+<body class="font-sans antialiased bg-gray-50 text-gray-800 {{ $isSidebarLayout ? 'h-screen overflow-hidden' : '' }}">
 
 @if($isSidebarLayout)
     {{-- ===== SIDEBAR LAYOUT (Admin & Super Admin) ===== --}}
@@ -37,7 +37,7 @@
             <x-topbar />
 
             {{-- Page Content --}}
-            <main class="flex-1 overflow-y-auto custom-scroll p-6">
+            <main class="flex-1 overflow-y-auto overflow-x-hidden custom-scroll p-6 @role('staff') pb-20 lg:pb-6 @endrole">
 
                 {{-- Session Flash Messages --}}
                 @if(session('success'))
@@ -78,6 +78,10 @@
             </main>
         </div>
     </div>
+
+    @role('staff')
+        <div class="lg:hidden"><x-bottom-nav /></div>
+    @endrole
 
 @elseif($isBottomNavLayout)
     {{-- ===== BOTTOM NAV LAYOUT (Staff & Student) ===== --}}
@@ -139,8 +143,6 @@
         </main>
     </div>
 @endif
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 
 @stack('scripts')
 </body>

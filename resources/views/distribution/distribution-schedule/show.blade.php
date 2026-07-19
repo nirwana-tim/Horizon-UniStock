@@ -25,7 +25,7 @@
                                 <dt class="text-sm font-medium text-gray-500">{{ __('Student Type') }}</dt>
                                 <dd class="mt-1">
                                     @if($distributionSchedule->student_type)
-                                        <x-badge type="primary">{{ ucfirst($distributionSchedule->student_type) }}</x-badge>
+                                        <x-badge type="primary">{{ $distributionSchedule->student_type_label ?? ucfirst($distributionSchedule->student_type) }}</x-badge>
                                     @else
                                         <x-badge type="neutral">All Student Types</x-badge>
                                     @endif
@@ -33,7 +33,11 @@
                             </div>
                             <div class="bg-gray-50 p-4 rounded-lg">
                                 <dt class="text-sm font-medium text-gray-500">{{ __('Program Level') }}</dt>
-                                <dd class="mt-1 text-sm text-gray-900 font-semibold">{{ $distributionSchedule->programLevel?->name ?? '-' }}</dd>
+                                <dd class="mt-1 text-sm text-gray-900 font-semibold">{{ $distributionSchedule->programLevel?->label ?? '-' }}</dd>
+                                </div>
+                                <div>
+                                    <dt class="text-sm font-medium text-gray-500">Stage</dt>
+                                    <dd class="mt-1 text-sm text-gray-900 font-semibold">{{ $distributionSchedule->stage?->name ?? '-' }}</dd>
                             </div>
                             <div class="bg-gray-50 p-4 rounded-lg">
                                 <dt class="text-sm font-medium text-gray-500">{{ __('Faculty / Study Program') }}</dt>

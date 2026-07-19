@@ -13,12 +13,16 @@ class DistributionItem extends Model
         'expected_size',
         'actual_size',
         'quantity',
+        'hpp',
+        'unit_price',
     ];
 
     protected function casts(): array
     {
         return [
             'quantity' => 'integer',
+            'hpp' => 'decimal:2',
+            'unit_price' => 'decimal:2',
         ];
     }
 

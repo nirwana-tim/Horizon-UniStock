@@ -92,6 +92,7 @@ class ImportService
             'stock_opname' => $this->resolveStockOpnameImporter($filePath),
             'item_price' => new ItemPriceImport(),
             'entitlement' => new EntitlementImport(),
+            'stock_receive' => new \App\Imports\StockReceiveImport(),
             default => throw new \InvalidArgumentException("Import type '{$type}' is not supported."),
         };
     }

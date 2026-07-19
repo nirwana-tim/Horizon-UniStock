@@ -17,14 +17,13 @@ class GpmService
             'distribution_items.item_id',
             'items.code as item_code',
             'items.name as item_name_raw',
-            'items.hpp',
             'items.selling_price',
             DB::raw('SUM(distribution_items.quantity) as qty_sold'),
-            DB::raw('SUM(distribution_items.quantity * items.hpp) as total_hpp'),
+            DB::raw('SUM(distribution_items.quantity * distribution_items.hpp) as total_hpp'),
             DB::raw('SUM(distribution_items.quantity * items.selling_price) as total_selling_price')
         )
             ->join('items', 'distribution_items.item_id', '=', 'items.id')
-            ->groupBy('distribution_items.item_id', 'items.code', 'items.name', 'items.hpp', 'items.selling_price');
+            ->groupBy('distribution_items.item_id', 'items.code', 'items.name', 'items.selling_price');
 
         if ($period) {
             $query->whereHas('transaction', function ($q) use ($period) {
@@ -42,13 +41,15 @@ class GpmService
             $itemModel = $categories->get($item->item_id);
             $labaRugi = $item->total_selling_price - $item->total_hpp;
 
+            $avgHpp = $item->qty_sold > 0 ? round($item->total_hpp / $item->qty_sold, 2) : 0;
+
             return [
                 'item_id' => $item->item_id,
                 'item_code' => $item->item_code ?? '',
                 'item_name' => $item->item_name_raw ?? '-',
                 'category_name' => $itemModel?->category?->name ?? '-',
                 'qty_sold' => $item->qty_sold,
-                'hpp' => $item->hpp ?? 0,
+                'hpp' => $avgHpp,
                 'selling_price' => $item->selling_price ?? 0,
                 'total_hpp' => $item->total_hpp,
                 'total_selling_price' => $item->total_selling_price,
@@ -85,7 +86,7 @@ class GpmService
             ->select(
                 'distribution_schedules.period',
                 DB::raw('SUM(distribution_items.quantity) as qty_sold'),
-                DB::raw('SUM(distribution_items.quantity * items.hpp) as total_hpp'),
+                DB::raw('SUM(distribution_items.quantity * distribution_items.hpp) as total_hpp'),
                 DB::raw('SUM(distribution_items.quantity * items.selling_price) as total_selling_price')
             )
             ->groupBy('distribution_schedules.period')

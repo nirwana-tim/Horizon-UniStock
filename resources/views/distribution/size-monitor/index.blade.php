@@ -6,6 +6,10 @@
                 <div class="p-6 text-gray-900">
                     <div class="flex items-center justify-between mb-6">
                         <h3 class="text-lg font-semibold text-gray-800">{{ __('Size Change Monitor') }}</h3>
+                        <a href="{{ route('report.size-recap') }}"
+                            class="inline-flex items-center px-4 py-2 border border-primary-500 text-primary-700 rounded-md font-semibold text-xs uppercase tracking-widest hover:bg-primary-50 transition">
+                            Export Recap
+                        </a>
                     </div>
 
                     <div x-data="serverTable('{{ route('distribution.size-monitor.index') }}')">

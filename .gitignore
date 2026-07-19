@@ -14,7 +14,8 @@
 /auth.json
 /node_modules
 .vercel
-.opencode
+/.opencode
+/tests
 /public/build
 /public/hot
 /public/storage

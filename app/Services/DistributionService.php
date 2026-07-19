@@ -38,15 +38,18 @@ class DistributionService
         return $eligibility && $eligibility->is_eligible;
     }
 
-    public function getEntitlementForStudent(Student $student, DistributionSchedule $schedule): ?Entitlement
+    public function getEntitlementForStudent(Student $student): ?Entitlement
     {
         if (! $student->entitlement_code) {
             return null;
         }
 
-        return Entitlement::where('code', '=', $student->entitlement_code, 'and')
-            ->where('is_active', '=', true, 'and')
-            ->where('student_type', '=', $student->student_type, 'and')
+        return Entitlement::where('code', $student->entitlement_code)
+            ->where('is_active', true)
+            ->where(function ($q) use ($student) {
+                $q->where('student_type', $student->student_type)
+                  ->orWhereNull('student_type');
+            })
             ->with('items.item')
             ->first();
     }
@@ -57,8 +60,8 @@ class DistributionService
      */
     public function findItemByBaseCodeAndSize(string $baseCode, string $size): ?Item
     {
-        return Item::where('base_code', '=', $baseCode, 'and')
-            ->whereHas('variants', fn ($q) => $q->where('size', '=', $size, 'and'))
+        return Item::where('base_code', $baseCode)
+            ->whereHas('variants', fn ($q) => $q->where('size', $size))
             ->with('variants')
             ->first();
     }
@@ -78,8 +81,9 @@ class DistributionService
             throw new \Exception('Jadwal distribusi ini tidak sesuai dengan tipe, angkatan, fakultas, atau prodi mahasiswa.');
         }
 
-        $existingTransaction = DistributionTransaction::where('student_id', '=', $student->id, 'and')
-            ->where('schedule_id', '=', $schedule->id, 'and')
+        $existingTransaction = DistributionTransaction::where('student_id', $student->id)
+            ->where('schedule_id', $schedule->id)
+            ->where('status', '!=', 'cancelled')
             ->exists();
 
         if ($existingTransaction) {
@@ -100,20 +104,26 @@ class DistributionService
             $autoNotes = [];
 
             foreach ($items as $itemData) {
-                $item = Item::find($itemData['item_id'], ['*']);
+                if (!empty($itemData['base_code'])) {
+                    $item = $this->findItemByBaseCodeAndSize($itemData['base_code'], $itemData['actual_size']);
+                }
+                if (!isset($item) || !$item) {
+                    $item = Item::find($itemData['item_id'] ?? 0);
+                }
                 if (! $item) {
                     continue;
                 }
 
-                $variant = ItemVariant::where('item_id', '=', $item->id, 'and')
-                    ->where('size', '=', $itemData['actual_size'], 'and')
+                $variant = ItemVariant::where('item_id', $item->id)
+                    ->where('size', $itemData['actual_size'])
                     ->first();
 
                 $quantity = (int) ($itemData['quantity'] ?? 1);
+                $hppAtDistribution = 0;
 
                 if ($variant) {
-                    $stockBalance = StockBalance::where('item_id', '=', $item->id, 'and')
-                        ->where('variant_id', '=', $variant->id, 'and')
+                    $stockBalance = StockBalance::where('item_id', $item->id)
+                        ->where('variant_id', $variant->id)
                         ->lockForUpdate()
                         ->first();
 
@@ -129,11 +139,14 @@ class DistributionService
                     $deductedQty = min($quantity, $availableStock);
 
                     if ($deductedQty > 0) {
+                        $hppAtDistribution = $stockBalance ? $stockBalance->last_hpp : 0;
+
                         StockMovement::create([
                             'item_id' => $item->id,
                             'variant_id' => $variant->id,
                             'type' => 'OUT',
                             'quantity' => $deductedQty,
+                            'hpp' => $hppAtDistribution,
                             'reference_type' => DistributionTransaction::class,
                             'reference_id' => $transaction->id,
                             'notes' => "Distribusi ke {$student->nim}",
@@ -142,7 +155,11 @@ class DistributionService
                         if ($stockBalance) {
                             $stockBalance->decrement('quantity', $deductedQty);
                         }
+                    } else {
+                        $hppAtDistribution = 0;
                     }
+                } else {
+                    $hppAtDistribution = 0;
                 }
 
                 DistributionItem::create([
@@ -151,6 +168,7 @@ class DistributionService
                     'expected_size' => $itemData['expected_size'] ?? $itemData['actual_size'],
                     'actual_size' => $itemData['actual_size'],
                     'quantity' => $quantity,
+                    'hpp' => $hppAtDistribution,
                 ]);
 
                 $oldSize = $itemData['old_size'] ?? $itemData['expected_size'] ?? null;
@@ -161,7 +179,7 @@ class DistributionService
 
             // Check if there are items in entitlement that were not checked (deferred)
             $checkedItemIds = array_column($items, 'item_id');
-            $entitlement = $this->getEntitlementForStudent($student, $schedule);
+            $entitlement = $this->getEntitlementForStudent($student);
             if ($entitlement) {
                 $studentSizes = [];
                 $sizeProfile = $student->activeSizeProfile;
@@ -218,7 +236,7 @@ class DistributionService
         }
 
         $sizeItem = $sizeProfile->sizeItems()
-            ->where('item_id', '=', $item->id, 'and')
+            ->where('item_id', $item->id)
             ->first();
 
         if ($sizeItem) {

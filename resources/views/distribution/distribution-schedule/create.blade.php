@@ -60,6 +60,17 @@
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
+                                <x-input-label for="stage_id" :value="__('Stage')" :required="true" />
+                                <select id="stage_id" name="stage_id" required
+                                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500">
+                                    <option value="">-- Select Stage --</option>
+                                    @foreach($stages as $stage)
+                                        <option value="{{ $stage->id }}" {{ old('stage_id') == $stage->id ? 'selected' : '' }}>{{ $stage->name }} (Tahap {{ $stage->stage_order }})</option>
+                                    @endforeach
+                                </select>
+                                <x-input-error :messages="$errors->get('stage_id')" class="mt-2" />
+                            </div>
+                            <div>
                                 <x-input-label for="name" :value="__('Schedule Name')" />
                                 <x-text-input id="name" name="name" type="text" class="mt-1 block w-full" :value="old('name')" required autofocus />
                                 <x-input-error :messages="$errors->get('name')" class="mt-2" />
@@ -70,7 +81,7 @@
                                         class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500">
                                     <option value="">-- All Levels --</option>
                                     @foreach($programLevels as $level)
-                                        <option value="{{ $level->id }}" {{ old('program_level_id') == $level->id ? 'selected' : '' }}>{{ $level->name }}</option>
+                                        <option value="{{ $level->id }}" {{ old('program_level_id') == $level->id ? 'selected' : '' }}>{{ $level->label }}</option>
                                     @endforeach
                                 </select>
                                 <x-input-error :messages="$errors->get('program_level_id')" class="mt-2" />
@@ -85,11 +96,11 @@
                                 <x-input-error :messages="$errors->get('semester')" class="mt-2" />
                             </div>
                             <div>
-                                <x-input-label for="student_type" :value="__('Student Type')" />
+                                <x-input-label for="student_type" :value="__('Student Type')" :required="true" />
                                 <select id="student_type" name="student_type" x-model="studentType"
                                         class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500">
                                     <option value="">All Student Types</option>
-                                    <option value="freshman">Freshman</option>
+                                    <option value="year_1_sem_1">Year 1 Sem 1</option>
                                     <option value="continuing">Continuing</option>
                                 </select>
                                 <x-input-error :messages="$errors->get('student_type')" class="mt-2" />

@@ -22,6 +22,7 @@ class EntitlementRequest extends FormRequest
                 'max:50',
                 "unique:entitlements,code,{$entitlementId}",
             ],
+            'student_type' => 'nullable|string|in:year_1_sem_1,year_1_sem_2,year_2_sem_3,year_2_sem_4,continuing',
             'description' => 'nullable|string|max:500',
             'is_active' => 'boolean',
             'items' => 'required|array|min:1',
@@ -33,11 +34,15 @@ class EntitlementRequest extends FormRequest
     protected function prepareForValidation(): void
     {
         if ($this->has('items') && is_array($this->items)) {
+            $seen = [];
             $filtered = [];
             foreach ($this->items as $item) {
                 if (isset($item['checked']) && $item['checked'] == '1') {
+                    $itemId = (int) $item['item_id'];
+                    if (in_array($itemId, $seen, true)) continue;
+                    $seen[] = $itemId;
                     $filtered[] = [
-                        'item_id' => (int) $item['item_id'],
+                        'item_id' => $itemId,
                         'quantity' => (int) ($item['quantity'] ?? 1),
                     ];
                 }

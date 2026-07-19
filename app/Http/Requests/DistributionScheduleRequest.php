@@ -23,8 +23,9 @@ class DistributionScheduleRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:255',
+            'stage_id' => 'nullable|integer|exists:distribution_stages,id',
             'semester' => 'required|string|in:Ganjil,Genap',
-            'student_type' => 'nullable|string|in:freshman,continuing',
+            'student_type' => 'nullable|string|in:year_1_sem_1,year_1_sem_2,year_2_sem_3,year_2_sem_4,continuing',
             'date' => 'required|date',
             'location' => 'required|string|max:255',
             'session' => 'required|string|max:100',

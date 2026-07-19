@@ -18,6 +18,10 @@
                                 <dd class="mt-1 text-sm text-gray-900 font-semibold font-mono">{{ $entitlement->code }}</dd>
                             </div>
                             <div class="bg-gray-50 p-4 rounded-lg">
+                                <dt class="text-sm font-medium text-gray-500">{{ __('Student Type') }}</dt>
+                                <dd class="mt-1 text-sm text-gray-900">{{ $entitlement->student_type ? \Illuminate\Support\Str::of($entitlement->student_type)->replace('_', ' ')->title() : '-' }}</dd>
+                            </div>
+                            <div class="bg-gray-50 p-4 rounded-lg">
                                 <dt class="text-sm font-medium text-gray-500">{{ __('Status') }}</dt>
                                 <dd class="mt-1"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $entitlement->is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' }}">{{ $entitlement->is_active ? 'Active' : 'Inactive' }}</span></dd>
                             </div>

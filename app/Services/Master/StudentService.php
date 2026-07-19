@@ -89,6 +89,41 @@ class StudentService
         });
     }
 
+    public function promoteStudents(array $ids, int $newLevelId, ?int $newStudyProgramId = null): int
+    {
+        return DB::transaction(function () use ($ids, $newLevelId, $newStudyProgramId) {
+            $students = Student::whereIn('id', $ids)->lockForUpdate()->get();
+            $count = 0;
+
+            foreach ($students as $student) {
+                $oldValues = $student->toArray();
+                $nextSemester = match ($student->current_semester) {
+                    'Y1S1' => ['student_type' => 'year_1_sem_2', 'current_semester' => 'Y1S2'],
+                    'Y1S2' => ['student_type' => 'year_2_sem_3', 'current_semester' => 'Y2S3'],
+                    'Y2S3' => ['student_type' => 'year_2_sem_4', 'current_semester' => 'Y2S4'],
+                    default => ['student_type' => 'continuing', 'current_semester' => 'Y2S4'],
+                };
+                $updates = [
+                    'program_level_id' => $newLevelId,
+                    'student_type' => $nextSemester['student_type'],
+                    'current_semester' => $nextSemester['current_semester'],
+                ];
+
+                if ($newStudyProgramId) {
+                    $updates['study_program_id'] = $newStudyProgramId;
+                }
+
+                $student->update($updates);
+                $this->refreshEntitlementCode($student);
+
+                AuditService::log('promote', Student::class, $student->id, $oldValues, $student->fresh()->toArray());
+                $count++;
+            }
+
+            return $count;
+        });
+    }
+
     public function refreshEntitlementCode(Student $student): void
     {
         $student->loadMissing(['studyProgram.faculty', 'programLevel']);

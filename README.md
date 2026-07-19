@@ -59,8 +59,15 @@ php artisan key:generate
 
 ## 6. Jalankan migrasi & seeder
 ```bash
-php artisan migrate --seed
+php artisan migrate:fresh --seed
 ```
+
+Master data (fakultas, prodi, item, dll) dari Excel bisa ditambahkan dengan:
+```bash
+php artisan db:seed --class="Database\Seeders\Master\MasterDataSeeder"
+```
+
+> **Catatan:** Seeder master ada di `database/seeders/Master/`, masing-masing 1 record. Bisa dihapus file-nya kapan aja jika tidak dibutuhkan.
 
 ## 7. Install frontend dependencies
 ```bash
@@ -96,9 +103,23 @@ npm install && npm run build
 | Role | Email | Password |
 |------|-------|----------|
 | Super Admin | `superadmin@horizon-unistock.test` | `password` |
-| Finance | `finance@horizon-unistock.test` | `password` |
+| Finance Admin | `finance@horizon-unistock.test` | `password` |
 | Staff | `staff@horizon-unistock.test` | `password` |
-| Mahasiswa | `1234567890123456` (NIM) | `password` |
+
+### Master Data Seeder
+
+Seeder master data ada di `database/seeders/Master/`, masing-masing 1 record dari data Excel.
+
+**Jalankan semua:**
+```bash
+php artisan db:seed --class="Database\Seeders\Master\MasterDataSeeder"
+```
+
+**Hapus semua master data:**
+```bash
+Remove-Item -Recurse -Force database/seeders/Master/
+php artisan migrate:fresh --seed
+```
 
 ## Dokumentasi
 

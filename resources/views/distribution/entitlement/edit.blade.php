@@ -15,9 +15,21 @@
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <x-input-label :value="__('Entitlement Code (Read-Only)') />
+                                <x-input-label :value="__('Entitlement Code (Read-Only)')" />
                                 <x-text-input id="code_display" type="text" class="mt-1 block w-full bg-gray-50 text-gray-500 font-mono" :value="$entitlement->code" disabled />
                                 <input type="hidden" name="code" value="{{ $entitlement->code }}">
+                            </div>
+                            <div>
+                                <x-input-label for="student_type" :value="__('Student Type')" />
+                                <select id="student_type" name="student_type" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500">
+                                    <option value="">-- Select Type --</option>
+                                    <option value="year_1_sem_1" {{ old('student_type', $entitlement->student_type) == 'year_1_sem_1' ? 'selected' : '' }}>Year 1 Sem 1</option>
+                                    <option value="year_1_sem_2" {{ old('student_type', $entitlement->student_type) == 'year_1_sem_2' ? 'selected' : '' }}>Year 1 Sem 2</option>
+                                    <option value="year_2_sem_3" {{ old('student_type', $entitlement->student_type) == 'year_2_sem_3' ? 'selected' : '' }}>Year 2 Sem 3</option>
+                                    <option value="year_2_sem_4" {{ old('student_type', $entitlement->student_type) == 'year_2_sem_4' ? 'selected' : '' }}>Year 2 Sem 4</option>
+                                    <option value="continuing" {{ old('student_type', $entitlement->student_type) == 'continuing' ? 'selected' : '' }}>Continuing</option>
+                                </select>
+                                <x-input-error :messages="$errors->get('student_type')" class="mt-2" />
                             </div>
                             <div>
                                 <x-input-label for="is_active" :value="__('Status')" />

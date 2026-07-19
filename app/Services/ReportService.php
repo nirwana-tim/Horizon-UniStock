@@ -83,7 +83,7 @@ class ReportService
         $query = DistributionItem::select(
             'distribution_items.item_id',
             DB::raw('SUM(distribution_items.quantity) as qty_sold'),
-            DB::raw('SUM(distribution_items.quantity * items.hpp) as total_hpp'),
+            DB::raw('SUM(distribution_items.quantity * distribution_items.hpp) as total_hpp'),
             DB::raw('SUM(distribution_items.quantity * items.selling_price) as total_revenue')
         )
             ->join('items', 'distribution_items.item_id', '=', 'items.id')
@@ -317,5 +317,323 @@ class ReportService
         }
 
         return $query->get();
+    }
+
+    public function getSalesDashboardProcessedData(?string $startDate = null, ?string $endDate = null, ?int $categoryId = null, ?int $itemId = null): array
+    {
+        $start = $startDate ? \Carbon\Carbon::parse($startDate)->startOfDay() : null;
+        $end = $endDate ? \Carbon\Carbon::parse($endDate)->endOfDay() : null;
+
+        // 1. KPI Sold Data
+        $soldQuery = DB::table('distribution_items as di')
+            ->join('distribution_transactions as dt', 'dt.id', '=', 'di.transaction_id')
+            ->join('items as i', 'i.id', '=', 'di.item_id')
+            ->select('i.category_id', DB::raw('SUM(di.quantity) as total_sold'))
+            ->whereIn('dt.status', ['completed', 'partial']);
+
+        if ($start) {
+            $soldQuery->where('dt.pickup_time', '>=', $start);
+        }
+        if ($end) {
+            $soldQuery->where('dt.pickup_time', '<=', $end);
+        }
+        if ($categoryId) {
+            $soldQuery->where('i.category_id', $categoryId);
+        }
+        if ($itemId) {
+            $soldQuery->where('di.item_id', $itemId);
+        }
+
+        $soldData = $soldQuery->groupBy('i.category_id')->pluck('total_sold', 'i.category_id');
+
+        // 2. KPI Stock Data
+        $stockQuery = DB::table('stock_balances as sb')
+            ->join('items as i', 'i.id', '=', 'sb.item_id')
+            ->select('i.category_id', DB::raw('SUM(sb.quantity) as total_stock'));
+
+        if ($categoryId) {
+            $stockQuery->where('i.category_id', $categoryId);
+        }
+        if ($itemId) {
+            $stockQuery->where('sb.item_id', $itemId);
+        }
+
+        $stockData = $stockQuery->groupBy('i.category_id')->pluck('total_stock', 'i.category_id');
+
+        // 3. Build KPIs
+        $categoriesList = DB::table('item_categories')->orderBy('code')->get();
+        $kpis = [];
+        $grandTotalSold = 0;
+        $grandTotalStock = 0;
+
+        foreach ($categoriesList as $cat) {
+            $catId = $cat->id;
+            $code = strtolower($cat->code);
+            $key = match($code) {
+                'unf' => 'uniform',
+                'shs' => 'shoes',
+                'tmb' => 'tumbler',
+                default => $code,
+            };
+            
+            $sold = (int) ($soldData[$catId] ?? 0);
+            $stock = (int) ($stockData[$catId] ?? 0);
+            
+            $kpis[$key] = [
+                'sold' => $sold,
+                'stock' => $stock
+            ];
+            
+            $grandTotalSold += $sold;
+            $grandTotalStock += $stock;
+        }
+
+        $kpis['grand_total'] = [
+            'sold' => $grandTotalSold,
+            'stock' => $grandTotalStock
+        ];
+
+        // 4. Chart 1: Unit Sold by Items
+        $c1Query = DB::table('distribution_items as di')
+            ->join('distribution_transactions as dt', 'dt.id', '=', 'di.transaction_id')
+            ->join('items as i', 'i.id', '=', 'di.item_id')
+            ->select('i.name', DB::raw('SUM(di.quantity) as total_sold'))
+            ->whereIn('dt.status', ['completed', 'partial']);
+
+        if ($start) {
+            $c1Query->where('dt.pickup_time', '>=', $start);
+        }
+        if ($end) {
+            $c1Query->where('dt.pickup_time', '<=', $end);
+        }
+        if ($categoryId) {
+            $c1Query->where('i.category_id', $categoryId);
+        }
+        if ($itemId) {
+            $c1Query->where('di.item_id', $itemId);
+        }
+
+        $c1Data = $c1Query->groupBy('i.id', 'i.name')
+            ->orderByDesc('total_sold')
+            ->limit(15)
+            ->get();
+
+        $chart1 = [
+            'labels' => $c1Data->pluck('name')->toArray(),
+            'datasets' => [
+                [
+                    'label' => 'Unit Sold',
+                    'data' => $c1Data->pluck('total_sold')->map(fn($v) => (int) $v)->toArray(),
+                    'backgroundColor' => '#980416',
+                    'borderRadius' => 4
+                ]
+            ]
+        ];
+
+        // 5. Chart 2: Revenue by Items
+        $c2Query = DB::table('distribution_items as di')
+            ->join('distribution_transactions as dt', 'dt.id', '=', 'di.transaction_id')
+            ->join('items as i', 'i.id', '=', 'di.item_id')
+            ->select('i.name', DB::raw('SUM(di.quantity * i.selling_price) as total_revenue'))
+            ->whereIn('dt.status', ['completed', 'partial']);
+
+        if ($start) {
+            $c2Query->where('dt.pickup_time', '>=', $start);
+        }
+        if ($end) {
+            $c2Query->where('dt.pickup_time', '<=', $end);
+        }
+        if ($categoryId) {
+            $c2Query->where('i.category_id', $categoryId);
+        }
+        if ($itemId) {
+            $c2Query->where('di.item_id', $itemId);
+        }
+
+        $c2Data = $c2Query->groupBy('i.id', 'i.name')
+            ->orderByDesc('total_revenue')
+            ->limit(15)
+            ->get();
+
+        $chart2 = [
+            'labels' => $c2Data->pluck('name')->toArray(),
+            'datasets' => [
+                [
+                    'label' => 'Revenue',
+                    'data' => $c2Data->pluck('total_revenue')->map(fn($v) => (int) $v)->toArray(),
+                    'backgroundColor' => '#10B981',
+                    'borderRadius' => 4
+                ]
+            ]
+        ];
+
+        // 6. Chart 3: Combo Chart (Revenue & Unit Sold by Month)
+        $c3Query = DB::table('distribution_items as di')
+            ->join('distribution_transactions as dt', 'dt.id', '=', 'di.transaction_id')
+            ->join('items as i', 'i.id', '=', 'di.item_id')
+            ->select(
+                DB::raw("DATE_FORMAT(dt.pickup_time, '%Y-%m') as month_val"),
+                DB::raw("DATE_FORMAT(dt.pickup_time, '%b-%y') as month_label"),
+                DB::raw('SUM(di.quantity) as total_sold'),
+                DB::raw('SUM(di.quantity * i.selling_price) as total_revenue')
+            )
+            ->whereIn('dt.status', ['completed', 'partial']);
+
+        if ($start) {
+            $c3Query->where('dt.pickup_time', '>=', $start);
+        }
+        if ($end) {
+            $c3Query->where('dt.pickup_time', '<=', $end);
+        }
+        if ($categoryId) {
+            $c3Query->where('i.category_id', $categoryId);
+        }
+        if ($itemId) {
+            $c3Query->where('di.item_id', $itemId);
+        }
+
+        $c3Data = $c3Query->groupBy('month_val', 'month_label')
+            ->orderBy('month_val')
+            ->get();
+
+        $chart3 = [
+            'labels' => $c3Data->pluck('month_label')->toArray(),
+            'datasets' => [
+                [
+                    'type' => 'bar',
+                    'label' => 'Revenue',
+                    'data' => $c3Data->pluck('total_revenue')->map(fn($v) => (int) $v)->toArray(),
+                    'backgroundColor' => '#980416',
+                    'yAxisID' => 'y',
+                    'borderRadius' => 4
+                ],
+                [
+                    'type' => 'line',
+                    'label' => 'Unit Sold',
+                    'data' => $c3Data->pluck('total_sold')->map(fn($v) => (int) $v)->toArray(),
+                    'borderColor' => '#2563EB',
+                    'backgroundColor' => 'rgba(37, 99, 235, 0.1)',
+                    'yAxisID' => 'y1',
+                    'tension' => 0.4,
+                    'fill' => true
+                ]
+            ]
+        ];
+
+        // 7. Chart 4: Available Stock
+        $c4Query = DB::table('stock_balances as sb')
+            ->join('items as i', 'i.id', '=', 'sb.item_id')
+            ->select('i.name', DB::raw('SUM(sb.quantity) as total_stock'));
+
+        if ($categoryId) {
+            $c4Query->where('i.category_id', $categoryId);
+        }
+        if ($itemId) {
+            $c4Query->where('sb.item_id', $itemId);
+        }
+
+        $c4Data = $c4Query->groupBy('i.id', 'i.name')
+            ->orderByDesc('total_stock')
+            ->limit(15)
+            ->get();
+
+        $chart4 = [
+            'labels' => $c4Data->pluck('name')->toArray(),
+            'datasets' => [
+                [
+                    'label' => 'Available Stock',
+                    'data' => $c4Data->pluck('total_stock')->map(fn($v) => (int) $v)->toArray(),
+                    'backgroundColor' => '#F59E0B',
+                    'borderRadius' => 4
+                ]
+            ]
+        ];
+
+        // 8. Chart 5: Value Stock
+        $c5Query = DB::table('stock_balances as sb')
+            ->join('items as i', 'i.id', '=', 'sb.item_id')
+            ->select('i.name', DB::raw('SUM(sb.quantity * CASE WHEN i.hpp > 0 THEN i.hpp ELSE i.selling_price * 0.7 END) as total_value'));
+
+        if ($categoryId) {
+            $c5Query->where('i.category_id', $categoryId);
+        }
+        if ($itemId) {
+            $c5Query->where('sb.item_id', $itemId);
+        }
+
+        $c5Data = $c5Query->groupBy('i.id', 'i.name')
+            ->orderByDesc('total_value')
+            ->limit(15)
+            ->get();
+
+        $chart5 = [
+            'labels' => $c5Data->pluck('name')->toArray(),
+            'datasets' => [
+                [
+                    'label' => 'Value Stock (Rp)',
+                    'data' => $c5Data->pluck('total_value')->map(fn($v) => (int) $v)->toArray(),
+                    'backgroundColor' => '#3B82F6',
+                    'borderRadius' => 4
+                ]
+            ]
+        ];
+
+        // 9. Chart 6: % Unit Sold
+        $c6Query = DB::table('distribution_items as di')
+            ->join('distribution_transactions as dt', 'dt.id', '=', 'di.transaction_id')
+            ->join('items as i', 'i.id', '=', 'di.item_id')
+            ->select('i.name', DB::raw('SUM(di.quantity) as total_sold'))
+            ->whereIn('dt.status', ['completed', 'partial']);
+
+        if ($start) {
+            $c6Query->where('dt.pickup_time', '>=', $start);
+        }
+        if ($end) {
+            $c6Query->where('dt.pickup_time', '<=', $end);
+        }
+        if ($categoryId) {
+            $c6Query->where('i.category_id', $categoryId);
+        }
+        if ($itemId) {
+            $c6Query->where('di.item_id', $itemId);
+        }
+
+        $c6Data = $c6Query->groupBy('i.id', 'i.name')
+            ->orderByDesc('total_sold')
+            ->limit(8)
+            ->get();
+
+        $colors = [
+            '#980416', // Maroon
+            '#3B82F6', // Blue
+            '#10B981', // Green
+            '#F59E0B', // Amber
+            '#EC4899', // Pink
+            '#8B5CF6', // Purple
+            '#06B6D4', // Cyan
+            '#6B7280', // Gray
+        ];
+
+        $chart6 = [
+            'labels' => $c6Data->pluck('name')->toArray(),
+            'datasets' => [
+                [
+                    'data' => $c6Data->pluck('total_sold')->map(fn($v) => (int) $v)->toArray(),
+                    'backgroundColor' => array_slice($colors, 0, $c6Data->count()),
+                    'borderWidth' => 2,
+                    'borderColor' => '#ffffff'
+                ]
+            ]
+        ];
+
+        return [
+            'kpis' => $kpis,
+            'chart1' => $chart1,
+            'chart2' => $chart2,
+            'chart3' => $chart3,
+            'chart4' => $chart4,
+            'chart5' => $chart5,
+            'chart6' => $chart6,
+        ];
     }
 }

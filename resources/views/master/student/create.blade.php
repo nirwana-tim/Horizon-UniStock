@@ -17,19 +17,19 @@
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <x-input-label for="nim" :value="__('NIM')" />
+                                <x-input-label for="nim" :value="__('NIM')" :required="true" />
                                 <x-text-input id="nim" name="nim" type="text" class="mt-1 block w-full" :value="old('nim')" required autofocus />
                                 <x-input-error :messages="$errors->get('nim')" class="mt-2" />
                             </div>
 
                             <div>
-                                <x-input-label for="name" :value="__('Full Name')" />
+                                <x-input-label for="name" :value="__('Full Name')" :required="true" />
                                 <x-text-input id="name" name="name" type="text" class="mt-1 block w-full" :value="old('name')" required />
                                 <x-input-error :messages="$errors->get('name')" class="mt-2" />
                             </div>
 
                             <div>
-                                <x-input-label for="email_kampus" :value="__('Campus Email')" />
+                                <x-input-label for="email_kampus" :value="__('Campus Email')" :required="true" />
                                 <x-text-input id="email_kampus" name="email_kampus" type="email" class="mt-1 block w-full" :value="old('email_kampus')" placeholder="nim@krw.horizon.ac.id" required />
                                 <x-input-error :messages="$errors->get('email_kampus')" class="mt-2" />
                             </div>
@@ -41,7 +41,7 @@
                             </div>
 
                             <div>
-                                <x-input-label for="study_program_id" :value="__('Study Program')" />
+                                <x-input-label for="study_program_id" :value="__('Study Program')" :required="true" />
                                 <select id="study_program_id" name="study_program_id" required
                                         class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500">
                                     <option value="">-- Select Study Program --</option>
@@ -53,21 +53,24 @@
                             </div>
 
                             <div>
-                                <x-input-label for="program_level_id" :value="__('Level / Batch')" />
+                                <x-input-label for="program_level_id" :value="__('Level / Batch')" :required="true" />
                                 <select id="program_level_id" name="program_level_id" required
                                         class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500">
                                     <option value="">-- Select Level --</option>
                                     @foreach($programLevels as $l)
-                                        <option value="{{ $l->id }}" {{ old('program_level_id') == $l->id ? 'selected' : '' }}>{{ $l->name }}</option>
+                                        <option value="{{ $l->id }}" {{ old('program_level_id') == $l->id ? 'selected' : '' }}>{{ $l->label }}</option>
                                     @endforeach
                                 </select>
                                 <x-input-error :messages="$errors->get('program_level_id')" class="mt-2" />
                             </div>
 
                             <div>
-                                <x-input-label for="student_type" :value="__('Student Type')" />
+                                <x-input-label for="student_type" :value="__('Student Type')" :required="true" />
                                 <select id="student_type" name="student_type" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500">
-                                    <option value="freshman" {{ old('student_type') == 'freshman' ? 'selected' : '' }}>Freshman</option>
+                                    <option value="year_1_sem_1" {{ old('student_type') == 'year_1_sem_1' ? 'selected' : '' }}>Year 1 Sem 1</option>
+                                    <option value="year_1_sem_2" {{ old('student_type') == 'year_1_sem_2' ? 'selected' : '' }}>Year 1 Sem 2</option>
+                                    <option value="year_2_sem_3" {{ old('student_type') == 'year_2_sem_3' ? 'selected' : '' }}>Year 2 Sem 3</option>
+                                    <option value="year_2_sem_4" {{ old('student_type') == 'year_2_sem_4' ? 'selected' : '' }}>Year 2 Sem 4</option>
                                     <option value="continuing" {{ old('student_type') == 'continuing' ? 'selected' : '' }}>Continuing</option>
                                 </select>
                                 <x-input-error :messages="$errors->get('student_type')" class="mt-2" />

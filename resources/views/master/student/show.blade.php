@@ -50,24 +50,24 @@
                         </div>
                         <div>
                             <h3 class="text-sm font-medium text-gray-500">Level / Batch</h3>
-                            <p class="mt-1 text-sm text-gray-900">{{ $student->programLevel->name ?? '-' }}</p>
+                            <p class="mt-1 text-sm text-gray-900">{{ $student->programLevel->label ?? '-' }}</p>
                         </div>
                         <div>
                             <h3 class="text-sm font-medium text-gray-500">Type</h3>
-                            @if($student->student_type === 'freshman')
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">Freshman</span>
-                            @else
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">Continuing</span>
-                            @endif
+                            <div class="mt-1">
+                                <x-badge type="info">{{ $student->student_type_label }}</x-badge>
+                            </div>
                         </div>
                         <div>
                             <h3 class="text-sm font-medium text-gray-500">Account Status</h3>
-                            @if($student->user_id)
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Active</span>
-                                <span class="text-xs text-gray-500 ml-2">{{ $student->user?->email }}</span>
-                            @else
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">Not Generated</span>
-                            @endif
+                            <div class="mt-1">
+                                @if($student->user_id)
+                                    <x-badge type="success">Active</x-badge>
+                                    <span class="text-xs text-gray-500 ml-2">{{ $student->user?->email }}</span>
+                                @else
+                                    <x-badge type="warning">Not Generated</x-badge>
+                                @endif
+                            </div>
                         </div>
                     </div>
 

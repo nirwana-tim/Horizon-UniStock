@@ -29,18 +29,31 @@ class ImportController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'import_type' => ['required', 'string', 'in:student,eligibility,item,stock_opname,item_price,entitlement'],
+        $rules = [
+            'import_type' => ['required', 'string', 'in:student,eligibility,item,stock_opname,item_price,entitlement,stock_receive'],
             'stock_opname_id' => ['required_if:import_type,stock_opname', 'nullable', 'integer', 'exists:stock_opnames,id'],
-            'file' => ['required', 'file', 'mimes:xlsx,xls,csv', 'max:10240'],
-        ]);
+        ];
 
-        $file = $request->file('file');
-        $fileName = time() . '_' . preg_replace('/[^a-zA-Z0-9._-]/', '', $file->getClientOriginalName());
-        $filePath = $file->storeAs('imports', $fileName, 'local');
+        if ($request->has('file_path') && $request->filled('file_path')) {
+            $filePath = $request->input('file_path');
+
+            if (!str_starts_with($filePath, 'imports/')) {
+                return back()->with('error', 'Invalid file path.');
+            }
+
+            if (!Storage::disk('local')->exists($filePath)) {
+                return back()->with('error', 'File not found. Please upload again.');
+            }
+        } else {
+            $rules['file'] = ['required', 'file', 'mimes:xlsx,xls,csv', 'max:10240'];
+            $validated = $request->validate($rules);
+            $file = $request->file('file');
+            $fileName = time() . '_' . preg_replace('/[^a-zA-Z0-9._-]/', '', $file->getClientOriginalName());
+            $filePath = $file->storeAs('imports', $fileName, 'local');
+        }
 
         $batch = $this->importService->processImport(
-            $validated['import_type'],
+            $request->input('import_type'),
             Storage::disk('local')->path($filePath),
             $request->user()->id
         );
@@ -60,7 +73,7 @@ class ImportController extends Controller
     {
         $validated = $request->validate([
             'file' => ['required', 'file', 'mimes:xlsx,xls,csv', 'max:10240'],
-            'import_type' => ['required', 'string', 'in:student,eligibility,item,stock_opname,item_price,entitlement'],
+            'import_type' => ['required', 'string', 'in:student,eligibility,item,stock_opname,item_price,entitlement,stock_receive'],
         ]);
 
         $file = $request->file('file');
@@ -72,10 +85,16 @@ class ImportController extends Controller
             Storage::disk('local')->path($filePath)
         )->first();
 
+        $headers = $data->isNotEmpty() ? $data->first()->keys()->toArray() : [];
+        $rows = $data->isNotEmpty() ? $data->skip(1)->values() : collect();
+        $totalDataRows = $rows->count();
+
         return view('import.preview', [
-            'data' => $data,
+            'headers' => $headers,
+            'rows' => $rows,
             'importType' => $validated['import_type'],
             'filePath' => $filePath,
+            'totalDataRows' => $totalDataRows,
         ]);
     }
 }

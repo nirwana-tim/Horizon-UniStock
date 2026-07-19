@@ -11,7 +11,7 @@
                 <div class="p-6 text-gray-900">
                     <h3 class="text-lg font-semibold text-gray-900 mb-4">Download Template Import</h3>
                     <p class="text-sm text-gray-500 mb-4">Download the Excel template, fill in the data, then upload using the form below.</p>
-                    <div class="grid grid-cols-1 md:grid-cols-5 gap-3">
+                    <div class="grid grid-cols-1 md:grid-cols-6 gap-3">
                         <a href="{{ route('templates.download', 'mahasiswa') }}" class="inline-flex items-center justify-center px-4 py-2 bg-[#980416] border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-[#7a0311] transition">
                             Student
                         </a>
@@ -26,6 +26,9 @@
                         </a>
                         <a href="{{ route('templates.download', 'hak_barang') }}" class="inline-flex items-center justify-center px-4 py-2 bg-[#980416] border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-[#7a0311] transition">
                             Item Entitlement
+                        </a>
+                        <a href="{{ route('templates.download', 'penerimaan') }}" class="inline-flex items-center justify-center px-4 py-2 bg-[#980416] border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-[#7a0311] transition">
+                            Stock Receive
                         </a>
                     </div>
                 </div>
@@ -47,7 +50,7 @@
                         </div>
                     @endif
 
-                    <form action="{{ route('import.store') }}" method="POST" enctype="multipart/form-data">
+                    <form action="{{ route('import.preview') }}" method="POST" enctype="multipart/form-data">
                         @csrf
 
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -62,6 +65,7 @@
                                     <option value="item_price" {{ old('import_type') === 'item_price' ? 'selected' : '' }}>Item Price</option>
                                     <option value="entitlement" {{ old('import_type') === 'entitlement' ? 'selected' : '' }}>Item Entitlement</option>
                                     <option value="stock_opname" {{ old('import_type') === 'stock_opname' ? 'selected' : '' }}>Stock Opname</option>
+                                    <option value="stock_receive" {{ old('import_type') === 'stock_receive' ? 'selected' : '' }}>Stock Receive</option>
                                 </select>
                                 <x-input-error :messages="$errors->get('import_type')" class="mt-2" />
                             </div>
@@ -74,7 +78,7 @@
 
                             <div class="flex items-end">
                                 <x-primary-button class="w-full justify-center bg-[#980416] hover:bg-[#7a0311]">
-                                    {{ __('Import') }}
+                                    {{ __('Preview & Import') }}
                                 </x-primary-button>
                             </div>
 

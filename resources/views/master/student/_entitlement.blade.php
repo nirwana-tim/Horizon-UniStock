@@ -27,13 +27,13 @@
                             $eQty = $ei->quantity;
                             if ($rQty >= $eQty) {
                                 $status = 'Complete';
-                                $statusClass = 'bg-green-100 text-green-800';
+                                $badgeType = 'success';
                             } elseif ($rQty > 0) {
                                 $status = 'Partial';
-                                $statusClass = 'bg-yellow-100 text-yellow-800';
+                                $badgeType = 'warning';
                             } else {
                                 $status = 'Pending';
-                                $statusClass = 'bg-gray-100 text-gray-600';
+                                $badgeType = 'neutral';
                             }
                         @endphp
                         <tr>
@@ -42,7 +42,7 @@
                             <td class="px-4 py-2 text-sm text-center text-gray-900">{{ $eQty }}</td>
                             <td class="px-4 py-2 text-sm text-center text-gray-900">{{ $rQty }}</td>
                             <td class="px-4 py-2 text-sm text-center">
-                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $statusClass }}">{{ $status }}</span>
+                                <x-badge :type="$badgeType">{{ $status }}</x-badge>
                             </td>
                         </tr>
                     @endforeach

@@ -3,11 +3,13 @@
 namespace App\Exports\Templates;
 
 use App\Exports\BaseExport;
+use App\Models\ItemSize;
 use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\WithTitle;
 use Maatwebsite\Excel\Concerns\WithCustomStartCell;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class KatalogTemplateExport extends BaseExport implements FromArray, WithHeadings, WithStyles, WithTitle, WithCustomStartCell
@@ -24,45 +26,37 @@ class KatalogTemplateExport extends BaseExport implements FromArray, WithHeading
 
     public function headings(): array
     {
-        return [
-            'Kode Barang',
-            'Kategori *',
-            'Gender *',
-            'Nama Item *',
-            'Departemen *',
-            'Ukuran *',
-            'Satuan *',
-        ];
+        $sizes = ItemSize::orderBy('code')->pluck('label');
+
+        return array_merge(
+            ['Kategori *', 'Gender *', 'Nama Item *', 'Departemen', 'Satuan *'],
+            $sizes->toArray()
+        );
     }
 
     public function styles(Worksheet $sheet): void
     {
-        $colCount = 7;
+        $sizes = ItemSize::orderBy('code')->pluck('label');
+        $fixedCols = 5;
+        $colCount = $fixedCols + $sizes->count();
 
         $this->setTitle($sheet, 'TEMPLATE IMPORT KATALOG BARANG', $colCount);
-        $this->setSubtitle($sheet, 'Kode Barang dikosongkan untuk generate otomatis. Kategori: UNF / SHO / KTM / KIT / MRC. Gender: L / P / U.', $colCount);
-
-        // Write Contoh Format in Row 3
-        $sheet->mergeCells('A3:G3');
-        $sheet->setCellValue('A3', 'Contoh Format: UNF-L-SCB-02-03 | UNF | L | Uniform Scrub Laki-Laki STIKES | 02 (STIKES) | S | Pcs');
-        $sheet->getStyle('A3')->applyFromArray([
-            'font' => ['italic' => true, 'color' => ['rgb' => '888888'], 'size' => 10],
-            'alignment' => [
-                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT,
-                'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
-            ],
-        ]);
-        $sheet->getRowDimension(3)->setRowHeight(20);
+        $this->setSubtitle($sheet, 'Kategori: UNF / SHO / KTM / KIT / MRC. Gender: L / P / U. Isi qty stok awal di kolom ukuran.', $colCount);
 
         $headerRow = $this->headerRow();
         $this->applyHeaderStyle($sheet, $headerRow, $colCount);
 
-        $this->setColumnWidths($sheet, [
-            'A' => 22, 'B' => 14, 'C' => 10, 'D' => 40, 'E' => 20, 'F' => 14, 'G' => 12,
-        ]);
+        $widths = ['A' => 12, 'B' => 10, 'C' => 40, 'D' => 20, 'E' => 10];
+        $colLetter = 'F';
+        foreach ($sizes as $label) {
+            $widths[$colLetter] = max(8, min(14, strlen($label) + 4));
+            $colLetter++;
+        }
+        $this->setColumnWidths($sheet, $widths);
 
+        $lastCol = Coordinate::stringFromColumnIndex($colCount);
         $sheet->freezePane('A' . ($headerRow + 1));
-        $sheet->setAutoFilter('A' . $headerRow . ':G' . $headerRow);
+        $sheet->setAutoFilter('A' . $headerRow . ':' . $lastCol . $headerRow);
     }
 
     public function title(): string

@@ -115,9 +115,9 @@ class StudentImport implements ToCollection, WithMultipleSheets
                 'program' => ['required', 'string'],
                 'email_kampus' => ['required', 'email', 'max:255', 'unique:students,email_kampus'],
                 'email_pribadi' => ['nullable', 'email', 'max:255'],
-                'student_type_raw' => ['required', 'string', 'in:Freshman,Continuing,freshman,continuing'],
+                'student_type_raw' => ['required', 'string', 'in:Year 1 Sem 1,Year 1 Sem 2,Year 2 Sem 3,Year 2 Sem 4,Continuing,continuing,year_1_sem_1,year_1_sem_2,year_2_sem_3,year_2_sem_4'],
             ], [
-                'student_type_raw.in' => 'The tipe field must be Freshman or Continuing.',
+                'student_type_raw.in' => 'The tipe field must be Year 1 Sem 1, Year 1 Sem 2, Year 2 Sem 3, Year 2 Sem 4, or Continuing.',
             ]);
 
             foreach ($validator->errors()->messages() as $attribute => $messages) {
@@ -145,9 +145,13 @@ class StudentImport implements ToCollection, WithMultipleSheets
                 $failures[] = new Failure($record['row'], 'level', ['Level/angkatan tidak ditemukan dari NIM.'], $record);
             }
 
-            $record['student_type'] = Str::lower((string) $record['student_type_raw']) === 'continuing'
-                ? 'continuing'
-                : 'freshman';
+            $record['student_type'] = match (Str::lower((string) $record['student_type_raw'])) {
+                'year 1 sem 1', 'year_1_sem_1' => 'year_1_sem_1',
+                'year 1 sem 2', 'year_1_sem_2' => 'year_1_sem_2',
+                'year 2 sem 3', 'year_2_sem_3' => 'year_2_sem_3',
+                'year 2 sem 4', 'year_2_sem_4' => 'year_2_sem_4',
+                default => 'continuing',
+            };
         }
 
         return $failures;
