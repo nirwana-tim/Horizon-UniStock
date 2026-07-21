@@ -14,6 +14,7 @@
         'master-data.item.*',
         'master-data.item-price.*',
         'master-data.vendor.*',
+        'master-data.student-type.*',
     ];
     $studentsRoutes = ['students.*'];
     $distributionRoutes = [
@@ -22,6 +23,7 @@
         'distribution.scan.*',
         'distribution.size-monitor.*',
         'distribution.stages.*',
+        'distribution.size-events.*',
     ];
     $inventoryRoutes = ['inventory.stock-receive.*', 'inventory.stock-opname.*', 'inventory.stock-balance.*', 'inventory.stock-movement.*'];
     $reportsRoutes = ['report.gpm-cost', 'report.gpm-cost.*', 'report.*'];
@@ -79,7 +81,8 @@
     </div>
 
     {{-- Navigation --}}
-    <nav class="flex-1 overflow-y-hidden py-3 px-2 space-y-0.5">
+    <div class="flex-1 overflow-y-auto custom-scroll">
+        <nav class="py-3 px-2 space-y-0.5">
 
         {{-- Dashboard --}}
         <a href="{{ route('dashboard') }}" title="Dashboard"
@@ -159,6 +162,10 @@
                         class="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm {{ request()->routeIs('master-data.vendor.*') ? 'text-primary-700 font-medium bg-primary-50' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50' }} transition-colors">
                         Vendor
                     </a>
+                    <a href="{{ route('master-data.student-type.index') }}"
+                        class="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm {{ request()->routeIs('master-data.student-type.*') ? 'text-primary-700 font-medium bg-primary-50' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50' }} transition-colors">
+                        Student Type
+                    </a>
                 </div>
             </div>
 
@@ -226,6 +233,10 @@
                     <a href="{{ route('distribution.size-monitor.index') }}"
                         class="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm {{ request()->routeIs('distribution.size-monitor.*') ? 'text-primary-700 font-medium bg-primary-50' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50' }} transition-colors">
                         Size Monitor
+                    </a>
+                    <a href="{{ route('distribution.size-events.index') }}"
+                        class="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm {{ request()->routeIs('distribution.size-events.*') ? 'text-primary-700 font-medium bg-primary-50' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50' }} transition-colors">
+                        Event Ukuran
                     </a>
                     <a href="{{ route('distribution.stages.index') }}"
                         class="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm {{ request()->routeIs('distribution.stages.*') ? 'text-primary-700 font-medium bg-primary-50' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50' }} transition-colors">
@@ -355,7 +366,8 @@
             </div>
         @endrole
 
-    </nav>
+        </nav>
+    </div>
 
     {{-- Bottom: User Info --}}
     <div class="flex-shrink-0 border-t border-gray-100 p-3 bg-white sticky bottom-0 z-10">
@@ -395,17 +407,14 @@
                     My Profile
                 </a>
                 <div class="border-t border-gray-100 my-1"></div>
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-                    <button type="submit"
-                        class="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors">
-                        <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                        </svg>
-                        Logout
-                    </button>
-                </form>
+                <a href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit()"
+                    class="w-full flex items-center gap-2 px-3 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors">
+                    <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                    Logout
+                </a>
             </div>
         </div>
     </div>

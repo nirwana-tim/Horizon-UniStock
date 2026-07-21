@@ -15,10 +15,10 @@
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                                 <div>
-                                    <x-input-label value="Target Program Level" />
-                                    <select name="target_level_id" required
+                                    <x-input-label value="Target Program Level (Opsional)" />
+                                    <select name="target_level_id"
                                         class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500 text-sm">
-                                        <option value="">-- Select Level --</option>
+                                        <option value="">-- Otomatis (Naikkan Semester) --</option>
                                         @foreach($programLevels as $level)
                                             <option value="{{ $level->id }}">{{ $level->label }} ({{ $level->code }})</option>
                                         @endforeach
@@ -26,10 +26,10 @@
                                     <x-input-error :messages="$errors->get('target_level_id')" class="mt-1" />
                                 </div>
                                 <div>
-                                    <x-input-label value="Target Study Program (optional)" />
+                                    <x-input-label value="Target Program Studi (Opsional)" />
                                     <select name="target_study_program_id"
                                         class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500 text-sm">
-                                        <option value="">-- Same Study Program --</option>
+                                        <option value="">-- Tetap di Prodi Saat Ini --</option>
                                         @foreach($studyPrograms as $program)
                                             <option value="{{ $program->id }}">{{ $program->faculty->code }} - {{ $program->name }}</option>
                                         @endforeach
@@ -42,9 +42,9 @@
                                 <input type="text"
                                     x-model="search"
                                     @input.debounce.300ms="page=1; fetchData()"
-                                    placeholder="Search by name or NIM..."
+                                    placeholder="Cari berdasarkan nama atau NIM..."
                                     class="w-72 border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500 text-sm">
-                                <span class="text-sm text-gray-500" id="selected-count">0 students selected</span>
+                                <span class="text-sm text-gray-500" id="selected-count">0 mahasiswa dipilih</span>
                             </div>
 
                             <div class="overflow-x-auto">
@@ -55,10 +55,10 @@
                                                 <input type="checkbox" id="select-all" class="rounded border-gray-300">
                                             </th>
                                             <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">NIM</th>
-                                            <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
-                                            <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">Study Program</th>
-                                            <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">Current Level</th>
-                                            <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
+                                            <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama Lengkap</th>
+                                            <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">Program Studi</th>
+                                            <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tingkat/Level</th>
+                                            <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tipe / Semester Saat Ini</th>
                                         </tr>
                                     </thead>
                                     <tbody class="bg-white divide-y divide-gray-200">
@@ -78,7 +78,7 @@
                                         @empty
                                         <tr>
                                             <td colspan="6" class="px-3 py-8 text-center text-sm text-gray-500">
-                                                No freshmen found to promote.
+                                                Tidak ada mahasiswa ditemukan.
                                             </td>
                                         </tr>
                                         @endforelse
@@ -92,13 +92,13 @@
 
                             <div class="mt-6 flex items-center gap-3">
                                 <button type="submit"
-                                    onclick="return confirm('Promote selected students to the new level? This action will change their student type to Continuing.')"
+                                    onclick="return confirm('Promosi semester untuk mahasiswa terpilih (misal: Year 1 Sem 1 → Year 1 Sem 2)?')"
                                     class="inline-flex items-center px-4 py-2 bg-primary-700 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-primary-800 transition">
-                                    Promote Selected Students
+                                    Promosikan Mahasiswa Terpilih
                                 </button>
                                 <a href="{{ route('students.index') }}"
                                     class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-50 transition">
-                                    Cancel
+                                    Batal
                                 </a>
                             </div>
                         </form>

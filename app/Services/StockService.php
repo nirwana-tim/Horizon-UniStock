@@ -27,9 +27,15 @@ class StockService
                 'notes' => $data['notes'] ?? null,
             ]);
 
+            $itemIds = array_column($data['items'], 'item_id');
+            $variantIds = array_column($data['items'], 'variant_id');
+            $preloadedItems = Item::whereIn('id', $itemIds)->get()->keyBy('id');
+            $preloadedVariants = ItemVariant::whereIn('id', $variantIds)->get()->keyBy('id');
+
             foreach ($data['items'] as $itemData) {
-                $item = Item::findOrFail($itemData['item_id']);
-                $variant = ItemVariant::findOrFail($itemData['variant_id']);
+                $item = $preloadedItems->get($itemData['item_id']);
+                $variant = $preloadedVariants->get($itemData['variant_id']);
+                if (!$item || !$variant) continue;
 
                 $receiveItem = StockReceiveItem::create([
                     'stock_receive_id' => $receive->id,
@@ -51,25 +57,34 @@ class StockService
                     'notes' => "Penerimaan dari vendor: {$receive->reference_number}",
                 ]);
 
-                $balance = StockBalance::firstOrNew([
-                    'item_id' => $item->id,
-                    'variant_id' => $variant->id,
-                ]);
+                $balance = StockBalance::where('item_id', $item->id)
+                    ->where('variant_id', $variant->id)
+                    ->lockForUpdate()
+                    ->first();
 
-                $oldQty = $balance->quantity ?? 0;
-                $oldHpp = $balance->last_hpp ?? 0;
+                $oldQty = $balance ? $balance->quantity : 0;
+                $oldHpp = $balance ? $balance->last_hpp : 0;
                 $newQty = $itemData['quantity'];
                 $newHpp = $receiveItem->hpp;
 
-                // Weighted-average HPP
                 $totalQty = $oldQty + $newQty;
                 $avgHpp = $totalQty > 0
                     ? (($oldQty * $oldHpp) + ($newQty * $newHpp)) / $totalQty
                     : $newHpp;
 
-                $balance->quantity = $totalQty;
-                $balance->last_hpp = round($avgHpp, 2);
-                $balance->save();
+                if ($balance) {
+                    $balance->update([
+                        'quantity' => $totalQty,
+                        'last_hpp' => round($avgHpp, 2),
+                    ]);
+                } else {
+                    StockBalance::create([
+                        'item_id' => $item->id,
+                        'variant_id' => $variant->id,
+                        'quantity' => $newQty,
+                        'last_hpp' => round($newHpp, 2),
+                    ]);
+                }
             }
 
             AuditLog::create([
@@ -195,7 +210,29 @@ class StockService
 
     private function generateReferenceNumber(): string
     {
-        return 'SR-' . date('Ymd') . '-' . str_pad(StockReceive::count() + 1, 4, '0', STR_PAD_LEFT);
+        $todayCount = StockReceive::whereDate('created_at', today())->lockForUpdate()->count();
+        return 'SR-' . date('Ymd') . '-' . str_pad($todayCount + 1, 4, '0', STR_PAD_LEFT);
+    }
+
+    public function reverseStockReceive(StockReceive $receive): void
+    {
+        DB::transaction(function () use ($receive) {
+            $receive->load('items');
+            foreach ($receive->items as $item) {
+                $balance = StockBalance::where('item_id', $item->item_id)
+                    ->where('variant_id', $item->variant_id)
+                    ->lockForUpdate()
+                    ->first();
+                if ($balance) {
+                    $balance->decrement('quantity', $item->quantity);
+                }
+                StockMovement::where('reference_type', StockReceive::class)
+                    ->where('reference_id', $receive->id)
+                    ->delete();
+            }
+            $receive->items()->delete();
+            $receive->delete();
+        });
     }
 
     public function getVendorReceivedItems(int $vendorId): Collection

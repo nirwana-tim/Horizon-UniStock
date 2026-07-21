@@ -35,6 +35,7 @@ class ImportController extends Controller
         ];
 
         if ($request->has('file_path') && $request->filled('file_path')) {
+            $validated = $request->validate($rules);
             $filePath = $request->input('file_path');
 
             if (!str_starts_with($filePath, 'imports/')) {

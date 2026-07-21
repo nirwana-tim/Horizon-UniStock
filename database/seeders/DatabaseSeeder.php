@@ -14,6 +14,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             RolePermissionSeeder::class,
             UserTestSeeder::class,
+            StudentTypeSeeder::class,
             // Uncomment to seed master data:
             // Master\MasterDataSeeder::class,
         ]);

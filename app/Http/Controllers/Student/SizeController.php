@@ -24,6 +24,7 @@ class SizeController extends Controller
         $user = auth()->user();
         $student = Student::where('user_id', $user->id)->firstOrFail();
 
+        $activeEvent = $this->sizeService->getActiveEventForStudent($student);
         $entitlementItems = $this->sizeService->getEntitlementItems($student);
 
         $existingSizes = [];
@@ -33,19 +34,29 @@ class SizeController extends Controller
             }
         }
 
-        $canUpdate = true;
+        $changedItemIds = [];
         if ($student->activeSizeProfile) {
-            $profile = $student->activeSizeProfile;
-            if ($profile->sizeItems->contains('change_count', '>=', 1)) {
-                $canUpdate = false;
-            }
+            $changedItemIds = $student->activeSizeProfile->sizeItems
+                ->where('change_count', '>=', 1)
+                ->pluck('item_id')
+                ->toArray();
+        }
+
+        $maxChangedItemIds = [];
+        if ($student->activeSizeProfile && $activeEvent) {
+            $maxChangedItemIds = $student->activeSizeProfile->sizeItems
+                ->filter(fn ($si) => ! $activeEvent->canEdit($si))
+                ->pluck('item_id')
+                ->toArray();
         }
 
         return view('student.size-input', compact(
             'student',
+            'activeEvent',
             'entitlementItems',
             'existingSizes',
-            'canUpdate'
+            'changedItemIds',
+            'maxChangedItemIds'
         ));
     }
 
@@ -59,7 +70,12 @@ class SizeController extends Controller
             'sizes.*' => 'nullable|string|max:10',
         ]);
 
-        $this->sizeService->saveSizes($student, $validated['sizes']);
+        try {
+            $this->sizeService->saveSizes($student, $validated['sizes']);
+        } catch (\RuntimeException $e) {
+            return redirect()->route('student.sizes.index')
+                ->with('error', $e->getMessage());
+        }
 
         return redirect()->route('student.qr')
             ->with('success', 'Ukuran berhasil disimpan. Silakan lihat QR Code Anda.');

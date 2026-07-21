@@ -104,8 +104,9 @@
                                 <select id="student_type" name="student_type" x-model="studentType"
                                         class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500">
                                     <option value="">All Student Types</option>
-                                    <option value="year_1_sem_1">Year 1 Sem 1</option>
-                                    <option value="continuing">Continuing</option>
+                                    @foreach($studentTypes as $st)
+                                        <option value="{{ $st->kode }}">{{ $st->deskripsi }}</option>
+                                    @endforeach
                                 </select>
                                 <x-input-error :messages="$errors->get('student_type')" class="mt-2" />
                             </div>

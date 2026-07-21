@@ -3,6 +3,7 @@
 use App\Http\Controllers\Finance\StockOpnameController;
 use App\Http\Controllers\Finance\GpmController;
 use App\Http\Controllers\Finance\EligibilityController;
+use App\Http\Controllers\Finance\SizeChangeEventController;
 use App\Http\Controllers\Master\DistributionScheduleController;
 use App\Http\Controllers\Master\EntitlementController;
 use App\Http\Controllers\Master\FacultyController;
@@ -19,6 +20,7 @@ use App\Http\Controllers\Master\StockReceiveController;
 use App\Http\Controllers\Inventory\StockBalanceController;
 use App\Http\Controllers\Inventory\StockMovementController;
 use App\Http\Controllers\Master\VendorController;
+use App\Http\Controllers\Master\StudentTypeController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ImportController;
 use App\Http\Controllers\ProfileController;
@@ -39,7 +41,7 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/dashboard', DashboardController::class)->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/dashboard', DashboardController::class)->middleware(['auth'])->name('dashboard');
 
 Route::middleware(['auth', 'password.changed'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -74,6 +76,7 @@ Route::middleware(['auth', 'password.changed', 'role:super_admin|admin'])->prefi
 
     Route::resource('vendor', VendorController::class);
     Route::resource('item-price', ItemPriceController::class);
+    Route::resource('student-type', StudentTypeController::class)->only(['index', 'show']);
 });
 
 Route::middleware(['auth', 'password.changed', 'role:super_admin|admin'])->prefix('admin/students')->name('students.')->group(function () {
@@ -86,6 +89,7 @@ Route::middleware(['auth', 'password.changed', 'role:super_admin|admin'])->prefi
     Route::get('/export', [StudentController::class, 'export'])->name('export');
     Route::get('/promote', [StudentController::class, 'promoteForm'])->name('promote.form');
     Route::post('/promote', [StudentController::class, 'promote'])->name('promote');
+    Route::patch('/{student}/toggle-status', [StudentController::class, 'toggleStatus'])->name('toggle-status');
 });
 
 Route::middleware(['auth', 'password.changed', 'role:super_admin|admin'])->prefix('distribution')->name('distribution.')->group(function () {
@@ -96,6 +100,7 @@ Route::middleware(['auth', 'password.changed', 'role:super_admin|admin'])->prefi
     Route::resource('distribution-schedule', DistributionScheduleController::class);
     Route::get('size-monitor', [SizeMonitorController::class, 'index'])->name('size-monitor.index');
     Route::resource('stages', DistributionStageController::class);
+    Route::resource('size-events', SizeChangeEventController::class);
 });
 
 Route::middleware(['auth', 'password.changed', 'role:super_admin|admin|staff'])->prefix('distribution')->name('distribution.')->group(function () {

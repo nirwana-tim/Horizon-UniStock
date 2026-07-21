@@ -17,7 +17,7 @@ class AuditService
             'model_id' => (string) $modelId,
             'old_values' => $oldValues,
             'new_values' => $newValues,
-            'ip_address' => Request::ip(),
+            'ip_address' => Request::ip() ?? request()->ip() ?? '127.0.0.1',
         ]);
     }
 }

@@ -68,11 +68,9 @@
                             <div>
                                 <x-input-label for="student_type" :value="__('Student Type')" :required="true" />
                                 <select id="student_type" name="student_type" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500">
-                                    <option value="year_1_sem_1" {{ old('student_type', $student->student_type) == 'year_1_sem_1' ? 'selected' : '' }}>Year 1 Sem 1</option>
-                                    <option value="year_1_sem_2" {{ old('student_type', $student->student_type) == 'year_1_sem_2' ? 'selected' : '' }}>Year 1 Sem 2</option>
-                                    <option value="year_2_sem_3" {{ old('student_type', $student->student_type) == 'year_2_sem_3' ? 'selected' : '' }}>Year 2 Sem 3</option>
-                                    <option value="year_2_sem_4" {{ old('student_type', $student->student_type) == 'year_2_sem_4' ? 'selected' : '' }}>Year 2 Sem 4</option>
-                                    <option value="continuing" {{ old('student_type', $student->student_type) == 'continuing' ? 'selected' : '' }}>Continuing</option>
+                                    @foreach($studentTypes as $st)
+                                        <option value="{{ $st->kode }}" {{ old('student_type', $student->student_type) == $st->kode ? 'selected' : '' }}>{{ $st->deskripsi }}</option>
+                                    @endforeach
                                 </select>
                                 <x-input-error :messages="$errors->get('student_type')" class="mt-2" />
                             </div>

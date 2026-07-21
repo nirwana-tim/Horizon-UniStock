@@ -138,15 +138,15 @@ class ScanController extends Controller
         $sizeProfile = $student->activeSizeProfile;
         if ($sizeProfile) {
             $sizeProfile->load('sizeItems.item');
+            $variantIds = $sizeProfile->sizeItems->pluck('item_id')->unique();
+            $preloadedVariants = ItemVariant::whereIn('item_id', $variantIds)->get()->groupBy('item_id');
             foreach ($sizeProfile->sizeItems as $sizeItem) {
                 $baseCode = $sizeItem->item->base_code;
                 if (!$baseCode) continue;
-                $variant = ItemVariant::where('item_id', $sizeItem->item_id)
-                    ->where('size', $sizeItem->size)
-                    ->first();
+                $matchingVariant = $preloadedVariants->get($sizeItem->item_id)?->firstWhere('size', $sizeItem->size);
                 $studentSizes[$baseCode] = [
                     'size' => $sizeItem->size,
-                    'size_label' => $variant?->size_label ?? $sizeItem->size,
+                    'size_label' => $matchingVariant?->size_label ?? $sizeItem->size,
                     'change_count' => $sizeItem->change_count,
                 ];
             }
@@ -164,12 +164,14 @@ class ScanController extends Controller
             ->pluck('total_qty', 'base_code')
             ->toArray();
 
-        $entitledQuantities = $entitlement
-            ? $entitlement->items->pluck('quantity', 'item_id')->mapWithKeys(function ($qty, $itemId) {
-                $baseCode = Item::where('id', $itemId)->value('base_code');
-                return $baseCode ? [$baseCode => $qty] : [];
-            })->toArray()
-            : [];
+        $entitledQuantities = [];
+        if ($entitlement) {
+            $itemIds = $entitlement->items->pluck('item_id');
+            $itemBaseCodes = Item::whereIn('id', $itemIds)->pluck('base_code', 'id');
+            $entitledQuantities = $entitlement->items->pluck('quantity', 'item_id')
+                ->mapWithKeys(fn ($qty, $itemId) => isset($itemBaseCodes[$itemId]) ? [$itemBaseCodes[$itemId] => $qty] : [])
+                ->toArray();
+        }
 
         $stockInfo = [];
         if ($activeSchedule) {
@@ -185,13 +187,17 @@ class ScanController extends Controller
             }
         }
 
+        $baseCodes = $scheduleItems->pluck('base_code')->filter()->unique();
+        $preloadedGroupVariants = Item::whereIn('base_code', $baseCodes)
+            ->with('variants')
+            ->get()
+            ->groupBy('base_code');
         foreach ($scheduleItems as $item) {
             $baseCode = $item->base_code ?? $item->code;
             if (isset($variantOptions[$baseCode])) continue;
             if ($item->base_code) {
-                $variantOptions[$baseCode] = ItemVariant::whereIn('item_id',
-                    Item::where('base_code', $item->base_code)->pluck('id')
-                )->get();
+                $group = $preloadedGroupVariants->get($item->base_code, collect());
+                $variantOptions[$baseCode] = $group->flatMap->variants;
             } else {
                 $variantOptions[$baseCode] = $item->variants;
             }

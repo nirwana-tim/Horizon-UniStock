@@ -38,7 +38,7 @@ Template adalah file Excel kosong yang didownload Admin, diisi, lalu diupload ke
 
 **File:** `storage/app/templates/import_mahasiswa.xlsx`
 **Class Generate:** `App\Exports\Templates\MahasiswaTemplateExport`
-**Tujuan:** Import data mahasiswa baru (freshman) dan lanjutan (continuing) dari kampus.
+**Tujuan:** Import data mahasiswa dari kampus. Nilai `student_type` diisi otomatis berdasarkan mapping semester (lihat `StudentImport` kelas).
 
 **Sumber Data Excel:**
 - `Student Data Template` — CAMPUS, COLLEGE, COURSE, YEAR, SEMESTER, STUDENT_ID

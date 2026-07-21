@@ -19,11 +19,15 @@ class AutoPromoteStudents extends Command
     public function handle(): int
     {
         $semesterMap = [
-            'Y1S1' => ['new_type' => 'year_1_sem_2', 'new_semester' => 'Y1S2'],
-            'Y1S2' => ['new_type' => 'year_2_sem_3', 'new_semester' => 'Y2S3'],
-            'Y2S3' => ['new_type' => 'year_2_sem_4', 'new_semester' => 'Y2S4'],
-            'Y2S4' => ['new_type' => 'continuing', 'new_semester' => 'Y2S4'],
-            '' => ['new_type' => 'year_1_sem_2', 'new_semester' => 'Y1S2'],
+            'Y1S1' => ['new_type' => 'Y1S2', 'new_semester' => 'Y1S2'],
+            'Y1S2' => ['new_type' => 'Y2S1', 'new_semester' => 'Y2S1'],
+            'Y2S1' => ['new_type' => 'Y2S2', 'new_semester' => 'Y2S2'],
+            'Y2S2' => ['new_type' => 'Y3S1', 'new_semester' => 'Y3S1'],
+            'Y3S1' => ['new_type' => 'Y3S2', 'new_semester' => 'Y3S2'],
+            'Y3S2' => ['new_type' => 'Y4S1', 'new_semester' => 'Y4S1'],
+            'Y4S1' => ['new_type' => 'Y4S2', 'new_semester' => 'Y4S2'],
+            'Y4S2' => ['new_type' => 'graduated', 'new_semester' => 'GRADUATED'],
+            '' => ['new_type' => 'Y1S2', 'new_semester' => 'Y1S2'],
         ];
 
         $targetSemester = $this->option('semester');
@@ -34,7 +38,7 @@ class AutoPromoteStudents extends Command
         if ($targetSemester) {
             $students->where('current_semester', $targetSemester);
         } else {
-            $students->whereIn('current_semester', ['Y1S1', 'Y1S2', 'Y2S3', 'Y2S4'])
+            $students->whereIn('current_semester', ['Y1S1', 'Y1S2', 'Y2S1', 'Y2S2', 'Y3S1', 'Y3S2', 'Y4S1', 'Y4S2'])
                 ->orWhereNull('current_semester')
                 ->orWhere('current_semester', '');
         }

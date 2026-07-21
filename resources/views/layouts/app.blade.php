@@ -145,5 +145,9 @@
 @endif
 
 @stack('scripts')
+
+<form id="logout-form" method="POST" action="{{ route('logout') }}" class="hidden" aria-hidden="true">
+    @csrf
+</form>
 </body>
 </html>

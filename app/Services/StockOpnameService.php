@@ -80,6 +80,10 @@ class StockOpnameService
     public function createAdjustments(StockOpname $batch, User $approver): void
     {
         DB::transaction(function () use ($batch, $approver) {
+            $batch = StockOpname::whereKey($batch->id)->lockForUpdate()->first();
+            if (!$batch || $batch->status !== 'counted') {
+                throw new \Exception('Stock opname sudah di-approve atau tidak dalam status counted.');
+            }
             $batch->load('items.item', 'items.variant');
 
             foreach ($batch->items as $item) {
@@ -112,6 +116,7 @@ class StockOpnameService
 
                 $stockBalance = StockBalance::where('item_id', $item->item_id)
                     ->where('variant_id', $item->variant_id)
+                    ->lockForUpdate()
                     ->first();
 
                 if ($stockBalance) {

@@ -73,24 +73,32 @@ class DistributionService
         array $items,
         ?string $manualNote = null
     ): DistributionTransaction {
-        if (! $this->isStudentEligible($student)) {
-            throw new \Exception('Mahasiswa ini belum memenuhi syarat distribusi. Status pembayaran belum lunas.');
-        }
-
-        if (! DistributionSchedule::whereKey($schedule->id)->forStudent($student)->exists()) {
-            throw new \Exception('Jadwal distribusi ini tidak sesuai dengan tipe, angkatan, fakultas, atau prodi mahasiswa.');
-        }
-
-        $existingTransaction = DistributionTransaction::where('student_id', $student->id)
-            ->where('schedule_id', $schedule->id)
-            ->where('status', '!=', 'cancelled')
-            ->exists();
-
-        if ($existingTransaction) {
-            throw new \Exception('Transaksi distribusi untuk mahasiswa ini pada jadwal ini sudah ada.');
-        }
-
         return DB::transaction(function () use ($student, $schedule, $staff, $items, $manualNote) {
+            $eligibility = EligibilityRecord::where('student_id', $student->id)
+                ->lockForUpdate()
+                ->first();
+            if (!$eligibility || !$eligibility->is_eligible) {
+                throw new \Exception('Mahasiswa ini belum memenuhi syarat distribusi. Status pembayaran belum lunas.');
+            }
+
+            $scheduleCheck = DistributionSchedule::whereKey($schedule->id)
+                ->where('is_active', true)
+                ->whereDate('date', '>=', now()->toDateString())
+                ->forStudent($student)
+                ->exists();
+            if (!$scheduleCheck) {
+                throw new \Exception('Jadwal distribusi tidak aktif, sudah lewat, atau tidak sesuai dengan mahasiswa.');
+            }
+
+            $existingTransaction = DistributionTransaction::where('student_id', $student->id)
+                ->where('schedule_id', $schedule->id)
+                ->where('status', '!=', 'cancelled')
+                ->lockForUpdate()
+                ->exists();
+
+            if ($existingTransaction) {
+                throw new \Exception('Transaksi distribusi untuk mahasiswa ini pada jadwal ini sudah ada.');
+            }
             $transaction = DistributionTransaction::create([
                 'student_id' => $student->id,
                 'schedule_id' => $schedule->id,
@@ -120,6 +128,7 @@ class DistributionService
 
                 $quantity = (int) ($itemData['quantity'] ?? 1);
                 $hppAtDistribution = 0;
+                $deductedQty = 0;
 
                 if ($variant) {
                     $stockBalance = StockBalance::where('item_id', $item->id)
@@ -128,15 +137,13 @@ class DistributionService
                         ->first();
 
                     $availableStock = $stockBalance ? $stockBalance->quantity - $stockBalance->reserved : 0;
+                    $deductedQty = min($quantity, $availableStock);
 
                     if ($availableStock < $quantity) {
-                        // Not enough stock — deduct whatever is available
                         $allFullyStocked = false;
                         $shortage = $quantity - $availableStock;
                         $autoNotes[] = "Stok {$item->name} (Ukuran {$variant->size}) habis/kurang (kurang {$shortage} pcs)";
                     }
-
-                    $deductedQty = min($quantity, $availableStock);
 
                     if ($deductedQty > 0) {
                         $hppAtDistribution = $stockBalance ? $stockBalance->last_hpp : 0;
@@ -162,13 +169,15 @@ class DistributionService
                     $hppAtDistribution = 0;
                 }
 
+                $effectiveQty = $variant ? $deductedQty : $quantity;
                 DistributionItem::create([
                     'transaction_id' => $transaction->id,
                     'item_id' => $item->id,
                     'expected_size' => $itemData['expected_size'] ?? $itemData['actual_size'],
                     'actual_size' => $itemData['actual_size'],
-                    'quantity' => $quantity,
+                    'quantity' => $effectiveQty,
                     'hpp' => $hppAtDistribution,
+                    'selling_price_at_distribution' => $item->selling_price ?? 0,
                 ]);
 
                 $oldSize = $itemData['old_size'] ?? $itemData['expected_size'] ?? null;
@@ -230,14 +239,13 @@ class DistributionService
 
     private function logSizeChange(Student $student, Item $item, string $oldSize, string $newSize, User $staff): void
     {
+        $student->loadMissing('activeSizeProfile.sizeItems');
         $sizeProfile = $student->activeSizeProfile;
         if (! $sizeProfile) {
             return;
         }
 
-        $sizeItem = $sizeProfile->sizeItems()
-            ->where('item_id', $item->id)
-            ->first();
+        $sizeItem = $sizeProfile->sizeItems->firstWhere('item_id', $item->id);
 
         if ($sizeItem) {
             StudentSizeHistory::create([

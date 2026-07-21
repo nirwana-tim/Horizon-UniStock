@@ -1,4 +1,17 @@
 <x-app-layout>
+    @php
+        $moduleRoutes = [
+            'student' => route('students.index'),
+            'eligibility' => route('finance.eligibility.index'),
+            'item' => route('master-data.item.index'),
+            'item_price' => route('master-data.item-price.index'),
+            'entitlement' => route('distribution.entitlement.index'),
+            'stock_receive' => route('inventory.stock-receive.index'),
+            'stock_opname' => route('inventory.stock-opname.index'),
+        ];
+        $backUrl = $moduleRoutes[$batch->import_type ?? ''] ?? route('import.index');
+    @endphp
+
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ __('Import Result') }}</h2>
     </x-slot>
@@ -85,9 +98,9 @@
                         </div>
                     @endif
 
-                    <div class="mt-6">
-                        <a href="{{ route('import.index') }}" class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                            {{ __('Back') }}
+                    <div class="mt-6 flex items-center gap-3">
+                        <a href="{{ $backUrl }}" class="inline-flex items-center px-4 py-2 bg-primary-700 text-white rounded-md font-semibold text-xs uppercase tracking-widest hover:bg-primary-800 transition">
+                            {{ __('Kembali ke Halaman Utama') }}
                         </a>
                     </div>
 

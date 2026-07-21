@@ -6,6 +6,20 @@
                 <div class="p-6 text-gray-900">
                     <div class="flex items-center justify-between mb-6">
                         <h3 class="text-lg font-semibold text-gray-800">{{ __('Eligibility') }}</h3>
+                        <div class="flex items-center gap-2">
+                            <a href="{{ route('templates.download', 'dp_lunas') }}" class="inline-flex items-center gap-1.5 px-3 py-2 border border-gray-300 rounded-md text-xs font-semibold text-gray-700 uppercase tracking-widest hover:bg-gray-50 transition">
+                                <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                                </svg>
+                                Download Template
+                            </a>
+                            <button type="button" @click="$dispatch('open-modal', 'import-eligibility')" class="inline-flex items-center gap-1.5 px-4 py-2 border border-primary-500 text-primary-700 hover:bg-primary-50 rounded-md font-semibold text-xs uppercase tracking-widest transition">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                                </svg>
+                                Import Eligibility / DP Lunas
+                            </button>
+                        </div>
                     </div>
 
                     <div x-data="serverTable('{{ route('finance.eligibility.index') }}')">
@@ -45,4 +59,12 @@
             </div>
         </div>
     </div>
+
+    <x-import-modal
+        name="import-eligibility"
+        type="eligibility"
+        template-type="dp_lunas"
+        title="Import Status Kelayakan (DP Lunas)"
+        description="Upload file Excel data status kelayakan DP Lunas mahasiswa."
+    />
 </x-app-layout>

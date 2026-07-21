@@ -298,8 +298,8 @@ class ReportService
             'item_categories.label as category_name',
             'item_categories.code as category_code',
             'items.hpp',
-            DB::raw('SUM(CASE WHEN stock_opname_items.variance < 0 THEN ABS(stock_opname_items.variance) ELSE 0 END) as qty_loss'),
-            DB::raw('SUM(CASE WHEN stock_opname_items.variance > 0 THEN stock_opname_items.variance ELSE 0 END) as qty_surplus')
+            DB::raw('SUM(CASE WHEN stock_opname_items.computed_variance < 0 THEN ABS(stock_opname_items.computed_variance) ELSE 0 END) as qty_loss'),
+            DB::raw('SUM(CASE WHEN stock_opname_items.computed_variance > 0 THEN stock_opname_items.computed_variance ELSE 0 END) as qty_surplus')
         )
             ->join('items', 'stock_opname_items.item_id', '=', 'items.id')
             ->leftJoin('item_categories', 'items.category_id', '=', 'item_categories.id')

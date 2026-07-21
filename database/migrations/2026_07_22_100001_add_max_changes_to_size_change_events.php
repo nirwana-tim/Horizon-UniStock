@@ -1,0 +1,22 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::table('size_change_events', function (Blueprint $table) {
+            $table->unsignedTinyInteger('max_changes')->default(1)->after('student_type');
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::table('size_change_events', function (Blueprint $table) {
+            $table->dropColumn('max_changes');
+        });
+    }
+};

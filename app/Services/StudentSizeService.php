@@ -4,11 +4,13 @@ namespace App\Services;
 
 use App\Models\Entitlement;
 use App\Models\Item;
+use App\Models\SizeChangeEvent;
 use App\Models\Student;
 use App\Models\StudentSizeHistory;
 use App\Models\StudentSizeItem;
 use App\Models\StudentSizeProfile;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 class StudentSizeService
 {
@@ -52,58 +54,78 @@ class StudentSizeService
         return $unique->values();
     }
 
+    public function getActiveEventForStudent(Student $student): ?SizeChangeEvent
+    {
+        $events = SizeChangeEvent::where('is_active', true)
+            ->where('start_date', '<=', now())
+            ->where('end_date', '>=', now())
+            ->get();
+
+        return $events->first(fn ($event) => $event->isApplicableToStudent($student));
+    }
+
     public function saveSizes(Student $student, array $sizes): void
     {
-        $profile = StudentSizeProfile::firstOrCreate(
-            [
-                'student_id' => $student->id,
-            ],
-            [
-                'is_filled' => false,
-            ]
-        );
+        $activeEvent = $this->getActiveEventForStudent($student);
 
-        foreach ($sizes as $itemId => $size) {
-            if (empty($size)) {
-                continue;
-            }
+        if (! $activeEvent) {
+            throw new \RuntimeException('Tidak ada event pengisian ukuran yang aktif saat ini.');
+        }
 
-            $sizeItem = StudentSizeItem::where('size_profile_id', $profile->id)
-                ->where('item_id', $itemId)
+        DB::transaction(function () use ($student, $sizes, $activeEvent) {
+            $profile = StudentSizeProfile::where('student_id', $student->id)
+                ->lockForUpdate()
                 ->first();
 
-            if ($sizeItem) {
-                if ($sizeItem->change_count >= 1) {
+            if (! $profile) {
+                $profile = StudentSizeProfile::create([
+                    'student_id' => $student->id,
+                    'is_filled' => false,
+                ]);
+            }
+
+            foreach ($sizes as $itemId => $size) {
+                if (empty($size)) {
                     continue;
                 }
 
-                if ($sizeItem->size !== $size) {
-                    StudentSizeHistory::create([
-                        'size_item_id' => $sizeItem->id,
-                        'old_size' => $sizeItem->size,
-                        'new_size' => $size,
-                        'changed_by' => $student->user_id,
-                        'changed_at' => now(),
-                    ]);
+                $sizeItem = StudentSizeItem::where('size_profile_id', $profile->id)
+                    ->where('item_id', $itemId)
+                    ->first();
 
-                    $sizeItem->update([
+                if ($sizeItem) {
+                    if (! $activeEvent->canEdit($sizeItem)) {
+                        continue;
+                    }
+
+                    if ($sizeItem->size !== $size) {
+                        StudentSizeHistory::create([
+                            'size_item_id' => $sizeItem->id,
+                            'old_size' => $sizeItem->size,
+                            'new_size' => $size,
+                            'changed_by' => $student->user_id,
+                            'changed_at' => now(),
+                        ]);
+
+                        $sizeItem->update([
+                            'size' => $size,
+                            'change_count' => $sizeItem->change_count + 1,
+                        ]);
+                    }
+                } else {
+                    StudentSizeItem::create([
+                        'size_profile_id' => $profile->id,
+                        'item_id' => $itemId,
                         'size' => $size,
-                        'change_count' => $sizeItem->change_count + 1,
+                        'change_count' => 0,
                     ]);
                 }
-            } else {
-                StudentSizeItem::create([
-                    'size_profile_id' => $profile->id,
-                    'item_id' => $itemId,
-                    'size' => $size,
-                    'change_count' => 0,
-                ]);
             }
-        }
 
-        $profile->update([
-            'is_filled' => true,
-            'filled_at' => $profile->filled_at ?? now(),
-        ]);
+            $profile->update([
+                'is_filled' => true,
+                'filled_at' => $profile->filled_at ?? now(),
+            ]);
+        });
     }
 }
