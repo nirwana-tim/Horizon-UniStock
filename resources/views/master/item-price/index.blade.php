@@ -6,9 +6,23 @@
                 <div class="p-6 text-gray-900">
                     <div class="flex items-center justify-between mb-6">
                         <h3 class="text-lg font-semibold text-gray-800">Item Prices</h3>
-                        <a href="{{ route('master-data.item-price.create') }}" class="inline-flex items-center px-4 py-2 bg-primary-700 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-primary-800 focus:bg-primary-800 active:bg-primary-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                            {{ __('Add Price') }}
-                        </a>
+                        <div class="flex items-center gap-2">
+                            <a href="{{ route('templates.download', 'harga') }}" class="inline-flex items-center gap-1.5 px-3 py-2 border border-gray-300 rounded-md text-xs font-semibold text-gray-700 uppercase tracking-widest hover:bg-gray-50 transition">
+                                <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                                </svg>
+                                Download Template
+                            </a>
+                            <button type="button" @click="$dispatch('open-modal', 'import-item-price')" class="inline-flex items-center gap-1.5 px-4 py-2 border border-primary-500 text-primary-700 hover:bg-primary-50 rounded-md font-semibold text-xs uppercase tracking-widest transition">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                                </svg>
+                                Import Item Price
+                            </button>
+                            <a href="{{ route('master-data.item-price.create') }}" class="inline-flex items-center px-4 py-2 bg-primary-700 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-primary-800 focus:bg-primary-800 active:bg-primary-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                                {{ __('Add Price') }}
+                            </a>
+                        </div>
                     </div>
 
                     <div x-data="serverTable('{{ route('master-data.item-price.index') }}')">
@@ -48,4 +62,12 @@
             </div>
         </div>
     </div>
+
+    <x-import-modal
+        name="import-item-price"
+        type="item_price"
+        template-type="harga"
+        title="Import Harga Barang"
+        description="Upload file Excel daftar harga barang & HPP per tahun akademik."
+    />
 </x-app-layout>

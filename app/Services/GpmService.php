@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\DistributionItem;
+use App\Models\DistributionPeriod;
 use App\Models\DistributionTransaction;
 use App\Models\Item;
 use Illuminate\Support\Carbon;
@@ -13,6 +14,11 @@ class GpmService
 {
     public function calculateGpm(?string $period = null): Collection
     {
+        if (!$period) {
+            $latestPeriod = DistributionPeriod::latest('period')->value('period');
+            $period = $latestPeriod ?? now()->format('Y-m');
+        }
+
         $query = DistributionItem::select(
             'distribution_items.item_id',
             'items.code as item_code',
@@ -20,18 +26,16 @@ class GpmService
             'items.selling_price',
             DB::raw('SUM(distribution_items.quantity) as qty_sold'),
             DB::raw('SUM(distribution_items.quantity * distribution_items.hpp) as total_hpp'),
-            DB::raw('SUM(distribution_items.quantity * items.selling_price) as total_selling_price')
+            DB::raw('SUM(distribution_items.quantity * distribution_items.selling_price_at_distribution) as total_selling_price')
         )
             ->join('items', 'distribution_items.item_id', '=', 'items.id')
             ->groupBy('distribution_items.item_id', 'items.code', 'items.name', 'items.selling_price');
 
-        if ($period) {
-            $query->whereHas('transaction', function ($q) use ($period) {
-                $q->whereHas('schedule', function ($q2) use ($period) {
-                    $q2->where('period', $period);
-                });
+        $query->whereHas('transaction', function ($q) use ($period) {
+            $q->whereHas('schedule', function ($q2) use ($period) {
+                $q2->where('period', $period);
             });
-        }
+        });
 
         $results = $query->get();
         $itemIds = $results->pluck('item_id');

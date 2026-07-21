@@ -429,9 +429,21 @@ erDiagram
 | `qr_generated_at` | datetime | Waktu QR digenerate |
 | `study_program_id` | int (FK) | Program studi |
 | `program_level_id` | int (FK) | Level / angkatan |
-| `student_type` | string | freshman / continuing |
+| `student_type` | string (FK ke `student_types.value`) | Lihat master data Student Type |
 | `email_verified_at` | datetime | Waktu verifikasi email |
 | `created_at` | datetime | Waktu dibuat |
+
+### `student_types`
+
+| Kolom | Tipe | Keterangan |
+|-------|------|-----------|
+| `id` | int (PK) | Identifier unik |
+| `value` | string (UK) | Identifier internal (contoh: `year_1_sem_1`) |
+| `label` | string | Label tampilan (contoh: `Year 1 Sem 1 (Freshman)`) |
+| `is_active` | boolean | Status aktif |
+| `sort_order` | int | Urutan tampilan |
+| `created_at` | datetime | Waktu dibuat |
+| `updated_at` | datetime | Waktu diupdate |
 
 ### `item_categories`
 
@@ -569,7 +581,7 @@ erDiagram
 | `study_program_id` | int (FK) | Program studi |
 | `program_level_id` | int (FK) | Level / angkatan |
 | `period_id` | int (FK) | Periode distribusi |
-| `student_type` | string | freshman / continuing |
+| `student_type` | string (FK ke `student_types.value`) | Lihat master data Student Type |
 | `description` | string | Deskripsi hak barang |
 | `created_at` | datetime | Waktu dibuat |
 

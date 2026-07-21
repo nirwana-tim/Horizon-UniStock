@@ -218,8 +218,7 @@ class StudentController extends Controller
 
     public function promoteForm(Request $request): View
     {
-        $query = Student::with(['studyProgram.faculty', 'programLevel'])
-            ->whereIn('student_type', ['year_1_sem_1', 'year_1_sem_2', 'year_2_sem_3', 'year_2_sem_4']);
+        $query = Student::with(['studyProgram.faculty', 'programLevel']);
 
         if ($search = $request->input('q')) {
             $query->where(function ($q) use ($search) {
@@ -240,18 +239,18 @@ class StudentController extends Controller
         $validated = $request->validate([
             'student_ids' => ['required', 'array'],
             'student_ids.*' => ['required', 'integer', 'exists:students,id'],
-            'target_level_id' => ['required', 'integer', 'exists:program_levels,id'],
+            'target_level_id' => ['nullable', 'integer', 'exists:program_levels,id'],
             'target_study_program_id' => ['nullable', 'integer', 'exists:study_programs,id'],
         ]);
 
         $count = $this->studentService->promoteStudents(
             $validated['student_ids'],
-            $validated['target_level_id'],
+            $validated['target_level_id'] ?? null,
             $validated['target_study_program_id'] ?? null,
         );
 
         return redirect()->route('students.index')
-            ->with('success', "{$count} mahasiswa berhasil dipromosikan ke level berikutnya.");
+            ->with('success', "{$count} mahasiswa berhasil dipromosikan ke semester/level berikutnya.");
     }
 
     public function generateAll(Request $request): RedirectResponse
@@ -279,5 +278,21 @@ class StudentController extends Controller
         return redirect()->route('students.index', ['tab' => 'generate-akun'])
             ->with('success', $message)
             ->with('generated_passwords', $generated);
+    }
+
+    public function toggleStatus(Student $student): RedirectResponse
+    {
+        $newStatus = match ($student->status) {
+            'active' => 'leave',
+            'leave' => 'active',
+            default => 'active',
+        };
+
+        $student->update(['status' => $newStatus]);
+
+        $label = $newStatus === 'leave' ? 'Cuti' : 'Aktif';
+
+        return redirect()->back()
+            ->with('success', "Status mahasiswa {$student->name} ({$student->nim}) berhasil diubah menjadi {$label}.");
     }
 }

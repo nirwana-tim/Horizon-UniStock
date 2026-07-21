@@ -9,6 +9,7 @@ use App\Services\AuditService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class EligibilityController extends Controller
@@ -38,23 +39,25 @@ class EligibilityController extends Controller
 
     public function toggle(Student $student): RedirectResponse
     {
-        $record = $student->eligibilityRecords()->first();
+        DB::transaction(function () use ($student, &$message) {
+            $record = EligibilityRecord::where('student_id', $student->id)
+                ->lockForUpdate()
+                ->first();
 
-        if ($record) {
-            // If exists, delete it (making them unpaid/not eligible)
-            AuditService::log('delete', 'eligibility_record', $record->id, $record->toArray(), null);
-            $record->delete([]);
-            $message = "Status kelayakan untuk mahasiswa {$student->name} berhasil dihapus (Set Belum Lunas).";
-        } else {
-            // If doesn't exist, create it as eligible
-            $newRecord = EligibilityRecord::create([
-                'student_id' => $student->id,
-                'is_eligible' => true,
-                'payment_status' => 'Paid',
-            ]);
-            AuditService::log('create', 'eligibility_record', $newRecord->id, null, $newRecord->toArray());
-            $message = "Mahasiswa {$student->name} berhasil di-set Layak (Lunas).";
-        }
+            if ($record) {
+                AuditService::log('delete', 'eligibility_record', $record->id, $record->toArray(), null);
+                $record->delete();
+                $message = "Status kelayakan untuk mahasiswa {$student->name} berhasil dihapus (Set Belum Lunas).";
+            } else {
+                $newRecord = EligibilityRecord::create([
+                    'student_id' => $student->id,
+                    'is_eligible' => true,
+                    'payment_status' => 'Paid',
+                ]);
+                AuditService::log('create', 'eligibility_record', $newRecord->id, null, $newRecord->toArray());
+                $message = "Mahasiswa {$student->name} berhasil di-set Layak (Lunas).";
+            }
+        });
 
         return redirect()->back()->with('success', $message);
     }

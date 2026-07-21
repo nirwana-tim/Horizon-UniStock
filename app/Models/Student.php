@@ -20,10 +20,22 @@ class Student extends Authenticatable
         'study_program_id',
         'program_level_id',
         'student_type',
+        'status',
         'current_semester',
         'entitlement_code',
         'email_verified_at',
     ];
+
+    public function getStatusLabelAttribute(): string
+    {
+        return match ($this->status) {
+            'active' => 'Aktif',
+            'leave' => 'Cuti',
+            'graduated' => 'Lulus',
+            'non_active' => 'Non-Aktif',
+            default => ucfirst((string) ($this->status ?? 'active')),
+        };
+    }
 
     protected function casts(): array
     {
@@ -35,14 +47,8 @@ class Student extends Authenticatable
 
     public function getStudentTypeLabelAttribute(): string
     {
-        return match ($this->student_type) {
-            'year_1_sem_1' => 'Year 1 Sem 1',
-            'year_1_sem_2' => 'Year 1 Sem 2',
-            'year_2_sem_3' => 'Year 2 Sem 3',
-            'year_2_sem_4' => 'Year 2 Sem 4',
-            'continuing' => 'Continuing',
-            default => ucfirst(str_replace('_', ' ', $this->student_type)),
-        };
+        return StudentType::where('kode', $this->student_type)->value('deskripsi')
+            ?? $this->student_type;
     }
 
     public function getCurrentSemesterLabelAttribute(): string

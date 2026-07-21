@@ -55,7 +55,8 @@ class StockReceiveController extends Controller
     {
         $query = Item::whereNotNull('base_code')
             ->select('base_code')
-            ->distinct()
+            ->selectRaw('MIN(name) as name')
+            ->groupBy('base_code')
             ->orderBy('base_code');
 
         if ($q = $request->input('q')) {
@@ -66,13 +67,10 @@ class StockReceiveController extends Controller
             });
         }
 
-        $items = $query->limit(20)->get()->map(function ($row) {
-            $rep = Item::where('base_code', $row->base_code)->first();
-            return [
-                'id' => $row->base_code,
-                'label' => ($rep->name ?? '?') . ' (' . $row->base_code . ')',
-            ];
-        });
+        $items = $query->limit(20)->get()->map(fn ($row) => [
+            'id' => $row->base_code,
+            'label' => ($row->name ?? '?') . ' (' . $row->base_code . ')',
+        ]);
 
         return response()->json($items);
     }
@@ -127,11 +125,10 @@ class StockReceiveController extends Controller
             return back()->with('error', 'Hanya penerimaan dengan status "received" yang bisa dihapus.');
         }
 
-        $stockReceive->items()->delete();
-        $stockReceive->delete();
+        $this->stockService->reverseStockReceive($stockReceive);
 
         return redirect()
             ->route('inventory.stock-receive.index')
-            ->with('success', 'Penerimaan barang berhasil dihapus.');
+            ->with('success', 'Penerimaan barang berhasil dihapus (stok dikembalikan).');
     }
 }

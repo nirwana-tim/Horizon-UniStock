@@ -19,7 +19,7 @@
                             </div>
                             <div class="bg-gray-50 p-4 rounded-lg">
                                 <dt class="text-sm font-medium text-gray-500">{{ __('Student Type') }}</dt>
-                                <dd class="mt-1 text-sm text-gray-900">{{ $entitlement->student_type ? \Illuminate\Support\Str::of($entitlement->student_type)->replace('_', ' ')->title() : '-' }}</dd>
+                                <dd class="mt-1 text-sm text-gray-900">{{ $entitlement->student_type_label }}</dd>
                             </div>
                             <div class="bg-gray-50 p-4 rounded-lg">
                                 <dt class="text-sm font-medium text-gray-500">{{ __('Status') }}</dt>

@@ -89,7 +89,7 @@ class StudentService
         });
     }
 
-    public function promoteStudents(array $ids, int $newLevelId, ?int $newStudyProgramId = null): int
+    public function promoteStudents(array $ids, ?int $newLevelId = null, ?int $newStudyProgramId = null): int
     {
         return DB::transaction(function () use ($ids, $newLevelId, $newStudyProgramId) {
             $students = Student::whereIn('id', $ids)->lockForUpdate()->get();
@@ -97,17 +97,57 @@ class StudentService
 
             foreach ($students as $student) {
                 $oldValues = $student->toArray();
-                $nextSemester = match ($student->current_semester) {
-                    'Y1S1' => ['student_type' => 'year_1_sem_2', 'current_semester' => 'Y1S2'],
-                    'Y1S2' => ['student_type' => 'year_2_sem_3', 'current_semester' => 'Y2S3'],
-                    'Y2S3' => ['student_type' => 'year_2_sem_4', 'current_semester' => 'Y2S4'],
-                    default => ['student_type' => 'continuing', 'current_semester' => 'Y2S4'],
+
+                $currentType = strtolower(trim((string) ($student->student_type ?? '')));
+                $currentSem = strtoupper(trim((string) ($student->current_semester ?? '')));
+
+                $next = match (true) {
+                    $currentType === 'Y1S1' || $currentType === 'freshman' || $currentSem === 'Y1S1' => [
+                        'student_type' => 'Y1S2',
+                        'current_semester' => 'Y1S2',
+                    ],
+                    $currentType === 'Y1S2' || $currentSem === 'Y1S2' => [
+                        'student_type' => 'Y2S1',
+                        'current_semester' => 'Y2S1',
+                    ],
+                    $currentType === 'Y2S1' || $currentSem === 'Y2S1' => [
+                        'student_type' => 'Y2S2',
+                        'current_semester' => 'Y2S2',
+                    ],
+                    $currentType === 'Y2S2' || $currentSem === 'Y2S2' => [
+                        'student_type' => 'Y3S1',
+                        'current_semester' => 'Y3S1',
+                    ],
+                    $currentType === 'Y3S1' || $currentSem === 'Y3S1' => [
+                        'student_type' => 'Y3S2',
+                        'current_semester' => 'Y3S2',
+                    ],
+                    $currentType === 'Y3S2' || $currentSem === 'Y3S2' => [
+                        'student_type' => 'Y4S1',
+                        'current_semester' => 'Y4S1',
+                    ],
+                    $currentType === 'Y4S1' || $currentSem === 'Y4S1' => [
+                        'student_type' => 'Y4S2',
+                        'current_semester' => 'Y4S2',
+                    ],
+                    $currentType === 'Y4S2' || $currentSem === 'Y4S2' => [
+                        'student_type' => 'graduated',
+                        'current_semester' => 'GRADUATED',
+                    ],
+                    default => [
+                        'student_type' => 'graduated',
+                        'current_semester' => 'GRADUATED',
+                    ],
                 };
+
                 $updates = [
-                    'program_level_id' => $newLevelId,
-                    'student_type' => $nextSemester['student_type'],
-                    'current_semester' => $nextSemester['current_semester'],
+                    'student_type' => $next['student_type'],
+                    'current_semester' => $next['current_semester'],
                 ];
+
+                if ($newLevelId) {
+                    $updates['program_level_id'] = $newLevelId;
+                }
 
                 if ($newStudyProgramId) {
                     $updates['study_program_id'] = $newStudyProgramId;

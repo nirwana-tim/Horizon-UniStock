@@ -80,6 +80,35 @@
             @enderror
         </div>
 
+        <!-- CAPTCHA -->
+        <div>
+            <label class="block text-xs font-semibold text-gray-700 mb-1.5">
+                Verifikasi <span class="text-red-500">*</span>
+            </label>
+            <div class="flex items-center gap-3 mb-2">
+                <img src="{{ captcha_src('math') }}" alt="captcha" id="captcha-img"
+                     class="rounded-lg border border-gray-200 h-11">
+                <button type="button" onclick="document.getElementById('captcha-img').src='{{ captcha_src('math') }}&'+Math.random()"
+                        class="text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0"
+                        title="Reload CAPTCHA">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                </button>
+            </div>
+            <input type="text" name="captcha" placeholder="Hasil penjumlahan"
+                   class="w-full px-3 py-2.5 h-11 text-sm bg-gray-100 border border-gray-200 rounded-lg text-gray-800 placeholder-gray-400 focus:bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-100 transition-colors duration-150 @error('captcha') border-red-400 focus:border-red-400 focus:ring-red-100 @enderror">
+            @error('captcha')
+                <p class="mt-1 text-xs text-red-600 flex items-center gap-1">
+                    <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                    </svg>
+                    {{ $message }}
+                </p>
+            @enderror
+        </div>
+
         <!-- Remember Me -->
         <div class="flex items-center justify-between">
             <label for="remember_me" class="flex items-center gap-2 cursor-pointer">

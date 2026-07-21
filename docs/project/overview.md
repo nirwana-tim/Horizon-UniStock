@@ -54,12 +54,21 @@ Student Data → Size Management → QR Identity → Staff Distribution → Inve
 7. Stock Opname Bulanan
 8. GPM / Cost Analysis
 
-### Freshman vs Continuing Student
+### Student Type
 
-Tidak perlu membuat dua aplikasi. Gunakan field `student_type`:
+Tidak perlu membuat dua aplikasi. Gunakan field `student_type` yang nilainya dikelola lewat master data **Student Type** (`/master-data/student-type`).
 
-- `freshman`
-- `continuing`
+Nilai default yang tersedia:
+- `year_1_sem_1` — Year 1 Sem 1 (Freshman)
+- `year_1_sem_2` — Year 1 Sem 2 (Freshman)
+- `year_2_sem_3` — Year 2 Sem 3 (Continuing)
+- `year_2_sem_4` — Year 2 Sem 4 (Continuing)
+- `continuing` — Continuing
+- `year_3_sem_1` — Year 3 Sem 1 (Continuing)
+- `year_3_sem_2` — Year 3 Sem 2 (Continuing)
+- `year_4_sem_1` — Year 4 Sem 1 (Continuing)
+- `year_4_sem_2` — Year 4 Sem 2 (Continuing)
+- `graduated` — Graduated / Lulus
 
 Perbedaan hanya pada onboarding, email, ukuran, eligible. Flow distribusi tetap sama.
 

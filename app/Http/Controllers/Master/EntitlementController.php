@@ -104,30 +104,30 @@ class EntitlementController extends Controller
      */
     private function getGroupedItems(): \Illuminate\Support\Collection
     {
-        return Item::whereNotNull('base_code')
-            ->select('base_code')
-            ->distinct()
-            ->orderBy('base_code', 'asc')
+        $items = Item::whereNotNull('base_code')
+            ->with(['category', 'variants'])
+            ->orderBy('base_code')
             ->get()
-            ->map(function ($row) {
-                $rep = Item::where('base_code', '=', $row->base_code, 'and')
-                    ->with(['category', 'variants'])
-                    ->first();
+            ->groupBy('base_code');
 
-                return (object) [
-                    'id' => $rep->id,
-                    'name' => $rep->name,
-                    'code' => $row->base_code,
-                    'gender' => $rep->gender,
-                    'category' => $rep->category,
-                    'sizes' => Item::where('base_code', '=', $row->base_code, 'and')
-                        ->pluck('code', 'id')
-                        ->map(fn($code, $id) => [
-                            'id' => $id,
-                            'code' => $code,
-                            'label' => Item::find($id)?->variants?->first()?->size_label ?? $code,
-                        ]),
-                ];
-            });
+        return $items->map(function ($group) {
+            $rep = $group->first();
+            $sizes = $group->mapWithKeys(fn ($item) => [
+                $item->id => [
+                    'id' => $item->id,
+                    'code' => $item->code,
+                    'label' => $item->variants->first()?->size_label ?? $item->code,
+                ],
+            ]);
+
+            return (object) [
+                'id' => $rep->id,
+                'name' => $rep->name,
+                'code' => $rep->base_code,
+                'gender' => $rep->gender,
+                'category' => $rep->category,
+                'sizes' => $sizes,
+            ];
+        })->values();
     }
 }

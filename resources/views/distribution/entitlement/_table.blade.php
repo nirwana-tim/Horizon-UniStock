@@ -3,7 +3,7 @@
         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $loop->iteration + ($entitlements->currentPage() - 1) * $entitlements->perPage() }}</td>
         <td class="px-6 py-4 whitespace-nowrap"><a href="{{ route('distribution.entitlement.show', $entitlement) }}" class="text-sm font-medium text-primary-600 hover:text-primary-900 font-mono">{{ $entitlement->code }}</a></td>
         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $entitlement->description ?? '-' }}</td>
-        <td class="px-6 py-4 whitespace-nowrap"><x-badge type="{{ $entitlement->student_type === 'year_1_sem_1' ? 'info' : 'warning' }}">{{ $entitlement->student_type ? \Illuminate\Support\Str::of($entitlement->student_type)->replace('_', ' ')->title() : '-' }}</x-badge></td>
+        <td class="px-6 py-4 whitespace-nowrap"><x-badge type="{{ $entitlement->student_type === 'Y1S1' ? 'info' : 'warning' }}">{{ $entitlement->student_type_label }}</x-badge></td>
         <td class="px-6 py-4 whitespace-nowrap"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $entitlement->is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' }}">{{ $entitlement->is_active ? 'Active' : 'Inactive' }}</span></td>
         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $entitlement->items->count() }} item</td>
         <td class="px-6 py-4 whitespace-nowrap text-sm text-right space-x-1">

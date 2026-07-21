@@ -48,14 +48,12 @@ class DistributionSchedule extends Model
 
     public function getStudentTypeLabelAttribute(): string
     {
-        return match ($this->student_type) {
-            'year_1_sem_1' => 'Year 1 Sem 1',
-            'year_1_sem_2' => 'Year 1 Sem 2',
-            'year_2_sem_3' => 'Year 2 Sem 3',
-            'year_2_sem_4' => 'Year 2 Sem 4',
-            'continuing' => 'Continuing',
-            default => $this->student_type ? ucfirst(str_replace('_', ' ', $this->student_type)) : 'All',
-        };
+        if (! $this->student_type) {
+            return 'All';
+        }
+
+        return StudentType::where('kode', $this->student_type)->value('deskripsi')
+            ?? $this->student_type;
     }
 
     public function programLevel(): BelongsTo

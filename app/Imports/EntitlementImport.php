@@ -27,12 +27,18 @@ class EntitlementImport implements ToCollection, WithHeadingRow, WithValidation
                 continue;
             }
 
-            $studentType = match (strtolower($row['tipe'])) {
-                'year 1 sem 1', 'year_1_sem_1' => 'year_1_sem_1',
-                'year 1 sem 2', 'year_1_sem_2' => 'year_1_sem_2',
-                'year 2 sem 3', 'year_2_sem_3' => 'year_2_sem_3',
-                'year 2 sem 4', 'year_2_sem_4' => 'year_2_sem_4',
-                default => 'continuing',
+            $rawType = strtolower(trim($row['tipe']));
+            $studentType = match (true) {
+                str_contains($rawType, 'year 1 sem 1') || str_contains($rawType, 'y1s1') || str_contains($rawType, 'freshman') => 'Y1S1',
+                str_contains($rawType, 'year 1 sem 2') || str_contains($rawType, 'y1s2') => 'Y1S2',
+                str_contains($rawType, 'year 2 sem 1') || str_contains($rawType, 'year 2 sem 3') || str_contains($rawType, 'y2s1') || str_contains($rawType, 'y2s3') => 'Y2S1',
+                str_contains($rawType, 'year 2 sem 2') || str_contains($rawType, 'year 2 sem 4') || str_contains($rawType, 'y2s2') || str_contains($rawType, 'y2s4') => 'Y2S2',
+                str_contains($rawType, 'year 3 sem 1') || str_contains($rawType, 'y3s1') => 'Y3S1',
+                str_contains($rawType, 'year 3 sem 2') || str_contains($rawType, 'y3s2') => 'Y3S2',
+                str_contains($rawType, 'year 4 sem 1') || str_contains($rawType, 'y4s1') => 'Y4S1',
+                str_contains($rawType, 'year 4 sem 2') || str_contains($rawType, 'y4s2') => 'Y4S2',
+                str_contains($rawType, 'continuing') => 'Y2S1',
+                default => 'Y2S1',
             };
 
             $codes = Student::where('program_level_id', $programLevel->id)
@@ -96,7 +102,7 @@ class EntitlementImport implements ToCollection, WithHeadingRow, WithValidation
     {
         return [
             'prodi_level' => ['required', 'string'],
-            'tipe' => ['required', 'string', 'in:Freshman,Continuing,freshman,continuing'],
+            'tipe' => ['required', 'string'],
         ];
     }
 }

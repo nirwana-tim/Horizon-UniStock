@@ -75,6 +75,9 @@
                     <x-nav-link :href="route('distribution.size-monitor.index')" :active="request()->routeIs('distribution.size-monitor.*')">
                         {{ __('Size Monitor') }}
                     </x-nav-link>
+                    <x-nav-link :href="route('distribution.size-events.index')" :active="request()->routeIs('distribution.size-events.*')">
+                        {{ __('Event Ukuran') }}
+                    </x-nav-link>
                     <x-nav-link :href="route('import.index')" :active="request()->routeIs('import.*')">
                         {{ __('Import') }}
                     </x-nav-link>
@@ -188,6 +191,9 @@
                     </x-responsive-nav-link>
                     <x-responsive-nav-link :href="route('master-data.vendor.index')" :active="request()->routeIs('master-data.vendor.*')">
                         {{ __('Vendor') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('master-data.student-type.index')" :active="request()->routeIs('master-data.student-type.*')">
+                        {{ __('Student Type') }}
                     </x-responsive-nav-link>
                     <x-responsive-nav-link :href="route('distribution.distribution-schedule.index')" :active="request()->routeIs('distribution.distribution-schedule.*')">
                         {{ __('Distribution Schedule') }}

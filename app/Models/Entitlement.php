@@ -21,6 +21,16 @@ class Entitlement extends Model
         ];
     }
 
+    public function getStudentTypeLabelAttribute(): string
+    {
+        if (! $this->student_type) {
+            return '-';
+        }
+
+        return StudentType::where('kode', $this->student_type)->value('deskripsi')
+            ?? $this->student_type;
+    }
+
     public function items(): HasMany
     {
         return $this->hasMany(EntitlementItem::class, 'entitlement_id');
