@@ -18,33 +18,29 @@
         <p class="text-xs text-gray-500 mt-0.5">Pilih ukuran untuk setiap item seragam kamu</p>
     </div>
 
-    @if(!$activeEvent)
-        <div class="bg-amber-50 border border-amber-200 rounded-xl p-5 text-center">
-            <div class="flex flex-col items-center gap-3">
-                <svg class="w-10 h-10 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                </svg>
-                <div>
-                    <p class="text-sm font-semibold text-amber-700">Belum ada event pengisian ukuran</p>
-                    <p class="text-xs text-amber-600 mt-1">Saat ini belum ada event pengisian ukuran yang aktif. Silakan hubungi admin untuk informasi lebih lanjut.</p>
-                </div>
+    <div class="mb-3">
+        <a href="{{ route('student.sizes.index') }}" class="inline-flex items-center text-xs text-primary-600 hover:text-primary-700 font-medium">
+            <svg class="w-3.5 h-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+            Kembali ke daftar event
+        </a>
+    </div>
+
+    <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-5">
+        <div class="flex items-start gap-3">
+            <svg class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <div class="text-sm text-blue-700">
+                <p class="font-semibold">{{ $event->title }}</p>
+                <p class="mt-0.5">Deadline: {{ $event->end_date->format('d M Y H:i') }}</p>
+                @if($event->description)
+                    <p class="mt-0.5 text-blue-600">{{ $event->description }}</p>
+                @endif
             </div>
         </div>
-    @else
-        <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-5">
-            <div class="flex items-start gap-3">
-                <svg class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-                <div class="text-sm text-blue-700">
-                    <p class="font-semibold">{{ $activeEvent->title }}</p>
-                    <p class="mt-0.5">Deadline: {{ $activeEvent->end_date->format('d M Y H:i') }}</p>
-                    @if($activeEvent->description)
-                        <p class="mt-0.5 text-blue-600">{{ $activeEvent->description }}</p>
-                    @endif
-                </div>
-            </div>
-        </div>
+    </div>
 
         @if($totalCount > 0)
         <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-4 mb-5">
@@ -65,7 +61,7 @@
                     <svg class="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                     </svg>
-                    <p class="text-sm text-amber-700">Kamu sudah mencapai batas maksimal perubahan ukuran ({{ $activeEvent->max_changes }}x) untuk semua item.</p>
+                    <p class="text-sm text-amber-700">Kamu sudah mencapai batas maksimal perubahan ukuran ({{ $event->max_changes }}x) untuk semua item.</p>
                 </div>
             </div>
         @endif
@@ -77,6 +73,7 @@
         @else
             <form action="{{ route('student.sizes.store') }}" method="POST">
                 @csrf
+                <input type="hidden" name="event_id" value="{{ $event->id }}">
 
                 <div class="space-y-3 mb-6">
                     @foreach($entitlementItems as $item)
@@ -85,7 +82,7 @@
                             $sizeItem = $student->activeSizeProfile
                                 ? $student->activeSizeProfile->sizeItems->where('item_id', $item->id)->first()
                                 : null;
-                            $isMaxed = $sizeItem && !$activeEvent->canEdit($sizeItem);
+                            $isMaxed = $sizeItem && !$event->canEdit($sizeItem);
                         @endphp
 
                         <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
@@ -102,7 +99,7 @@
                                 @if(!empty($currentSize) && !$isMaxed)
                                     <span class="text-xs font-medium text-primary-600 bg-primary-50 px-2.5 py-1 rounded-full flex-shrink-0">Terisi</span>
                                 @elseif($isMaxed)
-                                    <span class="text-xs font-medium text-red-600 bg-red-50 px-2.5 py-1 rounded-full flex-shrink-0">Maksimal ({{ $sizeItem->change_count }}/{{ $activeEvent->max_changes }})</span>
+                                    <span class="text-xs font-medium text-red-600 bg-red-50 px-2.5 py-1 rounded-full flex-shrink-0">Maksimal ({{ $sizeItem->change_count }}/{{ $event->max_changes }})</span>
                                 @endif
                             </div>
 
@@ -153,5 +150,4 @@
                 @endif
             </form>
         @endif
-    @endif
 </x-app-layout>

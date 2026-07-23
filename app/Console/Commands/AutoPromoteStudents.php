@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\Student;
-use App\Models\ProgramLevel;
+use App\Models\StudentGeneration;
 use App\Services\AuditService;
 use Illuminate\Console\Command;
 
@@ -12,7 +12,7 @@ class AutoPromoteStudents extends Command
     protected $signature = 'students:auto-promote
         {--dry-run : Preview changes without saving}
         {--semester= : Target semester e.g. Y1S2, Y2S3}
-        {--level-id= : Target program_level_id for promoted students}';
+        {--level-id= : Target generation_id for promoted students}';
 
     protected $description = 'Promote all students to the next semester';
 
@@ -51,9 +51,9 @@ class AutoPromoteStudents extends Command
 
                 $newLevelId = $targetLevelId;
                 if (!$newLevelId) {
-                    $nextYear = ((int) substr($student->programLevel?->code ?? '2500', 0, 2)) + 1;
+                    $nextYear = ((int) substr($student->generation?->code ?? '2500', 0, 2)) + 1;
                     $nextCode = sprintf('%02d%02d', $nextYear, $nextYear + 1);
-                    $nextLevel = ProgramLevel::where('code', $nextCode)->first();
+                    $nextLevel = StudentGeneration::where('code', $nextCode)->first();
                     $newLevelId = $nextLevel?->id;
                 }
 
@@ -62,7 +62,7 @@ class AutoPromoteStudents extends Command
                         '[DRY-RUN] %s (%s): %s → %s, sem %s → %s',
                         $student->nim,
                         $student->name,
-                        $student->student_type,
+                        $student->student_level,
                         $map['new_type'],
                         $student->current_semester ?? '-',
                         $map['new_semester']
@@ -70,11 +70,11 @@ class AutoPromoteStudents extends Command
                 } else {
                     $oldValues = $student->toArray();
                     $updates = [
-                        'student_type' => $map['new_type'],
+                        'student_level' => $map['new_type'],
                         'current_semester' => $map['new_semester'],
                     ];
                     if ($newLevelId) {
-                        $updates['program_level_id'] = $newLevelId;
+                        $updates['generation_id'] = $newLevelId;
                     }
                     $student->update($updates);
                     AuditService::log('auto_promote', Student::class, $student->id, $oldValues, $student->fresh()->toArray());

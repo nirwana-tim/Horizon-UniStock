@@ -5,7 +5,7 @@ namespace App\Imports;
 use App\Models\Entitlement;
 use App\Models\EntitlementItem;
 use App\Models\Item;
-use App\Models\ProgramLevel;
+use App\Models\StudentGeneration;
 use App\Models\Student;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
@@ -22,13 +22,13 @@ class EntitlementImport implements ToCollection, WithHeadingRow, WithValidation
     public function collection(Collection $rows): void
     {
         foreach ($rows as $row) {
-            $programLevel = ProgramLevel::where('name', $row['prodi_level'])->first();
-            if (!$programLevel) {
+            $generation = StudentGeneration::where('name', $row['prodi_level'])->first();
+            if (!$generation) {
                 continue;
             }
 
             $rawType = strtolower(trim($row['tipe']));
-            $studentType = match (true) {
+            $studentLevel = match (true) {
                 str_contains($rawType, 'year 1 sem 1') || str_contains($rawType, 'y1s1') || str_contains($rawType, 'freshman') => 'Y1S1',
                 str_contains($rawType, 'year 1 sem 2') || str_contains($rawType, 'y1s2') => 'Y1S2',
                 str_contains($rawType, 'year 2 sem 1') || str_contains($rawType, 'year 2 sem 3') || str_contains($rawType, 'y2s1') || str_contains($rawType, 'y2s3') => 'Y2S1',
@@ -41,8 +41,8 @@ class EntitlementImport implements ToCollection, WithHeadingRow, WithValidation
                 default => 'Y2S1',
             };
 
-            $codes = Student::where('program_level_id', $programLevel->id)
-                ->where('student_type', $studentType)
+            $codes = Student::where('generation_id', $generation->id)
+                ->where('student_level', $studentLevel)
                 ->whereNotNull('entitlement_code')
                 ->distinct()
                 ->pluck('entitlement_code');
@@ -55,10 +55,10 @@ class EntitlementImport implements ToCollection, WithHeadingRow, WithValidation
                 $entitlement = Entitlement::updateOrCreate(
                     [
                         'code' => $code,
-                        'student_type' => $studentType,
+                        'student_level' => $studentLevel,
                     ],
                     [
-                        'description' => "Hak barang {$studentType} {$row['prodi_level']}",
+                        'description' => "Hak barang {$studentLevel} {$row['prodi_level']}",
                         'is_active' => true,
                     ]
                 );

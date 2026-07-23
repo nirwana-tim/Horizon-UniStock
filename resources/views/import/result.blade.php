@@ -9,7 +9,7 @@
             'stock_receive' => route('inventory.stock-receive.index'),
             'stock_opname' => route('inventory.stock-opname.index'),
         ];
-        $backUrl = $moduleRoutes[$batch->import_type ?? ''] ?? route('import.index');
+        $backUrl = $moduleRoutes[$batch->import_type ?? ''] ?? route('dashboard');
     @endphp
 
     <x-slot name="header">

@@ -252,10 +252,10 @@
             <form action="{{ route('report.size-recap') }}" method="GET">
                 <div class="grid grid-cols-1 gap-2 mb-4">
                     <div>
-                        <label class="block text-xs font-medium text-gray-700">Program Level</label>
-                        <select name="program_level_id" class="block w-full border-gray-300 rounded-lg shadow-sm sm:text-sm">
-                            <option value="">All Program Levels</option>
-                            @foreach($programLevels as $level)
+                        <label class="block text-xs font-medium text-gray-700">Generation</label>
+                        <select name="generation_id" class="block w-full border-gray-300 rounded-lg shadow-sm sm:text-sm">
+                            <option value="">All Generations</option>
+                            @foreach($generations as $level)
                                 <option value="{{ $level->id }}">{{ $level->label }}</option>
                             @endforeach
                         </select>

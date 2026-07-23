@@ -52,7 +52,7 @@ erDiagram
         int faculty_id FK
     }
 
-    PROGRAM_LEVELS {
+    STUDENT_GENERATIONS {
         int id PK
         string name
         string code
@@ -68,8 +68,8 @@ erDiagram
         string qr_token UK
         datetime qr_generated_at
         int study_program_id FK
-        int program_level_id FK
-        string student_type
+        int generation_id FK
+        string student_level
     }
 
     ITEM_CATEGORIES {
@@ -167,9 +167,9 @@ erDiagram
     ENTITLEMENTS {
         int id PK
         int study_program_id FK
-        int program_level_id FK
+        int generation_id FK
         int period_id FK
-        string student_type
+        string student_level
         string description
     }
 
@@ -317,7 +317,7 @@ erDiagram
     USERS ||--|| STUDENTS : "fk.user_id -> id"
     FACULTIES ||--o{ STUDY_PROGRAMS : "fk.faculty_id -> id"
     STUDY_PROGRAMS ||--o{ STUDENTS : "fk.study_program_id -> id"
-    PROGRAM_LEVELS ||--o{ STUDENTS : "fk.program_level_id -> id"
+    STUDENT_GENERATIONS ||--o{ STUDENTS : "fk.generation_id -> id"
     ITEM_CATEGORIES ||--o{ ITEMS : "fk.category_id -> id"
     ITEMS ||--o{ ITEM_VARIANTS : "fk.item_id -> id"
     ITEMS ||--o{ ITEM_PRICES : "fk.item_id -> id"
@@ -335,7 +335,7 @@ erDiagram
     DISTRIBUTION_PERIODS ||--o{ DISTRIBUTION_STAGES : "fk.period_id -> id"
 
     ENTITLEMENTS }o--|| STUDY_PROGRAMS : "fk.study_program_id -> id"
-    ENTITLEMENTS }o--|| PROGRAM_LEVELS : "fk.program_level_id -> id"
+    ENTITLEMENTS }o--|| STUDENT_GENERATIONS : "fk.generation_id -> id"
     ENTITLEMENTS }o--|| DISTRIBUTION_PERIODS : "fk.period_id -> id"
     ENTITLEMENTS ||--o{ ENTITLEMENT_ITEMS : "fk.entitlement_id -> id"
     ENTITLEMENT_ITEMS }o--|| ITEMS : "fk.item_id -> id"
@@ -406,13 +406,13 @@ erDiagram
 | `faculty_id` | int (FK) | Fakultas induk |
 | `created_at` | datetime | Waktu dibuat |
 
-### `program_levels`
+### `student_generations`
 
 | Kolom | Tipe | Keterangan |
 |-------|------|-----------|
 | `id` | int (PK) | Identifier unik |
-| `name` | string | Nama level (Semester 1, Angkatan 2024) |
-| `code` | string | Kode level |
+| `name` | string | Nama generasi (Semester 1, Angkatan 2024) |
+| `code` | string | Kode generasi |
 | `created_at` | datetime | Waktu dibuat |
 
 ### `students`
@@ -428,17 +428,17 @@ erDiagram
 | `qr_token` | string (UK, nullable) | Token QR permanen |
 | `qr_generated_at` | datetime | Waktu QR digenerate |
 | `study_program_id` | int (FK) | Program studi |
-| `program_level_id` | int (FK) | Level / angkatan |
-| `student_type` | string (FK ke `student_types.value`) | Lihat master data Student Type |
+| `generation_id` | int (FK) | Generasi |
+| `student_level` | string (FK ke `student_levels.kode`) | Lihat master data Student Level |
 | `email_verified_at` | datetime | Waktu verifikasi email |
 | `created_at` | datetime | Waktu dibuat |
 
-### `student_types`
+### `student_levels`
 
 | Kolom | Tipe | Keterangan |
 |-------|------|-----------|
 | `id` | int (PK) | Identifier unik |
-| `value` | string (UK) | Identifier internal (contoh: `year_1_sem_1`) |
+| `kode` | string (UK) | Identifier internal (contoh: `year_1_sem_1`) |
 | `label` | string | Label tampilan (contoh: `Year 1 Sem 1 (Freshman)`) |
 | `is_active` | boolean | Status aktif |
 | `sort_order` | int | Urutan tampilan |
@@ -579,9 +579,9 @@ erDiagram
 |-------|------|-----------|
 | `id` | int (PK) | Identifier unik |
 | `study_program_id` | int (FK) | Program studi |
-| `program_level_id` | int (FK) | Level / angkatan |
+| `generation_id` | int (FK) | Generasi |
 | `period_id` | int (FK) | Periode distribusi |
-| `student_type` | string (FK ke `student_types.value`) | Lihat master data Student Type |
+| `student_level` | string (FK ke `student_levels.kode`) | Lihat master data Student Level |
 | `description` | string | Deskripsi hak barang |
 | `created_at` | datetime | Waktu dibuat |
 

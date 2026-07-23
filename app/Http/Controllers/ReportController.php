@@ -12,7 +12,7 @@ use App\Exports\Reports\StockReport;
 use App\Models\DistributionSchedule;
 use App\Models\Item;
 use App\Exports\Reports\SizeRecapReport;
-use App\Models\ProgramLevel;
+use App\Models\StudentGeneration;
 use App\Models\StudyProgram;
 use App\Models\ItemCategory;
 use App\Models\StockOpname;
@@ -31,20 +31,20 @@ class ReportController extends Controller
         $items = Item::orderBy('name', 'asc')->pluck('code', 'code');
         $categories = ItemCategory::orderBy('code', 'asc')->get(['code', 'label']);
         
-        $programLevels = ProgramLevel::orderBy('name', 'asc')->get();
+        $generations = StudentGeneration::orderBy('name', 'asc')->get();
         $studyPrograms = StudyProgram::orderBy('name', 'asc')->get();
 
-        return view('report.index', compact('periods', 'stockOpnames', 'items', 'categories', 'programLevels', 'studyPrograms'));
+        return view('report.index', compact('periods', 'stockOpnames', 'items', 'categories', 'generations', 'studyPrograms'));
     }
 
     public function sizeRecap(Request $request)
     {
         $request->validate([
-            'program_level_id' => 'nullable|integer|exists:program_levels,id',
+            'generation_id' => 'nullable|integer|exists:student_generations,id',
             'study_program_id' => 'nullable|integer|exists:study_programs,id',
         ]);
 
-        $levelId = $request->input('program_level_id');
+        $levelId = $request->input('generation_id');
         $prodiId = $request->input('study_program_id');
         $filename = 'Laporan_Rekap_Kebutuhan_Ukuran.xlsx';
 

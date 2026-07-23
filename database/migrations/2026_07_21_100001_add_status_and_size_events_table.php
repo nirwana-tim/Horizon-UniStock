@@ -10,7 +10,7 @@ return new class extends Migration
     {
         if (!Schema::hasColumn('students', 'status')) {
             Schema::table('students', function (Blueprint $table) {
-                $table->enum('status', ['active', 'leave', 'graduated', 'non_active'])->default('active')->after('student_type')->index();
+                $table->enum('status', ['active', 'leave', 'graduated', 'non_active'])->default('active')->after('student_level')->index();
             });
         }
 
@@ -23,8 +23,8 @@ return new class extends Migration
                 $table->dateTime('end_date');
                 $table->foreignId('faculty_id')->nullable()->constrained('faculties')->nullOnDelete();
                 $table->foreignId('study_program_id')->nullable()->constrained('study_programs')->nullOnDelete();
-                $table->foreignId('program_level_id')->nullable()->constrained('program_levels')->nullOnDelete();
-                $table->string('student_type')->nullable();
+                $table->foreignId('generation_id')->nullable()->constrained('student_generations')->nullOnDelete();
+                $table->string('student_level')->nullable();
                 $table->boolean('is_active')->default(true);
                 $table->boolean('allow_reedit')->default(false);
                 $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();

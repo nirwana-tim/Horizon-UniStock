@@ -77,7 +77,7 @@ Sebelum mengerjakan **task apa pun**, AI WAJIB mengikuti urutan ini:
 - `users` — Akun pengguna
 - `faculties` — Fakultas
 - `study_programs` — Program Studi
-- `program_levels` — Level/Angkatan
+- `student_generations` — Generasi
 - `students` — Mahasiswa
 - `item_categories` — Kategori Barang
 - `items` — Barang

@@ -82,7 +82,7 @@ resources/views
 ├── import/                # index, preview, result
 ├── inventory/             # stock-receive/, stock-opname/
 ├── layouts/               # app.blade.php, navigation
-├── master/                # faculty/, study-program/, program-level/, item/, vendor/, etc.
+├── master/                # faculty/, study-program/, student-generation/, item/, vendor/, etc.
 ├── report/                # index, gpm-cost
 ├── student/               # size-input, qr-show (student self-service)
 └── profile/               # Breeze profile

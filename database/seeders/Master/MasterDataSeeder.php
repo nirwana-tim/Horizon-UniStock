@@ -10,7 +10,7 @@ class MasterDataSeeder extends Seeder
     {
         $this->call([
             FacultySeeder::class,
-            ProgramLevelSeeder::class,
+            StudentGenerationSeeder::class,
             ItemCategorySeeder::class,
             ItemTypeSeeder::class,
             ItemDepartmentSeeder::class,

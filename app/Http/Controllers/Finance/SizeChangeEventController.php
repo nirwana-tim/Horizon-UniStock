@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Finance;
 
 use App\Http\Controllers\Controller;
 use App\Models\Faculty;
-use App\Models\ProgramLevel;
+use App\Models\StudentGeneration;
 use App\Models\SizeChangeEvent;
 use App\Models\StudyProgram;
 use Illuminate\Http\RedirectResponse;
@@ -15,7 +15,7 @@ class SizeChangeEventController extends Controller
 {
     public function index(): View
     {
-        $events = SizeChangeEvent::with(['faculty', 'studyProgram', 'programLevel', 'creator'])
+        $events = SizeChangeEvent::with(['faculty', 'studyProgram', 'generation', 'creator'])
             ->latest()
             ->paginate(15);
 
@@ -26,9 +26,9 @@ class SizeChangeEventController extends Controller
     {
         $faculties = Faculty::orderBy('name')->get();
         $studyPrograms = StudyProgram::with('faculty')->orderBy('name')->get();
-        $programLevels = ProgramLevel::orderBy('name')->get();
+        $generations = StudentGeneration::orderBy('name')->get();
 
-        return view('finance.size-events.create', compact('faculties', 'studyPrograms', 'programLevels'));
+        return view('finance.size-events.create', compact('faculties', 'studyPrograms', 'generations'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -40,8 +40,8 @@ class SizeChangeEventController extends Controller
             'end_date' => ['required', 'date', 'after_or_equal:start_date'],
             'faculty_id' => ['nullable', 'integer', 'exists:faculties,id'],
             'study_program_id' => ['nullable', 'integer', 'exists:study_programs,id'],
-            'program_level_id' => ['nullable', 'integer', 'exists:program_levels,id'],
-            'student_type' => ['nullable', 'string', 'exists:student_types,kode'],
+            'generation_id' => ['nullable', 'integer', 'exists:student_generations,id'],
+            'student_level' => ['nullable', 'string', 'exists:student_levels,kode'],
             'max_changes' => ['required', 'integer', 'min:0'],
             'is_active' => ['boolean'],
         ]);

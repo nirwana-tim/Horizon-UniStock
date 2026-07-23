@@ -24,10 +24,10 @@
 
                     <form action="{{ route('distribution.distribution-schedule.update', $distributionSchedule) }}" method="POST"
                           x-data="{
-                              programLevelId: '{{ old('program_level_id', $distributionSchedule->program_level_id) }}',
+                              generationId: '{{ old('generation_id', $distributionSchedule->generation_id) }}',
                               facultyId: '{{ old('faculty_id', $distributionSchedule->faculty_id) }}',
                               prodiId: '{{ old('study_program_id', $distributionSchedule->study_program_id ?? 'all') }}',
-                              studentType: '{{ old('student_type', $distributionSchedule->student_type) }}',
+                              studentLevel: '{{ old('student_level', $distributionSchedule->student_level) }}',
                               prodiByFaculty: {{ json_encode($prodiByFaculty) }},
                               allProdi: {{ json_encode($allProdi) }},
                               itemHtml: '',
@@ -41,17 +41,17 @@
                               },
                               init() {
                                   this.$watch('prodiId', () => this.fetchItems());
-                                  this.$watch('programLevelId', () => { if (this.prodiId) this.fetchItems(); });
+                                  this.$watch('generationId', () => { if (this.prodiId) this.fetchItems(); });
                                   this.$watch('facultyId', () => { if (this.prodiId) this.fetchItems(); });
-                                  this.$watch('studentType', () => { if (this.prodiId) this.fetchItems(); });
+                                  this.$watch('studentLevel', () => { if (this.prodiId) this.fetchItems(); });
                                   if (this.prodiId) this.fetchItems();
                               },
                               fetchItems() {
                                   let params = {
-                                      program_level_id: this.programLevelId || '',
+                                      generation_id: this.generationId || '',
                                       faculty_id: this.facultyId || '',
                                       study_program_id: this.prodiId,
-                                      student_type: this.studentType || '',
+                                      student_level: this.studentLevel || '',
                                   };
                                   if (this.selectedItemIds.length) {
                                       params.checked_ids = this.selectedItemIds.join(',');
@@ -64,31 +64,20 @@
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <x-input-label for="stage_id" :value="__('Stage')" :required="true" />
-                                <select id="stage_id" name="stage_id" required
-                                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500">
-                                    <option value="">-- Select Stage --</option>
-                                    @foreach($stages as $stage)
-                                        <option value="{{ $stage->id }}" {{ old('stage_id', $distributionSchedule->stage_id) == $stage->id ? 'selected' : '' }}>{{ $stage->name }} (Tahap {{ $stage->stage_order }})</option>
-                                    @endforeach
-                                </select>
-                                <x-input-error :messages="$errors->get('stage_id')" class="mt-2" />
-                            </div>
-                            <div>
                                 <x-input-label for="name" :value="__('Schedule Name')" />
                                 <x-text-input id="name" name="name" type="text" class="mt-1 block w-full" :value="old('name', $distributionSchedule->name)" required autofocus />
                                 <x-input-error :messages="$errors->get('name')" class="mt-2" />
                             </div>
-                            <div @change="programLevelId = $event.target.value">
-                                <x-input-label for="program_level_id" :value="__('Program Level')" />
-                                <select id="program_level_id" name="program_level_id"
+                            <div @change="generationId = $event.target.value">
+                                <x-input-label for="generation_id" :value="__('Generation')" />
+                                <select id="generation_id" name="generation_id"
                                         class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500">
                                     <option value="">-- All Levels --</option>
-                                    @foreach($programLevels as $level)
-                                        <option value="{{ $level->id }}" {{ old('program_level_id', $distributionSchedule->program_level_id) == $level->id ? 'selected' : '' }}>{{ $level->label }}</option>
-                                    @endforeach
+@foreach($generations as $gen)
+    <option value="{{ $gen->id }}" {{ old('generation_id', $distributionSchedule->generation_id) == $gen->id ? 'selected' : '' }}>{{ $gen->label }}</option>
+@endforeach
                                 </select>
-                                <x-input-error :messages="$errors->get('program_level_id')" class="mt-2" />
+                                <x-input-error :messages="$errors->get('generation_id')" class="mt-2" />
                             </div>
                             <div>
                                 <x-input-label for="semester" :value="__('Semester')" />
@@ -100,15 +89,15 @@
                                 <x-input-error :messages="$errors->get('semester')" class="mt-2" />
                             </div>
                             <div>
-                                <x-input-label for="student_type" :value="__('Student Type')" :required="true" />
-                                <select id="student_type" name="student_type" x-model="studentType"
+                                <x-input-label for="student_level" :value="__('Student Level')" :required="true" />
+                                <select id="student_level" name="student_level" x-model="studentLevel"
                                         class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500">
-                                    <option value="">All Student Types</option>
-                                    @foreach($studentTypes as $st)
+                                    <option value="">All Student Levels</option>
+                                    @foreach($studentLevels as $st)
                                         <option value="{{ $st->kode }}">{{ $st->deskripsi }}</option>
                                     @endforeach
                                 </select>
-                                <x-input-error :messages="$errors->get('student_type')" class="mt-2" />
+                                <x-input-error :messages="$errors->get('student_level')" class="mt-2" />
                             </div>
                             <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>

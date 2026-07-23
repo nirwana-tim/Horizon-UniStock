@@ -4,9 +4,9 @@
         <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-900">{{ $student->nim }}</td>
         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $student->name }}</td>
         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $student->studyProgram->name ?? '-' }}</td>
-        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $student->programLevel->label ?? '-' }}</td>
+        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $student->generation->label ?? '-' }}</td>
         <td class="px-6 py-4 whitespace-nowrap">
-            <x-badge type="info">{{ $student->student_type_label }}</x-badge>
+            <x-badge type="info">{{ $student->student_level_label }}</x-badge>
         </td>
         <td class="px-6 py-4 whitespace-nowrap">
             @if($student->status === 'leave')

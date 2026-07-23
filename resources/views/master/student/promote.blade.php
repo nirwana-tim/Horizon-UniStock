@@ -15,11 +15,11 @@
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                                 <div>
-                                    <x-input-label value="Target Program Level (Opsional)" />
+                                    <x-input-label value="Target Generation (Opsional)" />
                                     <select name="target_level_id"
                                         class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500 text-sm">
                                         <option value="">-- Otomatis (Naikkan Semester) --</option>
-                                        @foreach($programLevels as $level)
+                                        @foreach($generations as $level)
                                             <option value="{{ $level->id }}">{{ $level->label }} ({{ $level->code }})</option>
                                         @endforeach
                                     </select>
@@ -57,8 +57,8 @@
                                             <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">NIM</th>
                                             <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama Lengkap</th>
                                             <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">Program Studi</th>
-                                            <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tingkat/Level</th>
-                                            <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tipe / Semester Saat Ini</th>
+<th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">Generation</th>
+<th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">Student Level</th>
                                         </tr>
                                     </thead>
                                     <tbody class="bg-white divide-y divide-gray-200">
@@ -70,9 +70,9 @@
                                             <td class="px-3 py-4 whitespace-nowrap text-sm font-mono text-gray-900">{{ $student->nim }}</td>
                                             <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-700">{{ $student->name }}</td>
                                             <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-500">{{ $student->studyProgram?->name ?? '-' }}</td>
-                                            <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-500">{{ $student->programLevel?->label ?? '-' }}</td>
+                                            <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-500">{{ $student->generation?->label ?? '-' }}</td>
                                             <td class="px-3 py-4 whitespace-nowrap">
-                                                <x-badge type="info">{{ $student->student_type_label }}</x-badge>
+                                                <x-badge type="info">{{ $student->student_level_label }}</x-badge>
                                             </td>
                                         </tr>
                                         @empty

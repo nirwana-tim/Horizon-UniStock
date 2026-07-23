@@ -133,13 +133,11 @@
                         </div>
 
                         <div class="mt-6">
-                            <label for="size_id" class="block text-sm font-medium text-gray-700 font-semibold">Size</label>
-                            <select id="size_id_display" disabled
-                                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm bg-gray-100 text-gray-500 sm:text-sm cursor-not-allowed">
-                                <option value="">-- Select Size --</option>
-                            </select>
-                            <input type="hidden" name="size_id" id="size_id" value="{{ old('size_id', $item->variants->first()?->size_id) }}">
-                            @error('size_id')
+                            <label class="block text-sm font-medium text-gray-700 font-semibold mb-1">Sizes <span class="text-red-500">*</span></label>
+                            <div id="size_checkboxes" class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                                {{-- populated by JS --}}
+                            </div>
+                            @error('size_ids')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
                         </div>
@@ -159,35 +157,33 @@
     </div>
 
     <script>
-        const sizeSelect = document.getElementById('size_id_display');
-        const typeSelect = document.getElementById('type_id_display');
+        const checkboxContainer = document.getElementById('size_checkboxes');
         const categorySelect = document.getElementById('category_id_display');
-        const currentSizeId = {{ old('size_id', $item->variants->first()?->size_id ?? 'null') }};
-        const currentTypeId = {{ old('type_id', $item->type_id ?? 'null') }};
+        const existingSizeIds = {{ $item->variants->pluck('size_id')->toJson() }};
 
         function renderSizes(sizes) {
-            sizeSelect.innerHTML = '<option value="">-- Select Size --</option>';
+            checkboxContainer.innerHTML = '';
+            if (!sizes.length) {
+                checkboxContainer.innerHTML = '<p class="text-sm text-gray-400 italic col-span-full">No sizes available for this category</p>';
+                return;
+            }
             sizes.forEach(s => {
-                const opt = document.createElement('option');
-                opt.value = s.id;
-                opt.textContent = s.code + ' - ' + (s.label || s.name);
-                if (s.id == currentSizeId) {
-                    opt.selected = true;
+                const label = document.createElement('label');
+                label.className = 'flex items-center gap-2 p-2.5 border border-gray-200 rounded-lg cursor-pointer hover:border-primary-300 hover:bg-primary-50 transition-colors has-[:checked]:border-primary-500 has-[:checked]:bg-primary-50';
+                const input = document.createElement('input');
+                input.type = 'checkbox';
+                input.name = 'size_ids[]';
+                input.value = s.id;
+                input.className = 'rounded border-gray-300 text-primary-600 focus:ring-primary-500';
+                if (existingSizeIds.includes(s.id)) {
+                    input.checked = true;
                 }
-                sizeSelect.appendChild(opt);
-            });
-        }
-
-        function renderTypes(types) {
-            typeSelect.innerHTML = '<option value="">-- Select Type --</option>';
-            types.forEach(t => {
-                const opt = document.createElement('option');
-                opt.value = t.id;
-                opt.textContent = t.code + ' - ' + (t.label || t.name);
-                if (t.id == currentTypeId) {
-                    opt.selected = true;
-                }
-                typeSelect.appendChild(opt);
+                const span = document.createElement('span');
+                span.className = 'text-sm text-gray-700';
+                span.textContent = s.code + ' - ' + (s.label || s.name);
+                label.appendChild(input);
+                label.appendChild(span);
+                checkboxContainer.appendChild(label);
             });
         }
 
@@ -197,7 +193,8 @@
                 params: { category_id: categoryId }
             }).then(res => {
                 renderSizes(res.data.sizes);
-                renderTypes(res.data.types);
+            }).catch(err => {
+                console.error('Load sizes error:', err);
             });
         }
 

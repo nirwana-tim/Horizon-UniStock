@@ -1,17 +1,15 @@
 <x-app-layout>
-
-
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
                     <div class="flex items-center justify-between mb-6">
-                        <h3 class="text-lg font-semibold text-gray-800">Program Levels</h3>
-                        <a href="{{ route('master-data.program-level.create') }}" class="inline-flex items-center px-4 py-2 bg-primary-700 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-primary-800 focus:bg-primary-800 active:bg-primary-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                            {{ __('Add Level') }}
+                        <h3 class="text-lg font-semibold text-gray-800">Generasi Mahasiswa</h3>
+                        <a href="{{ route('master-data.student-generation.create') }}" class="inline-flex items-center px-4 py-2 bg-primary-700 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-primary-800 focus:bg-primary-800 active:bg-primary-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                            {{ __('Add Generation') }}
                         </a>
                     </div>
-                    <div x-data="serverTable('{{ route('master-data.program-level.index') }}')">
+                    <div x-data="serverTable('{{ route('master-data.student-generation.index') }}')">
 
                         <div class="mb-4">
                             <input type="text"
@@ -33,11 +31,11 @@
                                     </tr>
                                 </thead>
                                 <tbody x-html="tableHtml" class="bg-white divide-y divide-gray-200">
-                                    @include('master.program-level._table')
+                                    @include('master.student-generation._table')
                                 </tbody>
                             </table>
                             <div x-html="paginationHtml" class="mt-4">
-                                @component('components.alpine-pagination', ['paginator' => $levels])@endcomponent
+                                @component('components.alpine-pagination', ['paginator' => $generations])@endcomponent
                             </div>
                         </div>
 

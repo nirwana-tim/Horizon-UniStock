@@ -20,14 +20,14 @@
                                 <input type="hidden" name="code" value="{{ $entitlement->code }}">
                             </div>
                             <div>
-                                <x-input-label for="student_type" :value="__('Student Type')" />
-                                <select id="student_type" name="student_type" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500">
+                                <x-input-label for="student_level" :value="__('Student Level')" />
+                                <select id="student_level" name="student_level" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500">
                                     <option value="">-- Select Type --</option>
-                                    @foreach($studentTypes as $st)
-                                        <option value="{{ $st->kode }}" {{ old('student_type', $entitlement->student_type) == $st->kode ? 'selected' : '' }}>{{ $st->deskripsi }}</option>
+                                    @foreach($studentLevels as $st)
+                                        <option value="{{ $st->kode }}" {{ old('student_level', $entitlement->student_level) == $st->kode ? 'selected' : '' }}>{{ $st->deskripsi }}</option>
                                     @endforeach
                                 </select>
-                                <x-input-error :messages="$errors->get('student_type')" class="mt-2" />
+                                <x-input-error :messages="$errors->get('student_level')" class="mt-2" />
                             </div>
                             <div>
                                 <x-input-label for="is_active" :value="__('Status')" />

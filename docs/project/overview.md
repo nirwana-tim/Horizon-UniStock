@@ -54,9 +54,9 @@ Student Data → Size Management → QR Identity → Staff Distribution → Inve
 7. Stock Opname Bulanan
 8. GPM / Cost Analysis
 
-### Student Type
+### Student Level
 
-Tidak perlu membuat dua aplikasi. Gunakan field `student_type` yang nilainya dikelola lewat master data **Student Type** (`/master-data/student-type`).
+Tidak perlu membuat dua aplikasi. Gunakan field `student_level` yang nilainya dikelola lewat master data **Student Level** (`/master-data/student-level`).
 
 Nilai default yang tersedia:
 - `year_1_sem_1` — Year 1 Sem 1 (Freshman)

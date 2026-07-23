@@ -4,8 +4,9 @@ namespace App\Imports;
 
 use App\Models\Faculty;
 use App\Models\Item;
-use App\Models\ProgramLevel;
 use App\Models\Student;
+use App\Models\StudentGeneration;
+use App\Services\Master\GenerationResolverService;
 use App\Models\StudentSizeItem;
 use App\Models\StudentSizeProfile;
 use App\Models\StudyProgram;
@@ -46,9 +47,9 @@ class StudentImport implements ToCollection, WithMultipleSheets
                     'email_kampus' => $record['email_kampus'],
                     'email_pribadi' => $record['email_pribadi'],
                     'study_program_id' => $record['study_program']->id,
-                    'program_level_id' => $record['program_level']->id,
-                    'student_type' => $record['student_type'],
-                    'entitlement_code' => $record['program_level']->code
+                    'generation_id' => $record['program_level']->id,
+                    'student_level' => $record['student_level'],
+                    'entitlement_code' => ($record['student_level'] ?? 'Y1S1')
                         . ($record['study_program']->faculty->code ?? 'FHS')
                         . $record['study_program']->code,
                 ]
@@ -173,7 +174,9 @@ class StudentImport implements ToCollection, WithMultipleSheets
             $record['study_program'] = $this->resolveStudyProgram($record['program']);
             $record['program_level'] = $this->resolveProgramLevel($record['nim']);
 
-            $record['student_type'] = match (true) {
+            $rawType = $record['student_type_raw'] ?? '';
+
+            $record['student_level'] = match (true) {
                 str_contains($rawType, 'graduated') || str_contains($rawType, 'lulus') || str_contains($rawType, 'alumni') => 'graduated',
                 str_contains($rawType, 'year 1 sem 1') || str_contains($rawType, 'y1s1') || str_contains($rawType, 'freshman') => 'Y1S1',
                 str_contains($rawType, 'year 1 sem 2') || str_contains($rawType, 'y1s2') => 'Y1S2',
@@ -245,39 +248,11 @@ class StudentImport implements ToCollection, WithMultipleSheets
         );
     }
 
-    private function resolveProgramLevel(?string $nim): ProgramLevel
+    private function resolveProgramLevel(?string $nim): StudentGeneration
     {
-        if ($nim) {
-            // Match 2-digit admission year right before last 4 digits (e.g. 4112757201 24 0004 -> 24 = 2024)
-            if (preg_match('/(\d{2})\d{4}$/', $nim, $matches)) {
-                $year = (int) $matches[1];
-                $code = sprintf('%02d%02d', $year, $year + 1);
-                $level = ProgramLevel::where('code', $code)->first();
-                if (!$level) {
-                    $level = ProgramLevel::create([
-                        'code' => $code,
-                        'name' => '20' . sprintf('%02d', $year) . '/20' . sprintf('%02d', $year + 1),
-                    ]);
-                }
-                return $level;
-            }
-
-            // Fallback match 4-digit year at start (e.g. 20240001)
-            if (preg_match('/^(20\d{2})/', $nim, $matches)) {
-                $year = (int) substr($matches[1], 2, 2);
-                $code = sprintf('%02d%02d', $year, $year + 1);
-                $level = ProgramLevel::where('code', $code)->first();
-                if (!$level) {
-                    $level = ProgramLevel::create([
-                        'code' => $code,
-                        'name' => '20' . sprintf('%02d', $year) . '/20' . sprintf('%02d', $year + 1),
-                    ]);
-                }
-                return $level;
-            }
-        }
-
-        return ProgramLevel::first() ?? ProgramLevel::create(['code' => '2526', 'name' => '2025/2026']);
+        return app(GenerationResolverService::class)->resolveFromNim($nim)
+            ?? StudentGeneration::first()
+            ?? StudentGeneration::create(['code' => '2526', 'name' => '2025/2026']);
     }
 
     private function normalizeGender(?string $gender): string

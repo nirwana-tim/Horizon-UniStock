@@ -34,11 +34,11 @@
                         </div>
                         <div>
                             <p class="text-sm text-gray-500">Level / Batch</p>
-                            <p class="font-medium text-gray-900">{{ $student->programLevel->label ?? '-' }}</p>
+                            <p class="font-medium text-gray-900">{{ $student->generation->label ?? '-' }}</p>
                         </div>
                         <div>
-                            <p class="text-sm text-gray-500">Student Type</p>
-                            <p class="font-medium text-gray-900">{{ $student->student_type_label }}</p>
+                            <p class="text-sm text-gray-500">Student Level</p>
+                            <p class="font-medium text-gray-900">{{ $student->student_level_label }}</p>
                         </div>
                         <div>
                             <p class="text-sm text-gray-500">Campus Email</p>

@@ -44,10 +44,10 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <x-input-label value="Target Tipe Mahasiswa / Semester" />
-                            <select name="student_type" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500 text-sm">
+                            <select name="student_level" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500 text-sm">
                                 <option value="">-- Semua Semester / Tipe --</option>
-                                @foreach($studentTypes as $st)
-                                    <option value="{{ $st->kode }}" {{ old('student_type') == $st->kode ? 'selected' : '' }}>{{ $st->deskripsi }}</option>
+                                @foreach($studentLevels as $st)
+                                    <option value="{{ $st->kode }}" {{ old('student_level') == $st->kode ? 'selected' : '' }}>{{ $st->deskripsi }}</option>
                                 @endforeach
                             </select>
                         </div>

@@ -22,22 +22,18 @@
                                 <dd class="mt-1 text-sm text-gray-900 font-semibold">{{ $distributionSchedule->semester ?? '-' }}</dd>
                             </div>
                             <div class="bg-gray-50 p-4 rounded-lg">
-                                <dt class="text-sm font-medium text-gray-500">{{ __('Student Type') }}</dt>
+                                <dt class="text-sm font-medium text-gray-500">{{ __('Student Level') }}</dt>
                                 <dd class="mt-1">
-                                    @if($distributionSchedule->student_type)
-                                        <x-badge type="primary">{{ $distributionSchedule->student_type_label ?? ucfirst($distributionSchedule->student_type) }}</x-badge>
+                                    @if($distributionSchedule->student_level)
+                                        <x-badge type="primary">{{ $distributionSchedule->student_level_label ?? ucfirst($distributionSchedule->student_level) }}</x-badge>
                                     @else
-                                        <x-badge type="neutral">All Student Types</x-badge>
+                                        <x-badge type="neutral">All Student Levels</x-badge>
                                     @endif
                                 </dd>
                             </div>
                             <div class="bg-gray-50 p-4 rounded-lg">
-                                <dt class="text-sm font-medium text-gray-500">{{ __('Program Level') }}</dt>
-                                <dd class="mt-1 text-sm text-gray-900 font-semibold">{{ $distributionSchedule->programLevel?->label ?? '-' }}</dd>
-                                </div>
-                                <div>
-                                    <dt class="text-sm font-medium text-gray-500">Stage</dt>
-                                    <dd class="mt-1 text-sm text-gray-900 font-semibold">{{ $distributionSchedule->stage?->name ?? '-' }}</dd>
+                                <dt class="text-sm font-medium text-gray-500">{{ __('Generation') }}</dt>
+                                <dd class="mt-1 text-sm text-gray-900 font-semibold">{{ $distributionSchedule->generation?->label ?? '-' }}</dd>
                             </div>
                             <div class="bg-gray-50 p-4 rounded-lg">
                                 <dt class="text-sm font-medium text-gray-500">{{ __('Faculty / Study Program') }}</dt>
@@ -101,7 +97,7 @@
                         @endif
                     </div>
 
-                    <div class="border-t border-gray-200 pt-6 mt-6"
+                     <div class="border-t border-gray-200 pt-6 mt-6"
                          x-data="{
                              tableHtml: '',
                              paginationHtml: '',
@@ -111,6 +107,11 @@
                                      this.tableHtml = res.data.html;
                                      this.paginationHtml = res.data.pagination;
                                  });
+                             },
+                             goToPage(p) {
+                                 let url = new URL(this.currentUrl);
+                                 url.searchParams.set('page', p);
+                                 this.loadData(url.toString());
                              },
                              init() { this.loadData(this.currentUrl); }
                          }">

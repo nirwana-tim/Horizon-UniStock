@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class ProgramLevelRequest extends FormRequest
+class StudentGenerationRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -13,11 +13,11 @@ class ProgramLevelRequest extends FormRequest
 
     public function rules(): array
     {
-        $levelId = $this->route('program_level')?->id;
+        $generationId = $this->route('student_generation')?->id;
 
         return [
             'name' => 'required|string|max:255',
-            'code' => 'required|string|max:50|unique:program_levels,code,' . $levelId,
+            'code' => 'required|string|max:50|unique:student_generations,code,' . $generationId,
         ];
     }
 }

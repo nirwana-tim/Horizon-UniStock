@@ -16,8 +16,8 @@ return new class extends Migration
             $table->string('email_kampus')->unique();
             $table->string('email_pribadi')->nullable();
             $table->foreignId('study_program_id')->constrained('study_programs');
-            $table->foreignId('program_level_id')->constrained('program_levels');
-            $table->enum('student_type', ['freshman', 'continuing'])->default('freshman')->index();
+            $table->foreignId('generation_id')->constrained('student_generations');
+            $table->string('student_level', 50)->nullable()->index();
             $table->string('entitlement_code')->nullable()->index();
             $table->timestamp('email_verified_at')->nullable();
             $table->timestamps();

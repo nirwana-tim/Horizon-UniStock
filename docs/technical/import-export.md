@@ -38,7 +38,7 @@ Template adalah file Excel kosong yang didownload Admin, diisi, lalu diupload ke
 
 **File:** `storage/app/templates/import_mahasiswa.xlsx`
 **Class Generate:** `App\Exports\Templates\MahasiswaTemplateExport`
-**Tujuan:** Import data mahasiswa dari kampus. Nilai `student_type` diisi otomatis berdasarkan mapping semester (lihat `StudentImport` kelas).
+**Tujuan:** Import data mahasiswa dari kampus. Nilai `student_level` diisi otomatis berdasarkan mapping semester (lihat `StudentImport` kelas).
 
 **Sumber Data Excel:**
 - `Student Data Template` — CAMPUS, COLLEGE, COURSE, YEAR, SEMESTER, STUDENT_ID
@@ -145,7 +145,7 @@ Template adalah file Excel kosong yang didownload Admin, diisi, lalu diupload ke
 
 | Kolom | Tipe | Required | Validasi | Contoh |
 |-------|------|----------|----------|--------|
-| Prodi Level* | String | Ya | Dropdown dari program_levels | D3 KEPERAWATAN 1 |
+| Prodi Level* | String | Ya | Dropdown dari student_generations | D3 KEPERAWATAN 1 |
 | Tipe* | String | Ya | Dropdown: Freshman / Continuing | Freshman |
 | Almamater | Number | No | 0 / 1 | 1 |
 | Seragam Kuliah | Number | No | 0 / 1 | 1 |

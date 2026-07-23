@@ -6,11 +6,13 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class ProgramLevel extends Model
+class StudentGeneration extends Model
 {
     use SoftDeletes;
 
     protected $fillable = ['name', 'code'];
+
+    protected $table = 'student_generations';
 
     public function getLabelAttribute(): string
     {
@@ -22,11 +24,11 @@ class ProgramLevel extends Model
 
     public function students(): HasMany
     {
-        return $this->hasMany(Student::class);
+        return $this->hasMany(Student::class, 'generation_id');
     }
 
     public function entitlements(): HasMany
     {
-        return $this->hasMany(Entitlement::class);
+        return $this->hasMany(Entitlement::class, 'generation_id');
     }
 }

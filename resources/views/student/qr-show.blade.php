@@ -17,7 +17,7 @@
                 </div>
                 <h3 class="text-base font-bold text-gray-900">{{ $student->name }}</h3>
                 <p class="text-sm text-gray-500 mt-0.5">NIM: <span class="font-mono font-medium text-gray-700">{{ $student->nim }}</span></p>
-                <p class="text-xs text-gray-400 mt-1">{{ $student->studyProgram->name ?? '-' }} &bull; {{ $student->programLevel->label ?? '-' }}</p>
+                <p class="text-xs text-gray-400 mt-1">{{ $student->studyProgram->name ?? '-' }} &bull; {{ $student->generation->label ?? '-' }}</p>
             </div>
 
             {{-- QR Code --}}

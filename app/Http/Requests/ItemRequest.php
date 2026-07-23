@@ -25,7 +25,8 @@ class ItemRequest extends FormRequest
             'unit' => 'required|string|max:20',
             'selling_price' => 'nullable|numeric|min:0',
             'hpp' => 'nullable|numeric|min:0',
-            'size_id' => 'required|exists:item_sizes,id',
+            'size_ids' => 'required|array|min:1',
+            'size_ids.*' => 'exists:item_sizes,id',
         ];
     }
 }

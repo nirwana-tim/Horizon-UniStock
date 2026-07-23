@@ -15,15 +15,6 @@
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <x-input-label for="level_select" :value="__('Program Level')" :required="true" />
-                                <select id="level_select" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500 text-sm">
-                                    <option value="">-- Select Program Level --</option>
-                                    @foreach($programLevels as $level)
-                                        <option value="{{ $level->code }}">{{ $level->label }} ({{ $level->code }})</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div>
                                 <x-input-label for="prodi_select" :value="__('Study Program')" />
                                 <select id="prodi_select" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500 text-sm">
                                     <option value="">-- Select Study Program --</option>
@@ -34,20 +25,16 @@
                                     @endforeach
                                 </select>
                             </div>
+                            <input type="hidden" name="code" id="code">
                             <div>
-                                <x-input-label for="code" :value="__('Entitlement Code (Auto)')" :required="true" />
-                                <x-text-input id="code" name="code" type="text" class="mt-1 block w-full bg-gray-50 text-gray-500 font-mono" :value="old('code')" placeholder="Auto-generated..." required readonly />
-                                <x-input-error :messages="$errors->get('code')" class="mt-2" />
-                            </div>
-                            <div>
-                                <x-input-label for="student_type" :value="__('Student Type')" :required="true" />
-                                <select id="student_type" name="student_type" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500 text-sm">
+                                <x-input-label for="student_level" :value="__('Student Level')" :required="true" />
+                                <select id="student_level" name="student_level" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500 text-sm">
                                     <option value="">-- Select Type --</option>
-                                    @foreach($studentTypes as $st)
-                                        <option value="{{ $st->kode }}" {{ old('student_type') == $st->kode ? 'selected' : '' }}>{{ $st->deskripsi }}</option>
+                                    @foreach($studentLevels as $st)
+                                        <option value="{{ $st->kode }}" {{ old('student_level') == $st->kode ? 'selected' : '' }}>{{ $st->deskripsi }}</option>
                                     @endforeach
                                 </select>
-                                <x-input-error :messages="$errors->get('student_type')" class="mt-2" />
+                                <x-input-error :messages="$errors->get('student_level')" class="mt-2" />
                             </div>
                             <div>
                                 <x-input-label for="is_active" :value="__('Status')" />
@@ -85,12 +72,12 @@
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         // Auto generation of entitlement code based on selections
-        const levelSelect = document.getElementById('level_select');
+        const studentLevelSelect = document.getElementById('student_level');
         const prodiSelect = document.getElementById('prodi_select');
         const codeInput = document.getElementById('code');
 
         function updateCode() {
-            const levelCode = levelSelect.value;
+            const levelCode = studentLevelSelect.value;
             const selectedProdiOpt = prodiSelect.options[prodiSelect.selectedIndex];
             const facultyCode = selectedProdiOpt ? selectedProdiOpt.dataset.faculty : '';
             const prodiCode = prodiSelect.value;
@@ -102,7 +89,7 @@
             }
         }
 
-        levelSelect.addEventListener('change', updateCode);
+        studentLevelSelect.addEventListener('change', updateCode);
         prodiSelect.addEventListener('change', updateCode);
     });
 </script>

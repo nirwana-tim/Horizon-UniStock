@@ -9,7 +9,7 @@
             'stock_receive' => route('inventory.stock-receive.index'),
             'stock_opname' => route('inventory.stock-opname.index'),
         ];
-        $backUrl = $moduleRoutes[$importType] ?? route('import.index');
+        $backUrl = $moduleRoutes[$importType] ?? route('dashboard');
     @endphp
 
     <div class="py-12">

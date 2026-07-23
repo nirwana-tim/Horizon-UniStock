@@ -22,7 +22,7 @@ class StudentSizeService
 
         $entitlement = Entitlement::where('code', $student->entitlement_code)
             ->where('is_active', true)
-            ->where('student_type', $student->student_type)
+            ->where('student_level', $student->student_level)
             ->with(['items.item'])
             ->first();
 
@@ -54,25 +54,32 @@ class StudentSizeService
         return $unique->values();
     }
 
-    public function getActiveEventForStudent(Student $student): ?SizeChangeEvent
+    public function getEventsForStudent(Student $student): \Illuminate\Support\Collection
     {
-        $events = SizeChangeEvent::where('is_active', true)
+        return SizeChangeEvent::where('is_active', true)
             ->where('start_date', '<=', now())
             ->where('end_date', '>=', now())
-            ->get();
-
-        return $events->first(fn ($event) => $event->isApplicableToStudent($student));
+            ->get()
+            ->filter(fn ($event) => $event->isApplicableToStudent($student))
+            ->values();
     }
 
-    public function saveSizes(Student $student, array $sizes): void
+    public function getActiveEventForStudent(Student $student): ?SizeChangeEvent
     {
-        $activeEvent = $this->getActiveEventForStudent($student);
+        return $this->getEventsForStudent($student)->first();
+    }
 
-        if (! $activeEvent) {
+    public function saveSizes(Student $student, array $sizes, ?int $eventId = null): void
+    {
+        $event = $eventId
+            ? SizeChangeEvent::find($eventId)
+            : $this->getActiveEventForStudent($student);
+
+        if (! $event) {
             throw new \RuntimeException('Tidak ada event pengisian ukuran yang aktif saat ini.');
         }
 
-        DB::transaction(function () use ($student, $sizes, $activeEvent) {
+        DB::transaction(function () use ($student, $sizes, $event) {
             $profile = StudentSizeProfile::where('student_id', $student->id)
                 ->lockForUpdate()
                 ->first();
@@ -94,7 +101,7 @@ class StudentSizeService
                     ->first();
 
                 if ($sizeItem) {
-                    if (! $activeEvent->canEdit($sizeItem)) {
+                    if (! $event->canEdit($sizeItem)) {
                         continue;
                     }
 

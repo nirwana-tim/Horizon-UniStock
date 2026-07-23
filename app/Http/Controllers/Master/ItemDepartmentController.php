@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Master;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ItemDepartmentRequest;
-use App\Models\Faculty;
 use App\Models\ItemDepartment;
 use App\Services\Master\ItemDepartmentService;
 use Illuminate\Http\JsonResponse;
@@ -20,7 +19,7 @@ class ItemDepartmentController extends Controller
 
     public function index(Request $request): View|JsonResponse
     {
-        $query = ItemDepartment::with('studyPrograms')->withCount('items');
+        $query = ItemDepartment::withCount('items');
 
         if ($search = $request->input('q')) {
             $search = str_replace(['%', '_'], ['\%', '\_'], $search);
@@ -44,17 +43,7 @@ class ItemDepartmentController extends Controller
 
     public function create(): View
     {
-        $faculties = Faculty::orderBy('name')->get();
-
-        return view('master.item-department.create', compact('faculties'));
-    }
-
-    public function studyPrograms(Faculty $faculty, Request $request): View
-    {
-        $faculty->load('studyPrograms');
-        $selectedIds = $request->input('selected_ids', []);
-
-        return view('master.item-department._study-programs', compact('faculty', 'selectedIds'));
+        return view('master.item-department.create');
     }
 
     public function store(ItemDepartmentRequest $request): RedirectResponse
@@ -66,17 +55,14 @@ class ItemDepartmentController extends Controller
 
     public function show(ItemDepartment $itemDepartment): View
     {
-        $itemDepartment->load(['studyPrograms.faculty', 'items.category']);
+        $itemDepartment->load(['items.category']);
 
         return view('master.item-department.show', compact('itemDepartment'));
     }
 
     public function edit(ItemDepartment $itemDepartment): View
     {
-        $itemDepartment->load('studyPrograms');
-        $faculties = Faculty::orderBy('name')->get();
-
-        return view('master.item-department.edit', compact('itemDepartment', 'faculties'));
+        return view('master.item-department.edit', compact('itemDepartment'));
     }
 
     public function update(ItemDepartmentRequest $request, ItemDepartment $itemDepartment): RedirectResponse

@@ -22,7 +22,7 @@ class EntitlementRequest extends FormRequest
                 'max:50',
                 "unique:entitlements,code,{$entitlementId}",
             ],
-            'student_type' => 'nullable|string|exists:student_types,kode',
+            'student_level' => 'nullable|string|exists:student_levels,kode',
             'description' => 'nullable|string|max:500',
             'is_active' => 'boolean',
             'items' => 'required|array|min:1',

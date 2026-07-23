@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('size_change_events', function (Blueprint $table) {
-            $table->unsignedTinyInteger('max_changes')->default(1)->after('student_type');
+            $table->unsignedTinyInteger('max_changes')->default(1)->after('student_level');
         });
     }
 

@@ -11,8 +11,8 @@ return new class extends Migration
         Schema::create('entitlements', function (Blueprint $table) {
             $table->id();
             $table->string('code');
-            $table->unique(['code', 'student_type']);
-            $table->string('student_type', 20)->nullable();
+            $table->unique(['code', 'student_level']);
+            $table->string('student_level', 20)->nullable();
             $table->string('description')->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestamps();

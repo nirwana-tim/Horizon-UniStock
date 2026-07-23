@@ -21,7 +21,7 @@ class DistributionService
 {
     public function findStudent(string $query): ?Student
     {
-        return Student::with(['studyProgram', 'programLevel'])
+        return Student::with(['studyProgram', 'generation'])
             ->where('nim', $query)
             ->first();
     }
@@ -47,8 +47,8 @@ class DistributionService
         return Entitlement::where('code', $student->entitlement_code)
             ->where('is_active', true)
             ->where(function ($q) use ($student) {
-                $q->where('student_type', $student->student_type)
-                  ->orWhereNull('student_type');
+                $q->where('student_level', $student->student_level)
+                  ->orWhereNull('student_level');
             })
             ->with('items.item')
             ->first();

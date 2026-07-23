@@ -15,8 +15,8 @@ class SizeChangeEvent extends Model
         'end_date',
         'faculty_id',
         'study_program_id',
-        'program_level_id',
-        'student_type',
+        'generation_id',
+        'student_level',
         'max_changes',
         'is_active',
         'created_by',
@@ -47,9 +47,9 @@ class SizeChangeEvent extends Model
         return $this->belongsTo(StudyProgram::class);
     }
 
-    public function programLevel(): BelongsTo
+    public function generation(): BelongsTo
     {
-        return $this->belongsTo(ProgramLevel::class);
+        return $this->belongsTo(StudentGeneration::class, 'generation_id');
     }
 
     public function creator(): BelongsTo
@@ -79,11 +79,11 @@ class SizeChangeEvent extends Model
             return false;
         }
 
-        if ($this->program_level_id && $student->program_level_id !== $this->program_level_id) {
+        if ($this->generation_id && $student->generation_id !== $this->generation_id) {
             return false;
         }
 
-        if ($this->student_type && strtolower((string)$student->student_type) !== strtolower((string)$this->student_type)) {
+        if ($this->student_level && strtolower((string)$student->student_level) !== strtolower((string)$this->student_level)) {
             return false;
         }
 

@@ -22,8 +22,8 @@ class StudentRequest extends FormRequest
             'email_kampus' => ['required', 'email', 'max:255', Rule::unique('students', 'email_kampus')->ignore($studentId)],
             'email_pribadi' => ['nullable', 'email', 'max:255'],
             'study_program_id' => ['required', 'integer', 'exists:study_programs,id'],
-            'program_level_id' => ['required', 'integer', 'exists:program_levels,id'],
-            'student_type' => ['required', 'string', 'exists:student_types,kode'],
+            'generation_id' => ['nullable', 'integer', 'exists:student_generations,id'],
+            'student_level' => ['required', 'string', 'exists:student_levels,kode'],
             'password' => ['nullable', 'string', 'min:8'],
         ];
     }

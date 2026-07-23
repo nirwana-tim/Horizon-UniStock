@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StudentRequest;
 use App\Models\DistributionItem;
 use App\Models\Entitlement;
-use App\Models\ProgramLevel;
+use App\Models\StudentGeneration;
 use App\Models\Student;
 use App\Models\StudyProgram;
 use App\Services\Master\StudentService;
@@ -23,7 +23,7 @@ class StudentController extends Controller
 
     public function index(Request $request): View|JsonResponse
     {
-        $query = Student::with(['studyProgram', 'programLevel']);
+        $query = Student::with(['studyProgram', 'generation', 'studentLevel']);
 
         if ($search = $request->input('q')) {
             $search = str_replace(['%', '_'], ['\%', '\_'], $search);
@@ -38,8 +38,8 @@ class StudentController extends Controller
             $query->where('study_program_id', $studyProgramId);
         }
 
-        if ($programLevelId = $request->input('program_level_id')) {
-            $query->where('program_level_id', $programLevelId);
+        if ($generationId = $request->input('generation_id')) {
+            $query->where('generation_id', $generationId);
         }
 
         $perPage = (int) $request->input('per_page', 20);
@@ -55,34 +55,39 @@ class StudentController extends Controller
         }
 
         $studyPrograms = StudyProgram::with('faculty')->orderBy('name')->get();
-        $programLevels = ProgramLevel::orderBy('name')->get();
-
-        $studentsWithoutAccount = Student::whereNull('user_id')
-            ->with(['studyProgram', 'programLevel'])
-            ->paginate(10, ['*'], 'account_page');
-
-        $totalStudents = Student::count();
-        $totalWithAccount = Student::whereNotNull('user_id')->count();
-        $totalWithoutAccount = Student::whereNull('user_id')->count();
+        $generations = StudentGeneration::orderBy('name')->get();
 
         return view('master.student.index', compact(
             'students',
             'studyPrograms',
-            'programLevels',
+            'generations',
+            'perPage',
+        ));
+    }
+
+    public function generateIndex(Request $request): View
+    {
+        $studentsWithoutAccount = Student::whereNull('user_id')
+            ->with(['studyProgram', 'generation', 'studentLevel'])
+            ->paginate(10, ['*'], 'account_page');
+
+        $totalStudents = cache()->remember('student-count-total', 300, fn () => Student::count());
+        $totalWithAccount = cache()->remember('student-count-with-account', 300, fn () => Student::whereNotNull('user_id')->count());
+        $totalWithoutAccount = cache()->remember('student-count-without-account', 300, fn () => Student::whereNull('user_id')->count());
+
+        return view('master.student.generate', compact(
             'studentsWithoutAccount',
             'totalStudents',
             'totalWithAccount',
             'totalWithoutAccount',
-            'perPage',
         ));
     }
 
     public function create(): View
     {
         $studyPrograms = StudyProgram::with('faculty')->orderBy('name')->get();
-        $programLevels = ProgramLevel::orderBy('name')->get();
 
-        return view('master.student.create', compact('studyPrograms', 'programLevels'));
+        return view('master.student.create', compact('studyPrograms'));
     }
 
     public function store(StudentRequest $request): RedirectResponse
@@ -94,7 +99,7 @@ class StudentController extends Controller
 
     public function show(Student $student): View
     {
-        $student->load(['studyProgram.faculty', 'programLevel', 'user']);
+        $student->load(['studyProgram.faculty', 'generation', 'user', 'studentLevel']);
 
         return view('master.student.show', compact('student'));
     }
@@ -104,7 +109,7 @@ class StudentController extends Controller
         $entitlement = $student->entitlement_code
             ? Entitlement::where('code', $student->entitlement_code)
                 ->where('is_active', true)
-                ->where('student_type', $student->student_type)
+                ->where('student_level', $student->student_level)
                 ->with('items.item')
                 ->first()
             : null;
@@ -154,9 +159,9 @@ class StudentController extends Controller
     public function edit(Student $student): View
     {
         $studyPrograms = StudyProgram::with('faculty')->orderBy('name')->get();
-        $programLevels = ProgramLevel::orderBy('name')->get();
+        $generations = StudentGeneration::orderBy('name')->get();
 
-        return view('master.student.edit', compact('student', 'studyPrograms', 'programLevels'));
+        return view('master.student.edit', compact('student', 'studyPrograms', 'generations'));
     }
 
     public function update(StudentRequest $request, Student $student): RedirectResponse
@@ -196,13 +201,13 @@ class StudentController extends Controller
         }
 
         if (empty($generated)) {
-            return redirect()->route('students.index', ['tab' => 'generate-akun'])
+            return redirect()->route('students.generate-index')
                 ->with('info', 'Tidak ada akun baru yang digenerate.');
         }
 
         $message = 'Berhasil membuat '.count($generated).' akun mahasiswa. Password hanya ditampilkan sekali di bawah.';
 
-        return redirect()->route('students.index', ['tab' => 'generate-akun'])
+        return redirect()->route('students.generate-index')
             ->with('success', $message)
             ->with('generated_passwords', $generated);
     }
@@ -212,13 +217,13 @@ class StudentController extends Controller
         return (new \App\Exports\StudentExport(
             search: $request->input('q'),
             studyProgramId: $request->input('study_program_id'),
-            programLevelId: $request->input('program_level_id'),
+            generationId: $request->input('generation_id'),
         ))->download('students-' . now()->format('Ymd') . '.xlsx');
     }
 
     public function promoteForm(Request $request): View
     {
-        $query = Student::with(['studyProgram.faculty', 'programLevel']);
+        $query = Student::with(['studyProgram.faculty', 'generation', 'studentLevel']);
 
         if ($search = $request->input('q')) {
             $query->where(function ($q) use ($search) {
@@ -228,10 +233,10 @@ class StudentController extends Controller
         }
 
         $students = $query->latest()->paginate(20);
-        $programLevels = ProgramLevel::orderBy('name')->get();
+        $generations = StudentGeneration::orderBy('name')->get();
         $studyPrograms = StudyProgram::with('faculty')->orderBy('name')->get();
 
-        return view('master.student.promote', compact('students', 'programLevels', 'studyPrograms'));
+        return view('master.student.promote', compact('students', 'generations', 'studyPrograms'));
     }
 
     public function promote(Request $request): RedirectResponse
@@ -239,7 +244,7 @@ class StudentController extends Controller
         $validated = $request->validate([
             'student_ids' => ['required', 'array'],
             'student_ids.*' => ['required', 'integer', 'exists:students,id'],
-            'target_level_id' => ['nullable', 'integer', 'exists:program_levels,id'],
+            'target_level_id' => ['nullable', 'integer', 'exists:student_generations,id'],
             'target_study_program_id' => ['nullable', 'integer', 'exists:study_programs,id'],
         ]);
 
@@ -258,7 +263,7 @@ class StudentController extends Controller
         $students = Student::whereNull('user_id')->get();
 
         if ($students->isEmpty()) {
-            return redirect()->route('students.index', ['tab' => 'generate-akun'])
+            return redirect()->route('students.generate-index')
                 ->with('info', 'Semua mahasiswa sudah memiliki akun.');
         }
 
@@ -275,7 +280,7 @@ class StudentController extends Controller
 
         $message = 'Berhasil membuat '.count($generated).' akun mahasiswa. Password hanya ditampilkan sekali di bawah.';
 
-        return redirect()->route('students.index', ['tab' => 'generate-akun'])
+        return redirect()->route('students.generate-index')
             ->with('success', $message)
             ->with('generated_passwords', $generated);
     }
