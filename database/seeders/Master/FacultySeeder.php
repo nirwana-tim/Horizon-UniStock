@@ -10,8 +10,16 @@ class FacultySeeder extends Seeder
     public function run(): void
     {
         Faculty::firstOrCreate(
+            ['code' => 'FICT'],
+            ['name' => 'Faculty of Information Computer and Technology']
+        );
+        Faculty::firstOrCreate(
             ['code' => 'FHS'],
-            ['name' => 'Fakultas Ilmu Kesehatan']
+            ['name' => 'Faculty of Health Sciences']
+        );
+        Faculty::firstOrCreate(
+            ['code' => 'FMB'],
+            ['name' => 'Faculty of Management and Business']
         );
     }
 }

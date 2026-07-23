@@ -9,14 +9,13 @@ return new class extends Migration
 {
     public function up(): void
     {
-        DB::statement('ALTER TABLE students MODIFY student_type VARCHAR(50) DEFAULT "year_1_sem_1"');
-        DB::statement('UPDATE students SET student_type = "year_1_sem_1" WHERE student_type = "freshman"');
-        DB::statement('UPDATE students SET student_type = "continuing" WHERE student_type = "continuing"');
+        DB::statement('ALTER TABLE students MODIFY student_level VARCHAR(50) DEFAULT "Y1S1"');
+        DB::statement('UPDATE students SET student_level = "Y1S1" WHERE student_level IS NULL');
     }
 
     public function down(): void
     {
-        DB::statement('UPDATE students SET student_type = "freshman" WHERE student_type = "year_1_sem_1"');
-        DB::statement('ALTER TABLE students MODIFY student_type ENUM("freshman", "continuing") DEFAULT "freshman"');
+        DB::statement('UPDATE students SET student_level = NULL WHERE student_level = "Y1S1"');
+        DB::statement('ALTER TABLE students MODIFY student_level VARCHAR(50) DEFAULT NULL');
     }
 };

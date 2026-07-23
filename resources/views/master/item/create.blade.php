@@ -86,12 +86,11 @@
                             </div>
 
                             <div>
-                                <label for="size_id" class="block text-sm font-medium text-gray-700">Size <span class="text-red-500">*</span></label>
-                                <select name="size_id" id="size_id" required
-                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-gray-500 sm:text-sm">
-                                    <option value="">-- Select Size --</option>
-                                </select>
-                                @error('size_id')
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Sizes <span class="text-red-500">*</span></label>
+                                <div id="size_checkboxes" class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                                    {{-- populated by JS --}}
+                                </div>
+                                @error('size_ids')
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
                             </div>
@@ -140,41 +139,44 @@
     </div>
 
     <script>
-        const sizeSelect = document.getElementById('size_id');
+        const checkboxContainer = document.getElementById('size_checkboxes');
         const typeSelect = document.getElementById('type_id');
         const categorySelect = document.getElementById('category_id');
 
         function renderSizes(sizes) {
-            sizeSelect.innerHTML = '<option value="">-- Select Size --</option>';
+            checkboxContainer.innerHTML = '';
+            if (!sizes.length) {
+                checkboxContainer.innerHTML = '<p class="text-sm text-gray-400 italic col-span-full">No sizes available for this category</p>';
+                return;
+            }
             sizes.forEach(s => {
-                const opt = document.createElement('option');
-                opt.value = s.id;
-                opt.textContent = s.code + ' - ' + (s.label || s.name);
-                sizeSelect.appendChild(opt);
-            });
-        }
-
-        function renderTypes(types) {
-            typeSelect.innerHTML = '<option value="">-- Select Type --</option>';
-            types.forEach(t => {
-                const opt = document.createElement('option');
-                opt.value = t.id;
-                opt.textContent = t.code + ' - ' + (t.label || t.name);
-                typeSelect.appendChild(opt);
+                const label = document.createElement('label');
+                label.className = 'flex items-center gap-2 p-2.5 border border-gray-200 rounded-lg cursor-pointer hover:border-primary-300 hover:bg-primary-50 transition-colors has-[:checked]:border-primary-500 has-[:checked]:bg-primary-50';
+                const input = document.createElement('input');
+                input.type = 'checkbox';
+                input.name = 'size_ids[]';
+                input.value = s.id;
+                input.className = 'rounded border-gray-300 text-primary-600 focus:ring-primary-500';
+                const span = document.createElement('span');
+                span.className = 'text-sm text-gray-700';
+                span.textContent = s.code + ' - ' + (s.label || s.name);
+                label.appendChild(input);
+                label.appendChild(span);
+                checkboxContainer.appendChild(label);
             });
         }
 
         function loadSizesAndTypes(categoryId) {
             if (!categoryId) {
                 renderSizes([]);
-                renderTypes([]);
                 return;
             }
             axios.get('{{ route("master-data.item.sizes-types-by-category") }}', {
                 params: { category_id: categoryId }
             }).then(res => {
                 renderSizes(res.data.sizes);
-                renderTypes(res.data.types);
+            }).catch(err => {
+                console.error('Load sizes error:', err);
             });
         }
 

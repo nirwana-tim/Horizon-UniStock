@@ -54,25 +54,25 @@
                             </div>
 
                             <div>
-                                <x-input-label for="program_level_id" :value="__('Level / Batch')" :required="true" />
-                                <select id="program_level_id" name="program_level_id" required
+                                <x-input-label for="generation_id" :value="__('Generation')" />
+                                <select id="generation_id" name="generation_id"
                                         class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500">
-                                    <option value="">-- Select Level --</option>
-                                    @foreach($programLevels as $l)
-                                        <option value="{{ $l->id }}" {{ old('program_level_id', $student->program_level_id) == $l->id ? 'selected' : '' }}>{{ $l->label }}</option>
+                                    <option value="">-- Auto Detect from NIM --</option>
+                                    @foreach($generations as $l)
+                                        <option value="{{ $l->id }}" {{ old('generation_id', $student->generation_id) == $l->id ? 'selected' : '' }}>{{ $l->label }}</option>
                                     @endforeach
                                 </select>
-                                <x-input-error :messages="$errors->get('program_level_id')" class="mt-2" />
+                                <x-input-error :messages="$errors->get('generation_id')" class="mt-2" />
                             </div>
 
                             <div>
-                                <x-input-label for="student_type" :value="__('Student Type')" :required="true" />
-                                <select id="student_type" name="student_type" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500">
-                                    @foreach($studentTypes as $st)
-                                        <option value="{{ $st->kode }}" {{ old('student_type', $student->student_type) == $st->kode ? 'selected' : '' }}>{{ $st->deskripsi }}</option>
+                                <x-input-label for="student_level" :value="__('Student Level')" :required="true" />
+                                <select id="student_level" name="student_level" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500">
+                                    @foreach($studentLevels as $st)
+                                        <option value="{{ $st->kode }}" {{ old('student_level', $student->student_level) == $st->kode ? 'selected' : '' }}>{{ $st->deskripsi }}</option>
                                     @endforeach
                                 </select>
-                                <x-input-error :messages="$errors->get('student_type')" class="mt-2" />
+                                <x-input-error :messages="$errors->get('student_level')" class="mt-2" />
                             </div>
 
                             @if($student->user_id)

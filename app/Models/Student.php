@@ -18,8 +18,8 @@ class Student extends Authenticatable
         'email_pribadi',
 
         'study_program_id',
-        'program_level_id',
-        'student_type',
+        'generation_id',
+        'student_level',
         'status',
         'current_semester',
         'entitlement_code',
@@ -45,10 +45,9 @@ class Student extends Authenticatable
         ];
     }
 
-    public function getStudentTypeLabelAttribute(): string
+    public function getStudentLevelLabelAttribute(): string
     {
-        return StudentType::where('kode', $this->student_type)->value('deskripsi')
-            ?? $this->student_type;
+        return $this->studentLevel?->deskripsi ?? $this->student_level ?? '-';
     }
 
     public function getCurrentSemesterLabelAttribute(): string
@@ -60,11 +59,11 @@ class Student extends Authenticatable
 
     public static function generateEntitlementCode(Model $student): ?string
     {
-        if (!$student->programLevel || !$student->studyProgram?->faculty) {
+        if (!$student->student_level || !$student->studyProgram?->faculty) {
             return null;
         }
 
-        return $student->programLevel->code
+        return $student->student_level
             . $student->studyProgram->faculty->code
             . $student->studyProgram->code;
     }
@@ -79,9 +78,9 @@ class Student extends Authenticatable
         return $this->belongsTo(StudyProgram::class);
     }
 
-    public function programLevel(): BelongsTo
+    public function generation(): BelongsTo
     {
-        return $this->belongsTo(ProgramLevel::class);
+        return $this->belongsTo(StudentGeneration::class, 'generation_id');
     }
 
     public function eligibilityRecords(): HasMany
@@ -107,5 +106,15 @@ class Student extends Authenticatable
     public function activeSizeProfile(): HasOne
     {
         return $this->hasOne(StudentSizeProfile::class)->where('is_filled', true)->latest();
+    }
+
+    public function studentLevel(): BelongsTo
+    {
+        return $this->belongsTo(StudentLevel::class, 'student_level', 'kode');
+    }
+
+    public function programLevel(): BelongsTo
+    {
+        return $this->belongsTo(StudentGeneration::class, 'generation_id');
     }
 }

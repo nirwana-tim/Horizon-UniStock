@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\EntitlementRequest;
 use App\Models\Entitlement;
 use App\Models\Item;
-use App\Models\ProgramLevel;
 use App\Models\StudyProgram;
 use App\Services\EntitlementService;
 use Illuminate\Http\JsonResponse;
@@ -22,7 +21,7 @@ class EntitlementController extends Controller
 
     public function index(Request $request): View|JsonResponse
     {
-        $entitlements = Entitlement::with('items.item')
+        $entitlements = Entitlement::with(['items.item', 'studentLevel'])
             ->when($request->input('q'), function ($query, $search) {
                 $search = str_replace(['%', '_'], ['\%', '\_'], $search);
                 $query->where('code', 'like', "%{$search}%")
@@ -42,10 +41,9 @@ class EntitlementController extends Controller
 
     public function create(): View
     {
-        $programLevels = ProgramLevel::orderBy('code', 'asc')->get(['*']);
         $studyPrograms = StudyProgram::with(['faculty'])->orderBy('name', 'asc')->get(['*']);
 
-        return view('distribution.entitlement.create', compact('programLevels', 'studyPrograms'));
+        return view('distribution.entitlement.create', compact('studyPrograms'));
     }
 
     public function store(EntitlementRequest $request): RedirectResponse
@@ -57,7 +55,7 @@ class EntitlementController extends Controller
 
     public function show(Entitlement $entitlement): View
     {
-        $entitlement->load('items.item');
+        $entitlement->load(['items.item', 'studentLevel']);
 
         return view('distribution.entitlement.show', compact('entitlement'));
     }
@@ -65,10 +63,9 @@ class EntitlementController extends Controller
     public function edit(Entitlement $entitlement): View
     {
         $entitlement->load('items');
-        $programLevels = ProgramLevel::orderBy('code', 'asc')->get(['*']);
         $studyPrograms = StudyProgram::with(['faculty'])->orderBy('name', 'asc')->get(['*']);
 
-        return view('distribution.entitlement.edit', compact('entitlement', 'programLevels', 'studyPrograms'));
+        return view('distribution.entitlement.edit', compact('entitlement', 'studyPrograms'));
     }
 
     public function update(EntitlementRequest $request, Entitlement $entitlement): RedirectResponse

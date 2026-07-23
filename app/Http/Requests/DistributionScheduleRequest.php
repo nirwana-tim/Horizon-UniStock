@@ -15,7 +15,7 @@ class DistributionScheduleRequest extends FormRequest
     {
         $this->merge([
             'is_active' => $this->boolean('is_active'),
-            'student_type' => $this->input('student_type') ?: null,
+            'student_level' => $this->input('student_level') ?: null,
         ]);
     }
 
@@ -23,14 +23,13 @@ class DistributionScheduleRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:255',
-            'stage_id' => 'nullable|integer|exists:distribution_stages,id',
             'semester' => 'required|string|in:Ganjil,Genap',
-            'student_type' => 'nullable|string|exists:student_types,kode',
+            'student_level' => 'nullable|string|exists:student_levels,kode',
             'date' => 'required|date',
             'location' => 'required|string|max:255',
             'session' => 'required|string|max:100',
             'is_active' => 'boolean',
-            'program_level_id' => 'nullable|integer|exists:program_levels,id',
+            'generation_id' => 'nullable|integer|exists:student_generations,id',
             'faculty_id' => 'nullable|integer|exists:faculties,id',
             'study_program_id' => 'nullable|integer|exists:study_programs,id',
             'item_ids' => 'nullable|array',

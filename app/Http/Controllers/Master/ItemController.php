@@ -24,21 +24,18 @@ class ItemController extends Controller
 
     public function index(Request $request): View|JsonResponse
     {
-        $query = ItemVariant::with(['item.category', 'itemSize']);
+        $query = Item::with(['category', 'variants.itemSize']);
 
         if ($search = $request->input('q')) {
             $search = str_replace(['%', '_'], ['\%', '\_'], $search);
             $query->where(function ($q) use ($search) {
-                $q->where('sku', 'like', "%{$search}%")
-                  ->orWhereHas('item', function ($iq) use ($search) {
-                      $iq->where('name', 'like', "%{$search}%")
-                        ->orWhere('code', 'like', "%{$search}%")
-                        ->orWhere('base_code', 'like', "%{$search}%");
-                  });
+                $q->where('code', 'like', "%{$search}%")
+                  ->orWhere('name', 'like', "%{$search}%")
+                  ->orWhere('base_code', 'like', "%{$search}%");
             });
         }
 
-        $data = $query->orderBy('sku')->paginate(20);
+        $data = $query->orderBy('code')->paginate(20);
 
         if ($request->ajax()) {
             return response()->json([
@@ -61,11 +58,10 @@ class ItemController extends Controller
 
     public function sizesTypesByCategory(Request $request): JsonResponse
     {
-        $category = ItemCategory::with(['sizes', 'types'])->findOrFail($request->input('category_id'));
+        $category = ItemCategory::with(['sizes'])->findOrFail($request->input('category_id'));
 
         return response()->json([
             'sizes' => $category->sizes,
-            'types' => $category->types,
         ]);
     }
 

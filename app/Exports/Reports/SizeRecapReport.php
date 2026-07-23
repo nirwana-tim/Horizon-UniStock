@@ -17,7 +17,7 @@ class SizeRecapReport extends BaseExport implements FromCollection, WithHeadings
     private int $row = 0;
 
     public function __construct(
-        private ?int $programLevelId = null,
+        private ?int $generationId = null,
         private ?int $studyProgramId = null
     ) {}
 
@@ -41,8 +41,8 @@ class SizeRecapReport extends BaseExport implements FromCollection, WithHeadings
             ->orderBy('items.name')
             ->orderBy('student_size_items.size');
 
-        if ($this->programLevelId) {
-            $query->where('students.program_level_id', $this->programLevelId);
+        if ($this->generationId) {
+            $query->where('students.generation_id', $this->generationId);
         }
         if ($this->studyProgramId) {
             $query->where('students.study_program_id', $this->studyProgramId);
@@ -84,12 +84,12 @@ class SizeRecapReport extends BaseExport implements FromCollection, WithHeadings
 
         $this->setTitle($sheet, 'LAPORAN REKAP KEBUTUHAN UKURAN MAHASISWA', $colCount);
         
-        $filterText = 'Semua Angkatan & Prodi';
-        if ($this->programLevelId || $this->studyProgramId) {
+        $filterText = 'Semua Generasi & Prodi';
+        if ($this->generationId || $this->studyProgramId) {
             $parts = [];
-            if ($this->programLevelId) {
-                $level = DB::table('program_levels')->where('id', $this->programLevelId)->first();
-                if ($level) $parts[] = 'Angkatan: ' . $level->name;
+            if ($this->generationId) {
+                $level = DB::table('student_generations')->where('id', $this->generationId)->first();
+                if ($level) $parts[] = 'Generasi: ' . $level->name;
             }
             if ($this->studyProgramId) {
                 $prodi = DB::table('study_programs')->where('id', $this->studyProgramId)->first();

@@ -9,9 +9,6 @@ class ItemDepartmentService
 {
     public function store(array $data): ItemDepartment
     {
-        $studyProgramIds = $data['study_program_ids'] ?? [];
-        unset($data['study_program_ids']);
-
         // Auto generate sequential numeric code: 01, 02, etc.
         $code = null;
         for ($i = 1; $i <= 99; $i++) {
@@ -24,7 +21,6 @@ class ItemDepartmentService
         $data['code'] = $code;
 
         $department = ItemDepartment::create($data);
-        $department->studyPrograms()->sync($studyProgramIds);
 
         AuditService::log('create', 'item_department', $department->id, null, $data);
         return $department;
@@ -33,12 +29,9 @@ class ItemDepartmentService
     public function update(ItemDepartment $itemDepartment, array $data): ItemDepartment
     {
         $old = $itemDepartment->toArray();
-        $studyProgramIds = $data['study_program_ids'] ?? [];
-        unset($data['study_program_ids']);
         unset($data['code']); // Protect code from modification
 
         $itemDepartment->update($data);
-        $itemDepartment->studyPrograms()->sync($studyProgramIds);
 
         AuditService::log('update', 'item_department', $itemDepartment->id, $old, $data);
         return $itemDepartment;

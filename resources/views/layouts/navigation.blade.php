@@ -35,8 +35,8 @@
                             <x-dropdown-link :href="route('master-data.study-program.index')" :active="request()->routeIs('master-data.study-program.*')">
                                 {{ __('Study Program') }}
                             </x-dropdown-link>
-                            <x-dropdown-link :href="route('master-data.program-level.index')" :active="request()->routeIs('master-data.program-level.*')">
-                                {{ __('Program Level') }}
+                            <x-dropdown-link :href="route('master-data.student-generation.index')" :active="request()->routeIs('master-data.student-generation.*')">
+                                {{ __('Generation') }}
                             </x-dropdown-link>
                             <hr class="my-1 border-gray-200">
                             <x-dropdown-link :href="route('master-data.item-category.index')" :active="request()->routeIs('master-data.item-category.*')">
@@ -69,17 +69,34 @@
                             </x-dropdown-link>
                         </x-slot>
                     </x-dropdown>
-                    <x-nav-link :href="route('students.index')" :active="request()->routeIs('students.*')">
-                        {{ __('Generate Account') }}
-                    </x-nav-link>
+                    <x-dropdown align="left" width="48">
+                        <x-slot name="trigger">
+                            <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
+                                <div>{{ __('Student') }}</div>
+                                <div class="ms-1">
+                                    <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+                            </button>
+                        </x-slot>
+                        <x-slot name="content">
+                            <x-dropdown-link :href="route('finance.eligibility.index')" :active="request()->routeIs('finance.eligibility.*')">
+                                {{ __('Eligibility') }}
+                            </x-dropdown-link>
+                            <x-dropdown-link :href="route('students.index')" :active="request()->routeIs('students.*') && !request()->routeIs('students.generate-index')">
+                                {{ __('Student Data') }}
+                            </x-dropdown-link>
+                            <x-dropdown-link :href="route('students.generate-index')" :active="request()->routeIs('students.generate-index')">
+                                {{ __('Generate Account') }}
+                            </x-dropdown-link>
+                        </x-slot>
+                    </x-dropdown>
                     <x-nav-link :href="route('distribution.size-monitor.index')" :active="request()->routeIs('distribution.size-monitor.*')">
                         {{ __('Size Monitor') }}
                     </x-nav-link>
                     <x-nav-link :href="route('distribution.size-events.index')" :active="request()->routeIs('distribution.size-events.*')">
                         {{ __('Event Ukuran') }}
-                    </x-nav-link>
-                    <x-nav-link :href="route('import.index')" :active="request()->routeIs('import.*')">
-                        {{ __('Import') }}
                     </x-nav-link>
                     <x-nav-link :href="route('inventory.stock-opname.index')" :active="request()->routeIs('inventory.stock-opname.*')">
                         {{ __('Stock Opname') }}
@@ -192,8 +209,8 @@
                     <x-responsive-nav-link :href="route('master-data.vendor.index')" :active="request()->routeIs('master-data.vendor.*')">
                         {{ __('Vendor') }}
                     </x-responsive-nav-link>
-                    <x-responsive-nav-link :href="route('master-data.student-type.index')" :active="request()->routeIs('master-data.student-type.*')">
-                        {{ __('Student Type') }}
+                    <x-responsive-nav-link :href="route('master-data.student-level.index')" :active="request()->routeIs('master-data.student-level.*')">
+                        {{ __('Student Level') }}
                     </x-responsive-nav-link>
                     <x-responsive-nav-link :href="route('distribution.distribution-schedule.index')" :active="request()->routeIs('distribution.distribution-schedule.*')">
                         {{ __('Distribution Schedule') }}
@@ -204,14 +221,18 @@
                     <x-responsive-nav-link :href="route('inventory.stock-receive.index')" :active="request()->routeIs('inventory.stock-receive.*')">
                         {{ __('Stock Receive') }}
                     </x-responsive-nav-link>
-                    <x-responsive-nav-link :href="route('students.index')" :active="request()->routeIs('students.*')">
+                    <p class="px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">Student</p>
+                    <x-responsive-nav-link :href="route('finance.eligibility.index')" :active="request()->routeIs('finance.eligibility.*')">
+                        {{ __('Eligibility') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('students.index')" :active="request()->routeIs('students.*') && !request()->routeIs('students.generate-index')">
+                        {{ __('Student Data') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('students.generate-index')" :active="request()->routeIs('students.generate-index')">
                         {{ __('Generate Account') }}
                     </x-responsive-nav-link>
                     <x-responsive-nav-link :href="route('distribution.size-monitor.index')" :active="request()->routeIs('distribution.size-monitor.*')">
                         {{ __('Size Monitor') }}
-                    </x-responsive-nav-link>
-                    <x-responsive-nav-link :href="route('import.index')" :active="request()->routeIs('import.*')">
-                        {{ __('Import') }}
                     </x-responsive-nav-link>
                     <x-responsive-nav-link :href="route('inventory.stock-opname.index')" :active="request()->routeIs('inventory.stock-opname.*')">
                         {{ __('Stock Opname') }}

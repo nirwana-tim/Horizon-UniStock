@@ -13,13 +13,12 @@ class DistributionSchedule extends Model
         'name',
         'period',
         'semester',
-        'stage_id',
-        'student_type',
+        'student_level',
         'date',
         'location',
         'session',
         'is_active',
-        'program_level_id',
+        'generation_id',
         'faculty_id',
         'study_program_id',
     ];
@@ -32,33 +31,27 @@ class DistributionSchedule extends Model
         ];
     }
 
-    public function stage(): BelongsTo
-    {
-        return $this->belongsTo(DistributionStage::class, 'stage_id');
-    }
-
     public function scopeForStudent(Builder $query, Student $student): Builder
     {
         return $query
-            ->where(fn (Builder $q) => $q->whereNull('student_type')->orWhere('student_type', $student->student_type))
-            ->where(fn (Builder $q) => $q->whereNull('program_level_id')->orWhere('program_level_id', $student->program_level_id))
+            ->where(fn (Builder $q) => $q->whereNull('student_level')->orWhere('student_level', $student->student_level))
+            ->where(fn (Builder $q) => $q->whereNull('generation_id')->orWhere('generation_id', $student->generation_id))
             ->where(fn (Builder $q) => $q->whereNull('faculty_id')->orWhere('faculty_id', $student->studyProgram?->faculty_id))
             ->where(fn (Builder $q) => $q->whereNull('study_program_id')->orWhere('study_program_id', $student->study_program_id));
     }
 
-    public function getStudentTypeLabelAttribute(): string
+    public function getStudentLevelLabelAttribute(): string
     {
-        if (! $this->student_type) {
+        if (! $this->student_level) {
             return 'All';
         }
 
-        return StudentType::where('kode', $this->student_type)->value('deskripsi')
-            ?? $this->student_type;
+        return $this->studentLevel?->deskripsi ?? $this->student_level;
     }
 
-    public function programLevel(): BelongsTo
+    public function generation(): BelongsTo
     {
-        return $this->belongsTo(ProgramLevel::class, 'program_level_id');
+        return $this->belongsTo(StudentGeneration::class, 'generation_id');
     }
 
     public function faculty(): BelongsTo
@@ -84,5 +77,15 @@ class DistributionSchedule extends Model
     public function emailNotifications(): HasMany
     {
         return $this->hasMany(EmailNotification::class, 'schedule_id');
+    }
+
+    public function studentLevel(): BelongsTo
+    {
+        return $this->belongsTo(StudentLevel::class, 'student_level', 'kode');
+    }
+
+    public function programLevel(): BelongsTo
+    {
+        return $this->belongsTo(StudentGeneration::class, 'generation_id');
     }
 }

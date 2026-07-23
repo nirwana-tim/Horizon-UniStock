@@ -2,10 +2,10 @@
 
 namespace Database\Seeders;
 
-use App\Models\StudentType;
+use App\Models\StudentLevel;
 use Illuminate\Database\Seeder;
 
-class StudentTypeSeeder extends Seeder
+class StudentLevelSeeder extends Seeder
 {
     public function run(): void
     {
@@ -22,7 +22,7 @@ class StudentTypeSeeder extends Seeder
         ];
 
         foreach ($types as $type) {
-            StudentType::firstOrCreate(
+            StudentLevel::firstOrCreate(
                 ['kode' => $type['kode']],
                 $type
             );

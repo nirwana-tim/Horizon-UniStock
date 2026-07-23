@@ -5,6 +5,7 @@ namespace App\Services\Master;
 use App\Models\Student;
 use App\Models\User;
 use App\Services\AuditService;
+use App\Services\Master\GenerationResolverService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -13,6 +14,11 @@ class StudentService
 {
     public function store(array $data): Student
     {
+        if (empty($data['generation_id']) && !empty($data['nim'])) {
+            $data['generation_id'] = app(GenerationResolverService::class)
+                ->resolveFromNim($data['nim'])?->id;
+        }
+
         $student = Student::create($data);
 
         $this->refreshEntitlementCode($student);
@@ -24,6 +30,11 @@ class StudentService
 
     public function update(Student $student, array $data): Student
     {
+        if (empty($data['generation_id']) && !empty($data['nim'])) {
+            $data['generation_id'] = app(GenerationResolverService::class)
+                ->resolveFromNim($data['nim'])?->id;
+        }
+
         $old = $student->toArray();
         $student->update($data);
 
@@ -46,7 +57,7 @@ class StudentService
             }
         }
 
-        if (isset($data['study_program_id'], $data['program_level_id'])) {
+        if (isset($data['study_program_id'], $data['generation_id'])) {
             $this->refreshEntitlementCode($student);
         }
 
@@ -98,55 +109,55 @@ class StudentService
             foreach ($students as $student) {
                 $oldValues = $student->toArray();
 
-                $currentType = strtolower(trim((string) ($student->student_type ?? '')));
+                $currentLevel = strtolower(trim((string) ($student->student_level ?? '')));
                 $currentSem = strtoupper(trim((string) ($student->current_semester ?? '')));
 
                 $next = match (true) {
-                    $currentType === 'Y1S1' || $currentType === 'freshman' || $currentSem === 'Y1S1' => [
-                        'student_type' => 'Y1S2',
+                    $currentLevel === 'Y1S1' || $currentSem === 'Y1S1' => [
+                        'student_level' => 'Y1S2',
                         'current_semester' => 'Y1S2',
                     ],
-                    $currentType === 'Y1S2' || $currentSem === 'Y1S2' => [
-                        'student_type' => 'Y2S1',
+                    $currentLevel === 'Y1S2' || $currentSem === 'Y1S2' => [
+                        'student_level' => 'Y2S1',
                         'current_semester' => 'Y2S1',
                     ],
-                    $currentType === 'Y2S1' || $currentSem === 'Y2S1' => [
-                        'student_type' => 'Y2S2',
+                    $currentLevel === 'Y2S1' || $currentSem === 'Y2S1' => [
+                        'student_level' => 'Y2S2',
                         'current_semester' => 'Y2S2',
                     ],
-                    $currentType === 'Y2S2' || $currentSem === 'Y2S2' => [
-                        'student_type' => 'Y3S1',
+                    $currentLevel === 'Y2S2' || $currentSem === 'Y2S2' => [
+                        'student_level' => 'Y3S1',
                         'current_semester' => 'Y3S1',
                     ],
-                    $currentType === 'Y3S1' || $currentSem === 'Y3S1' => [
-                        'student_type' => 'Y3S2',
+                    $currentLevel === 'Y3S1' || $currentSem === 'Y3S1' => [
+                        'student_level' => 'Y3S2',
                         'current_semester' => 'Y3S2',
                     ],
-                    $currentType === 'Y3S2' || $currentSem === 'Y3S2' => [
-                        'student_type' => 'Y4S1',
+                    $currentLevel === 'Y3S2' || $currentSem === 'Y3S2' => [
+                        'student_level' => 'Y4S1',
                         'current_semester' => 'Y4S1',
                     ],
-                    $currentType === 'Y4S1' || $currentSem === 'Y4S1' => [
-                        'student_type' => 'Y4S2',
+                    $currentLevel === 'Y4S1' || $currentSem === 'Y4S1' => [
+                        'student_level' => 'Y4S2',
                         'current_semester' => 'Y4S2',
                     ],
-                    $currentType === 'Y4S2' || $currentSem === 'Y4S2' => [
-                        'student_type' => 'graduated',
+                    $currentLevel === 'Y4S2' || $currentSem === 'Y4S2' => [
+                        'student_level' => 'graduated',
                         'current_semester' => 'GRADUATED',
                     ],
                     default => [
-                        'student_type' => 'graduated',
+                        'student_level' => 'graduated',
                         'current_semester' => 'GRADUATED',
                     ],
                 };
 
                 $updates = [
-                    'student_type' => $next['student_type'],
+                    'student_level' => $next['student_level'],
                     'current_semester' => $next['current_semester'],
                 ];
 
                 if ($newLevelId) {
-                    $updates['program_level_id'] = $newLevelId;
+                    $updates['generation_id'] = $newLevelId;
                 }
 
                 if ($newStudyProgramId) {
@@ -166,7 +177,7 @@ class StudentService
 
     public function refreshEntitlementCode(Student $student): void
     {
-        $student->loadMissing(['studyProgram.faculty', 'programLevel']);
+        $student->loadMissing(['studyProgram.faculty']);
 
         $code = Student::generateEntitlementCode($student);
 

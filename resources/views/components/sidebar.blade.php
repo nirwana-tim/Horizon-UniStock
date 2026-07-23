@@ -6,7 +6,7 @@
     $masterDataRoutes = [
         'master-data.faculty.*',
         'master-data.study-program.*',
-        'master-data.program-level.*',
+        'master-data.student-generation.*',
         'master-data.item-category.*',
         'master-data.item-type.*',
         'master-data.item-department.*',
@@ -14,15 +14,15 @@
         'master-data.item.*',
         'master-data.item-price.*',
         'master-data.vendor.*',
-        'master-data.student-type.*',
+        'master-data.student-level.*',
     ];
-    $studentsRoutes = ['students.*'];
+    $studentsRoutes = ['finance.eligibility.*', 'students.*'];
+    $studentsOpen = request()->routeIs($studentsRoutes) ? 'true' : 'false';
     $distributionRoutes = [
         'distribution.entitlement.*',
         'distribution.distribution-schedule.*',
         'distribution.scan.*',
         'distribution.size-monitor.*',
-        'distribution.stages.*',
         'distribution.size-events.*',
     ];
     $inventoryRoutes = ['inventory.stock-receive.*', 'inventory.stock-opname.*', 'inventory.stock-balance.*', 'inventory.stock-movement.*'];
@@ -35,7 +35,7 @@
     $reportsOpen = request()->routeIs($reportsRoutes) ? 'true' : 'false';
     $systemOpen = request()->routeIs($systemRoutes) ? 'true' : 'false';
 @endphp
-<aside x-data="{ collapsed: false, mobileOpen: false, userMenuOpen: false, masterOpen: {{ $masterOpen }}, distributionOpen: {{ $distributionOpen }}, inventoryOpen: {{ $inventoryOpen }}, reportsOpen: {{ $reportsOpen }}, systemOpen: {{ $systemOpen }} }" x-init="setTimeout(() => $el.classList.add('sidebar-transition'), 50)" @toggle-sidebar.window="mobileOpen = !mobileOpen"
+<aside x-data="{ collapsed: false, mobileOpen: false, userMenuOpen: false, masterOpen: {{ $masterOpen }}, distributionOpen: {{ $distributionOpen }}, studentsOpen: {{ $studentsOpen }}, inventoryOpen: {{ $inventoryOpen }}, reportsOpen: {{ $reportsOpen }}, systemOpen: {{ $systemOpen }} }" x-init="setTimeout(() => $el.classList.add('sidebar-transition'), 50)" @toggle-sidebar.window="mobileOpen = !mobileOpen"
     class="fixed inset-y-0 left-0 z-30 flex-shrink-0 bg-white border-r border-gray-200 flex flex-col h-full overflow-hidden lg:overflow-y-auto custom-scroll transition-transform duration-250 lg:transform-none lg:static lg:z-auto"
     :class="{
         'w-16': collapsed,
@@ -124,9 +124,9 @@
                         class="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm {{ request()->routeIs('master-data.study-program.*') ? 'text-primary-700 font-medium bg-primary-50' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50' }} transition-colors">
                         Study Program
                     </a>
-                    <a href="{{ route('master-data.program-level.index') }}"
-                        class="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm {{ request()->routeIs('master-data.program-level.*') ? 'text-primary-700 font-medium bg-primary-50' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50' }} transition-colors">
-                        Program Level
+                    <a href="{{ route('master-data.student-generation.index') }}"
+                        class="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm {{ request()->routeIs('master-data.student-generation.*') ? 'text-primary-700 font-medium bg-primary-50' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50' }} transition-colors">
+                        Generation
                     </a>
 
                     {{-- Item --}}
@@ -162,42 +162,46 @@
                         class="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm {{ request()->routeIs('master-data.vendor.*') ? 'text-primary-700 font-medium bg-primary-50' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50' }} transition-colors">
                         Vendor
                     </a>
-                    <a href="{{ route('master-data.student-type.index') }}"
-                        class="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm {{ request()->routeIs('master-data.student-type.*') ? 'text-primary-700 font-medium bg-primary-50' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50' }} transition-colors">
-                        Student Type
+                    <a href="{{ route('master-data.student-level.index') }}"
+                        class="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm {{ request()->routeIs('master-data.student-level.*') ? 'text-primary-700 font-medium bg-primary-50' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50' }} transition-colors">
+                        Student Level
                     </a>
                 </div>
             </div>
 
-            {{-- Import Data --}}
-            <a href="{{ route('import.index') }}" title="Import Data"
-                class="flex items-center gap-3 px-2 py-2 rounded-lg text-sm {{ request()->routeIs('import.*') ? 'sidebar-item-active' : 'sidebar-item' }}">
-                <svg aria-hidden="true" class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
-                </svg>
-                <span x-show="!collapsed" class="truncate">Import Data</span>
-            </a>
+            {{-- Student (Collapsible) --}}
+            <div>
+                <button
+                    @click="collapsed ? (collapsed=false, studentsOpen=true) : studentsOpen = !studentsOpen"
+                    class="w-full flex items-center gap-3 px-2 py-2 rounded-lg text-sm {{ request()->routeIs($studentsRoutes) ? 'sidebar-item-active' : 'sidebar-item' }}" title="Student">
+                    <svg aria-hidden="true" class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                    <span x-show="!collapsed" class="flex-1 text-left truncate">Student</span>
+                    <svg aria-hidden="true" x-show="!collapsed" :class="studentsOpen ? 'rotate-180' : ''"
+                        class="w-4 h-4 flex-shrink-0 transition-transform duration-200" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </button>
 
-            {{-- Eligibility --}}
-            <a href="{{ route('finance.eligibility.index') }}" title="Student Eligibility"
-                class="flex items-center gap-3 px-2 py-2 rounded-lg text-sm {{ request()->routeIs('finance.eligibility.*') ? 'sidebar-item-active' : 'sidebar-item' }}">
-                <svg aria-hidden="true" class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span x-show="!collapsed" class="truncate">Student Eligibility</span>
-            </a>
-
-            {{-- Students --}}
-            <a href="{{ route('students.index') }}" title="Students"
-                class="flex items-center gap-3 px-2 py-2 rounded-lg text-sm {{ request()->routeIs('students.*') ? 'sidebar-item-active' : 'sidebar-item' }}">
-                <svg aria-hidden="true" class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                </svg>
-                <span x-show="!collapsed" class="truncate">Students</span>
-            </a>
+                <div x-show="studentsOpen && !collapsed" x-cloak
+                    class="mt-0.5 ml-4 pl-4 border-l border-gray-200 space-y-0.5">
+                    <a href="{{ route('finance.eligibility.index') }}"
+                        class="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm {{ request()->routeIs('finance.eligibility.*') ? 'text-primary-700 font-medium bg-primary-50' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50' }} transition-colors">
+                        Eligibility
+                    </a>
+                    <a href="{{ route('students.index') }}"
+                        class="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm {{ request()->routeIs('students.*') && !request()->routeIs('students.generate-index') ? 'text-primary-700 font-medium bg-primary-50' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50' }} transition-colors">
+                        Student Data
+                    </a>
+                    <a href="{{ route('students.generate-index') }}"
+                        class="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm {{ request()->routeIs('students.generate-index') ? 'text-primary-700 font-medium bg-primary-50' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50' }} transition-colors">
+                        Generate Account
+                    </a>
+                </div>
+            </div>
 
             {{-- Distribution (Collapsible) --}}
             <div>
@@ -237,10 +241,6 @@
                     <a href="{{ route('distribution.size-events.index') }}"
                         class="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm {{ request()->routeIs('distribution.size-events.*') ? 'text-primary-700 font-medium bg-primary-50' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50' }} transition-colors">
                         Event Ukuran
-                    </a>
-                    <a href="{{ route('distribution.stages.index') }}"
-                        class="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm {{ request()->routeIs('distribution.stages.*') ? 'text-primary-700 font-medium bg-primary-50' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50' }} transition-colors">
-                        Stages
                     </a>
                 </div>
             </div>

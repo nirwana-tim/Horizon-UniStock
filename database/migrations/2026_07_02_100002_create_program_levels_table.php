@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('program_levels', function (Blueprint $table) {
+        Schema::create('student_generations', function (Blueprint $table) {
             $table->id();
             $table->string('name');
             $table->string('code')->unique();
@@ -19,6 +19,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('program_levels');
+        Schema::dropIfExists('student_generations');
     }
 };

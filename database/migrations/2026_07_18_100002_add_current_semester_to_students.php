@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('students', function (Blueprint $table) {
-            $table->string('current_semester', 20)->default('Y1S1')->after('student_type');
+            $table->string('current_semester', 20)->default('Y1S1')->after('student_level');
         });
     }
 

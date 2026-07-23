@@ -278,7 +278,8 @@
                     c6: null
                 },
 
-                init() {
+                async init() {
+                    await window.loadChart();
                     // Initial load
                     this.fetchDashboardData();
 

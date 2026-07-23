@@ -49,13 +49,13 @@
                             <p class="mt-1 text-sm text-gray-900">{{ $student->studyProgram->name ?? '-' }}</p>
                         </div>
                         <div>
-                            <h3 class="text-sm font-medium text-gray-500">Level / Batch</h3>
-                            <p class="mt-1 text-sm text-gray-900">{{ $student->programLevel->label ?? '-' }}</p>
-                        </div>
-                        <div>
-                            <h3 class="text-sm font-medium text-gray-500">Type</h3>
+<h3 class="text-sm font-medium text-gray-500">Generation</h3>
+<p class="mt-1 text-sm text-gray-900">{{ $student->generation->label ?? '-' }}</p>
+</div>
+<div>
+<h3 class="text-sm font-medium text-gray-500">Student Level</h3>
                             <div class="mt-1">
-                                <x-badge type="info">{{ $student->student_type_label }}</x-badge>
+                                <x-badge type="info">{{ $student->student_level_label }}</x-badge>
                             </div>
                         </div>
                         <div>

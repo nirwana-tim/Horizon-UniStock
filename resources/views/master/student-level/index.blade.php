@@ -1,7 +1,7 @@
 <x-app-layout>
     <div class="py-12">
         <div class="max-w-5xl mx-auto sm:px-6 lg:px-8 space-y-6">
-            <x-page-header title="Tipe Mahasiswa" />
+            <x-page-header title="Level Mahasiswa" />
 
             @if(session('success'))
                 <x-alert type="success">{{ session('success') }}</x-alert>
@@ -18,32 +18,32 @@
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
-                        @forelse($studentTypes as $type)
+                        @forelse($studentLevels as $level)
                         <tr class="hover:bg-gray-50">
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $loop->iteration }}</td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <code class="text-sm font-mono text-gray-800">{{ $type->kode }}</code>
+                                <code class="text-sm font-mono text-gray-800">{{ $level->kode }}</code>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $type->deskripsi }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $level->deskripsi }}</td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                @switch($type->status)
+                                @switch($level->status)
                                     @case('Freshman')
-                                        <x-badge type="info">{{ $type->status }}</x-badge>
+                                        <x-badge type="info">{{ $level->status }}</x-badge>
                                         @break
                                     @case('Continuing')
-                                        <x-badge type="warning">{{ $type->status }}</x-badge>
+                                        <x-badge type="warning">{{ $level->status }}</x-badge>
                                         @break
                                     @case('Graduated')
-                                        <x-badge type="neutral">{{ $type->status }}</x-badge>
+                                        <x-badge type="neutral">{{ $level->status }}</x-badge>
                                         @break
                                     @default
-                                        <x-badge type="primary">{{ $type->status }}</x-badge>
+                                        <x-badge type="primary">{{ $level->status }}</x-badge>
                                 @endswitch
                             </td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="4" class="px-6 py-8 text-center text-sm text-gray-500">Belum ada data tipe mahasiswa.</td>
+                            <td colspan="4" class="px-6 py-8 text-center text-sm text-gray-500">Belum ada data level mahasiswa.</td>
                         </tr>
                         @endforelse
                     </tbody>

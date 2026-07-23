@@ -45,7 +45,7 @@
                                 <td class="px-4 py-4 whitespace-nowrap text-xs text-gray-700">
                                     <div>Fakultas: <span class="font-semibold">{{ $event->faculty?->name ?? 'Semua' }}</span></div>
                                     <div>Prodi: <span class="font-semibold">{{ $event->studyProgram?->name ?? 'Semua' }}</span></div>
-                                    <div>Angkatan: <span class="font-semibold">{{ $event->programLevel?->name ?? 'Semua' }}</span></div>
+                                    <div>Angkatan: <span class="font-semibold">{{ $event->generation?->name ?? 'Semua' }}</span></div>
                                 </td>
                                 <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
                                     {{ $event->max_changes }}x

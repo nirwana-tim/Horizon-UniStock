@@ -3,13 +3,14 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Entitlement extends Model
 {
     protected $fillable = [
         'code',
-        'student_type',
+        'student_level',
         'description',
         'is_active',
     ];
@@ -21,18 +22,18 @@ class Entitlement extends Model
         ];
     }
 
-    public function getStudentTypeLabelAttribute(): string
+    public function getStudentLevelLabelAttribute(): string
     {
-        if (! $this->student_type) {
-            return '-';
-        }
-
-        return StudentType::where('kode', $this->student_type)->value('deskripsi')
-            ?? $this->student_type;
+        return $this->studentLevel?->deskripsi ?? $this->student_level ?? '-';
     }
 
     public function items(): HasMany
     {
         return $this->hasMany(EntitlementItem::class, 'entitlement_id');
+    }
+
+    public function studentLevel(): BelongsTo
+    {
+        return $this->belongsTo(StudentLevel::class, 'student_level', 'kode');
     }
 }

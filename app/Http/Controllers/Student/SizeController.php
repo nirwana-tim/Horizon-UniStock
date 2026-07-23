@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Student;
 use App\Http\Controllers\Controller;
 use App\Models\DistributionSchedule;
 use App\Models\DistributionTransaction;
+use App\Models\SizeChangeEvent;
 use App\Models\Student;
 use App\Services\QrCodeService;
 use App\Services\StudentSizeService;
@@ -24,7 +25,20 @@ class SizeController extends Controller
         $user = auth()->user();
         $student = Student::where('user_id', $user->id)->firstOrFail();
 
-        $activeEvent = $this->sizeService->getActiveEventForStudent($student);
+        $events = $this->sizeService->getEventsForStudent($student);
+
+        return view('student.sizes-index', compact('student', 'events'));
+    }
+
+    public function input(SizeChangeEvent $event): View
+    {
+        $user = auth()->user();
+        $student = Student::where('user_id', $user->id)->firstOrFail();
+
+        if (! $event->isApplicableToStudent($student)) {
+            abort(403, 'Event ini tidak berlaku untuk kamu.');
+        }
+
         $entitlementItems = $this->sizeService->getEntitlementItems($student);
 
         $existingSizes = [];
@@ -43,20 +57,16 @@ class SizeController extends Controller
         }
 
         $maxChangedItemIds = [];
-        if ($student->activeSizeProfile && $activeEvent) {
+        if ($student->activeSizeProfile) {
             $maxChangedItemIds = $student->activeSizeProfile->sizeItems
-                ->filter(fn ($si) => ! $activeEvent->canEdit($si))
+                ->filter(fn ($si) => ! $event->canEdit($si))
                 ->pluck('item_id')
                 ->toArray();
         }
 
         return view('student.size-input', compact(
-            'student',
-            'activeEvent',
-            'entitlementItems',
-            'existingSizes',
-            'changedItemIds',
-            'maxChangedItemIds'
+            'student', 'event', 'entitlementItems',
+            'existingSizes', 'changedItemIds', 'maxChangedItemIds'
         ));
     }
 
@@ -68,12 +78,16 @@ class SizeController extends Controller
         $validated = $request->validate([
             'sizes' => 'required|array',
             'sizes.*' => 'nullable|string|max:10',
+            'event_id' => 'nullable|integer|exists:size_change_events,id',
         ]);
 
         try {
-            $this->sizeService->saveSizes($student, $validated['sizes']);
+            $this->sizeService->saveSizes($student, $validated['sizes'], $validated['event_id'] ?? null);
         } catch (\RuntimeException $e) {
-            return redirect()->route('student.sizes.index')
+            $route = $validated['event_id']
+                ? route('student.sizes.input', $validated['event_id'])
+                : route('student.sizes.index');
+            return redirect()->to($route)
                 ->with('error', $e->getMessage());
         }
 

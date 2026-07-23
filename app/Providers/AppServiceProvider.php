@@ -2,7 +2,7 @@
 
 namespace App\Providers;
 
-use App\Models\StudentType;
+use App\Models\StudentLevel;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\View;
@@ -29,7 +29,7 @@ class AppServiceProvider extends ServiceProvider
         });
 
         View::composer('*', function ($view) {
-            $view->with('studentTypes', StudentType::orderBy('kode')->get());
+            $view->with('studentLevels', StudentLevel::orderBy('kode')->get());
         });
     }
 }

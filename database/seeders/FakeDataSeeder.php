@@ -7,7 +7,7 @@ use App\Models\DistributionSchedule;
 use App\Models\DistributionTransaction;
 use App\Models\Item;
 use App\Models\ItemVariant;
-use App\Models\ProgramLevel;
+use App\Models\StudentGeneration;
 use App\Models\StockBalance;
 use App\Models\StockReceive;
 use App\Models\StockReceiveItem;
@@ -28,7 +28,7 @@ class FakeDataSeeder extends Seeder
         $variantIds = ItemVariant::pluck('id')->toArray();
         $studentIds = Student::pluck('id')->toArray();
         $staffIds = User::role(['super_admin', 'admin', 'staff'])->pluck('id')->toArray();
-        $programLevelIds = ProgramLevel::pluck('id')->toArray();
+        $programLevelIds = StudentGeneration::pluck('id')->toArray();
         $itemPrices = Item::pluck('selling_price', 'id')->toArray();
 
         if (empty($itemIds) || empty($studentIds) || empty($staffIds)) {
@@ -53,7 +53,7 @@ class FakeDataSeeder extends Seeder
                 'location' => $faker->randomElement(['Gedung Serbaguna A', 'Aula Fakultas Kedokteran', 'Gedung Rektorat Lantai 2', 'Fakultas Teknik']),
                 'session' => $faker->randomElement(['08:00-10:00', '10:00-12:00', '13:00-15:00', '15:00-17:00']),
                 'is_active' => true,
-                'program_level_id' => $faker->randomElement($programLevelIds),
+                'generation_id' => $faker->randomElement($programLevelIds),
             ])->id;
         }
 

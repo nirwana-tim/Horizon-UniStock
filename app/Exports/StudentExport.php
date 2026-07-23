@@ -16,12 +16,12 @@ class StudentExport implements FromCollection, WithHeadings, WithMapping
     public function __construct(
         private ?string $search = null,
         private ?int $studyProgramId = null,
-        private ?int $programLevelId = null,
+        private ?int $generationId = null,
     ) {}
 
     public function collection()
     {
-        $query = Student::with(['studyProgram.faculty', 'programLevel']);
+        $query = Student::with(['studyProgram.faculty', 'generation', 'studentLevel']);
 
         if ($this->search) {
             $query->where(function ($q) {
@@ -34,8 +34,8 @@ class StudentExport implements FromCollection, WithHeadings, WithMapping
             $query->where('study_program_id', $this->studyProgramId);
         }
 
-        if ($this->programLevelId) {
-            $query->where('program_level_id', $this->programLevelId);
+        if ($this->generationId) {
+            $query->where('generation_id', $this->generationId);
         }
 
         return $query->latest()->get();
@@ -67,8 +67,8 @@ class StudentExport implements FromCollection, WithHeadings, WithMapping
             $student->name,
             $student->studyProgram?->name ?? '-',
             $student->studyProgram?->faculty?->name ?? '-',
-            $student->programLevel?->name ?? '-',
-            $student->student_type_label,
+            $student->generation?->name ?? '-',
+            $student->student_level_label,
             $student->email_kampus ?? '-',
             $student->email_pribadi ?? '-',
             $student->user_id ? 'Active' : 'Inactive',

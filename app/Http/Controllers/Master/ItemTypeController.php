@@ -19,7 +19,7 @@ class ItemTypeController extends Controller
 
     public function index(Request $request): View|JsonResponse
     {
-        $query = ItemType::with('categories')->withCount('items');
+        $query = ItemType::withCount('items');
 
         if ($search = $request->input('q')) {
             $search = str_replace(['%', '_'], ['\%', '\_'], $search);
@@ -43,8 +43,7 @@ class ItemTypeController extends Controller
 
     public function create(): View
     {
-        $categories = \App\Models\ItemCategory::orderBy('code')->get();
-        return view('master.item-type.create', compact('categories'));
+        return view('master.item-type.create');
     }
 
     public function store(ItemTypeRequest $request): RedirectResponse
@@ -56,15 +55,12 @@ class ItemTypeController extends Controller
 
     public function show(ItemType $itemType): View
     {
-        $itemType->load('categories');
         return view('master.item-type.show', compact('itemType'));
     }
 
     public function edit(ItemType $itemType): View
     {
-        $categories = \App\Models\ItemCategory::orderBy('code')->get();
-        $itemType->load('categories');
-        return view('master.item-type.edit', compact('itemType', 'categories'));
+        return view('master.item-type.edit', compact('itemType'));
     }
 
     public function update(ItemTypeRequest $request, ItemType $itemType): RedirectResponse

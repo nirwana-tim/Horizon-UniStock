@@ -19,26 +19,6 @@
                         </div>
 
                         <div>
-                            <h3 class="text-sm font-medium text-gray-500">{{ __('Related Study Programs') }}</h3>
-                            @if($itemDepartment->studyPrograms->count())
-                                <div class="mt-2 space-y-1">
-                                    @foreach($itemDepartment->studyPrograms->groupBy(fn($sp) => $sp->faculty?->name ?? 'Lainnya') as $facultyName => $programs)
-                                        <div>
-                                            <span class="text-xs font-semibold text-primary-700">{{ $facultyName }}</span>
-                                            <div class="ml-3 mt-1">
-                                                @foreach($programs as $program)
-                                                    <span class="inline-block px-2 py-0.5 text-xs bg-gray-100 text-gray-700 rounded-full mr-1 mb-1">{{ $program->name }}</span>
-                                                @endforeach
-                                            </div>
-                                        </div>
-                                    @endforeach
-                                </div>
-                            @else
-                                <p class="mt-1 text-sm text-gray-400">No related study programs yet.</p>
-                            @endif
-                        </div>
-
-                        <div>
                             <h3 class="text-sm font-medium text-gray-500 mb-2">Related Items</h3>
                             @if($itemDepartment->items->count())
                                 <div class="overflow-x-auto border border-gray-200 rounded-lg">

@@ -14,13 +14,13 @@ use App\Http\Controllers\Master\ItemDepartmentController;
 use App\Http\Controllers\Master\ItemSizeController;
 use App\Http\Controllers\Master\ItemTypeController;
 use App\Http\Controllers\Master\ItemVariantController;
-use App\Http\Controllers\Master\ProgramLevelController;
+use App\Http\Controllers\Master\StudentGenerationController;
 use App\Http\Controllers\Master\StudyProgramController;
 use App\Http\Controllers\Master\StockReceiveController;
 use App\Http\Controllers\Inventory\StockBalanceController;
 use App\Http\Controllers\Inventory\StockMovementController;
 use App\Http\Controllers\Master\VendorController;
-use App\Http\Controllers\Master\StudentTypeController;
+use App\Http\Controllers\Master\StudentLevelController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ImportController;
 use App\Http\Controllers\ProfileController;
@@ -32,7 +32,6 @@ use App\Http\Controllers\Auth\ForgotPasswordStudentController;
 use App\Http\Controllers\Auth\PasswordChangeController;
 use App\Http\Controllers\Master\StudentController;
 use App\Http\Controllers\Master\SizeMonitorController;
-use App\Http\Controllers\Distribution\DistributionStageController;
 use App\Http\Controllers\Staff\ScanController;
 use App\Http\Controllers\Student\SizeController;
 use Illuminate\Support\Facades\Route;
@@ -61,36 +60,24 @@ Route::middleware(['auth', 'password.changed'])->group(function () {
 Route::middleware(['auth', 'password.changed', 'role:super_admin|admin'])->prefix('master-data')->name('master-data.')->group(function () {
     Route::resource('faculty', FacultyController::class);
     Route::resource('study-program', StudyProgramController::class);
-    Route::resource('program-level', ProgramLevelController::class);
+    Route::resource('student-generation', StudentGenerationController::class);
 
     Route::resource('item-category', ItemCategoryController::class);
     Route::resource('item-type', ItemTypeController::class);
     Route::resource('item-department', ItemDepartmentController::class);
-    Route::get('item-department/study-programs/{faculty}', [ItemDepartmentController::class, 'studyPrograms'])->name('item-department.study-programs');
     Route::resource('item-size', ItemSizeController::class);
 
-    Route::resource('item', ItemController::class);
     Route::get('item/sizes-types-by-category', [ItemController::class, 'sizesTypesByCategory'])->name('item.sizes-types-by-category');
+    Route::resource('item', ItemController::class);
     Route::post('item/{item}/variant', [ItemVariantController::class, 'store'])->name('item.variant.store');
     Route::delete('item/{item}/variant/{variant}', [ItemVariantController::class, 'destroy'])->name('item.variant.destroy');
 
     Route::resource('vendor', VendorController::class);
     Route::resource('item-price', ItemPriceController::class);
-    Route::resource('student-type', StudentTypeController::class)->only(['index', 'show']);
+    Route::resource('student-level', StudentLevelController::class)->only(['index', 'show']);
 });
 
-Route::middleware(['auth', 'password.changed', 'role:super_admin|admin'])->prefix('admin/students')->name('students.')->group(function () {
-    Route::resource('/', StudentController::class)->parameters(['' => 'student']);
-    Route::get('/{student}/entitlement', [StudentController::class, 'entitlement'])->name('entitlement');
-    Route::get('/{student}/received-items', [StudentController::class, 'receivedItems'])->name('received-items');
-    Route::get('/{student}/transactions', [StudentController::class, 'transactions'])->name('transactions');
-    Route::post('/generate', [StudentController::class, 'generate'])->middleware('throttle:5,1')->name('generate');
-    Route::post('/generate-all', [StudentController::class, 'generateAll'])->middleware('throttle:2,1')->name('generateAll');
-    Route::get('/export', [StudentController::class, 'export'])->name('export');
-    Route::get('/promote', [StudentController::class, 'promoteForm'])->name('promote.form');
-    Route::post('/promote', [StudentController::class, 'promote'])->name('promote');
-    Route::patch('/{student}/toggle-status', [StudentController::class, 'toggleStatus'])->name('toggle-status');
-});
+
 
 Route::middleware(['auth', 'password.changed', 'role:super_admin|admin'])->prefix('distribution')->name('distribution.')->group(function () {
     Route::get('entitlement/items-grid', [EntitlementController::class, 'itemsGrid'])->name('entitlement.items-grid');
@@ -99,7 +86,6 @@ Route::middleware(['auth', 'password.changed', 'role:super_admin|admin'])->prefi
     Route::get('distribution-schedule/{distributionSchedule}/transactions', [DistributionScheduleController::class, 'transactions'])->name('distribution-schedule.transactions');
     Route::resource('distribution-schedule', DistributionScheduleController::class);
     Route::get('size-monitor', [SizeMonitorController::class, 'index'])->name('size-monitor.index');
-    Route::resource('stages', DistributionStageController::class);
     Route::resource('size-events', SizeChangeEventController::class);
 });
 
@@ -148,19 +134,39 @@ Route::middleware(['auth', 'password.changed', 'role:super_admin|admin'])->group
 });
 
 Route::middleware(['auth', 'password.changed', 'role:super_admin|admin'])->prefix('import')->name('import.')->group(function () {
-    Route::get('/', [ImportController::class, 'index'])->name('index');
     Route::get('/{importBatch}', [ImportController::class, 'result'])->name('result');
     Route::post('/', [ImportController::class, 'store'])->middleware('throttle:5,1')->name('store');
     Route::post('/preview', [ImportController::class, 'preview'])->middleware('throttle:10,1')->name('preview');
 });
 
-Route::middleware(['auth', 'password.changed', 'role:super_admin|admin'])->prefix('finance')->name('finance.')->group(function () {
-    Route::get('eligibility', [EligibilityController::class, 'index'])->name('eligibility.index');
-    Route::post('eligibility/{student}/toggle', [EligibilityController::class, 'toggle'])->middleware('throttle:10,1')->name('eligibility.toggle');
+Route::middleware(['auth', 'password.changed', 'role:super_admin|admin'])->prefix('student')->name('finance.eligibility.')->group(function () {
+    Route::get('/eligibility', [EligibilityController::class, 'index'])->name('index');
+    Route::post('/eligibility/{student}/toggle', [EligibilityController::class, 'toggle'])->middleware('throttle:10,1')->name('toggle');
+});
+
+Route::middleware(['auth', 'password.changed', 'role:super_admin|admin'])->prefix('student')->name('students.')->group(function () {
+    Route::get('/students-data', [StudentController::class, 'index'])->name('index');
+    Route::get('/students-data/create', [StudentController::class, 'create'])->name('create');
+    Route::post('/students-data', [StudentController::class, 'store'])->name('store');
+    Route::get('/students-data/{student}', [StudentController::class, 'show'])->name('show');
+    Route::get('/students-data/{student}/edit', [StudentController::class, 'edit'])->name('edit');
+    Route::put('/students-data/{student}', [StudentController::class, 'update'])->name('update');
+    Route::delete('/students-data/{student}', [StudentController::class, 'destroy'])->name('destroy');
+    Route::get('/students-data/{student}/entitlement', [StudentController::class, 'entitlement'])->name('entitlement');
+    Route::get('/students-data/{student}/received-items', [StudentController::class, 'receivedItems'])->name('received-items');
+    Route::get('/students-data/{student}/transactions', [StudentController::class, 'transactions'])->name('transactions');
+    Route::patch('/students-data/{student}/toggle-status', [StudentController::class, 'toggleStatus'])->name('toggle-status');
+    Route::get('/generate', [StudentController::class, 'generateIndex'])->name('generate-index');
+    Route::post('/generate', [StudentController::class, 'generate'])->middleware('throttle:5,1')->name('generate');
+    Route::post('/generate-all', [StudentController::class, 'generateAll'])->middleware('throttle:2,1')->name('generateAll');
+    Route::get('/export', [StudentController::class, 'export'])->name('export');
+    Route::get('/promote', [StudentController::class, 'promoteForm'])->name('promote.form');
+    Route::post('/promote', [StudentController::class, 'promote'])->name('promote');
 });
 
 Route::middleware(['auth', 'password.changed', 'role:student'])->prefix('student')->name('student.')->group(function () {
     Route::get('/sizes', [SizeController::class, 'index'])->name('sizes.index');
+    Route::get('/sizes/{event}/input', [SizeController::class, 'input'])->name('sizes.input');
     Route::post('/sizes', [SizeController::class, 'store'])->name('sizes.store');
     Route::post('/email/send-otp', [EmailVerificationOtpController::class, 'sendOtp'])->middleware('throttle:3,1')->name('email.send-otp');
     Route::get('/email/verify', [EmailVerificationOtpController::class, 'showVerifyForm'])->name('email.verify-form');

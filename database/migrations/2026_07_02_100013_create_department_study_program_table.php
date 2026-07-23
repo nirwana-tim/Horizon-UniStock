@@ -8,13 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('department_study_program', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('department_id')->constrained('item_departments')->cascadeOnDelete();
-            $table->foreignId('study_program_id')->constrained('study_programs')->cascadeOnDelete();
-            $table->unique(['department_id', 'study_program_id']);
-            $table->timestamps();
-        });
+        // Table dropped by drop_department_study_program_table migration
     }
 
     public function down(): void
