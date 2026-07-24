@@ -82,7 +82,7 @@ class ItemController extends Controller
 
     public function edit(Item $item): View
     {
-        $item->load(['category.sizes', 'category.types', 'variants']);
+        $item->load(['category.sizes', 'variants']);
         $categories = ItemCategory::orderBy('code')->get();
         $types = ItemType::orderBy('code')->get();
         $departments = ItemDepartment::orderBy('code')->get();
