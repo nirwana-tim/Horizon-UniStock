@@ -135,7 +135,16 @@
                         <div class="mt-6">
                             <label class="block text-sm font-medium text-gray-700 font-semibold mb-1">Sizes <span class="text-red-500">*</span></label>
                             <div id="size_checkboxes" class="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                                {{-- populated by JS --}}
+                                @forelse($sizes as $size)
+                                    <label class="flex items-center gap-2 p-2.5 border border-gray-200 rounded-lg cursor-pointer hover:border-primary-300 hover:bg-primary-50 transition-colors has-[:checked]:border-primary-500 has-[:checked]:bg-primary-50">
+                                        <input type="checkbox" name="size_ids[]" value="{{ $size->id }}"
+                                            {{ in_array($size->id, $item->variants->pluck('size_id')->toArray()) ? 'checked' : '' }}
+                                            class="rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+                                        <span class="text-sm text-gray-700">{{ $size->code }} - {{ $size->label ?? $size->name }}</span>
+                                    </label>
+                                @empty
+                                    <p class="text-sm text-gray-400 italic col-span-full">No sizes available for this category</p>
+                                @endforelse
                             </div>
                             @error('size_ids')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -158,7 +167,7 @@
 
     <script>
         const checkboxContainer = document.getElementById('size_checkboxes');
-        const categorySelect = document.getElementById('category_id_display');
+        const categoryInput = document.getElementById('category_id');
         const existingSizeIds = {{ $item->variants->pluck('size_id')->toJson() }};
 
         function renderSizes(sizes) {
@@ -197,7 +206,5 @@
                 console.error('Load sizes error:', err);
             });
         }
-
-        loadSizesAndTypes(categorySelect.value);
     </script>
 </x-app-layout>

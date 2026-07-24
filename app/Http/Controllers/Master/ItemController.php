@@ -86,8 +86,9 @@ class ItemController extends Controller
         $categories = ItemCategory::orderBy('code')->get();
         $types = ItemType::orderBy('code')->get();
         $departments = ItemDepartment::orderBy('code')->get();
+        $sizes = $item->category ? $item->category->sizes()->orderBy('code')->get() : collect();
 
-        return view('master.item.edit', compact('item', 'categories', 'types', 'departments'));
+        return view('master.item.edit', compact('item', 'categories', 'types', 'departments', 'sizes'));
     }
 
     public function update(ItemRequest $request, Item $item): RedirectResponse
