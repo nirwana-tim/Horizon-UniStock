@@ -114,7 +114,7 @@
         <div class="space-y-3">
             @foreach([
                 ['step' => '1', 'text' => 'Scan student QR or search manually by NIM'],
-                ['step' => '2', 'text' => 'System displays student data & active entitlement stage'],
+                ['step' => '2', 'text' => 'System displays student data & active entitlement'],
                 ['step' => '3', 'text' => 'Check items given, edit size if needed'],
                 ['step' => '4', 'text' => 'Validate stock — partial pickup if insufficient'],
                 ['step' => '5', 'text' => 'Submit transaction to save & reduce stock'],

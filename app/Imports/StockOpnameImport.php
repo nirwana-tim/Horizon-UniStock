@@ -30,14 +30,16 @@ class StockOpnameImport implements ToCollection, WithHeadingRow, WithValidation
     public function collection(Collection $rows): void
     {
         foreach ($rows as $row) {
-            $item = Item::where('code', $row['kode_item'])->first();
-            $variant = $item
-                ? $item->variants()->where('size', $row['varian_ukuran'])->first()
-                : null;
+            $item = Item::where('code', $row['kode_barang'])->first();
+            if (!$item) continue;
 
-            if (!$item || !$variant) {
-                continue;
-            }
+            $variantLabel = trim((string) ($row['varian_ukuran'] ?? ''));
+            $variant = $item->variants()
+                ->where('size_label', $variantLabel)
+                ->orWhere('size', $variantLabel)
+                ->first();
+
+            if (!$variant) continue;
 
             $stockBalance = StockBalance::where('item_id', $item->id)
                 ->where('variant_id', $variant->id)
@@ -61,7 +63,7 @@ class StockOpnameImport implements ToCollection, WithHeadingRow, WithValidation
     public function rules(): array
     {
         return [
-            'kode_item' => ['required', 'string', 'exists:items,code'],
+            'kode_barang' => ['required', 'string', 'exists:items,code'],
             'varian_ukuran' => ['required', 'string'],
             'quantity_fisik' => ['required', 'integer', 'min:0'],
         ];

@@ -7,6 +7,7 @@ use App\Models\ItemCategory;
 use App\Models\ItemDepartment;
 use App\Models\ItemPrice;
 use App\Models\ItemSize;
+use App\Models\ItemType;
 use App\Models\ItemVariant;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Validator;
@@ -47,6 +48,11 @@ class ItemImport implements ToCollection, WithHeadingRow, WithMultipleSheets
         foreach ($records as $record) {
             $category = $this->resolveCategory($record['kategori']);
             $department = $this->resolveDepartment($record['departemen']);
+            $type = $this->resolveType($record['type']);
+
+            if (!$record['kode']) {
+                $record['kode'] = $this->generateCode($record);
+            }
 
             $item = Item::updateOrCreate(
                 ['code' => $record['kode']],
@@ -55,6 +61,7 @@ class ItemImport implements ToCollection, WithHeadingRow, WithMultipleSheets
                     'base_code' => $this->generateBaseCode($record),
                     'gender' => $record['gender'],
                     'category_id' => $category?->id,
+                    'type_id' => $type?->id,
                     'department_id' => $department?->id,
                     'unit' => $record['satuan'],
                     'selling_price' => $record['harga_jual'] ?? 0,
@@ -149,6 +156,7 @@ class ItemImport implements ToCollection, WithHeadingRow, WithMultipleSheets
                 'gender' => strtoupper($this->clean($values['gender'] ?? null) ?? ''),
                 'nama' => $this->clean($values['nama_item'] ?? $values['nama'] ?? null),
                 'kode' => $this->clean($values['kode_barang'] ?? $values['kode'] ?? null),
+                'type' => strtoupper($this->clean($values['type'] ?? null) ?? ''),
                 'departemen' => $this->clean($values['departemen'] ?? null),
                 'satuan' => $this->clean($values['satuan'] ?? null),
                 'harga_jual' => $this->parseNumeric($values['harga_jual'] ?? null),
@@ -193,6 +201,7 @@ class ItemImport implements ToCollection, WithHeadingRow, WithMultipleSheets
                 'nama' => ['required', 'string', 'max:255'],
                 'kategori' => ['required', 'string', 'max:255'],
                 'gender' => ['required', 'string', 'in:L,P,U'],
+                'type' => ['required', 'string', 'max:10'],
                 'satuan' => ['required', 'string', 'max:50'],
             ];
 
@@ -217,7 +226,29 @@ class ItemImport implements ToCollection, WithHeadingRow, WithMultipleSheets
 
     private function generateBaseCode(array $record): string
     {
-        return implode('-', array_filter([$record['kategori'], $record['gender'], substr(preg_replace('/[^A-Z]/', '', strtoupper($record['nama'])), 0, 3)]));
+        return implode('-', array_filter([$record['kategori'], $record['gender'], $record['type'] ?: 'GEN']));
+    }
+
+    private function resolveType(?string $value): ?ItemType
+    {
+        if (!$value) return null;
+
+        return ItemType::where('code', strtoupper($value))
+            ->orWhere('label', $value)
+            ->first();
+    }
+
+    private function generateCode(array $record): string
+    {
+        $categoryCode = strtoupper(substr(preg_replace('/[^a-zA-Z0-9]/', '', $record['kategori']), 0, 3));
+        $gender = $record['gender'] ?: 'U';
+        $typeCode = $record['type'] ?: 'GEN';
+        $base = "{$categoryCode}-{$gender}-{$typeCode}";
+
+        $existing = Item::where('base_code', $base)->orWhere('code', 'like', "{$base}-%")->count();
+        $variant = str_pad($existing + 1, 2, '0', STR_PAD_LEFT);
+
+        return "{$base}-{$variant}-01";
     }
 
     private function resolveCategory(string $name): ?ItemCategory

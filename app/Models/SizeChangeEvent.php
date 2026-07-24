@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Models\StudentSizeItem;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -32,9 +31,12 @@ class SizeChangeEvent extends Model
         ];
     }
 
-    public function canEdit(StudentSizeItem $sizeItem): bool
+    public function canEdit(Student $student): bool
     {
-        return $sizeItem->change_count < $this->max_changes;
+        $submission = SizeEventSubmission::where('student_id', $student->id)
+            ->where('event_id', $this->id)->first();
+
+        return ($submission?->submission_count ?? 0) < $this->max_changes;
     }
 
     public function faculty(): BelongsTo

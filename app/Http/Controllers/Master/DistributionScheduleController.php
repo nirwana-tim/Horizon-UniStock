@@ -8,7 +8,6 @@ use App\Models\DistributionSchedule;
 use App\Models\Entitlement;
 use App\Models\Faculty;
 use App\Models\Item;
-use App\Models\StudentGeneration;
 use App\Models\StudyProgram;
 use App\Services\AuditService;
 use Illuminate\Http\JsonResponse;
@@ -20,7 +19,7 @@ class DistributionScheduleController extends Controller
 {
     public function index(Request $request): View|JsonResponse
     {
-        $schedules = DistributionSchedule::with('generation', 'faculty', 'studyProgram', 'stage', 'studentLevel')
+        $schedules = DistributionSchedule::with('faculty', 'studyProgram', 'studentLevel')
             ->when($request->input('q'), function ($query, $search) {
                 $search = str_replace(['%', '_'], ['\%', '\_'], $search);
                 $query->where(function ($q) use ($search) {
@@ -62,12 +61,11 @@ class DistributionScheduleController extends Controller
 
     public function create(): View
     {
-        $generations = StudentGeneration::orderBy('name', 'asc')->get();
         $faculties = Faculty::orderBy('name', 'asc')->get();
         $studyPrograms = StudyProgram::with('faculty')->orderBy('name', 'asc')->get();
 
         return view('distribution.distribution-schedule.create', compact(
-            'generations', 'faculties', 'studyPrograms'
+            'faculties', 'studyPrograms'
         ));
     }
 
@@ -78,12 +76,11 @@ class DistributionScheduleController extends Controller
  
         if ($studyProgramId === 'all') {
             $items = Item::orderBy('name')->get();
-        } elseif ($studyProgramId && $request->generation_id && $request->faculty_id) {
-            $levelCode = StudentGeneration::find($request->generation_id)?->code ?? '';
+        } elseif ($studyProgramId && $request->faculty_id) {
             $facultyCode = Faculty::find($request->faculty_id)?->code ?? '';
             $prodiCode = StudyProgram::find($studyProgramId)?->code ?? '';
             $entitlement = Entitlement::with('items')
-                ->where('code', $levelCode.$facultyCode.$prodiCode)
+                ->where('code', $facultyCode.$prodiCode)
                 ->when($studentLevel, fn ($query) => $query->where('student_level', $studentLevel))
                 ->first();
             $allowedIds = $entitlement?->items->pluck('item_id')->toArray() ?? [];
@@ -130,7 +127,7 @@ class DistributionScheduleController extends Controller
 
     public function show(DistributionSchedule $distributionSchedule): View
     {
-        $distributionSchedule->load(['generation', 'faculty', 'studyProgram', 'items.item', 'studentLevel']);
+        $distributionSchedule->load(['faculty', 'studyProgram', 'items.item', 'studentLevel']);
 
         return view('distribution.distribution-schedule.show', compact('distributionSchedule'));
     }
@@ -159,12 +156,11 @@ class DistributionScheduleController extends Controller
     public function edit(DistributionSchedule $distributionSchedule): View
     {
         $distributionSchedule->load('items');
-        $generations = StudentGeneration::orderBy('name', 'asc')->get();
         $faculties = Faculty::orderBy('name', 'asc')->get();
         $studyPrograms = StudyProgram::with('faculty')->orderBy('name', 'asc')->get();
 
         return view('distribution.distribution-schedule.edit', compact(
-            'distributionSchedule', 'generations', 'faculties', 'studyPrograms'
+            'distributionSchedule', 'faculties', 'studyPrograms'
         ));
     }
 

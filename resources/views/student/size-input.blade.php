@@ -10,7 +10,6 @@
     @php
         $filledCount = $entitlementItems->filter(fn($i) => !empty($existingSizes[$i->id] ?? ''))->count();
         $totalCount = $entitlementItems->count();
-        $allMaxedOut = $totalCount > 0 && collect($maxChangedItemIds)->count() === $totalCount;
     @endphp
 
     <div class="mb-5">
@@ -55,13 +54,22 @@
         </div>
         @endif
 
-        @if($allMaxedOut)
+        @if(!$canEdit)
             <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-5">
                 <div class="flex items-start gap-3">
                     <svg class="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                     </svg>
-                    <p class="text-sm text-amber-700">Kamu sudah mencapai batas maksimal perubahan ukuran ({{ $event->max_changes }}x) untuk semua item.</p>
+                    <p class="text-sm text-amber-700">Kamu sudah mencapai batas maksimal pengisian ({{ $event->max_changes }}x) untuk event ini.</p>
+                </div>
+            </div>
+        @else
+            <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-5">
+                <div class="flex items-start gap-3">
+                    <svg class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <p class="text-sm text-blue-700">Kesempatan mengisi: <strong>{{ $remainingChanges }}x</strong> lagi</p>
                 </div>
             </div>
         @endif
@@ -79,10 +87,6 @@
                     @foreach($entitlementItems as $item)
                         @php
                             $currentSize = $existingSizes[$item->id] ?? '';
-                            $sizeItem = $student->activeSizeProfile
-                                ? $student->activeSizeProfile->sizeItems->where('item_id', $item->id)->first()
-                                : null;
-                            $isMaxed = $sizeItem && !$event->canEdit($sizeItem);
                         @endphp
 
                         <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
@@ -96,14 +100,12 @@
                                     <h3 class="text-sm font-semibold text-gray-800 truncate">{{ $item->name }}</h3>
                                     <p class="text-xs text-gray-400 truncate">{{ $item->base_code }} &bull; {{ $item->unit }}</p>
                                 </div>
-                                @if(!empty($currentSize) && !$isMaxed)
+                                @if(!empty($currentSize))
                                     <span class="text-xs font-medium text-primary-600 bg-primary-50 px-2.5 py-1 rounded-full flex-shrink-0">Terisi</span>
-                                @elseif($isMaxed)
-                                    <span class="text-xs font-medium text-red-600 bg-red-50 px-2.5 py-1 rounded-full flex-shrink-0">Maksimal ({{ $sizeItem->change_count }}/{{ $event->max_changes }})</span>
                                 @endif
                             </div>
 
-                            @if($isMaxed)
+                            @if(!$canEdit)
                                 @php
                                     $currentVariant = $item->variants->firstWhere('size', $currentSize);
                                     $sizeDisplay = $currentVariant ? $currentVariant->size_label : $currentSize;
@@ -142,7 +144,7 @@
                     @endforeach
                 </div>
 
-                @if(!$allMaxedOut)
+                @if($canEdit)
                 <button type="submit"
                     class="w-full h-12 bg-primary-700 text-white text-sm font-semibold rounded-lg hover:bg-primary-800 active:bg-primary-900 focus:outline-none focus:ring-2 focus:ring-primary-300 transition-colors">
                     Simpan Ukuran

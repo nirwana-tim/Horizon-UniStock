@@ -74,7 +74,7 @@ Template adalah file Excel kosong yang didownload Admin, diisi, lalu diupload ke
 **Class Generate:** `App\Exports\Templates\DpLunasTemplateExport`
 **Tujuan:** Import data mahasiswa yang sudah membayar DP (Down Payment) dari sistem keuangan kampus.
 
-**Sumber Data Excel:** `ALL DATA DP PAID` — Student ID, Student Name, Course, Semester, Learning Modality
+**Sumber Data Excel:** `ALL DATA DP PAID` — Student ID, Student Name, Course, Level, Learning Modality
 
 **Struktur Kolom:**
 
@@ -83,10 +83,8 @@ Template adalah file Excel kosong yang didownload Admin, diisi, lalu diupload ke
 | NIM* | String (20) | Ya | Harus ada di tabel students | 4112714201240001 |
 | Nama Mahasiswa* | String | Ya | - | WULAN SARI NURFIANI |
 | Prodi* | String | Ya | Dropdown dari study_programs | S1 KEPERAWATAN |
-| Semester* | String | Ya | Dropdown: Year 1 Sem 1 / Year 1 Sem 2 / ... | Year 2 Sem 2 |
+| Level* | String | Ya | Dropdown dari student_levels | Y1S1 |
 | Status Bayar* | String | Ya | Dropdown: Lunas / Belum Lunas | Lunas |
-| Tanggal Bayar | Date | No | Format dd/mm/yyyy | 01/07/2025 |
-| Nominal (Rp) | Number | No | Format #,##0 | 5000000 |
 
 ### 1.3 Template Import Katalog Barang
 

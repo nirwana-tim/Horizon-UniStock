@@ -12,13 +12,11 @@ class DistributionSchedule extends Model
     protected $fillable = [
         'name',
         'period',
-        'semester',
         'student_level',
         'date',
         'location',
         'session',
         'is_active',
-        'generation_id',
         'faculty_id',
         'study_program_id',
     ];
@@ -35,7 +33,6 @@ class DistributionSchedule extends Model
     {
         return $query
             ->where(fn (Builder $q) => $q->whereNull('student_level')->orWhere('student_level', $student->student_level))
-            ->where(fn (Builder $q) => $q->whereNull('generation_id')->orWhere('generation_id', $student->generation_id))
             ->where(fn (Builder $q) => $q->whereNull('faculty_id')->orWhere('faculty_id', $student->studyProgram?->faculty_id))
             ->where(fn (Builder $q) => $q->whereNull('study_program_id')->orWhere('study_program_id', $student->study_program_id));
     }
