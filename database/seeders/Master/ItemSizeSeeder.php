@@ -19,7 +19,7 @@ class ItemSizeSeeder extends Seeder
         ];
 
         $sizeCategories = [
-            '01' => ['UNF'],
+            '01' => ['UNF', 'KTM', 'KIT'],
             '02' => ['UNF'],
             '03' => ['UNF'],
             '04' => ['UNF'],

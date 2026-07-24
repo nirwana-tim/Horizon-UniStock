@@ -8,7 +8,6 @@ use App\Exports\Templates\HargaTemplateExport;
 use App\Exports\Templates\KatalogTemplateExport;
 use App\Exports\Templates\MahasiswaTemplateExport;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 
 class TemplateController extends Controller
@@ -27,12 +26,6 @@ class TemplateController extends Controller
 
         if (!isset($validTypes[$type])) {
             abort(404, 'Template tidak ditemukan.');
-        }
-
-        $staticPath = "templates/import_{$type}.xlsx";
-
-        if (Storage::disk('local')->exists($staticPath)) {
-            return Storage::disk('local')->download($staticPath, "Template_Import_{$type}.xlsx");
         }
 
         $exportClass = new $validTypes[$type]();
