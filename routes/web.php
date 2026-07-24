@@ -134,6 +134,7 @@ Route::middleware(['auth', 'password.changed', 'role:super_admin|admin'])->group
 });
 
 Route::middleware(['auth', 'password.changed', 'role:super_admin|admin'])->prefix('import')->name('import.')->group(function () {
+    Route::get('/', [ImportController::class, 'index'])->name('index');
     Route::get('/{importBatch}', [ImportController::class, 'result'])->name('result');
     Route::post('/', [ImportController::class, 'store'])->middleware('throttle:5,1')->name('store');
     Route::post('/preview', [ImportController::class, 'preview'])->middleware('throttle:10,1')->name('preview');
