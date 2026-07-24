@@ -27,6 +27,7 @@ class Item extends Model
         'unit',
         'selling_price',
         'hpp',
+        'is_active',
     ];
 
     protected function casts(): array
@@ -34,6 +35,7 @@ class Item extends Model
         return [
             'selling_price' => 'decimal:2',
             'hpp' => 'decimal:2',
+            'is_active' => 'boolean',
         ];
     }
 
