@@ -73,18 +73,43 @@ class DistributionScheduleController extends Controller
     {
         $studyProgramId = $request->study_program_id;
         $studentLevel = $request->input('student_level');
- 
+
         if ($studyProgramId === 'all') {
             $items = Item::orderBy('name')->get();
-        } elseif ($studyProgramId && $request->faculty_id) {
-            $facultyCode = Faculty::find($request->faculty_id)?->code ?? '';
-            $prodiCode = StudyProgram::find($studyProgramId)?->code ?? '';
-            $entitlement = Entitlement::with('items')
-                ->where('code', $facultyCode.$prodiCode)
-                ->when($studentLevel, fn ($query) => $query->where('student_level', $studentLevel))
-                ->first();
-            $allowedIds = $entitlement?->items->pluck('item_id')->toArray() ?? [];
-            $items = $allowedIds ? Item::whereIn('id', $allowedIds)->orderBy('name')->get() : collect();
+        } elseif ($studyProgramId) {
+            $studyProgram = StudyProgram::with('faculty')->find($studyProgramId);
+            $facultyCode = Faculty::find($request->faculty_id)?->code ?? $studyProgram?->faculty?->code ?? '';
+            $prodiCode = $studyProgram?->code ?? '';
+
+            $allowedIds = collect();
+
+            if ($prodiCode) {
+                $targetCode = $studentLevel ? ($studentLevel.$facultyCode.$prodiCode) : null;
+
+                $entitlements = Entitlement::with('items')
+                    ->where('is_active', true)
+                    ->when($studentLevel, fn ($q) => $q->where(function ($sub) use ($studentLevel, $targetCode) {
+                        $sub->where('student_level', $studentLevel);
+                        if ($targetCode) {
+                            $sub->orWhere('code', $targetCode);
+                        }
+                    }))
+                    ->where(function ($q) use ($facultyCode, $prodiCode) {
+                        if ($facultyCode) {
+                            $q->where('code', 'like', "%{$facultyCode}{$prodiCode}%")
+                              ->orWhere('code', 'like', "%{$prodiCode}%");
+                        } else {
+                            $q->where('code', 'like', "%{$prodiCode}%");
+                        }
+                    })
+                    ->get();
+
+                $allowedIds = $entitlements->flatMap(fn ($e) => $e->items->pluck('item_id'))->unique()->values();
+            }
+
+            $items = $allowedIds->isNotEmpty()
+                ? Item::whereIn('id', $allowedIds)->orderBy('name')->get()
+                : collect();
         } else {
             $items = collect();
         }
