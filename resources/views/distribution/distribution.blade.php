@@ -135,7 +135,7 @@
             @elseif(!$entitlement)
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6 text-center">
-                        <p class="text-gray-500">This student does not have any item entitlement for the current distribution stage.</p>
+                        <p class="text-gray-500">This student does not have any item entitlement for the current distribution.</p>
                     </div>
                 </div>
             @else

@@ -24,7 +24,6 @@
 
                     <form action="{{ route('distribution.distribution-schedule.store') }}" method="POST"
                           x-data="{
-                              generationId: '{{ old('generation_id') }}',
                               facultyId: '{{ old('faculty_id') }}',
                               prodiId: '{{ old('study_program_id') }}',
                               studentLevel: '{{ old('student_level') }}',
@@ -40,7 +39,6 @@
                               },
                               init() {
                                   this.$watch('prodiId', () => this.fetchItems());
-                                  this.$watch('generationId', () => { if (this.prodiId) this.fetchItems(); });
                                   this.$watch('facultyId', () => { if (this.prodiId) this.fetchItems(); });
                                   this.$watch('studentLevel', () => { if (this.prodiId) this.fetchItems(); });
                                   if (this.prodiId) this.fetchItems();
@@ -48,7 +46,6 @@
                               fetchItems() {
                                   axios.get('{{ route('distribution.distribution-schedule.fetch-items') }}', {
                                       params: {
-                                          generation_id: this.generationId || '',
                                           faculty_id: this.facultyId || '',
                                           study_program_id: this.prodiId,
                                           student_level: this.studentLevel || '',
@@ -64,26 +61,7 @@
                                 <x-text-input id="name" name="name" type="text" class="mt-1 block w-full" :value="old('name')" required autofocus />
                                 <x-input-error :messages="$errors->get('name')" class="mt-2" />
                             </div>
-                            <div @change="generationId = $event.target.value">
-                                <x-input-label for="generation_id" :value="__('Generation')" />
-                                <select id="generation_id" name="generation_id"
-                                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500">
-                                    <option value="">-- All Levels --</option>
-@foreach($generations as $gen)
-    <option value="{{ $gen->id }}" {{ old('generation_id') == $gen->id ? 'selected' : '' }}>{{ $gen->label }}</option>
-@endforeach
-                                </select>
-                                <x-input-error :messages="$errors->get('generation_id')" class="mt-2" />
-                            </div>
-                            <div>
-                                <x-input-label for="semester" :value="__('Semester')" />
-                                <select id="semester" name="semester" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500" required>
-                                    <option value="">-- Select Semester --</option>
-                                    <option value="Ganjil" {{ old('semester') == 'Ganjil' ? 'selected' : '' }}>Ganjil</option>
-                                    <option value="Genap" {{ old('semester') == 'Genap' ? 'selected' : '' }}>Genap</option>
-                                </select>
-                                <x-input-error :messages="$errors->get('semester')" class="mt-2" />
-                            </div>
+
                             <div>
                                 <x-input-label for="student_level" :value="__('Student Level')" :required="true" />
                                 <select id="student_level" name="student_level" x-model="studentLevel"

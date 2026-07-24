@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Entitlement;
 use App\Models\Item;
 use App\Models\SizeChangeEvent;
+use App\Models\SizeEventSubmission;
 use App\Models\Student;
 use App\Models\StudentSizeHistory;
 use App\Models\StudentSizeItem;
@@ -79,6 +80,10 @@ class StudentSizeService
             throw new \RuntimeException('Tidak ada event pengisian ukuran yang aktif saat ini.');
         }
 
+        if (! $event->canEdit($student)) {
+            throw new \RuntimeException('Kamu sudah mencapai batas maksimal pengisian untuk event ini.');
+        }
+
         DB::transaction(function () use ($student, $sizes, $event) {
             $profile = StudentSizeProfile::where('student_id', $student->id)
                 ->lockForUpdate()
@@ -101,10 +106,6 @@ class StudentSizeService
                     ->first();
 
                 if ($sizeItem) {
-                    if (! $event->canEdit($sizeItem)) {
-                        continue;
-                    }
-
                     if ($sizeItem->size !== $size) {
                         StudentSizeHistory::create([
                             'size_item_id' => $sizeItem->id,
@@ -114,10 +115,7 @@ class StudentSizeService
                             'changed_at' => now(),
                         ]);
 
-                        $sizeItem->update([
-                            'size' => $size,
-                            'change_count' => $sizeItem->change_count + 1,
-                        ]);
+                        $sizeItem->update(['size' => $size]);
                     }
                 } else {
                     StudentSizeItem::create([
@@ -128,6 +126,12 @@ class StudentSizeService
                     ]);
                 }
             }
+
+            $submission = SizeEventSubmission::firstOrCreate(
+                ['student_id' => $student->id, 'event_id' => $event->id],
+                ['submission_count' => 0],
+            );
+            $submission->increment('submission_count');
 
             $profile->update([
                 'is_filled' => true,

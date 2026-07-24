@@ -2,9 +2,7 @@
     <tr class="hover:bg-gray-50">
         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $loop->iteration + ($schedules->currentPage() - 1) * $schedules->perPage() }}</td>
         <td class="px-6 py-4 whitespace-nowrap"><a href="{{ route('distribution.distribution-schedule.show', $schedule) }}" class="text-sm font-medium text-primary-600 hover:text-primary-900">{{ $schedule->name }}</a></td>
-        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $schedule->generation?->label ?? '-' }}</td>
         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $schedule->faculty?->name ?? '-' }}{{ $schedule->studyProgram ? ' / ' . $schedule->studyProgram->name : '' }}</td>
-        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $schedule->semester ?? '-' }}</td>
         <td class="px-6 py-4 whitespace-nowrap">
             @if($schedule->student_level)
                 <x-badge type="primary">{{ $schedule->student_level_label ?? ucfirst($schedule->student_level) }}</x-badge>
@@ -30,5 +28,5 @@
         </td>
     </tr>
 @empty
-    <tr><td colspan="10" class="px-6 py-4 text-center text-sm text-gray-500">{{ __('No distribution schedule found.') }}</td></tr>
+    <tr><td colspan="8" class="px-6 py-4 text-center text-sm text-gray-500">{{ __('No distribution schedule found.') }}</td></tr>
 @endforelse

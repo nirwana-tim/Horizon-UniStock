@@ -22,6 +22,7 @@ class TemplateController extends Controller
             'harga' => HargaTemplateExport::class,
             'hak_barang' => HakBarangTemplateExport::class,
             'penerimaan' => \App\Exports\Templates\StockReceiveTemplateExport::class,
+            'stock_opname' => \App\Exports\Templates\StockOpnameTemplateExport::class,
         ];
 
         if (!isset($validTypes[$type])) {

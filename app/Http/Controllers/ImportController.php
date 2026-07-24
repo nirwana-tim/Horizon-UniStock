@@ -31,7 +31,7 @@ class ImportController extends Controller
     {
         $rules = [
             'import_type' => ['required', 'string', 'in:student,eligibility,item,stock_opname,item_price,entitlement,stock_receive'],
-            'stock_opname_id' => ['required_if:import_type,stock_opname', 'nullable', 'integer', 'exists:stock_opnames,id'],
+            'stock_opname_id' => ['nullable', 'integer', 'exists:stock_opnames,id'],
         ];
 
         if ($request->has('file_path') && $request->filled('file_path')) {

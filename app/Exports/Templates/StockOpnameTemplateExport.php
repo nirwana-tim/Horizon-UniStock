@@ -10,7 +10,7 @@ use Maatwebsite\Excel\Concerns\WithTitle;
 use Maatwebsite\Excel\Concerns\WithCustomStartCell;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class DpLunasTemplateExport extends BaseExport implements FromArray, WithHeadings, WithStyles, WithTitle, WithCustomStartCell
+class StockOpnameTemplateExport extends BaseExport implements FromArray, WithHeadings, WithStyles, WithTitle, WithCustomStartCell
 {
     public function startCell(): string
     {
@@ -25,23 +25,21 @@ class DpLunasTemplateExport extends BaseExport implements FromArray, WithHeading
     public function headings(): array
     {
         return [
-            'NIM *',
-            'Nama Mahasiswa *',
-            'Prodi *',
-            'Level *',
-            'Status Bayar *',
+            'Kode Barang *',
+            'Varian Ukuran *',
+            'Quantity Fisik *',
         ];
     }
 
     public function styles(Worksheet $sheet): void
     {
-        $colCount = 5;
+        $colCount = 3;
 
-        $this->setTitle($sheet, 'TEMPLATE IMPORT DP LUNAS', $colCount);
-        $this->setSubtitle($sheet, 'Data mahasiswa yang sudah membayar DP. Status Bayar: Lunas / Belum Lunas.', $colCount);
+        $this->setTitle($sheet, 'TEMPLATE IMPORT STOCK OPNAME', $colCount);
+        $this->setSubtitle($sheet, 'Kode Barang: UNF-L-SCB-02-03. Varian Ukuran: S/M/L/XL (atau All Size). Quantity Fisik: jumlah stok nyata di lapangan.', $colCount);
 
-        $sheet->mergeCells('A3:E3');
-        $sheet->setCellValue('A3', 'Contoh Format: 4112714201240001 | WULAN SARI NURFIANI | S1 KEPERAWATAN | Y1S1 | Lunas');
+        $sheet->mergeCells('A3:C3');
+        $sheet->setCellValue('A3', 'Contoh: UNF-L-SCB-02-03 | M | 50');
         $sheet->getStyle('A3')->applyFromArray([
             'font' => ['italic' => true, 'color' => ['rgb' => '888888'], 'size' => 10],
             'alignment' => [
@@ -55,11 +53,18 @@ class DpLunasTemplateExport extends BaseExport implements FromArray, WithHeading
         $this->applyHeaderStyle($sheet, $headerRow, $colCount);
 
         $this->setColumnWidths($sheet, [
-            'A' => 22, 'B' => 30, 'C' => 22, 'D' => 18, 'E' => 16,
+            'A' => 22,
+            'B' => 20,
+            'C' => 18,
         ]);
 
+        $dataStart = $this->dataStartRow();
+        $dataEnd = 1000;
+        $this->setFormatNumber($sheet, 'C', $dataStart, $dataEnd);
+
+        $lastCol = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colCount);
         $sheet->freezePane('A' . ($headerRow + 1));
-        $sheet->setAutoFilter('A' . $headerRow . ':E' . $headerRow);
+        $sheet->setAutoFilter('A' . $headerRow . ':' . $lastCol . $headerRow);
     }
 
     public function title(): string

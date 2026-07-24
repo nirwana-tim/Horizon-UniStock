@@ -18,10 +18,6 @@
                                 <dd class="mt-1 text-sm text-gray-900 font-semibold">{{ $distributionSchedule->name }}</dd>
                             </div>
                             <div class="bg-gray-50 p-4 rounded-lg">
-                                <dt class="text-sm font-medium text-gray-500">{{ __('Semester') }}</dt>
-                                <dd class="mt-1 text-sm text-gray-900 font-semibold">{{ $distributionSchedule->semester ?? '-' }}</dd>
-                            </div>
-                            <div class="bg-gray-50 p-4 rounded-lg">
                                 <dt class="text-sm font-medium text-gray-500">{{ __('Student Level') }}</dt>
                                 <dd class="mt-1">
                                     @if($distributionSchedule->student_level)
@@ -30,10 +26,6 @@
                                         <x-badge type="neutral">All Student Levels</x-badge>
                                     @endif
                                 </dd>
-                            </div>
-                            <div class="bg-gray-50 p-4 rounded-lg">
-                                <dt class="text-sm font-medium text-gray-500">{{ __('Generation') }}</dt>
-                                <dd class="mt-1 text-sm text-gray-900 font-semibold">{{ $distributionSchedule->generation?->label ?? '-' }}</dd>
                             </div>
                             <div class="bg-gray-50 p-4 rounded-lg">
                                 <dt class="text-sm font-medium text-gray-500">{{ __('Faculty / Study Program') }}</dt>

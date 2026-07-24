@@ -34,6 +34,7 @@ class EligibilityImport implements ToModel, WithHeadingRow, WithValidation
     {
         return [
             'nim' => ['required', 'string', 'exists:students,nim'],
+            'level' => ['required', 'string', 'exists:student_levels,kode'],
             'is_eligible' => ['required', 'boolean'],
             'payment_status' => ['nullable', 'string', 'max:50'],
         ];

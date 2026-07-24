@@ -27,7 +27,13 @@ class SizeController extends Controller
 
         $events = $this->sizeService->getEventsForStudent($student);
 
-        return view('student.sizes-index', compact('student', 'events'));
+        $eventIds = $events->pluck('id');
+        $submissions = \App\Models\SizeEventSubmission::where('student_id', $student->id)
+            ->whereIn('event_id', $eventIds)
+            ->get()
+            ->keyBy('event_id');
+
+        return view('student.sizes-index', compact('student', 'events', 'submissions'));
     }
 
     public function input(SizeChangeEvent $event): View
@@ -48,25 +54,15 @@ class SizeController extends Controller
             }
         }
 
-        $changedItemIds = [];
-        if ($student->activeSizeProfile) {
-            $changedItemIds = $student->activeSizeProfile->sizeItems
-                ->where('change_count', '>=', 1)
-                ->pluck('item_id')
-                ->toArray();
-        }
-
-        $maxChangedItemIds = [];
-        if ($student->activeSizeProfile) {
-            $maxChangedItemIds = $student->activeSizeProfile->sizeItems
-                ->filter(fn ($si) => ! $event->canEdit($si))
-                ->pluck('item_id')
-                ->toArray();
-        }
+        $submission = \App\Models\SizeEventSubmission::where('student_id', $student->id)
+            ->where('event_id', $event->id)->first();
+        $submissionCount = $submission?->submission_count ?? 0;
+        $canEdit = $submissionCount < $event->max_changes;
+        $remainingChanges = $event->max_changes - $submissionCount;
 
         return view('student.size-input', compact(
             'student', 'event', 'entitlementItems',
-            'existingSizes', 'changedItemIds', 'maxChangedItemIds'
+            'existingSizes', 'canEdit', 'remainingChanges'
         ));
     }
 

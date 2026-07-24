@@ -9,6 +9,7 @@ use App\Imports\ItemPriceImport;
 use App\Imports\StockOpnameImport;
 use App\Imports\StudentImport;
 use App\Models\ImportBatch;
+use App\Models\StockOpname;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
@@ -102,9 +103,17 @@ class ImportService
         $stockOpnameId = request()->input('stock_opname_id');
 
         if (!$stockOpnameId) {
-            throw new \InvalidArgumentException('stock_opname_id is required for stock opname import.');
+            $batch = StockOpname::create([
+                'reference_number' => 'IMP-' . now()->format('YmdHis'),
+                'opname_date' => now()->toDateString(),
+                'period' => now()->format('Y') . '/' . (now()->format('y') + 1),
+                'notes' => 'Auto-created from import',
+                'status' => 'draft',
+                'created_by' => auth()->id(),
+            ]);
+            $stockOpnameId = $batch->id;
         }
 
-        return new StockOpnameImport($stockOpnameId);
+        return new StockOpnameImport((int) $stockOpnameId);
     }
 }

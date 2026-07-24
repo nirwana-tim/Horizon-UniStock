@@ -23,7 +23,7 @@ class ItemPriceImport implements ToModel, WithHeadingRow, WithValidation
             return null;
         }
 
-        $effectiveDate = $row['tahun_akademik'] ?? now()->startOfYear()->toDateString();
+        $effectiveDate = $this->resolveEffectiveDate($row['tahun_akademik'] ?? null);
 
         return ItemPrice::updateOrCreate(
             [
@@ -35,6 +35,25 @@ class ItemPriceImport implements ToModel, WithHeadingRow, WithValidation
                 'hpp' => $row['hpp'],
             ]
         );
+    }
+
+    private function resolveEffectiveDate(?string $tahunAkademik): string
+    {
+        if (!$tahunAkademik) {
+            return now()->startOfYear()->toDateString();
+        }
+
+        if (preg_match('/^(\d{2,4})\s*\/\s*(\d{2})$/', $tahunAkademik, $matches)) {
+            $year = (int) $matches[1];
+            $year = $year < 100 ? 2000 + $year : $year;
+            return "{$year}-07-01";
+        }
+
+        if (strtotime($tahunAkademik)) {
+            return date('Y-m-d', strtotime($tahunAkademik));
+        }
+
+        return now()->startOfYear()->toDateString();
     }
 
     public function rules(): array

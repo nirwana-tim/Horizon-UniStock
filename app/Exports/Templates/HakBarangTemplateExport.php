@@ -39,7 +39,7 @@ class HakBarangTemplateExport extends BaseExport implements FromArray, WithHeadi
         $colCount = 2 + $items->count();
 
         $this->setTitle($sheet, 'TEMPLATE IMPORT HAK BARANG (ENTITLEMENT)', $colCount);
-        $this->setSubtitle($sheet, 'Isi 1 jika prodi berhak mendapat barang, 0 jika tidak. Tipe: Freshman / Continuing.', $colCount);
+        $this->setSubtitle($sheet, 'Isi jumlah barang yang berhak didapat per item (0 jika tidak berhak). Tipe: Freshman / Continuing.', $colCount);
 
         $headerRow = $this->headerRow();
         $this->applyHeaderStyle($sheet, $headerRow, $colCount);
