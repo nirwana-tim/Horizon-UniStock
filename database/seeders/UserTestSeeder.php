@@ -21,6 +21,11 @@ class UserTestSeeder extends Seeder
                 'role' => 'admin',
             ],
             [
+                'name' => 'Finance Admin',
+                'email' => 'finance2@horizon-unistock.test',
+                'role' => 'admin',
+            ],
+            [
                 'name' => 'Staff Gudang',
                 'email' => 'staff@horizon-unistock.test',
                 'role' => 'staff',
