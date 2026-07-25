@@ -25,6 +25,11 @@ Library JavaScript untuk scan QR Code langsung dari kamera browser — tanpa per
 npm install html5-qrcode
 ```
 
+Atau dengan bun:
+```bash
+bun add html5-qrcode
+```
+
 ## 2. Setup di resources/js/app.js
 
 ```js
@@ -33,7 +38,7 @@ import Alpine from 'alpinejs';
 import 'html5-qrcode';
 ```
 
-Lalu `npm run build`.
+Lalu `npm run build` (atau `bun run build`).
 
 ## 3. Contoh Halaman Scan Sederhana
 

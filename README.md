@@ -70,8 +70,15 @@ php artisan db:seed --class="Database\Seeders\Master\MasterDataSeeder"
 > **Catatan:** Seeder master ada di `database/seeders/Master/`, masing-masing 1 record. Bisa dihapus file-nya kapan aja jika tidak dibutuhkan.
 
 ## 7. Install frontend dependencies
+
+**npm:**
 ```bash
 npm install && npm run build
+```
+
+**bun (alternatif, jika sudah install bun):**
+```bash
+bun install && bun run build
 ```
 
 ## 8. Buat storage link
@@ -91,13 +98,20 @@ Buka http://127.0.0.1:8000
 Setiap kali menarik perubahan terbaru dari repositori, jalankan perintah berikut secara berurutan:
 
 ```bash
-php artisan config:clear && php artisan route:clear && php artisan view:clear && php artisan cache:clear, npm install sama npm run build
+php artisan config:clear && php artisan route:clear && php artisan view:clear && php artisan cache:clear
 ```
+
+**npm:**
 ```bash
 npm install && npm run build
 ```
 
-> **Catatan:** `npm install && npm run build` wajib dijalankan jika ada perubahan pada file JavaScript, CSS, atau dependensi frontend. Keempat `php artisan ...:clear` membersihkan cache Laravel yang mungkin masih menyimpan versi lama.
+**bun (alternatif):**
+```bash
+bun install && bun run build
+```
+
+> **Catatan:** `npm install && npm run build` (atau `bun install && bun run build`) wajib dijalankan jika ada perubahan pada file JavaScript, CSS, atau dependensi frontend. Keempat `php artisan ...:clear` membersihkan cache Laravel yang mungkin masih menyimpan versi lama.
 
 ### Login Default
 | Role | Email | Password |

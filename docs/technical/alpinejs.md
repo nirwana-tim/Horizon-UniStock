@@ -22,7 +22,7 @@ Alpine.start();
 ```
 
 Cara kerja:
-1. `npm install alpinejs` (`package.json` sudah include)
+1. `npm install alpinejs` (atau `bun add alpinejs`) — `package.json` sudah include
 2. Import `alpinejs` dan daftarkan ke `window.Alpine`
 3. Panggil `Alpine.start()` — cukup sekali per halaman
 4. File ini di-load via `@vite('resources/js/app.js')` di layout

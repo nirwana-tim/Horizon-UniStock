@@ -21,6 +21,7 @@
 /public/storage
 /storage/*.key
 /storage/pail
+/UniStock
 /vendor
 Homestead.json
 Homestead.yaml

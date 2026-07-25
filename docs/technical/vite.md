@@ -54,14 +54,14 @@ Ada 2 entry point yang di-load:
 </head>
 ```
 
-### Mode Development (`npm run dev`)
+### Mode Development (`npm run dev` / `bun run dev`)
 
 `@vite()` inject:
 - **Vite client** — WebSocket untuk HMR
 - **CSS** — Langsung dari Vite dev server (hot update)
 - **JS** — ES module asli, bukan bundle
 
-### Mode Production (`npm run build`)
+### Mode Production (`npm run build` / `bun run build`)
 
 `@vite()` inject:
 - **CSS** — File minified dari `public/build/assets/` dengan hash versi
@@ -75,12 +75,22 @@ Ada 2 entry point yang di-load:
 npm run dev
 ```
 
+Atau dengan bun:
+```bash
+bun run dev
+```
+
 Menjalankan Vite dev server (biasanya di `http://localhost:5173`). File diubah → browser otomatis update.
 
 ### Production Build
 
 ```bash
 npm run build
+```
+
+Atau dengan bun:
+```bash
+bun run build
 ```
 
 Hasil build disimpan di `public/build/`:
@@ -104,7 +114,7 @@ Menjalankan 4 proses paralel via `concurrently`:
 | Laravel server | `php artisan serve` |
 | Queue listener | `php artisan queue:listen` |
 | Log viewer | `php artisan pail` |
-| Vite | `npm run dev` |
+| Vite | `npm run dev` / `bun run dev` |
 
 ## Alur Development
 
@@ -169,20 +179,24 @@ import.meta.glob(['../images/**', '../fonts/**']);
 ## Troubleshooting
 
 ### HMR tidak jalan
-Pastikan `npm run dev` berjalan di terminal terpisah.
+Pastikan `npm run dev` (atau `bun run dev`) berjalan di terminal terpisah.
 
 ### Build error
 ```bash
 # Hapus cache Vite
 rm -rf public/build/
-# Build ulang
+# Build ulang (npm)
 npm run build
+# atau (bun)
+bun run build
 ```
 
 ### CSS/JS tidak muncul di production
 ```bash
 php artisan optimize:clear
 npm run build
+# atau
+bun run build
 ```
 
 ## Sumber
