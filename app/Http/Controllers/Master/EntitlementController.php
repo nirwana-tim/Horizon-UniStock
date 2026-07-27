@@ -27,6 +27,7 @@ class EntitlementController extends Controller
                 $query->where('code', 'like', "%{$search}%")
                       ->orWhere('description', 'like', "%{$search}%");
             })
+            ->when($request->input('is_active'), fn ($q, $v) => $q->where('is_active', $v === '1'))
             ->latest()
             ->paginate(20);
 
@@ -81,7 +82,7 @@ class EntitlementController extends Controller
         $entitlement = null;
 
         if ($entitlementId = $request->input('entitlement_id')) {
-            $entitlement = Entitlement::with('items')->findOrFail($entitlementId);
+            $entitlement = Entitlement::with('items.item')->findOrFail($entitlementId);
             $this->authorize('view', $entitlement);
         }
 

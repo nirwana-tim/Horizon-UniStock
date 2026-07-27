@@ -4,29 +4,28 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class StockMovement extends Model
+class StockBatch extends Model
 {
     use SoftDeletes;
+
     protected $fillable = [
         'item_id',
         'variant_id',
-        'type',
-        'quantity',
-        'hpp',
-        'stock_batch_id',
-        'reference_type',
-        'reference_id',
-        'notes',
+        'quantity_remaining',
+        'unit_hpp',
+        'received_date',
+        'stock_receive_item_id',
     ];
 
     protected function casts(): array
     {
         return [
-            'quantity' => 'integer',
-            'hpp' => 'decimal:2',
+            'quantity_remaining' => 'integer',
+            'unit_hpp' => 'decimal:2',
+            'received_date' => 'date',
         ];
     }
 
@@ -40,8 +39,13 @@ class StockMovement extends Model
         return $this->belongsTo(ItemVariant::class, 'variant_id');
     }
 
-    public function reference(): MorphTo
+    public function stockReceiveItem(): BelongsTo
     {
-        return $this->morphTo();
+        return $this->belongsTo(StockReceiveItem::class, 'stock_receive_item_id');
+    }
+
+    public function movements(): HasMany
+    {
+        return $this->hasMany(StockMovement::class, 'stock_batch_id');
     }
 }

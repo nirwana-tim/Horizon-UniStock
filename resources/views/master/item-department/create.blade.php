@@ -11,6 +11,12 @@
                         @csrf
 
                         <div class="mb-4">
+                            <x-input-label for="code" :value="__('Code')" />
+                            <x-text-input id="code" name="code" type="text" class="mt-1 block w-full" :value="old('code')" maxlength="2" placeholder="Example: ST" />
+                            <x-input-error :messages="$errors->get('code')" class="mt-2" />
+                        </div>
+
+                        <div class="mb-4">
                             <x-input-label for="label" :value="__('Label')" />
                             <x-text-input id="label" name="label" type="text" class="mt-1 block w-full" :value="old('label')" required placeholder="Example: STIKES, STMIK, STIE" />
                             <x-input-error :messages="$errors->get('label')" class="mt-2" />

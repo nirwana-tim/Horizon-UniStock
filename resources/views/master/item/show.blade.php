@@ -62,6 +62,14 @@
                     <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">HPP</p>
                     <p class="mt-1 text-sm text-gray-900">Rp {{ number_format($item->hpp, 2) }}</p>
                 </div>
+                <div>
+                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Min. Stok</p>
+                    <p class="mt-1 text-sm text-gray-900">{{ $item->min_stock ?? 0 }}</p>
+                </div>
+                <div>
+                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Max. Stok</p>
+                    <p class="mt-1 text-sm text-gray-900">{{ $item->max_stock ?? 0 }}</p>
+                </div>
             </div>
         </div>
 
@@ -236,11 +244,13 @@
                                     $qty = $balance?->quantity ?? 0;
                                     $reserved = $balance?->reserved ?? 0;
                                     $totalAllStock += $qty;
+                                    $variantMin = $item->min_stock ?? 0;
+                                    $variantMax = $item->max_stock ?? 0;
                                 @endphp
                                 <tr class="hover:bg-gray-50 transition-colors">
                                     <td class="px-4 py-3 text-sm text-gray-800">{{ $variant->size_label ?? $variant->size }}</td>
                                     <td class="px-4 py-3 text-sm font-mono text-gray-600">{{ $variant->sku }}</td>
-                                    <td class="px-4 py-3 text-sm text-right font-semibold {{ $qty <= 0 ? 'text-red-600' : ($qty <= 5 ? 'text-amber-600' : 'text-gray-800') }}">
+                                    <td class="px-4 py-3 text-sm text-right font-semibold {{ $qty <= 0 ? 'text-red-600' : ($variantMin > 0 && $qty <= $variantMin ? 'text-amber-600' : ($variantMax > 0 && $qty >= $variantMax ? 'text-gray-800' : 'text-gray-800')) }}">
                                         {{ number_format($qty) }}
                                     </td>
                                     <td class="px-4 py-3 text-sm text-right text-gray-500">

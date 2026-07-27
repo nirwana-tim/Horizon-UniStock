@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Staff;
 use App\Http\Controllers\Controller;
 use App\Models\DistributionSchedule;
 use App\Models\Item;
+use App\Models\ItemPrice;
 use App\Models\ItemVariant;
 use App\Models\StockBalance;
 use App\Models\Student;
@@ -104,13 +105,18 @@ class ScanController extends Controller
         $schedule = DistributionSchedule::findOrFail($request->input('schedule_id'));
         $staff = auth()->user();
 
-        $transaction = $this->distributionService->processDistribution(
-            $student,
-            $schedule,
-            $staff,
-            $request->input('items'),
-            $request->input('notes')
-        );
+        try {
+            $transaction = $this->distributionService->processDistribution(
+                $student,
+                $schedule,
+                $staff,
+                $request->input('items'),
+                $request->input('notes')
+            );
+        } catch (\Exception $e) {
+            return redirect()->route('distribution.scan.index')
+                ->with('error', 'Distribusi gagal: ' . $e->getMessage());
+        }
 
         return redirect()->route('distribution.scan.index')
             ->with('success', "Distribusi berhasil dicatat untuk {$student->nim} - {$student->name}.");
@@ -188,6 +194,20 @@ class ScanController extends Controller
             }
         }
 
+        $itemPrices = [];
+        $itemIds = $scheduleItems->pluck('id');
+        if ($itemIds->isNotEmpty()) {
+            $allPrices = ItemPrice::whereIn('item_id', $itemIds)
+                ->where('effective_date', '<=', $activeSchedule->date)
+                ->orderBy('effective_date', 'desc')
+                ->get()
+                ->groupBy('item_id')
+                ->map(fn($prices) => $prices->first()->selling_price);
+            foreach ($scheduleItems as $item) {
+                $itemPrices[$item->id] = $allPrices[$item->id] ?? $item->selling_price ?? 0;
+            }
+        }
+
         $baseCodes = $scheduleItems->pluck('base_code')->filter()->unique();
         $preloadedGroupVariants = Item::whereIn('base_code', $baseCodes)
             ->with('variants')
@@ -214,7 +234,8 @@ class ScanController extends Controller
             'stockInfo',
             'eligibility',
             'distributedItems',
-            'entitledQuantities'
+            'entitledQuantities',
+            'itemPrices'
         ));
     }
 }

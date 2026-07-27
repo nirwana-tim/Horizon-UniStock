@@ -147,4 +147,13 @@
 
     </form>
 
+@push('scripts')
+<script>
+    setInterval(function () {
+        document.getElementById('captcha-img').src =
+            '{{ captcha_src("math") }}&' + Date.now();
+    }, 90000);
+</script>
+@endpush
+
 </x-guest-layout>

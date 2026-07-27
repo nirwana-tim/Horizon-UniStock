@@ -5,7 +5,11 @@
     @foreach($items as $idx => $item)
         @php
             $existingItems = $entitlement?->items ?? collect(old('items', []));
-            $oldItem = $existingItems->first(fn($i) => ($i['item_id'] ?? $i->item_id ?? null) == $item->id);
+            $oldItem = $existingItems->first(fn($i) => 
+                ($i instanceof \App\Models\EntitlementItem) 
+                    ? ($i->item?->base_code ?? '') === $item->code
+                    : ($i['base_code'] ?? '') === $item->code
+            );
             $isChecked = !empty($oldItem);
             $qty = $isChecked ? ($oldItem['quantity'] ?? $oldItem->quantity ?? 1) : 1;
         @endphp

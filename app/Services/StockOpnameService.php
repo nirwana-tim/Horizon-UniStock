@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\AuditLog;
 use App\Models\Item;
 use App\Models\StockBalance;
+use App\Models\StockBatch;
 use App\Models\StockMovement;
 use App\Models\StockOpname;
 use App\Models\StockOpnameAdjustment;
@@ -15,6 +16,9 @@ use Illuminate\Support\Facades\DB;
 
 class StockOpnameService
 {
+    public function __construct(
+        private readonly StockService $stockService
+    ) {}
     public function createBatch(array $data): StockOpname
     {
         $referenceNumber = 'SO-' . date('Ym') . '-' . str_pad(StockOpname::count() + 1, 4, '0', STR_PAD_LEFT);
@@ -94,37 +98,83 @@ class StockOpnameService
                 $type = $item->variance > 0 ? 'IN' : 'OUT';
                 $quantity = abs($item->variance);
 
-                $stockMovement = StockMovement::create([
-                    'item_id' => $item->item_id,
-                    'variant_id' => $item->variant_id,
-                    'type' => $type,
-                    'quantity' => $quantity,
-                    'reference_type' => StockOpname::class,
-                    'reference_id' => $batch->id,
-                    'notes' => "Stock Opname adjustment - {$batch->reference_number}",
-                ]);
+                if ($type === 'OUT') {
+                    $fifoResult = $this->stockService->deductStockFifo(
+                        $item->item_id,
+                        $item->variant_id,
+                        $quantity,
+                        StockOpname::class,
+                        $batch->id,
+                        "Stock Opname adjustment (shortage) - {$batch->reference_number}"
+                    );
 
-                StockOpnameAdjustment::create([
-                    'stock_opname_id' => $batch->id,
-                    'stock_movement_id' => $stockMovement->id,
-                    'type' => $type,
-                    'quantity' => $quantity,
-                    'reason' => $item->variance > 0 ? 'Surplus' : 'Shortage',
-                    'approved_by' => $approver->id,
-                    'approved_at' => now(),
-                ]);
+                    $movements = StockMovement::where('reference_type', StockOpname::class)
+                        ->where('reference_id', $batch->id)
+                        ->where('item_id', $item->item_id)
+                        ->where('variant_id', $item->variant_id)
+                        ->latest()
+                        ->get();
 
-                $stockBalance = StockBalance::where('item_id', $item->item_id)
-                    ->where('variant_id', $item->variant_id)
-                    ->lockForUpdate()
-                    ->first();
+                    foreach ($movements as $movement) {
+                        StockOpnameAdjustment::create([
+                            'stock_opname_id' => $batch->id,
+                            'stock_movement_id' => $movement->id,
+                            'type' => 'OUT',
+                            'quantity' => $movement->quantity,
+                            'reason' => 'Shortage',
+                            'approved_by' => $approver->id,
+                            'approved_at' => now(),
+                        ]);
+                    }
+                } else {
+                    $balance = $this->stockService->getBalance($item->item_id, $item->variant_id);
+                    $unitHpp = $balance?->last_hpp ?? 0;
 
-                if ($stockBalance) {
-                    $newQuantity = $type === 'IN'
-                        ? $stockBalance->quantity + $quantity
-                        : $stockBalance->quantity - $quantity;
+                    $newBatch = StockBatch::create([
+                        'item_id' => $item->item_id,
+                        'variant_id' => $item->variant_id,
+                        'quantity_remaining' => $quantity,
+                        'unit_hpp' => $unitHpp,
+                        'received_date' => today(),
+                    ]);
 
-                    $stockBalance->update(['quantity' => max(0, $newQuantity)]);
+                    $stockMovement = StockMovement::create([
+                        'item_id' => $item->item_id,
+                        'variant_id' => $item->variant_id,
+                        'type' => 'IN',
+                        'quantity' => $quantity,
+                        'hpp' => $unitHpp,
+                        'stock_batch_id' => $newBatch->id,
+                        'reference_type' => StockOpname::class,
+                        'reference_id' => $batch->id,
+                        'notes' => "Stock Opname adjustment (surplus) - {$batch->reference_number}",
+                    ]);
+
+                    StockOpnameAdjustment::create([
+                        'stock_opname_id' => $batch->id,
+                        'stock_movement_id' => $stockMovement->id,
+                        'type' => 'IN',
+                        'quantity' => $quantity,
+                        'reason' => 'Surplus',
+                        'approved_by' => $approver->id,
+                        'approved_at' => now(),
+                    ]);
+
+                    $dbBalance = StockBalance::where('item_id', $item->item_id)
+                        ->where('variant_id', $item->variant_id)
+                        ->lockForUpdate()
+                        ->first();
+
+                    if ($dbBalance) {
+                        $dbBalance->increment('quantity', $quantity);
+                    } else {
+                        StockBalance::create([
+                            'item_id' => $item->item_id,
+                            'variant_id' => $item->variant_id,
+                            'quantity' => $quantity,
+                            'last_hpp' => $unitHpp,
+                        ]);
+                    }
                 }
             }
 

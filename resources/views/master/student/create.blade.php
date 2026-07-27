@@ -61,6 +61,17 @@
                                 </select>
                                 <x-input-error :messages="$errors->get('student_level')" class="mt-2" />
                             </div>
+
+                            <div>
+                                <x-input-label for="generation_id" :value="__('Generation')" />
+                                <select id="generation_id" name="generation_id" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500">
+                                    <option value="">-- Select Generation --</option>
+                                    @foreach($generations as $gen)
+                                        <option value="{{ $gen->id }}" {{ old('generation_id') == $gen->id ? 'selected' : '' }}>{{ $gen->name }}</option>
+                                    @endforeach
+                                </select>
+                                <x-input-error :messages="$errors->get('generation_id')" class="mt-2" />
+                            </div>
                         </div>
 
                         <div class="mt-6 flex items-center gap-3">

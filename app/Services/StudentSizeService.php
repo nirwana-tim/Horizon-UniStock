@@ -80,10 +80,6 @@ class StudentSizeService
             throw new \RuntimeException('Tidak ada event pengisian ukuran yang aktif saat ini.');
         }
 
-        if (! $event->canEdit($student)) {
-            throw new \RuntimeException('Kamu sudah mencapai batas maksimal pengisian untuk event ini.');
-        }
-
         DB::transaction(function () use ($student, $sizes, $event) {
             $profile = StudentSizeProfile::where('student_id', $student->id)
                 ->lockForUpdate()
@@ -94,6 +90,18 @@ class StudentSizeService
                     'student_id' => $student->id,
                     'is_filled' => false,
                 ]);
+            }
+
+            $submission = SizeEventSubmission::where('student_id', $student->id)
+                ->where('event_id', $event->id)
+                ->lockForUpdate()
+                ->first();
+
+            $submissionCount = $submission?->submission_count ?? 0;
+            if ($submissionCount >= $event->max_changes) {
+                throw new \RuntimeException(
+                    'Kamu sudah mencapai batas maksimal pengisian (' . $event->max_changes . 'x) untuk event ini.'
+                );
             }
 
             foreach ($sizes as $itemId => $size) {
@@ -127,10 +135,13 @@ class StudentSizeService
                 }
             }
 
-            $submission = SizeEventSubmission::firstOrCreate(
-                ['student_id' => $student->id, 'event_id' => $event->id],
-                ['submission_count' => 0],
-            );
+            if (! $submission) {
+                $submission = SizeEventSubmission::create([
+                    'student_id' => $student->id,
+                    'event_id' => $event->id,
+                    'submission_count' => 0,
+                ]);
+            }
             $submission->increment('submission_count');
 
             $profile->update([

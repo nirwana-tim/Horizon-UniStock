@@ -8,9 +8,8 @@ use App\Models\DistributionTransaction;
 use App\Models\EligibilityRecord;
 use App\Models\Entitlement;
 use App\Models\Item;
+use App\Models\ItemPrice;
 use App\Models\ItemVariant;
-use App\Models\StockBalance;
-use App\Models\StockMovement;
 use App\Models\Student;
 use App\Models\StudentSizeHistory;
 use App\Models\StudentSizeItem;
@@ -19,6 +18,9 @@ use Illuminate\Support\Facades\DB;
 
 class DistributionService
 {
+    public function __construct(
+        private readonly StockService $stockService
+    ) {}
     public function findStudent(string $query): ?Student
     {
         return Student::with(['studyProgram', 'generation'])
@@ -81,13 +83,18 @@ class DistributionService
                 throw new \Exception('Mahasiswa ini belum memenuhi syarat distribusi. Status pembayaran belum lunas.');
             }
 
-            $scheduleCheck = DistributionSchedule::whereKey($schedule->id)
-                ->where('is_active', true)
-                ->whereDate('date', '>=', now()->toDateString())
+            if (!$schedule->is_active) {
+                throw new \Exception('Jadwal distribusi sudah tidak aktif. Silakan hubungi admin.');
+            }
+
+            $isApplicable = DistributionSchedule::whereKey($schedule->id)
                 ->forStudent($student)
                 ->exists();
-            if (!$scheduleCheck) {
-                throw new \Exception('Jadwal distribusi tidak aktif, sudah lewat, atau tidak sesuai dengan mahasiswa.');
+            if (!$isApplicable) {
+                throw new \Exception(
+                    'Jadwal distribusi "' . $schedule->name . '" tidak sesuai dengan mahasiswa ini. ' .
+                    'Pastikan fakultas/prodi/angkatan sesuai.'
+                );
             }
 
             $existingTransaction = DistributionTransaction::where('student_id', $student->id)
@@ -97,7 +104,7 @@ class DistributionService
                 ->exists();
 
             if ($existingTransaction) {
-                throw new \Exception('Transaksi distribusi untuk mahasiswa ini pada jadwal ini sudah ada.');
+                throw new \Exception('Mahasiswa ini sudah melakukan pengambilan pada jadwal "' . $schedule->name . '". Tidak boleh mengambil ulang.');
             }
             $transaction = DistributionTransaction::create([
                 'student_id' => $student->id,
@@ -131,12 +138,8 @@ class DistributionService
                 $deductedQty = 0;
 
                 if ($variant) {
-                    $stockBalance = StockBalance::where('item_id', $item->id)
-                        ->where('variant_id', $variant->id)
-                        ->lockForUpdate()
-                        ->first();
-
-                    $availableStock = $stockBalance ? $stockBalance->quantity - $stockBalance->reserved : 0;
+                    $balance = $this->stockService->getBalance($item->id, $variant->id);
+                    $availableStock = $balance ? $balance->quantity - $balance->reserved : 0;
                     $deductedQty = min($quantity, $availableStock);
 
                     if ($availableStock < $quantity) {
@@ -146,30 +149,25 @@ class DistributionService
                     }
 
                     if ($deductedQty > 0) {
-                        $hppAtDistribution = $stockBalance ? $stockBalance->last_hpp : 0;
-
-                        StockMovement::create([
-                            'item_id' => $item->id,
-                            'variant_id' => $variant->id,
-                            'type' => 'OUT',
-                            'quantity' => $deductedQty,
-                            'hpp' => $hppAtDistribution,
-                            'reference_type' => DistributionTransaction::class,
-                            'reference_id' => $transaction->id,
-                            'notes' => "Distribusi ke {$student->nim}",
-                        ]);
-
-                        if ($stockBalance) {
-                            $stockBalance->decrement('quantity', $deductedQty);
-                        }
+                        $fifoResult = $this->stockService->deductStockFifo(
+                            $item->id,
+                            $variant->id,
+                            $deductedQty,
+                            DistributionTransaction::class,
+                            $transaction->id,
+                            "Distribusi ke {$student->nim}"
+                        );
+                        $hppAtDistribution = $fifoResult['blended_hpp'];
                     } else {
                         $hppAtDistribution = 0;
                     }
-                } else {
-                    $hppAtDistribution = 0;
                 }
 
                 $effectiveQty = $variant ? $deductedQty : $quantity;
+
+                $sellingPrice = $this->getDeferredPrice($student, $item->id)
+                    ?? $this->getSellingPriceForPeriod($item->id, $schedule);
+
                 DistributionItem::create([
                     'transaction_id' => $transaction->id,
                     'item_id' => $item->id,
@@ -177,7 +175,7 @@ class DistributionService
                     'actual_size' => $itemData['actual_size'],
                     'quantity' => $effectiveQty,
                     'hpp' => $hppAtDistribution,
-                    'selling_price_at_distribution' => $item->selling_price ?? 0,
+                    'selling_price_at_distribution' => $sellingPrice,
                 ]);
 
                 $oldSize = $itemData['old_size'] ?? $itemData['expected_size'] ?? null;
@@ -187,23 +185,45 @@ class DistributionService
             }
 
             // Check if there are items in entitlement that were not checked (deferred)
-            $checkedItemIds = array_column($items, 'item_id');
-            $entitlement = $this->getEntitlementForStudent($student);
-            if ($entitlement) {
-                $studentSizes = [];
-                $sizeProfile = $student->activeSizeProfile;
-                if ($sizeProfile) {
-                    foreach ($sizeProfile->sizeItems as $sizeItem) {
-                        $studentSizes[$sizeItem->item_id] = $sizeItem->size;
+            $checkedBaseCodes = [];
+            foreach ($items as $itemData) {
+                if (!empty($itemData['base_code'])) {
+                    $checkedBaseCodes[] = $itemData['base_code'];
+                } elseif (!empty($itemData['item_id'])) {
+                    $checkedItem = Item::find($itemData['item_id']);
+                    if ($checkedItem && $checkedItem->base_code) {
+                        $checkedBaseCodes[] = $checkedItem->base_code;
                     }
                 }
+            }
+            $entitlement = $this->getEntitlementForStudent($student);
+            if ($entitlement) {
+                $entitlement->load('items.item');
+            }
 
-                foreach ($entitlement->items as $entitlementItem) {
-                    if (! in_array($entitlementItem->item_id, $checkedItemIds)) {
-                        $allFullyStocked = false;
-                        $expectedSize = $studentSizes[$entitlementItem->item_id] ?? '-';
-                        $autoNotes[] = "{$entitlementItem->item->name} (Ukuran {$expectedSize}) ditunda/belum diambil";
+            $studentSizesByBaseCode = [];
+            $sizeProfile = $student->activeSizeProfile;
+            if ($sizeProfile) {
+                foreach ($sizeProfile->sizeItems as $sizeItem) {
+                    $studentSizesByBaseCode[$sizeItem->item_id] = $sizeItem->size;
+                    if ($sizeItem->item?->base_code) {
+                        $studentSizesByBaseCode[$sizeItem->item->base_code] = $sizeItem->size;
                     }
+                }
+            }
+            if ($entitlement) {
+                foreach ($entitlement->items as $entitlementItem) {
+                    $entBaseCode = $entitlementItem->item?->base_code;
+                    if ($entBaseCode && in_array($entBaseCode, $checkedBaseCodes)) {
+                        continue;
+                    }
+                    if (in_array($entitlementItem->item_id, array_column($items, 'item_id'))) {
+                        continue;
+                    }
+                    $allFullyStocked = false;
+                    $expectedSize = $studentSizesByBaseCode[$entitlementItem->item_id]
+                        ?? $studentSizesByBaseCode[$entBaseCode ?? ''] ?? '-';
+                    $autoNotes[] = "{$entitlementItem->item->name} (Ukuran {$expectedSize}) ditunda/belum diambil";
                 }
             }
 
@@ -235,6 +255,29 @@ class DistributionService
 
             return $transaction->fresh(['items.item', 'student', 'schedule']);
         });
+    }
+
+    private function getSellingPriceForPeriod(int $itemId, DistributionSchedule $schedule): float
+    {
+        return ItemPrice::where('item_id', $itemId)
+            ->where('effective_date', '<=', $schedule->date)
+            ->latest('effective_date')
+            ->first()?->selling_price
+            ?? Item::find($itemId)?->selling_price
+            ?? 0;
+    }
+
+    private function getDeferredPrice(Student $student, int $itemId): ?float
+    {
+        $partialPrice = DistributionItem::where('item_id', $itemId)
+            ->whereHas('transaction', fn($q) => $q
+                ->where('student_id', $student->id)
+                ->where('status', 'partial')
+            )
+            ->orderBy('distribution_items.id')
+            ->value('selling_price_at_distribution');
+
+        return $partialPrice > 0 ? $partialPrice : null;
     }
 
     private function logSizeChange(Student $student, Item $item, string $oldSize, string $newSize, User $staff): void

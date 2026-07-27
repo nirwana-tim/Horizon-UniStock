@@ -86,8 +86,9 @@ class StudentController extends Controller
     public function create(): View
     {
         $studyPrograms = StudyProgram::with('faculty')->orderBy('name')->get();
+        $generations = StudentGeneration::orderBy('name')->get();
 
-        return view('master.student.create', compact('studyPrograms'));
+        return view('master.student.create', compact('studyPrograms', 'generations'));
     }
 
     public function store(StudentRequest $request): RedirectResponse

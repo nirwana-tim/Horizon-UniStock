@@ -63,7 +63,7 @@
                             </div>
 
                             <div>
-                                <x-input-label for="student_level" :value="__('Student Level')" :required="true" />
+                                <x-input-label for="student_level" :value="__('Student Level')" />
                                 <select id="student_level" name="student_level" x-model="studentLevel"
                                         class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500">
                                     <option value="">All Student Levels</option>

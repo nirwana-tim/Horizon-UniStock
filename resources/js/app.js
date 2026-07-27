@@ -16,6 +16,7 @@ Alpine.data('serverTable', (url) => ({
     perPage: 20,
     studyProgramId: '',
     generationId: '',
+    isActive: '',
     tableHtml: '',
     paginationHtml: '',
     loading: false,
@@ -39,6 +40,7 @@ Alpine.data('serverTable', (url) => ({
         if (this.perPage && this.perPage !== 20) params.per_page = this.perPage;
         if (this.studyProgramId) params.study_program_id = this.studyProgramId;
         if (this.generationId) params.generation_id = this.generationId;
+        if (this.isActive) params.is_active = this.isActive;
         axios.get(url, { params })
         .then(res => {
             this.tableHtml = res.data.html || res.data.tableHtml || '';

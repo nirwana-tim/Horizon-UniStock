@@ -26,12 +26,18 @@
 
                     <div x-data="serverTable('{{ route('distribution.entitlement.index') }}')">
 
-                        <div class="mb-4">
+                        <div class="mb-4 flex items-center gap-3">
                             <input type="text"
                                    x-model="search"
                                    @input.debounce.300ms="page=1; fetchData()"
                                    placeholder="Search..."
                                    class="w-72 border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500 text-sm">
+                            <select x-model="isActive" @change="page=1; fetchData()"
+                                class="w-40 border-gray-300 rounded-md shadow-sm text-sm focus:border-primary-500 focus:ring-primary-500">
+                                <option value="">All Status</option>
+                                <option value="1">Active</option>
+                                <option value="0">Inactive</option>
+                            </select>
                         </div>
 
                         <div class="overflow-x-auto">

@@ -159,7 +159,7 @@ class DistributionScheduleController extends Controller
 
     public function transactions(DistributionSchedule $distributionSchedule, Request $request): View|JsonResponse
     {
-        $query = $distributionSchedule->transactions()->with('student');
+        $query = $distributionSchedule->transactions()->with('student', 'items.item');
 
         if ($search = $request->input('q')) {
             $search = str_replace(['%', '_'], ['\%', '\_'], $search);

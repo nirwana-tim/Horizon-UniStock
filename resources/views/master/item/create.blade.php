@@ -54,8 +54,8 @@
                             </div>
 
                             <div>
-                                <label for="type_id" class="block text-sm font-medium text-gray-700">Type <span class="text-red-500">*</span></label>
-                                <select name="type_id" id="type_id" required
+                                <label for="type_id" class="block text-sm font-medium text-gray-700">Type</label>
+                                <select name="type_id" id="type_id"
                                     class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-gray-500 sm:text-sm">
 <option value="">-- Select Type --</option>
                                     @foreach($types as $type)
@@ -70,8 +70,8 @@
                             </div>
 
                             <div>
-                                <label for="department_id" class="block text-sm font-medium text-gray-700">Department <span class="text-red-500">*</span></label>
-                                <select name="department_id" id="department_id" required
+                                <label for="department_id" class="block text-sm font-medium text-gray-700">Department</label>
+                                <select name="department_id" id="department_id"
                                     class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-gray-500 sm:text-sm">
                                     <option value="">-- Select Department --</option>
                                     @foreach($departments as $dept)
@@ -96,8 +96,8 @@
                             </div>
 
                             <div>
-                                <label for="unit" class="block text-sm font-medium text-gray-700">Unit</label>
-                                <input type="text" name="unit" id="unit" value="{{ old('unit', 'pcs') }}"
+                                <label for="unit" class="block text-sm font-medium text-gray-700">Unit <span class="text-red-500">*</span></label>
+                                <input type="text" name="unit" id="unit" value="{{ old('unit', 'pcs') }}" required
                                     class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-gray-500 sm:text-sm">
                                 @error('unit')
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -118,6 +118,24 @@
                                 <input type="number" name="hpp" id="hpp" value="{{ old('hpp', 0) }}" min="0" step="100"
                                     class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-gray-500 sm:text-sm">
                                 @error('hpp')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <div>
+                                <label for="min_stock" class="block text-sm font-medium text-gray-700">Min. Stock</label>
+                                <input type="number" name="min_stock" id="min_stock" value="{{ old('min_stock', 0) }}" min="0"
+                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-gray-500 sm:text-sm">
+                                @error('min_stock')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <div>
+                                <label for="max_stock" class="block text-sm font-medium text-gray-700">Max. Stock</label>
+                                <input type="number" name="max_stock" id="max_stock" value="{{ old('max_stock', 0) }}" min="0"
+                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-gray-500 sm:text-sm">
+                                @error('max_stock')
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
                             </div>

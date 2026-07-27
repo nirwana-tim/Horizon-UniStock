@@ -10,15 +10,20 @@
                     <form action="{{ route('master-data.item-size.store') }}" method="POST">
                         @csrf
 
+                        <div class="mb-4">
+                            <x-input-label for="code" :value="__('Code')" />
+                            <x-text-input id="code" name="code" type="text" class="mt-1 block w-full" :value="old('code')" maxlength="10" placeholder="Example: S, M, L, XL" />
+                            <x-input-error :messages="$errors->get('code')" class="mt-2" />
+                        </div>
 
                         <div class="mb-4">
                             <x-input-label for="label" :value="__('Label')" />
-                            <x-text-input id="label" name="label" type="text" class="mt-1 block w-full" :value="old('label')" required placeholder="Example: S, M, L, XL, 37, 38" />
+                            <x-text-input id="label" name="label" type="text" class="mt-1 block w-full" :value="old('label')" required placeholder="Example: Small, Medium, Large" />
                             <x-input-error :messages="$errors->get('label')" class="mt-2" />
                         </div>
 
                         <div class="mb-4">
-                            <x-input-label :value="__('Category')" />
+                            <x-input-label :value="__('Category')" :required="true" />
                             <div class="mt-1 grid grid-cols-2 sm:grid-cols-3 gap-2">
                                 @foreach($categories as $cat)
                                     <label class="inline-flex items-center gap-2 px-3 py-2 bg-gray-50 border border-gray-200 rounded-md cursor-pointer hover:bg-gray-100">

@@ -170,6 +170,9 @@
                                                     Code
                                                 </th>
                                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                    Price (Rp)
+                                                </th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                                     Input Size
                                                 </th>
                                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -220,6 +223,11 @@
                                                     </td>
                                                     <td class="px-6 py-4 whitespace-nowrap">
                                                         <div class="text-sm text-gray-500">{{ $item->code }}</div>
+                                                    </td>
+                                                    <td class="px-6 py-4 whitespace-nowrap">
+                                                        <div class="text-sm text-gray-700 tabular-nums">
+                                                            {{ number_format($itemPrices[$item->id] ?? 0, 0, ',', '.') }}
+                                                        </div>
                                                     </td>
                                                     <td class="px-6 py-4 whitespace-nowrap">
                                                         <div class="text-sm text-gray-900">{{ $expectedLabel }}</div>

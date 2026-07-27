@@ -10,10 +10,17 @@
         <td class="px-6 py-4 whitespace-nowrap text-sm text-right tabular-nums text-gray-500">Rp {{ number_format($balance->last_hpp ?? 0, 0, ',', '.') }}</td>
         <td class="px-6 py-4 whitespace-nowrap text-sm text-right tabular-nums text-gray-900 font-medium">Rp {{ number_format(($balance->quantity * ($balance->last_hpp ?? 0)), 0, ',', '.') }}</td>
         <td class="px-6 py-4 whitespace-nowrap text-center">
-            @if($balance->quantity <= 0)
+            @php
+                $min = $balance->item?->min_stock ?? 0;
+                $max = $balance->item?->max_stock ?? 0;
+                $qty = $balance->quantity;
+            @endphp
+            @if($qty <= 0)
                 <x-badge type="danger">Out of Stock</x-badge>
-            @elseif($balance->quantity <= 10)
+            @elseif($min > 0 && $qty <= $min)
                 <x-badge type="warning">Low Stock</x-badge>
+            @elseif($max > 0 && $qty >= $max)
+                <x-badge type="info">Overstock</x-badge>
             @else
                 <x-badge type="success">In Stock</x-badge>
             @endif

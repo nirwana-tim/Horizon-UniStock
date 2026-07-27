@@ -1,0 +1,30 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('stock_batches', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('item_id')->constrained('items')->cascadeOnDelete();
+            $table->foreignId('variant_id')->constrained('item_variants')->cascadeOnDelete();
+            $table->integer('quantity_remaining')->default(0);
+            $table->decimal('unit_hpp', 15, 2)->default(0);
+            $table->date('received_date');
+            $table->foreignId('stock_receive_item_id')->nullable()->constrained('stock_receive_items')->nullOnDelete();
+            $table->timestamps();
+            $table->softDeletes();
+
+            $table->index(['item_id', 'variant_id']);
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('stock_batches');
+    }
+};

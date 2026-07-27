@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use App\Models\DistributionItem;
-use App\Models\DistributionPeriod;
+use App\Models\DistributionSchedule;
 use App\Models\DistributionTransaction;
 use App\Models\Item;
 use Illuminate\Support\Carbon;
@@ -15,7 +15,7 @@ class GpmService
     public function calculateGpm(?string $period = null): Collection
     {
         if (!$period) {
-            $latestPeriod = DistributionPeriod::latest('period')->value('period');
+            $latestPeriod = DistributionSchedule::whereNotNull('period')->latest('period')->value('period');
             $period = $latestPeriod ?? now()->format('Y-m');
         }
 

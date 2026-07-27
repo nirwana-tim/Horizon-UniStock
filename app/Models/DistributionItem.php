@@ -15,6 +15,7 @@ class DistributionItem extends Model
         'quantity',
         'hpp',
         'unit_price',
+        'selling_price_at_distribution',
     ];
 
     protected function casts(): array
@@ -23,6 +24,7 @@ class DistributionItem extends Model
             'quantity' => 'integer',
             'hpp' => 'decimal:2',
             'unit_price' => 'decimal:2',
+            'selling_price_at_distribution' => 'decimal:2',
         ];
     }
 

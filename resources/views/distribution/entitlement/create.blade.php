@@ -27,7 +27,7 @@
                             </div>
                             <input type="hidden" name="code" id="code">
                             <div>
-                                <x-input-label for="student_level" :value="__('Student Level')" :required="true" />
+                                <x-input-label for="student_level" :value="__('Student Level')" />
                                 <select id="student_level" name="student_level" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500 text-sm">
                                     <option value="">-- Select Type --</option>
                                     @foreach($studentLevels as $st)
@@ -71,10 +71,10 @@
 @push('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        // Auto generation of entitlement code based on selections
         const studentLevelSelect = document.getElementById('student_level');
         const prodiSelect = document.getElementById('prodi_select');
         const codeInput = document.getElementById('code');
+        const form = document.querySelector('form');
 
         function updateCode() {
             const levelCode = studentLevelSelect.value;
@@ -91,6 +91,13 @@
 
         studentLevelSelect.addEventListener('change', updateCode);
         prodiSelect.addEventListener('change', updateCode);
+
+        form.addEventListener('submit', function (e) {
+            if (!codeInput.value) {
+                e.preventDefault();
+                alert('Silakan pilih Program Studi dan Student Level untuk menghasilkan kode entitlement.');
+            }
+        });
     });
 </script>
 @endpush

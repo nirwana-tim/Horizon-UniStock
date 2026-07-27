@@ -52,5 +52,6 @@ return [
         'height' => 65,
         'quality' => 90,
         'math' => true,
+        'expire' => 90,
     ],
 ];
