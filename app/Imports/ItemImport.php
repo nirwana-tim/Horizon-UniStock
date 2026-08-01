@@ -54,9 +54,9 @@ class ItemImport implements ToCollection, WithHeadingRow, WithMultipleSheets
                 $record['kode'] = $this->generateCode($record);
             }
 
-            $item = Item::updateOrCreate(
-                ['code' => $record['kode']],
-                [
+            $item = Item::firstOrNew(['code' => $record['kode']]);
+            if (!$item->exists) {
+                $item->fill([
                     'name' => $record['nama'],
                     'base_code' => $this->generateBaseCode($record),
                     'gender' => $record['gender'],
@@ -66,8 +66,8 @@ class ItemImport implements ToCollection, WithHeadingRow, WithMultipleSheets
                     'unit' => $record['satuan'],
                     'selling_price' => $record['harga_jual'] ?? 0,
                     'hpp' => $record['hpp'] ?? 0,
-                ]
-            );
+                ])->save();
+            }
 
             if (!empty($record['harga_jual']) || !empty($record['hpp'])) {
                 ItemPrice::updateOrCreate(

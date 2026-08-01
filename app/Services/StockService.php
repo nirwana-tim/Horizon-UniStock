@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Models\AuditLog;
 use App\Models\Item;
 use App\Models\ItemVariant;
 use App\Models\StockBalance;
@@ -97,14 +96,7 @@ class StockService
                 }
             }
 
-            AuditLog::create([
-                'user_id' => Auth::id(),
-                'action' => 'create',
-                'model_type' => StockReceive::class,
-                'model_id' => $receive->id,
-                'new_values' => $receive->toArray(),
-                'ip_address' => request()->ip(),
-            ]);
+            AuditService::log('create', StockReceive::class, $receive->id, null, $receive->toArray());
 
             return $receive->fresh(['items.item', 'items.variant', 'vendor']);
         });
@@ -284,7 +276,9 @@ class StockService
                     ->delete();
             }
             $receive->items()->delete();
+            $old = $receive->toArray();
             $receive->delete();
+            AuditService::log('delete', StockReceive::class, $receive->id, $old, null);
         });
     }
 
@@ -336,6 +330,8 @@ class StockService
             if ($balance) {
                 $balance->increment('quantity', $quantity);
             }
+
+            AuditService::log('return_stock', StockMovement::class, $referenceId, ['quantity' => $quantity], ['item_id' => $itemId, 'variant_id' => $variantId, 'reference' => $referenceType]);
         });
     }
 

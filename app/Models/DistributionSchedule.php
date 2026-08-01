@@ -21,6 +21,7 @@ class DistributionSchedule extends Model
         'is_active',
         'faculty_id',
         'study_program_id',
+        'generation_id',
     ];
 
     protected function casts(): array
@@ -83,8 +84,4 @@ class DistributionSchedule extends Model
         return $this->belongsTo(StudentLevel::class, 'student_level', 'kode');
     }
 
-    public function programLevel(): BelongsTo
-    {
-        return $this->belongsTo(StudentGeneration::class, 'generation_id');
-    }
 }

@@ -37,9 +37,15 @@ class StockReceiveImport implements ToCollection, WithHeadingRow, WithMultipleSh
         $stockService = app(StockService::class);
 
         foreach ($groups as $key => $group) {
+            $vendorCode = strtoupper(substr(preg_replace('/[^a-zA-Z0-9]/', '', $group['vendor_name']), 0, 3));
+            $baseCode = $vendorCode;
+            $suffix = 1;
+            while (Vendor::where('code', $vendorCode)->where('name', '!=', $group['vendor_name'])->exists()) {
+                $vendorCode = $baseCode . $suffix++;
+            }
             $vendor = Vendor::firstOrCreate(
                 ['name' => $group['vendor_name']],
-                ['code' => strtoupper(substr(preg_replace('/[^a-zA-Z0-9]/', '', $group['vendor_name']), 0, 3))]
+                ['code' => $vendorCode]
             );
 
             $data = [
@@ -51,8 +57,10 @@ class StockReceiveImport implements ToCollection, WithHeadingRow, WithMultipleSh
             ];
 
             foreach ($group['items'] as $itemData) {
-                $item = Item::where('code', $itemData['kode_barang'])
-                    ->orWhere('base_code', $itemData['kode_barang'])
+                $item = Item::where(function ($q) use ($itemData) {
+                        $q->where('code', $itemData['kode_barang'])
+                          ->orWhere('base_code', $itemData['kode_barang']);
+                    })
                     ->first();
 
                 if (!$item) continue;
@@ -150,15 +158,21 @@ class StockReceiveImport implements ToCollection, WithHeadingRow, WithMultipleSh
     private function groupRecords(array $records): array
     {
         $groups = [];
+        $batchIndex = 0;
 
         foreach ($records as $record) {
-            $key = $record['nomor_ref'] ?? md5($record['vendor'] . '|' . $record['tanggal'] . '|' . ($record['notes'] ?? ''));
+            $ref = $record['nomor_ref'];
+            if (!$ref) {
+                $batchIndex++;
+                $ref = 'SR-' . date('Ymd') . '-' . str_pad($batchIndex, 4, '0', STR_PAD_LEFT);
+            }
+            $key = $ref;
 
             if (!isset($groups[$key])) {
                 $groups[$key] = [
                     'vendor_name' => $record['vendor'],
                     'receive_date' => $record['tanggal'],
-                    'reference_number' => $record['nomor_ref'],
+                    'reference_number' => $ref,
                     'notes' => $record['notes'],
                     'items' => [],
                 ];

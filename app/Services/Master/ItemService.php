@@ -88,6 +88,7 @@ class ItemService
         $item->update($updateData);
 
         if ($newCode !== $old['code']) {
+            $item->load('variants');
             foreach ($item->variants as $var) {
                 $var->update([
                     'sku' => $newCode . '-' . $var->size,

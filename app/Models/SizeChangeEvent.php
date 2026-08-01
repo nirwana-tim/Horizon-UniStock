@@ -18,7 +18,10 @@ class SizeChangeEvent extends Model
         'student_level',
         'max_changes',
         'is_active',
+        'allow_reedit',
         'created_by',
+        'baju_size_options',
+        'sepatu_size_options',
     ];
 
     protected function casts(): array
@@ -28,6 +31,8 @@ class SizeChangeEvent extends Model
             'end_date' => 'datetime',
             'is_active' => 'boolean',
             'max_changes' => 'integer',
+            'baju_size_options' => 'array',
+            'sepatu_size_options' => 'array',
         ];
     }
 

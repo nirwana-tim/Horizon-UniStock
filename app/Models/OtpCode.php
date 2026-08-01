@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class OtpCode extends Model
 {
@@ -22,6 +23,11 @@ class OtpCode extends Model
             'expires_at' => 'datetime',
             'used_at' => 'datetime',
         ];
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 
     public function isValid(): bool

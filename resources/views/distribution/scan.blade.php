@@ -7,11 +7,7 @@
 
     <div class="py-12">
         <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
-            @if(session('success'))
-                <div class="mb-4 px-4 py-3 bg-green-100 border border-green-300 text-green-700 rounded-md">
-                    {{ session('success') }}
-                </div>
-            @endif
+            <x-alert type="success">{{ session('success') }}</x-alert>
 
             <div class="mb-4 flex items-center gap-4">
                 <div class="flex items-center gap-2 text-sm text-gray-600">
@@ -124,7 +120,6 @@
     </div>
 
     @push('scripts')
-    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
 

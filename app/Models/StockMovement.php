@@ -40,6 +40,11 @@ class StockMovement extends Model
         return $this->belongsTo(ItemVariant::class, 'variant_id');
     }
 
+    public function stockBatch(): BelongsTo
+    {
+        return $this->belongsTo(StockBatch::class, 'stock_batch_id');
+    }
+
     public function reference(): MorphTo
     {
         return $this->morphTo();

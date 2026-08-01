@@ -109,11 +109,11 @@ class StudentService
             foreach ($students as $student) {
                 $oldValues = $student->toArray();
 
-                $currentLevel = strtolower(trim((string) ($student->student_level ?? '')));
+                $currentLevel = strtoupper(trim((string) ($student->student_level ?? '')));
                 $currentSem = strtoupper(trim((string) ($student->current_semester ?? '')));
 
                 $next = match (true) {
-                    $currentLevel === 'Y1S1' || $currentSem === 'Y1S1' => [
+                    $currentLevel === 'Y1S1' || $currentSem === 'Y1S1' || $currentSem === '' => [
                         'student_level' => 'Y1S2',
                         'current_semester' => 'Y1S2',
                     ],
@@ -146,8 +146,8 @@ class StudentService
                         'current_semester' => 'GRADUATED',
                     ],
                     default => [
-                        'student_level' => 'graduated',
-                        'current_semester' => 'GRADUATED',
+                        'student_level' => 'Y1S1',
+                        'current_semester' => 'Y1S1',
                     ],
                 };
 
@@ -155,6 +155,10 @@ class StudentService
                     'student_level' => $next['student_level'],
                     'current_semester' => $next['current_semester'],
                 ];
+
+                if ($next['student_level'] === 'graduated') {
+                    $updates['status'] = 'graduated';
+                }
 
                 if ($newLevelId) {
                     $updates['generation_id'] = $newLevelId;
@@ -173,6 +177,25 @@ class StudentService
 
             return $count;
         });
+    }
+
+    public function verifyEmailKampus(Student $student, string $email): void
+    {
+        $old = $student->toArray();
+        $student->update([
+            'email_kampus' => $email,
+            'email_verified_at' => now(),
+        ]);
+
+        AuditService::log('email_kampus.verified', Student::class, $student->id, $old, $student->fresh()->toArray());
+    }
+
+    public function updateEmailPribadi(Student $student, string $email): void
+    {
+        $old = $student->toArray();
+        $student->update(['email_pribadi' => $email]);
+
+        AuditService::log('email_pribadi.updated', Student::class, $student->id, $old, $student->fresh()->toArray());
     }
 
     public function refreshEntitlementCode(Student $student): void

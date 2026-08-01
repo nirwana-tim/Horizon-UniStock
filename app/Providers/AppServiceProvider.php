@@ -28,7 +28,16 @@ class AppServiceProvider extends ServiceProvider
             return $user->hasRole('super_admin') ? true : null;
         });
 
-        View::composer('*', function ($view) {
+        View::composer([
+            'finance.size-events.create',
+            'distribution.entitlement.edit',
+            'distribution.entitlement.create',
+            'distribution.distribution-schedule.edit',
+            'distribution.distribution-schedule.create',
+            'master.student-level.index',
+            'master.student.create',
+            'master.student.edit',
+        ], function ($view) {
             $view->with('studentLevels', StudentLevel::orderBy('kode')->get());
         });
     }

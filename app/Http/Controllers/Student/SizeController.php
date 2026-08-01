@@ -33,7 +33,9 @@ class SizeController extends Controller
             ->get()
             ->keyBy('event_id');
 
-        return view('student.sizes-index', compact('student', 'events', 'submissions'));
+        $profile = $student->activeSizeProfile;
+
+        return view('student.sizes-index', compact('student', 'events', 'submissions', 'profile'));
     }
 
     public function input(SizeChangeEvent $event): View
@@ -45,14 +47,13 @@ class SizeController extends Controller
             abort(403, 'Event ini tidak berlaku untuk kamu.');
         }
 
-        $entitlementItems = $this->sizeService->getEntitlementItems($student);
+        $sizeOptions = $this->sizeService->getSizeOptions($event);
 
-        $existingSizes = [];
-        if ($student->activeSizeProfile) {
-            foreach ($student->activeSizeProfile->sizeItems as $sizeItem) {
-                $existingSizes[$sizeItem->item_id] = $sizeItem->size;
-            }
-        }
+        $profile = $student->activeSizeProfile;
+        $currentSizes = [
+            'baju' => $profile?->baju_size ?? null,
+            'sepatu' => $profile?->sepatu_size ?? null,
+        ];
 
         $submission = \App\Models\SizeEventSubmission::where('student_id', $student->id)
             ->where('event_id', $event->id)->first();
@@ -61,8 +62,8 @@ class SizeController extends Controller
         $remainingChanges = $event->max_changes - $submissionCount;
 
         return view('student.size-input', compact(
-            'student', 'event', 'entitlementItems',
-            'existingSizes', 'canEdit', 'remainingChanges'
+            'student', 'event', 'sizeOptions', 'currentSizes',
+            'canEdit', 'remainingChanges'
         ));
     }
 
@@ -73,17 +74,15 @@ class SizeController extends Controller
 
         $validated = $request->validate([
             'sizes' => 'required|array',
-            'sizes.*' => 'nullable|string|max:10',
-            'event_id' => 'nullable|integer|exists:size_change_events,id',
+            'sizes.baju' => 'nullable|string|max:10',
+            'sizes.sepatu' => 'nullable|string|max:10',
+            'event_id' => 'required|integer|exists:size_change_events,id',
         ]);
 
         try {
-            $this->sizeService->saveSizes($student, $validated['sizes'], $validated['event_id'] ?? null);
+            $this->sizeService->saveSizes($student, $validated['sizes'], $validated['event_id']);
         } catch (\RuntimeException $e) {
-            $route = $validated['event_id']
-                ? route('student.sizes.input', $validated['event_id'])
-                : route('student.sizes.index');
-            return redirect()->to($route)
+            return redirect()->route('student.sizes.input', $validated['event_id'])
                 ->with('error', $e->getMessage());
         }
 

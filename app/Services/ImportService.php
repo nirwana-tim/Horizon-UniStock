@@ -17,7 +17,7 @@ use Maatwebsite\Excel\Validators\ValidationException;
 
 class ImportService
 {
-    public function processImport(string $type, string $filePath, int $userId): ImportBatch
+    public function processImport(string $type, string $filePath, int $userId, ?int $stockOpnameId = null): ImportBatch
     {
         $totalRows = 0;
         $importer = null;
@@ -33,7 +33,7 @@ class ImportService
         ]);
 
         try {
-            $importer = $this->resolveImporter($type, $filePath);
+            $importer = $this->resolveImporter($type, $filePath, $stockOpnameId, $userId);
 
             $collection = Excel::toCollection(null, $filePath)->first() ?? collect();
             $totalRows = method_exists($importer, 'countRows')
@@ -84,13 +84,13 @@ class ImportService
         return $batch->fresh();
     }
 
-    protected function resolveImporter(string $type, string $filePath): object
+    protected function resolveImporter(string $type, string $filePath, ?int $stockOpnameId = null, ?int $userId = null): object
     {
         return match ($type) {
             'student' => new StudentImport(),
             'eligibility' => new EligibilityImport(),
             'item' => new ItemImport(),
-            'stock_opname' => $this->resolveStockOpnameImporter($filePath),
+            'stock_opname' => $this->resolveStockOpnameImporter($stockOpnameId, $userId),
             'item_price' => new ItemPriceImport(),
             'entitlement' => new EntitlementImport(),
             'stock_receive' => new \App\Imports\StockReceiveImport(),
@@ -98,10 +98,8 @@ class ImportService
         };
     }
 
-    protected function resolveStockOpnameImporter(string $filePath): StockOpnameImport
+    protected function resolveStockOpnameImporter(?int $stockOpnameId, ?int $userId): StockOpnameImport
     {
-        $stockOpnameId = request()->input('stock_opname_id');
-
         if (!$stockOpnameId) {
             $batch = StockOpname::create([
                 'reference_number' => 'IMP-' . now()->format('YmdHis'),
@@ -109,7 +107,7 @@ class ImportService
                 'period' => now()->format('Y') . '/' . (now()->format('y') + 1),
                 'notes' => 'Auto-created from import',
                 'status' => 'draft',
-                'created_by' => auth()->id(),
+                'created_by' => $userId,
             ]);
             $stockOpnameId = $batch->id;
         }

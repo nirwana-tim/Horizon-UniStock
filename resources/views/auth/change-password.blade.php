@@ -5,11 +5,7 @@
         </p>
     </div>
 
-    @if(session('error'))
-        <div class="mb-4 p-4 bg-red-100 border border-red-300 text-red-800 rounded-md">
-            {{ session('error') }}
-        </div>
-    @endif
+    <x-alert type="error">{{ session('error') }}</x-alert>
 
     <form method="POST" action="{{ route('password.change.store') }}">
         @csrf

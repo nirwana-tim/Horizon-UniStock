@@ -57,7 +57,7 @@
                 </svg>
             </div>
             <div class="min-w-0">
-                <p class="text-sm font-bold text-gray-900 leading-tight truncate">UniStock</p>
+                <p class="font-headline-sm text-headline-sm text-primary font-bold leading-tight truncate">{{ config('app.name', 'Horizon') }}</p>
             </div>
         </a>
 

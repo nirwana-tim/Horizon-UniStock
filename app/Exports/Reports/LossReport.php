@@ -29,13 +29,14 @@ class LossReport extends BaseExport implements FromCollection, WithHeadings, Wit
                 'items.name as item_name',
                 'item_categories.label as category_name',
                 'item_categories.code as category_code',
+                'items.hpp',
                 DB::raw('SUM(CASE WHEN stock_opname_items.variance < 0 THEN ABS(stock_opname_items.variance) ELSE 0 END) as qty_loss'),
                 DB::raw('SUM(CASE WHEN stock_opname_items.variance > 0 THEN stock_opname_items.variance ELSE 0 END) as qty_surplus'),
                 DB::raw('COUNT(DISTINCT stock_opname_items.stock_opname_id) as opname_count')
             )
             ->join('items', 'stock_opname_items.item_id', '=', 'items.id')
             ->leftJoin('item_categories', 'items.category_id', '=', 'item_categories.id')
-            ->groupBy('items.id', 'items.name', 'item_categories.label', 'item_categories.code')
+            ->groupBy('items.id', 'items.name', 'item_categories.label', 'item_categories.code', 'items.hpp')
             ->orderBy('item_categories.code')
             ->orderBy('items.name');
 
@@ -69,8 +70,7 @@ class LossReport extends BaseExport implements FromCollection, WithHeadings, Wit
     public function map($item): array
     {
         $this->row++;
-        $itemModel = \App\Models\Item::where('name', $item->item_name)->first();
-        $hpp = $itemModel?->hpp ?? 0;
+        $hpp = $item->hpp ?? 0;
 
         $totalLoss = $item->qty_loss * $hpp;
         $totalSurplus = $item->qty_surplus * $hpp;

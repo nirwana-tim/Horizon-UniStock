@@ -6,25 +6,36 @@ use App\Http\Controllers\Controller;
 use App\Models\OtpCode;
 use App\Models\Student;
 use App\Services\AuditService;
+use App\Services\Master\StudentService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\View\View;
 
 class EmailController extends Controller
 {
+    public function __construct(
+        protected StudentService $studentService
+    ) {}
+
     public function showChangeForm(): View
     {
         return view('profile.email.verify-password');
     }
 
-    public function verifyPassword(Request $request): RedirectResponse
+    public function verifyPassword(Request $request): RedirectResponse|\Illuminate\Http\JsonResponse
     {
         $request->validate([
             'password' => ['required', 'current_password'],
         ]);
+
+        if ($request->ajax()) {
+            return response()->json([
+                'redirect' => route('profile.email.input-email'),
+            ]);
+        }
 
         return redirect()->route('profile.email.input-email');
     }
@@ -129,15 +140,7 @@ class EmailController extends Controller
 
         $oldEmail = $student->email_pribadi;
 
-        $student->update(['email_pribadi' => $pendingEmail]);
-
-        AuditService::log(
-            'email_pribadi.updated',
-            Student::class,
-            $student->id,
-            ['email_pribadi' => $oldEmail],
-            ['email_pribadi' => $pendingEmail]
-        );
+        $this->studentService->updateEmailPribadi($student, $pendingEmail);
 
         try {
             Mail::raw(
@@ -148,6 +151,11 @@ class EmailController extends Controller
                 }
             );
         } catch (\Exception $e) {
+            Log::warning('Gagal kirim notifikasi perubahan email', [
+                'student_id' => $student->id,
+                'old_email' => $oldEmail,
+                'error' => $e->getMessage(),
+            ]);
         }
 
         return redirect()->route('profile.edit')

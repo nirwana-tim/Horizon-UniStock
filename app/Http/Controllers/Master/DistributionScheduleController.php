@@ -5,11 +5,7 @@ namespace App\Http\Controllers\Master;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\DistributionScheduleRequest;
 use App\Models\DistributionSchedule;
-use App\Models\Entitlement;
-use App\Models\Faculty;
-use App\Models\Item;
-use App\Models\StudyProgram;
-use App\Services\AuditService;
+use App\Services\DistributionScheduleService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -17,21 +13,18 @@ use Illuminate\View\View;
 
 class DistributionScheduleController extends Controller
 {
+    public function __construct(
+        protected DistributionScheduleService $scheduleService
+    ) {}
+
     public function index(Request $request): View|JsonResponse
     {
-        $schedules = DistributionSchedule::with('faculty', 'studyProgram', 'studentLevel')
-            ->when($request->input('q'), function ($query, $search) {
-                $search = str_replace(['%', '_'], ['\%', '\_'], $search);
-                $query->where(function ($q) use ($search) {
-                    $q->where('name', 'like', "%{$search}%")
-                        ->orWhere('location', 'like', "%{$search}%");
-                });
-            })
-            ->when($request->input('period'), fn ($query, $p) => $query->where('period', $p))
-            ->when($request->input('faculty_id'), fn ($query, $f) => $query->where('faculty_id', $f))
-            ->when($request->input('study_program_id'), fn ($query, $s) => $query->where('study_program_id', $s))
-            ->latest()
-            ->paginate(20);
+        $schedules = $this->scheduleService->getFilteredSchedules(
+            $request->input('q'),
+            $request->input('period'),
+            $request->integer('faculty_id') ?: null,
+            $request->integer('study_program_id') ?: null,
+        );
 
         if ($request->ajax()) {
             $html = view('distribution.distribution-schedule._table', compact('schedules'))->render();
@@ -40,81 +33,35 @@ class DistributionScheduleController extends Controller
             return response()->json(compact('html', 'pagination'));
         }
 
-        $periods = cache()->remember('schedule-periods', 3600, fn () =>
-            DistributionSchedule::whereNotNull('period')
-                ->distinct()
-                ->orderBy('period', 'desc')
-                ->pluck('period')
-                ->map(fn ($p) => (string) $p)
-                ->values()
-                ->toArray()
-        );
-        $faculties = cache()->remember('faculties-all', 3600, fn () =>
-            Faculty::orderBy('name')->get()
-        );
-        $studyPrograms = cache()->remember('study-programs-faculty', 3600, fn () =>
-            StudyProgram::with('faculty')->orderBy('name')->get()
-        );
+        $options = $this->scheduleService->getFormOptions();
 
-        return view('distribution.distribution-schedule.index', compact('schedules', 'periods', 'faculties', 'studyPrograms'));
+        return view('distribution.distribution-schedule.index', array_merge(
+            compact('schedules'),
+            $options
+        ));
     }
 
     public function create(): View
     {
-        $faculties = Faculty::orderBy('name', 'asc')->get();
-        $studyPrograms = StudyProgram::with('faculty')->orderBy('name', 'asc')->get();
+        $options = $this->scheduleService->getFormOptions();
 
-        return view('distribution.distribution-schedule.create', compact(
-            'faculties', 'studyPrograms'
-        ));
+        return view('distribution.distribution-schedule.create', [
+            'faculties' => $options['faculties'],
+            'studyPrograms' => $options['studyPrograms'],
+        ]);
     }
 
     public function fetchItems(Request $request): JsonResponse
     {
-        $studyProgramId = $request->study_program_id;
-        $studentLevel = $request->input('student_level');
-
-        if ($studyProgramId === 'all') {
-            $items = Item::orderBy('name')->get();
-        } elseif ($studyProgramId) {
-            $studyProgram = StudyProgram::with('faculty')->find($studyProgramId);
-            $facultyCode = Faculty::find($request->faculty_id)?->code ?? $studyProgram?->faculty?->code ?? '';
-            $prodiCode = $studyProgram?->code ?? '';
-
-            $allowedIds = collect();
-
-            if ($prodiCode) {
-                $targetCode = $studentLevel ? ($studentLevel.$facultyCode.$prodiCode) : null;
-
-                $entitlements = Entitlement::with('items')
-                    ->where('is_active', true)
-                    ->when($studentLevel, fn ($q) => $q->where(function ($sub) use ($studentLevel, $targetCode) {
-                        $sub->where('student_level', $studentLevel);
-                        if ($targetCode) {
-                            $sub->orWhere('code', $targetCode);
-                        }
-                    }))
-                    ->where(function ($q) use ($facultyCode, $prodiCode) {
-                        if ($facultyCode) {
-                            $q->where('code', 'like', "%{$facultyCode}{$prodiCode}%")
-                              ->orWhere('code', 'like', "%{$prodiCode}%");
-                        } else {
-                            $q->where('code', 'like', "%{$prodiCode}%");
-                        }
-                    })
-                    ->get();
-
-                $allowedIds = $entitlements->flatMap(fn ($e) => $e->items->pluck('item_id'))->unique()->values();
-            }
-
-            $items = $allowedIds->isNotEmpty()
-                ? Item::whereIn('id', $allowedIds)->orderBy('name')->get()
-                : collect();
-        } else {
-            $items = collect();
-        }
-
+        $studyProgramId = $request->input('study_program_id') === 'all' ? -1 : $request->integer('study_program_id');
         $checkedIds = $request->has('checked_ids') ? explode(',', $request->checked_ids) : [];
+
+        [$items, $checkedIds] = $this->scheduleService->fetchItems(
+            $studyProgramId,
+            $request->integer('faculty_id') ?: null,
+            $request->input('student_level'),
+            $checkedIds
+        );
 
         $html = view('distribution.distribution-schedule._items', compact('items', 'checkedIds'))->render();
 
@@ -123,29 +70,7 @@ class DistributionScheduleController extends Controller
 
     public function store(DistributionScheduleRequest $request): RedirectResponse
     {
-        $data = $request->validated();
-        $itemIds = $data['item_ids'] ?? [];
-        unset($data['item_ids']);
-
-        if (($data['study_program_id'] ?? null) === 'all') {
-            $data['study_program_id'] = null;
-        }
-
-        $schedule = DistributionSchedule::create($data);
-
-        if ($itemIds) {
-            foreach ($itemIds as $itemId) {
-                $schedule->items()->create(['item_id' => $itemId]);
-            }
-        }
-
-        AuditService::log(
-            'create',
-            DistributionSchedule::class,
-            $schedule->id,
-            null,
-            array_merge($schedule->fresh()->toArray(), ['item_ids' => $itemIds])
-        );
+        $this->scheduleService->store($request->validated());
 
         return redirect()->route('distribution.distribution-schedule.index')->with('success', 'Jadwal distribusi berhasil ditambahkan.');
     }
@@ -163,7 +88,7 @@ class DistributionScheduleController extends Controller
 
         if ($search = $request->input('q')) {
             $search = str_replace(['%', '_'], ['\%', '\_'], $search);
-            $query->whereHas('student', fn ($q) => $q->where('name', 'like', "%{$search}%")->orWhere('nim', 'like', "%{$search}%"));
+            $query->whereHas('student', fn($q) => $q->where('name', 'like', "%{$search}%")->orWhere('nim', 'like', "%{$search}%"));
         }
 
         $transactions = $query->latest('pickup_time')->paginate(20);
@@ -181,8 +106,8 @@ class DistributionScheduleController extends Controller
     public function edit(DistributionSchedule $distributionSchedule): View
     {
         $distributionSchedule->load('items');
-        $faculties = Faculty::orderBy('name', 'asc')->get();
-        $studyPrograms = StudyProgram::with('faculty')->orderBy('name', 'asc')->get();
+        $faculties = $this->scheduleService->getFormOptions()['faculties'];
+        $studyPrograms = $this->scheduleService->getFormOptions()['studyPrograms'];
 
         return view('distribution.distribution-schedule.edit', compact(
             'distributionSchedule', 'faculties', 'studyPrograms'
@@ -191,49 +116,14 @@ class DistributionScheduleController extends Controller
 
     public function update(DistributionScheduleRequest $request, DistributionSchedule $distributionSchedule): RedirectResponse
     {
-        $data = $request->validated();
-        $itemIds = $data['item_ids'] ?? [];
-        unset($data['item_ids']);
-
-        if (($data['study_program_id'] ?? null) === 'all') {
-            $data['study_program_id'] = null;
-        }
-
-        $oldValues = array_merge($distributionSchedule->toArray(), [
-            'item_ids' => $distributionSchedule->items()->pluck('item_id')->toArray(),
-        ]);
-
-        $distributionSchedule->update($data);
-
-        $distributionSchedule->items()->delete();
-
-        if ($itemIds) {
-            foreach ($itemIds as $itemId) {
-                $distributionSchedule->items()->create(['item_id' => $itemId]);
-            }
-        }
-
-        AuditService::log(
-            'update',
-            DistributionSchedule::class,
-            $distributionSchedule->id,
-            $oldValues,
-            array_merge($distributionSchedule->fresh()->toArray(), ['item_ids' => $itemIds])
-        );
+        $this->scheduleService->update($distributionSchedule, $request->validated());
 
         return redirect()->route('distribution.distribution-schedule.index')->with('success', 'Jadwal distribusi berhasil diperbarui.');
     }
 
     public function destroy(DistributionSchedule $distributionSchedule): RedirectResponse
     {
-        $oldValues = array_merge($distributionSchedule->toArray(), [
-            'item_ids' => $distributionSchedule->items()->pluck('item_id')->toArray(),
-        ]);
-
-        $distributionSchedule->items()->delete();
-        $distributionSchedule->delete();
-
-        AuditService::log('delete', DistributionSchedule::class, $distributionSchedule->id, $oldValues, null);
+        $this->scheduleService->destroy($distributionSchedule);
 
         return redirect()->route('distribution.distribution-schedule.index')->with('success', 'Jadwal distribusi berhasil dihapus.');
     }

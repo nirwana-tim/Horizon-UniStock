@@ -37,7 +37,7 @@ class UserTestSeeder extends Seeder
                 ['email' => $userData['email']],
                 [
                     'name' => $userData['name'],
-                    'password' => bcrypt('password'),
+                    'password' => bcrypt(env('TEST_USER_PASSWORD', 'password')),
                     'must_change_password' => false,
                 ]
             );

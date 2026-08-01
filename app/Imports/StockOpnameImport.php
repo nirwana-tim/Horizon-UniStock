@@ -35,8 +35,10 @@ class StockOpnameImport implements ToCollection, WithHeadingRow, WithValidation
 
             $variantLabel = trim((string) ($row['varian_ukuran'] ?? ''));
             $variant = $item->variants()
-                ->where('size_label', $variantLabel)
-                ->orWhere('size', $variantLabel)
+                ->where(function ($q) use ($variantLabel) {
+                    $q->where('size_label', $variantLabel)
+                      ->orWhere('size', $variantLabel);
+                })
                 ->first();
 
             if (!$variant) continue;

@@ -4,17 +4,27 @@ namespace App\Services;
 
 use App\Models\Entitlement;
 use App\Models\Item;
+use App\Models\ItemCategory;
+use App\Models\ItemSize;
 use App\Models\SizeChangeEvent;
 use App\Models\SizeEventSubmission;
 use App\Models\Student;
 use App\Models\StudentSizeHistory;
 use App\Models\StudentSizeItem;
 use App\Models\StudentSizeProfile;
+use App\Services\AuditService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class StudentSizeService
 {
+    /**
+     * Default size options (fallback when event has no custom options).
+     * These are derived from DB seeders but cached here for performance.
+     */
+    private const DEFAULT_BAJU_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL', 'XXXXL', 'XXXXXL', 'XXXXXXL'];
+    private const DEFAULT_SEPATU_SIZES = ['38', '39', '40', '41', '42', '43', '44', '45'];
+
     public function getEntitlementItems(Student $student): Collection
     {
         if (! $student->entitlement_code) {
@@ -70,6 +80,76 @@ class StudentSizeService
         return $this->getEventsForStudent($student)->first();
     }
 
+    /**
+     * Get size options for baju and sepatu.
+     * Merges event-specific JSON overrides with DB defaults.
+     */
+    public function getSizeOptions(SizeChangeEvent $event): array
+    {
+        $bajuOptions = $event->baju_size_options ?? $this->getDefaultBajuSizes();
+        $sepatuOptions = $event->sepatu_size_options ?? $this->getDefaultSepatuSizes();
+
+        return [
+            'baju' => $bajuOptions,
+            'sepatu' => $sepatuOptions,
+        ];
+    }
+
+    /**
+     * Get default baju sizes from DB (category UNF) with fallback to hardcoded.
+     */
+    public function getDefaultBajuSizes(): array
+    {
+        try {
+            $unfCategory = ItemCategory::where('code', 'UNF')->first();
+            if (! $unfCategory) {
+                return self::DEFAULT_BAJU_SIZES;
+            }
+
+            $sizes = ItemSize::whereHas('categories', fn ($q) => $q->where('item_category_id', $unfCategory->id))
+                ->orderBy('code')
+                ->pluck('label')
+                ->filter()
+                ->values()
+                ->toArray();
+
+            return $sizes->isNotEmpty() ? $sizes->toArray() : self::DEFAULT_BAJU_SIZES;
+        } catch (\Exception $e) {
+            return self::DEFAULT_BAJU_SIZES;
+        }
+    }
+
+    /**
+     * Get default sepatu sizes from DB (category SHO) with fallback to hardcoded.
+     */
+    public function getDefaultSepatuSizes(): array
+    {
+        try {
+            $shoCategory = ItemCategory::where('code', 'SHO')->first();
+            if (! $shoCategory) {
+                return self::DEFAULT_SEPATU_SIZES;
+            }
+
+            $sizes = ItemSize::whereHas('categories', fn ($q) => $q->where('item_category_id', $shoCategory->id))
+                ->orderBy('code')
+                ->pluck('label')
+                ->filter()
+                ->values()
+                ->toArray();
+
+            return $sizes->isNotEmpty() ? $sizes->toArray() : self::DEFAULT_SEPATU_SIZES;
+        } catch (\Exception $e) {
+            return self::DEFAULT_SEPATU_SIZES;
+        }
+    }
+
+    /**
+     * Save student sizes (baju + sepatu) for a given event.
+     *
+     * @param  Student  $student
+     * @param  array{baju: string, sepatu: string}  $sizes
+     * @param  int|null  $eventId
+     */
     public function saveSizes(Student $student, array $sizes, ?int $eventId = null): void
     {
         $event = $eventId
@@ -80,7 +160,14 @@ class StudentSizeService
             throw new \RuntimeException('Tidak ada event pengisian ukuran yang aktif saat ini.');
         }
 
-        DB::transaction(function () use ($student, $sizes, $event) {
+        $baju = $sizes['baju'] ?? null;
+        $sepatu = $sizes['sepatu'] ?? null;
+
+        if (empty($baju) && empty($sepatu)) {
+            throw new \RuntimeException('Pilih minimal satu ukuran (Baju atau Sepatu).');
+        }
+
+        DB::transaction(function () use ($student, $baju, $sepatu, $event) {
             $profile = StudentSizeProfile::where('student_id', $student->id)
                 ->lockForUpdate()
                 ->first();
@@ -104,35 +191,15 @@ class StudentSizeService
                 );
             }
 
-            foreach ($sizes as $itemId => $size) {
-                if (empty($size)) {
-                    continue;
-                }
+            $oldBaju = $profile->baju_size;
+            $oldSepatu = $profile->sepatu_size;
 
-                $sizeItem = StudentSizeItem::where('size_profile_id', $profile->id)
-                    ->where('item_id', $itemId)
-                    ->first();
+            if (! empty($baju)) {
+                $profile->update(['baju_size' => $baju]);
+            }
 
-                if ($sizeItem) {
-                    if ($sizeItem->size !== $size) {
-                        StudentSizeHistory::create([
-                            'size_item_id' => $sizeItem->id,
-                            'old_size' => $sizeItem->size,
-                            'new_size' => $size,
-                            'changed_by' => $student->user_id,
-                            'changed_at' => now(),
-                        ]);
-
-                        $sizeItem->update(['size' => $size]);
-                    }
-                } else {
-                    StudentSizeItem::create([
-                        'size_profile_id' => $profile->id,
-                        'item_id' => $itemId,
-                        'size' => $size,
-                        'change_count' => 0,
-                    ]);
-                }
+            if (! empty($sepatu)) {
+                $profile->update(['sepatu_size' => $sepatu]);
             }
 
             if (! $submission) {
@@ -147,6 +214,16 @@ class StudentSizeService
             $profile->update([
                 'is_filled' => true,
                 'filled_at' => $profile->filled_at ?? now(),
+            ]);
+
+            AuditService::log('save_sizes', StudentSizeProfile::class, $profile->id, [
+                'student_id' => $student->id,
+                'event_id' => $event->id,
+                'submission_count' => $submission->submission_count,
+                'baju_size' => $baju,
+                'sepatu_size' => $sepatu,
+                'old_baju_size' => $oldBaju,
+                'old_sepatu_size' => $oldSepatu,
             ]);
         });
     }

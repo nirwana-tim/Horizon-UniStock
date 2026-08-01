@@ -13,6 +13,7 @@ use App\Models\StockReceive;
 use App\Models\StockReceiveItem;
 use App\Models\Student;
 use App\Models\User;
+use App\Models\Vendor;
 use Carbon\Carbon;
 use Faker\Factory as Faker;
 use Illuminate\Database\Seeder;
@@ -45,41 +46,46 @@ class FakeDataSeeder extends Seeder
 
         $scheduleIds = [];
         foreach ($scheduleDates as $i => $date) {
-            $scheduleIds[] = DistributionSchedule::create([
-                'name' => 'Jadwal ' . ($i + 1),
-                'date' => $date,
-                'period' => '2025/2026',
-                'semester' => 'Genap',
-                'location' => $faker->randomElement(['Gedung Serbaguna A', 'Aula Fakultas Kedokteran', 'Gedung Rektorat Lantai 2', 'Fakultas Teknik']),
-                'session' => $faker->randomElement(['08:00-10:00', '10:00-12:00', '13:00-15:00', '15:00-17:00']),
-                'is_active' => true,
-                'generation_id' => $faker->randomElement($programLevelIds),
-            ])->id;
+            $scheduleIds[] = DistributionSchedule::firstOrCreate(
+                ['name' => 'Jadwal ' . ($i + 1), 'date' => $date],
+                [
+                    'name' => 'Jadwal ' . ($i + 1),
+                    'date' => $date,
+                    'period' => '2025/2026',
+                    'location' => $faker->randomElement(['Gedung Serbaguna A', 'Aula Fakultas Kedokteran', 'Gedung Rektorat Lantai 2', 'Fakultas Teknik']),
+                    'session' => $faker->randomElement(['08:00-10:00', '10:00-12:00', '13:00-15:00', '15:00-17:00']),
+                    'is_active' => true,
+                    'generation_id' => $faker->randomElement($programLevelIds),
+                ]
+            )->id;
         }
 
         $this->command->info('Phase 1: ' . count($scheduleIds) . ' schedules created');
 
         // ===== Phase 2: Vendor + Stock Receives =====
-        $vendorId = \DB::table('vendors')->insertGetId([
-            'name' => 'PT Seragam Nusantara',
-            'email' => 'sales@seragamnusantara.co.id',
-            'contact' => 'Budi Santoso',
-            'phone' => '081234567890',
-            'created_at' => $now,
-            'updated_at' => $now,
-        ]);
+        $vendorId = Vendor::firstOrCreate(
+            ['name' => 'PT Seragam Nusantara'],
+            [
+                'email' => 'sales@seragamnusantara.co.id',
+                'contact' => 'Budi Santoso',
+                'phone' => '081234567890',
+            ]
+        )->id;
 
         $receiveDates = ['2026-05-10', '2026-06-05', '2026-06-28'];
         $receiveIds = [];
 
         foreach ($receiveDates as $rDate) {
-            $receiveIds[] = StockReceive::create([
-                'reference_number' => 'PO/2026/' . str_pad(count($receiveIds) + 1, 4, '0', STR_PAD_LEFT),
-                'vendor_id' => $vendorId,
-                'receive_date' => $rDate,
-                'status' => 'received',
-                'notes' => 'Penerimaan ' . $rDate,
-            ])->id;
+            $receiveIds[] = StockReceive::firstOrCreate(
+                ['reference_number' => 'PO/2026/' . str_pad(count($receiveIds) + 1, 4, '0', STR_PAD_LEFT)],
+                [
+                    'reference_number' => 'PO/2026/' . str_pad(count($receiveIds) + 1, 4, '0', STR_PAD_LEFT),
+                    'vendor_id' => $vendorId,
+                    'receive_date' => $rDate,
+                    'status' => 'received',
+                    'notes' => 'Penerimaan ' . $rDate,
+                ]
+            )->id;
         }
 
         foreach ($receiveIds as $rId) {
@@ -87,15 +93,22 @@ class FakeDataSeeder extends Seeder
             foreach ($batchItems as $iId) {
                 $qty = $faker->numberBetween(100, 500);
                 $price = $itemPrices[$iId] ?? 50000;
+                $itemVariantIds = ItemVariant::where('item_id', $iId)->pluck('id')->toArray();
+                $selectedVariantId = !empty($itemVariantIds) ? $faker->randomElement($itemVariantIds) : null;
 
-                StockReceiveItem::create([
-                    'stock_receive_id' => $rId,
-                    'item_id' => $iId,
-                    'variant_id' => $faker->randomElement($variantIds),
-                    'quantity' => $qty,
-                    'unit_price' => $price,
-                    'hpp' => (int) ($price * 0.7),
-                ]);
+                if (!$selectedVariantId) continue;
+
+                StockReceiveItem::firstOrCreate(
+                    ['stock_receive_id' => $rId, 'item_id' => $iId, 'variant_id' => $selectedVariantId],
+                    [
+                        'stock_receive_id' => $rId,
+                        'item_id' => $iId,
+                        'variant_id' => $selectedVariantId,
+                        'quantity' => $qty,
+                        'unit_price' => $price,
+                        'hpp' => (int) ($price * 0.7),
+                    ]
+                );
             }
         }
 
@@ -103,13 +116,20 @@ class FakeDataSeeder extends Seeder
 
         // ===== Phase 3: Stock Balances =====
         foreach ($itemIds as $iId) {
-            StockBalance::create([
-                'item_id' => $iId,
-                'variant_id' => $faker->randomElement($variantIds),
-                'quantity' => $faker->numberBetween(50, 500),
-                'reserved' => $faker->numberBetween(0, 20),
-                'last_hpp' => ($itemPrices[$iId] ?? 50000) * 0.7,
-            ]);
+            $itemVariantIds = ItemVariant::where('item_id', $iId)->pluck('id')->toArray();
+            $selectedVariantId = !empty($itemVariantIds) ? $faker->randomElement($itemVariantIds) : null;
+
+            if (!$selectedVariantId) continue;
+
+            StockBalance::firstOrCreate(
+                ['item_id' => $iId, 'variant_id' => $selectedVariantId],
+                [
+                    'item_id' => $iId,
+                    'variant_id' => $selectedVariantId,
+                    'quantity' => $faker->numberBetween(50, 500),
+                    'last_hpp' => ($itemPrices[$iId] ?? 50000) * 0.7,
+                ]
+            );
         }
 
         $this->command->info('Phase 3: ' . count($itemIds) . ' stock balances created');
@@ -120,35 +140,45 @@ class FakeDataSeeder extends Seeder
 
         foreach ($scheduleIds as $sId) {
             $schedule = DistributionSchedule::find($sId);
-            $scheduleDate = $schedule->date;
+            if (!$schedule) continue;
 
             $txPerSchedule = $faker->numberBetween(5, 12);
 
             for ($t = 0; $t < $txPerSchedule; $t++) {
-                $pickupTime = Carbon::parse($scheduleDate)
+                $pickupTime = Carbon::parse($schedule->date)
                     ->addHours($faker->numberBetween(8, 16))
                     ->addMinutes($faker->numberBetween(0, 59));
 
-                $tx = DistributionTransaction::create([
-                    'student_id' => $faker->randomElement($studentIds),
-                    'schedule_id' => $sId,
-                    'staff_id' => $faker->randomElement($staffIds),
-                    'status' => $faker->randomElement(['completed', 'completed', 'completed', 'partial']),
-                    'pickup_time' => $pickupTime,
-                    'notes' => $faker->optional(0.3)->sentence(),
-                ]);
+                $studentId = $faker->randomElement($studentIds);
+
+                $tx = DistributionTransaction::firstOrCreate(
+                    ['student_id' => $studentId, 'schedule_id' => $sId],
+                    [
+                        'student_id' => $studentId,
+                        'schedule_id' => $sId,
+                        'staff_id' => $faker->randomElement($staffIds),
+                        'status' => $faker->randomElement(['completed', 'completed', 'completed', 'partial']),
+                        'pickup_time' => $pickupTime,
+                        'notes' => $faker->optional(0.3)->sentence(),
+                    ]
+                );
 
                 $transactionCount++;
 
                 $txItems = $faker->randomElements($itemIds, $faker->numberBetween(2, 5));
                 foreach ($txItems as $iId) {
-                    DistributionItem::create([
-                        'transaction_id' => $tx->id,
-                        'item_id' => $iId,
-                        'expected_size' => $faker->randomElement(['S', 'M', 'L', 'XL', 'XXL']),
-                        'actual_size' => $faker->randomElement(['S', 'M', 'L', 'XL', 'XXL', null]),
-                        'quantity' => $faker->numberBetween(1, 3),
-                    ]);
+                    DistributionItem::firstOrCreate(
+                        ['transaction_id' => $tx->id, 'item_id' => $iId],
+                        [
+                            'transaction_id' => $tx->id,
+                            'item_id' => $iId,
+                            'expected_size' => $faker->randomElement(['S', 'M', 'L', 'XL', 'XXL']),
+                            'actual_size' => $faker->randomElement(['S', 'M', 'L', 'XL', 'XXL', null]),
+                            'quantity' => $faker->numberBetween(1, 3),
+                            'hpp' => ($itemPrices[$iId] ?? 50000) * 0.7,
+                            'selling_price_at_distribution' => $itemPrices[$iId] ?? 50000,
+                        ]
+                    );
                     $itemCount++;
                 }
             }

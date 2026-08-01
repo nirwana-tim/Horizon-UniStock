@@ -3,7 +3,7 @@
         <div class="flex items-center justify-between">
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ __('Edit Faculty') }}</h2>
             <a href="{{ route('master-data.faculty.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-300 focus:bg-gray-300 active:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                {{ __('â† Back') }}
+                {{ __('Back') }}
             </a>
         </div>
     </x-slot>
@@ -13,11 +13,7 @@
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
 
-                    @if(session('success'))
-                        <div class="mb-4 p-4 bg-green-100 border border-green-300 text-green-800 rounded-md">
-                            {{ session('success') }}
-                        </div>
-                    @endif
+                    <x-alert type="success">{{ session('success') }}</x-alert>
 
                     <form action="{{ route('master-data.faculty.update', $faculty) }}" method="POST">
                         @csrf

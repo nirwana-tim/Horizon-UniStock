@@ -34,6 +34,7 @@ class StockReport extends BaseExport implements FromCollection, WithHeadings, Wi
                 'items.code as item_code',
                 'items.selling_price',
                 'items.unit',
+                'items.gender',
                 'item_categories.label as category_name',
                 'item_categories.code as category_code',
                 'item_variants.size as variant_size'
@@ -80,7 +81,7 @@ class StockReport extends BaseExport implements FromCollection, WithHeadings, Wi
             $balance->item_code,
             $balance->item_name,
             $balance->category_name ?? '-',
-            $balance->variant?->item?->category?->name ?? '-',
+            $balance->gender ?? '-',
             $balance->variant_size ?? '-',
             $balance->quantity,
             $totalIn,

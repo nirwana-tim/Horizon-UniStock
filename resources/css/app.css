@@ -51,4 +51,154 @@
     .sidebar-item {
         @apply text-gray-600 border-l-4 border-transparent hover:bg-gray-50 hover:text-gray-800 transition-colors duration-150;
     }
+
+    /* ===== index.html parity utilities ===== */
+
+    /* Material Symbols */
+    .material-symbols-outlined {
+        font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+    }
+
+    /* Selection */
+    ::selection {
+        background: rgba(152, 4, 22, 0.1);
+    }
+
+    /* Focus visible */
+    button:focus-visible,
+    a:focus-visible,
+    [tabindex]:focus-visible {
+        outline: 2px solid #980416;
+        outline-offset: 2px;
+    }
+
+    /* Reduced motion */
+    @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+        }
+    }
+
+    /* Glassmorphism */
+    .glass-card {
+        background: rgba(255, 255, 255, 0.6);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .glass-top-bar {
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+    }
+
+    /* Shadows */
+    .shadow-card {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04), 0 8px 32px rgba(0, 0, 0, 0.06);
+    }
+
+    .shadow-soft {
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    .shadow-button {
+        box-shadow: 0 4px 20px rgba(152, 4, 22, 0.25);
+    }
+
+    /* Dividers */
+    .divider-subtle {
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    /* Tab indicator */
+    .active-tab-indicator {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        height: 3px;
+        width: 100%;
+        background-color: #980416;
+        border-radius: 3px 3px 0 0;
+    }
+
+    /* Pill buttons */
+    .active-pill {
+        background-color: #980416;
+        color: white;
+        border: 1px solid #980416;
+    }
+
+    .inactive-pill {
+        background-color: transparent;
+        color: #333;
+        border: 1px solid #e0e0e0;
+    }
+
+    /* QR gradient */
+    .qr-gradient {
+        background: linear-gradient(135deg, #fbf9f8 0%, #efeded 100%);
+    }
+
+    /* Animations */
+    .animate-pop {
+        animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+
+    @keyframes pop {
+        0% {
+            transform: scale(0.9);
+            opacity: 0;
+        }
+        100% {
+            transform: scale(1);
+            opacity: 1;
+        }
+    }
+
+    /* Active nav dot */
+    .active-nav::after {
+        content: "";
+        position: absolute;
+        bottom: -2px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 4px;
+        height: 4px;
+        background-color: #980416;
+        border-radius: 50%;
+    }
+
+    /* Scrollbar hide */
+    .scrollbar-hide {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+
+    .scrollbar-hide::-webkit-scrollbar {
+        display: none;
+    }
+
+    /* Safe area */
+    .safe-area-bottom {
+        padding-bottom: max(env(safe-area-inset-bottom, 0px), 4px);
+    }
+
+    /* Sheet transitions */
+    body.sheet-open {
+        overflow: hidden;
+    }
+
+    #sheet-overlay {
+        transition: opacity 0.3s ease;
+    }
+
+    #sheet-panel {
+        transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+    }
 }

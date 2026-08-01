@@ -67,6 +67,15 @@ class ScanController extends Controller
         return $this->showDistribution($student);
     }
 
+    public function searchByQuery(Request $request): RedirectResponse
+    {
+        $nim = $request->query('query');
+        if ($nim) {
+            return redirect()->route('distribution.scan.student', $nim);
+        }
+        return redirect()->route('distribution.scan.index');
+    }
+
     public function showByNim(string $nim): View|RedirectResponse
     {
         $student = $this->distributionService->findStudent($nim);
@@ -182,12 +191,18 @@ class ScanController extends Controller
 
         $stockInfo = [];
         if ($activeSchedule) {
+            $allItemIds = $scheduleItems->pluck('id');
+            $allVariantIds = $scheduleItems->flatMap(fn ($i) => $i->variants->pluck('id'));
+            $allBalances = StockBalance::whereIn('item_id', $allItemIds)
+                ->whereIn('variant_id', $allVariantIds)
+                ->get()
+                ->keyBy(fn ($b) => $b->item_id . '-' . $b->variant_id);
+
             foreach ($scheduleItems as $item) {
                 $baseCode = $item->base_code ?? $item->code;
                 foreach ($item->variants as $variant) {
-                    $balance = StockBalance::where('item_id', $item->id)
-                        ->where('variant_id', $variant->id)
-                        ->first();
+                    $key = $item->id . '-' . $variant->id;
+                    $balance = $allBalances[$key] ?? null;
                     $stockInfo[$baseCode][$variant->size] = ($stockInfo[$baseCode][$variant->size] ?? 0)
                         + ($balance ? $balance->quantity : 0);
                 }

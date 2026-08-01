@@ -3,11 +3,7 @@
         Enter the 6-digit OTP code sent to <strong>{{ $email }}</strong>
     </div>
 
-    @if(session('success'))
-        <div class="mb-4 p-4 bg-green-100 border border-green-300 text-green-800 rounded-md">
-            {{ session('success') }}
-        </div>
-    @endif
+    <x-alert type="success">{{ session('success') }}</x-alert>
 
     <form method="POST" action="{{ route('student.email.verify-otp') }}">
         @csrf

@@ -214,7 +214,7 @@
                     </table>
                 </div>
             @else
-                <p class="text-sm text-gray-400 py-4 text-center">Belum ada varian.</p>
+                <x-empty-state title="Belum ada varian" description="Tambahkan varian ukuran untuk item ini." />
             @endif
         </div>
 
@@ -269,7 +269,7 @@
                     </table>
                 </div>
             @else
-                <p class="text-sm text-gray-400 py-4 text-center">Tidak ada data stok. Tambahkan varian terlebih dahulu.</p>
+                <x-empty-state title="Tidak ada data stok" description="Tambahkan varian terlebih dahulu." />
             @endif
         </div>
 

@@ -15,14 +15,15 @@ class EligibilityImport implements ToModel, WithHeadingRow, WithValidation
         return 4;
     }
 
-    public function model(array $row): EligibilityRecord
+    public function model(array $row): ?EligibilityRecord
     {
         $student = Student::where('nim', $row['nim'])->first();
+        if (!$student) {
+            return null;
+        }
 
         return EligibilityRecord::updateOrCreate(
-            [
-                'student_id' => $student?->id,
-            ],
+            ['student_id' => $student->id],
             [
                 'is_eligible' => filter_var($row['is_eligible'], FILTER_VALIDATE_BOOLEAN),
                 'payment_status' => $row['payment_status'] ?? null,

@@ -1,0 +1,1325 @@
+<!DOCTYPE html>
+<html class="light" lang="id">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<title>Horizon</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+tailwind.config = {
+  darkMode: "class",
+  theme: {
+    extend: {
+      colors: {
+        primary: "#980416",
+        "primary-container": "#800012",
+        "on-primary": "#ffffff",
+        "on-primary-container": "#ffa09a",
+        "primary-fixed": "#ffdad7",
+        "primary-fixed-dim": "#ffb3ae",
+        "inverse-primary": "#ffb3ae",
+        "on-primary-fixed": "#410004",
+        "on-primary-fixed-variant": "#930014",
+        secondary: "#5f5e5e",
+        "secondary-container": "#e4e2e1",
+        "on-secondary": "#ffffff",
+        "on-secondary-container": "#656464",
+        "secondary-fixed": "#e4e2e1",
+        "secondary-fixed-dim": "#c8c6c6",
+        "on-secondary-fixed": "#1b1c1c",
+        "on-secondary-fixed-variant": "#474747",
+        tertiary: "#323434",
+        "tertiary-container": "#484a4a",
+        "on-tertiary": "#ffffff",
+        "on-tertiary-container": "#b9b9ba",
+        "tertiary-fixed": "#e2e2e2",
+        "tertiary-fixed-dim": "#c6c6c7",
+        "on-tertiary-fixed": "#1a1c1c",
+        "on-tertiary-fixed-variant": "#454747",
+        error: "#ba1a1a",
+        "error-container": "#ffdad6",
+        "on-error": "#ffffff",
+        "on-error-container": "#93000a",
+        background: "#fbf9f8",
+        "on-background": "#1b1c1c",
+        surface: "#fbf9f8",
+        "on-surface": "#1b1c1c",
+        "surface-variant": "#e4e2e2",
+        "on-surface-variant": "#5a403e",
+        outline: "#8e706d",
+        "outline-variant": "#e3bebb",
+        "surface-container-lowest": "#ffffff",
+        "surface-container-low": "#f5f3f3",
+        "surface-container": "#efeded",
+        "surface-container-high": "#e9e8e7",
+        "surface-container-highest": "#e4e2e2",
+        "surface-dim": "#dbdad9",
+        "surface-bright": "#fbf9f8",
+        "inverse-surface": "#303031",
+        "inverse-on-surface": "#f2f0f0",
+        "surface-tint": "#b62228",
+      },
+      borderRadius: {
+        DEFAULT: "0.25rem",
+        lg: "0.5rem",
+        xl: "0.75rem",
+        "2xl": "1rem",
+        full: "9999px",
+      },
+      spacing: {
+        gutter: "16px",
+        "stack-sm": "8px",
+        "container-margin": "20px",
+        "stack-lg": "24px",
+        "section-padding": "32px",
+        "stack-md": "16px",
+      },
+      fontFamily: {
+        "headline-lg-mobile": ["Inter"],
+        "label-md": ["Inter"],
+        "headline-lg": ["Inter"],
+        "body-md": ["Inter"],
+        "body-lg": ["Inter"],
+        "headline-md": ["Inter"],
+        "headline-sm": ["Inter"],
+      },
+      fontSize: {
+        "headline-lg-mobile": ["24px", { lineHeight: "30px", fontWeight: "700" }],
+        "label-md": ["12px", { lineHeight: "16px", letterSpacing: "0.05em", fontWeight: "600" }],
+        "headline-lg": ["28px", { lineHeight: "34px", letterSpacing: "-0.02em", fontWeight: "700" }],
+        "body-md": ["14px", { lineHeight: "20px", fontWeight: "400" }],
+        "body-lg": ["16px", { lineHeight: "24px", fontWeight: "400" }],
+        "headline-md": ["22px", { lineHeight: "28px", letterSpacing: "-0.01em", fontWeight: "600" }],
+        "headline-sm": ["18px", { lineHeight: "24px", fontWeight: "600" }],
+      },
+    },
+  },
+};
+</script>
+<style>
+body {
+  font-family: "Inter", sans-serif;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  touch-action: manipulation;
+}
+
+.material-symbols-outlined {
+  font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+}
+
+::selection { background: rgba(152, 4, 22, 0.1); }
+
+button:focus-visible, a:focus-visible, [tabindex]:focus-visible {
+  outline: 2px solid #980416;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.glass-top-bar {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+.shadow-card {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04), 0 8px 32px rgba(0, 0, 0, 0.06);
+}
+
+.shadow-soft {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.shadow-button {
+  box-shadow: 0 4px 20px rgba(152, 4, 22, 0.25);
+}
+
+.divider-subtle { border-bottom: 1px solid rgba(0, 0, 0, 0.05); }
+
+.active-tab-indicator {
+  position: absolute; bottom: 0; left: 0; height: 3px; width: 100%;
+  background-color: #980416; border-radius: 3px 3px 0 0;
+}
+
+.active-pill {
+  background-color: #980416; color: white; border: 1px solid #980416;
+}
+
+.inactive-pill {
+  background-color: transparent; color: #333;
+  border: 1px solid #e0e0e0;
+}
+
+.qr-gradient {
+  background: linear-gradient(135deg, #fbf9f8 0%, #efeded 100%);
+}
+
+.animate-pop {
+  animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes pop {
+  0% { transform: scale(0.9); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.active-nav::after {
+  content: ""; position: absolute; bottom: -2px; left: 50%;
+  transform: translateX(-50%); width: 4px; height: 4px;
+  background-color: #980416; border-radius: 50%;
+}
+
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+
+.safe-area-bottom {
+  padding-bottom: max(env(safe-area-inset-bottom, 0px), 4px);
+}
+
+body.sheet-open { overflow: hidden; }
+
+#sheet-overlay { transition: opacity 0.3s ease; }
+
+#sheet-panel { transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1); }
+</style>
+</head>
+<body class="bg-background text-on-background min-h-screen pb-32 flex flex-col selection:bg-primary/10" data-page="beranda">
+<nav class="glass-top-bar flex justify-between items-center px-container-margin h-16 w-full sticky top-0 z-50">
+<div class="flex items-center gap-2">
+<span class="font-headline-lg-mobile text-headline-lg-mobile font-bold text-primary">Horizon</span>
+</div>
+<button type="button" class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold text-sm ring-2 ring-white shadow-soft active:scale-95 duration-150" aria-label="Profil" data-navigate="profil.html">
+BS
+</button>
+</nav>
+
+<section class="page flex-1 flex flex-col" data-page="beranda">
+<main class="px-container-margin pt-6 pb-8">
+<header class="mb-7">
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile text-on-background">Selamat Pagi, Budi!</h1>
+<p class="font-body-md text-secondary/70 mt-0.5">12345678 &bull; S1 Informatika</p>
+</header>
+<section id="email-card" class="mb-7"></section>
+<div class="space-y-7">
+<section id="jadwal-distribusi">
+<div class="flex justify-between items-center mb-4">
+<h2 class="font-headline-sm text-headline-sm text-on-background">Jadwal Distribusi</h2>
+<button type="button" class="text-primary font-label-md hover:underline transition-transform duration-150 active:scale-95" data-scroll="jadwal-distribusi">Lihat Semua</button>
+</div>
+<div class="bg-white shadow-card rounded-2xl overflow-hidden">
+<div class="flex items-center px-5 py-4 divider-subtle active:bg-black/[0.02] transition-colors cursor-pointer group" data-modal="schedule-1">
+<div class="w-12 h-12 rounded-xl bg-primary/5 flex flex-col items-center justify-center mr-4 shrink-0">
+<span class="text-[10px] font-bold text-primary uppercase">Okt</span>
+<span class="text-lg font-extrabold text-primary leading-tight">24</span>
+</div>
+<div class="flex-1 min-w-0">
+<h4 class="font-headline-sm text-[15px] text-on-background">Paket Atribut Wisuda</h4>
+<p class="font-body-md text-[13px] text-secondary/60 mt-0.5">Gedung Serbaguna, 09:00 - 15:00</p>
+</div>
+<span class="material-symbols-outlined text-primary shrink-0 group-hover:translate-x-0.5 transition-transform">chevron_right</span>
+</div>
+<div class="flex items-center px-5 py-4 active:bg-black/[0.02] transition-colors cursor-pointer group" data-modal="schedule-2">
+<div class="w-12 h-12 rounded-xl bg-surface-variant/50 flex flex-col items-center justify-center mr-4 shrink-0">
+<span class="text-[10px] font-bold text-secondary uppercase">Okt</span>
+<span class="text-lg font-extrabold text-secondary leading-tight">28</span>
+</div>
+<div class="flex-1 min-w-0">
+<h4 class="font-headline-sm text-[15px] text-on-background">Modul Praktikum Genap</h4>
+<p class="font-body-md text-[13px] text-secondary/60 mt-0.5">Lab Dasar Komputer</p>
+</div>
+<span class="material-symbols-outlined text-primary shrink-0 group-hover:translate-x-0.5 transition-transform">chevron_right</span>
+</div>
+</div>
+</section>
+</div>
+</main>
+</section>
+
+<section class="page flex-1 flex flex-col hidden" data-page="ukuran">
+<main class="flex-1 px-container-margin pb-32 pt-6">
+<div class="max-w-md mx-auto">
+<div class="mb-6 overflow-hidden rounded-2xl h-48 relative shadow-card">
+<div class="w-full h-full bg-cover bg-center" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCBt5P2HmtLID51h-uo7bahZP2QGNPaNUd_2L7Ek7GZEMKx0zkZ4TqbRU27lvZ2qQ4VITeTqkB_6VSZwUcm8rZUmO_OpP4Qxum37jkyH0-Kc5qWpdjnVTk5kEo6xr1pPYbpets4QQgDe8nKAMzKb10WM8zZWhZdx0O4o7z--UKhF2R2YUVm2nk25DjqqDuj4UjRB-2GUDAUZqv6tB3wppXKaQ-0EmOZ570do3Caux7jcLZH1IZqaROL')"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent flex items-end p-5">
+<p class="text-white font-headline-sm text-headline-sm">Lengkapi Profil Distribusi</p>
+</div>
+</div>
+<div id="size-status" class="mb-4"></div>
+<div class="bg-white rounded-2xl p-6 shadow-card space-y-6">
+<section>
+<label class="block font-label-md text-label-md text-secondary mb-2">UKURAN BAJU</label>
+<button type="button" class="w-full flex items-center justify-between px-4 h-14 rounded-xl bg-surface-container-low active:bg-black/[0.04] transition-colors" data-size-field="baju">
+<span class="font-body-md text-body-md text-secondary/70">Pilih ukuran</span>
+<span class="flex items-center gap-2">
+<span id="field-baju-value" class="font-body-md text-body-md text-primary font-semibold">—</span>
+<span class="material-symbols-outlined text-primary">chevron_right</span>
+</span>
+</button>
+</section>
+<section>
+<label class="block font-label-md text-label-md text-secondary mb-2">UKURAN SEPATU</label>
+<button type="button" class="w-full flex items-center justify-between px-4 h-14 rounded-xl bg-surface-container-low active:bg-black/[0.04] transition-colors" data-size-field="sepatu">
+<span class="font-body-md text-body-md text-secondary/70">Pilih ukuran</span>
+<span class="flex items-center gap-2">
+<span id="field-sepatu-value" class="font-body-md text-body-md text-primary font-semibold">—</span>
+<span class="material-symbols-outlined text-primary">chevron_right</span>
+</span>
+</button>
+</section>
+</div>
+<div class="mt-6">
+<button type="button" class="w-full bg-primary text-white h-14 rounded-full font-headline-sm text-headline-sm shadow-button active:scale-[0.98] transition-transform duration-200 disabled:opacity-40 disabled:saturate-50" data-save="size">
+Simpan Ukuran
+</button>
+</div>
+</div>
+</main>
+</section>
+
+<section class="page flex-1 flex flex-col hidden" data-page="qr">
+<main class="flex-grow px-container-margin pt-6 pb-32 flex flex-col items-center">
+<div class="w-full max-w-sm bg-white rounded-2xl shadow-card p-8 flex flex-col items-center animate-pop">
+<div class="flex flex-col items-center mb-6">
+<div class="w-20 h-20 rounded-full bg-primary flex items-center justify-center mb-4 shadow-lg border-4 border-white ring-1 ring-black/[0.04]">
+<span class="text-white font-headline-md text-headline-md font-bold">BS</span>
+</div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Budi Santoso</h2>
+<p class="font-body-md text-body-md text-secondary/60 mt-0.5">2101928374</p>
+</div>
+<div class="w-full aspect-square bg-surface-container-low rounded-xl flex items-center justify-center relative mb-6 p-6 border border-black/[0.04]">
+<div class="absolute top-4 left-4 w-6 h-6 border-t-2 border-l-2 border-primary"></div>
+<div class="absolute top-4 right-4 w-6 h-6 border-t-2 border-r-2 border-primary"></div>
+<div class="absolute bottom-4 left-4 w-6 h-6 border-b-2 border-l-2 border-primary"></div>
+<div class="absolute bottom-4 right-4 w-6 h-6 border-b-2 border-r-2 border-primary"></div>
+<div class="w-full h-full bg-white rounded-xl flex flex-col items-center justify-center shadow-sm">
+<div class="w-full h-full bg-contain bg-center bg-no-repeat" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBOYDfWai-pTOa2u3245JoeWgOesmCibdU2zc9AysdcRDwb9b57An1gK0boto-uMN5DX9RBTIlCXz1_u4Jc_1lZ-4U-PNQBGVoJnraRxo3z29ZaxrvrvkmnqRfc7BHOeiZVd8hoThvKVll4pnYON2u-7cIt81GFAPUiBugS1YHN5u_IVbJbkiLQBHu70csvIjaA7YkDRLvGe5YA3lEd5fBzkKxkSTXrq_BmFu4S14WtP0X92mTAcOmX')"></div>
+<span class="mt-2 font-label-md text-label-md text-primary tracking-[0.2em] uppercase">NIM</span>
+</div>
+</div>
+<button type="button" class="w-full h-14 bg-primary text-white rounded-full font-headline-sm text-headline-sm flex items-center justify-center gap-2 shadow-button active:scale-[0.98] transition-transform duration-200" data-download>
+<span class="material-symbols-outlined">download</span>
+Download QR PNG
+</button>
+<p class="mt-6 font-body-md text-body-md text-secondary/60 text-center leading-relaxed px-2">
+Tunjukkan QR ini pada petugas saat pengambilan paket untuk verifikasi identitas Anda.
+</p>
+</div>
+<div class="mt-6 grid grid-cols-2 gap-4 w-full max-w-sm">
+<div class="bg-white shadow-soft rounded-xl p-4">
+<span class="font-label-md text-label-md text-secondary/60 uppercase">Status</span>
+<p class="font-headline-sm text-headline-sm text-on-surface mt-1">Aktif</p>
+</div>
+<div class="bg-white shadow-soft rounded-xl p-4">
+<span class="font-label-md text-label-md text-secondary/60 uppercase">Valid Hingga</span>
+<p class="font-headline-sm text-headline-sm text-on-surface mt-1">2025</p>
+</div>
+</div>
+</main>
+</section>
+
+<section class="page flex-1 flex flex-col hidden" data-page="barang">
+<main class="min-h-screen pb-8">
+<nav class="flex w-full bg-white/90 backdrop-blur-sm sticky top-16 z-40 shadow-[0_1px_0_rgba(0,0,0,0.04)]">
+<button type="button" class="flex-1 relative py-4 text-center font-label-md text-label-md text-black/30 hover:text-primary/60 transition-colors duration-150 active:scale-95" data-tab="pending">
+Pending
+</button>
+<button type="button" class="flex-1 relative py-4 text-center font-label-md text-label-md text-black/30 hover:text-primary/60 transition-colors duration-150 active:scale-95" data-tab="received">
+Received
+</button>
+</nav>
+<div class="px-container-margin pt-4 flex justify-between items-center">
+<span class="text-secondary/50 font-label-md text-label-md" id="items-counter">2 ITEMS PENDING</span>
+</div>
+<div class="px-container-margin mt-4 space-y-4" id="barang-list"></div>
+</main>
+</section>
+
+<section class="page flex-1 flex flex-col hidden" data-page="profil">
+<main class="flex-grow px-container-margin pt-8 pb-32">
+<section class="flex flex-col items-center mb-8 text-center">
+<div class="w-24 h-24 rounded-full bg-primary flex items-center justify-center text-white text-3xl font-bold mb-5 shadow-xl border-4 border-white ring-1 ring-black/[0.04]">
+BS
+</div>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface mb-1">Budi Santoso</h1>
+<p class="font-body-lg text-body-lg text-secondary/60">NIM: 12021940001</p>
+</section>
+<section class="bg-white rounded-2xl p-5 mb-6 shadow-card">
+<div class="space-y-4">
+<div class="flex justify-between items-center pb-3 divider-subtle">
+<span class="font-label-md text-label-md text-secondary/60 uppercase tracking-wider">Program Studi</span>
+<span class="font-body-md text-body-md text-on-surface font-semibold">S1 Sistem Informasi</span>
+</div>
+<div class="flex justify-between items-center pb-3 divider-subtle">
+<span class="font-label-md text-label-md text-secondary/60 uppercase tracking-wider">Fakultas</span>
+<span class="font-body-md text-body-md text-on-surface font-semibold">Rekayasa Industri</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="font-label-md text-label-md text-secondary/60 uppercase tracking-wider">Status</span>
+<div class="flex items-center gap-1 bg-emerald-50 text-emerald-700 px-3 py-1 rounded-full border border-emerald-200/50">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="font-label-md text-label-md font-semibold">Aktif</span>
+</div>
+</div>
+</div>
+</section>
+<section class="flex flex-col gap-4">
+<button type="button" class="w-full h-14 rounded-full border-2 border-primary text-primary font-semibold text-body-lg flex items-center justify-center gap-2 active:scale-[0.98] transition-colors duration-200 hover:bg-primary/5" data-modal="change-password">
+<span class="material-symbols-outlined">lock_reset</span>
+Ubah Password
+</button>
+<button type="button" class="w-full h-14 rounded-full bg-primary text-white font-semibold text-body-lg flex items-center justify-center gap-2 shadow-button active:scale-[0.98] transition-transform duration-200" data-modal="verify-email">
+<span class="material-symbols-outlined">verified_user</span>
+Kelola Email
+</button>
+</section>
+</main>
+</section>
+
+<nav class="fixed bottom-0 w-full z-50 flex items-center h-[72px] bg-white/80 backdrop-blur-xl border-t border-black/[0.04] safe-area-bottom">
+<button type="button" class="flex-1 flex flex-col items-center justify-center gap-0.5 active:scale-90 transition-colors duration-200" data-nav="beranda">
+<span class="material-symbols-outlined">home</span>
+<span class="text-[10px] font-semibold tracking-wide">Beranda</span>
+</button>
+<button type="button" class="flex-1 flex flex-col items-center justify-center gap-0.5 active:scale-90 transition-colors duration-200" data-nav="ukuran">
+<span class="material-symbols-outlined">straighten</span>
+<span class="text-[10px] font-semibold tracking-wide">Ukuran</span>
+</button>
+<button type="button" class="flex-1 flex flex-col items-center justify-center gap-0.5 active:scale-90 transition-colors duration-200" data-nav="qr">
+<span class="material-symbols-outlined">qr_code_scanner</span>
+<span class="text-[10px] font-semibold tracking-wide">Scan</span>
+</button>
+<button type="button" class="flex-1 flex flex-col items-center justify-center gap-0.5 active:scale-90 transition-colors duration-200" data-nav="barang">
+<span class="material-symbols-outlined">inventory_2</span>
+<span class="text-[10px] font-semibold tracking-wide">Barang</span>
+</button>
+<button type="button" class="flex-1 flex flex-col items-center justify-center gap-0.5 active:scale-90 transition-colors duration-200" data-nav="profil">
+<span class="material-symbols-outlined">person</span>
+<span class="text-[10px] font-semibold tracking-wide">Profil</span>
+</button>
+</nav>
+
+<script>
+(function () {
+  // ── Icons ──
+  document.querySelectorAll(".material-symbols-outlined").forEach(function (el) {
+    el.setAttribute("aria-hidden", "true");
+  });
+
+  // ── Touch Feedback ──
+  document.querySelectorAll("button, a").forEach(function (el) {
+    el.addEventListener("touchstart", function () {
+      this.classList.add("opacity-80");
+    });
+    el.addEventListener("touchend", function () {
+      this.classList.remove("opacity-80");
+    });
+  });
+
+  // ── Bottom Sheet ──
+  var sheetOverlay = null;
+  var sheetPanel = null;
+  var sheetBody = null;
+  var sheetOpen = false;
+
+  function createSheet() {
+    var overlay = document.createElement("div");
+    overlay.id = "sheet-overlay";
+    overlay.className =
+      "fixed inset-0 bg-black/30 z-[100] opacity-0 pointer-events-none";
+
+    var panel = document.createElement("div");
+    panel.id = "sheet-panel";
+    panel.className =
+      "fixed bottom-0 left-0 right-0 z-[101] bg-white rounded-t-2xl max-h-[85vh] flex flex-col translate-y-full";
+
+    var handle = document.createElement("div");
+    handle.className =
+      "sticky top-0 bg-white rounded-t-2xl z-10 px-5 pt-3 pb-2";
+    handle.innerHTML =
+      '<div class="w-10 h-1 bg-black/20 rounded-full mx-auto mb-2"></div>';
+
+    var body = document.createElement("div");
+    body.className = "overflow-y-auto overscroll-contain px-5 pb-8 flex-1";
+
+    panel.appendChild(handle);
+    panel.appendChild(body);
+
+    document.body.appendChild(overlay);
+    document.body.appendChild(panel);
+
+    sheetOverlay = overlay;
+    sheetPanel = panel;
+    sheetBody = body;
+
+    overlay.addEventListener("click", function () {
+      closeSheet();
+    });
+
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && sheetOpen) closeSheet();
+    });
+  }
+
+  function openSheet(html) {
+    if (!sheetOverlay) createSheet();
+    sheetBody.innerHTML = html;
+    sheetOverlay.classList.remove("pointer-events-none");
+    requestAnimationFrame(function () {
+      sheetOverlay.classList.add("opacity-100");
+      sheetPanel.classList.remove("translate-y-full");
+    });
+    document.body.classList.add("sheet-open");
+    sheetOpen = true;
+  }
+
+  function closeSheet() {
+    if (!sheetOpen) return;
+    sheetPanel.classList.add("translate-y-full");
+    sheetOverlay.classList.remove("opacity-100");
+    sheetOverlay.classList.add("pointer-events-none");
+    document.body.classList.remove("sheet-open");
+    sheetOpen = false;
+  }
+
+  // ── Barang Data ──
+  var barangData = [
+    { id: "AM-0921", name: "Kemeja Almamater", size: "L", status: "pending", icon: "apparel" },
+    { id: "SP-8820", name: "Sepatu Pantofel", size: "42", status: "pending", icon: "straighten" },
+    { id: "BK-4510", name: "Buku Panduan", size: null, status: "received", icon: "menu_book" },
+    { id: "ID-3321", name: "KTM Mahasiswa", size: null, status: "received", icon: "badge" },
+  ];
+  var currentFilter = "pending";
+
+  function renderBarang(filter) {
+    var container = document.getElementById("barang-list");
+    var counter = document.getElementById("items-counter");
+    if (!container) return;
+
+    var filtered = barangData.filter(function (item) {
+      return filter === "all" || item.status === filter;
+    });
+
+    if (counter) {
+      counter.textContent = filtered.length + " ITEMS " + filter.toUpperCase();
+    }
+
+    if (filtered.length === 0) {
+      container.innerHTML =
+        '<div class="bg-white rounded-2xl p-8 text-center"><span class="material-symbols-outlined text-4xl text-secondary/30 mb-3">inventory_2</span><p class="font-body-md text-body-md text-secondary/50">Tidak ada barang</p></div>';
+      return;
+    }
+
+    container.innerHTML = filtered
+      .map(function (item) {
+        var statusClass =
+          item.status === "pending"
+            ? "text-primary"
+            : "text-emerald-600";
+        var sizeHtml = item.size
+          ? '<div class="inline-flex items-center px-2.5 py-1 rounded-full bg-surface-variant/40 w-fit"><span class="text-[10px] font-semibold text-secondary uppercase tracking-wider">Ukuran ' +
+            item.size +
+            "</span></div>"
+          : "";
+        return (
+          '<div class="bg-white rounded-2xl p-5 shadow-card flex items-center justify-between active:scale-[0.99] transition-transform duration-200 cursor-pointer" data-modal="barang:' +
+          item.id +
+          '">' +
+          '<div class="flex items-center gap-4">' +
+          '<div class="w-14 h-14 rounded-xl bg-primary/5 flex items-center justify-center">' +
+          '<span class="material-symbols-outlined text-primary text-2xl" style="font-variation-settings: \'FILL\' 1;">' +
+          item.icon +
+          "</span></div>" +
+          '<div class="flex flex-col gap-1.5">' +
+          '<h3 class="font-headline-sm text-[15px] text-on-surface">' +
+          item.name +
+          "</h3>" +
+          sizeHtml +
+          "</div></div>" +
+          '<div class="flex flex-col items-end gap-1">' +
+          '<span class="font-semibold font-label-md text-label-md ' +
+          statusClass +
+          '">' +
+          item.status.charAt(0).toUpperCase() +
+          item.status.slice(1) +
+          '</span>' +
+          '<span class="text-[10px] text-secondary/50">ID: #' +
+          item.id +
+          "</span></div></div>"
+        );
+      })
+      .join("");
+  }
+
+  // ── Acara Perubahan Ukuran & Kuota ──
+  var CURRENT_NIM = "12345678";
+  var EVENTS_KEY = "horizon_events";
+  var CHANGES_KEY = "horizon_size_changes";
+  var SIZES_KEY = "horizon_sizes";
+
+  var DEFAULT_SIZE_OPTIONS = {
+    baju: ["XS", "S", "M", "L", "XL", "XXL", "XXXL", "XXXXL", "XXXXXL", "XXXXXXL"],
+    sepatu: ["40", "41", "42", "43", "44", "45"],
+  };
+
+  function storeGet(key, fallback) {
+    try {
+      var raw = localStorage.getItem(key);
+      return raw ? JSON.parse(raw) : fallback;
+    } catch (e) {
+      return fallback;
+    }
+  }
+
+  function storeSet(key, value) {
+    localStorage.setItem(key, JSON.stringify(value));
+  }
+
+  function getEvents() {
+    return storeGet(EVENTS_KEY, []);
+  }
+
+  function getActiveEvents() {
+    return getEvents().filter(function (e) {
+      return e.aktif;
+    });
+  }
+
+  function getCurrentEvent() {
+    var active = getActiveEvents();
+    return active.length ? active[active.length - 1] : null;
+  }
+
+  function getChanges() {
+    return storeGet(CHANGES_KEY, []);
+  }
+
+  function getChangeCount(eventId, nim) {
+    return getChanges().filter(function (c) {
+      return c.eventId === eventId && c.nim === nim;
+    }).length;
+  }
+
+  function getRemaining(event, nim) {
+    return Math.max(0, event.batasPerubahan - getChangeCount(event.id, nim));
+  }
+
+  function canChange(event, nim) {
+    return getRemaining(event, nim) > 0;
+  }
+
+  function seedDemoEvent() {
+    if (getEvents().length > 0) return;
+    storeSet(EVENTS_KEY, [
+      {
+        id: "EVT-DEMO",
+        nama: "Perubahan Ukuran Wisuda",
+        tanggalMulai: "2026-08-01",
+        tanggalSelesai: "2026-08-31",
+        batasPerubahan: 2,
+        aktif: true,
+      },
+    ]);
+  }
+
+  function getSizes() {
+    return storeGet(SIZES_KEY, {});
+  }
+
+  function getStudentSizes(nim) {
+    return getSizes()[nim] || {};
+  }
+
+  function setStudentSizes(nim, sizes) {
+    var all = getSizes();
+    all[nim] = sizes;
+    storeSet(SIZES_KEY, all);
+  }
+
+  function recordChange(event, nim, size) {
+    var changes = getChanges();
+    var prev = getStudentSizes(nim);
+    changes.push({
+      id: "CHG-" + Date.now(),
+      eventId: event.id,
+      nim: nim,
+      baju: size.baju,
+      sepatu: size.sepatu,
+      prevBaju: prev.baju || "-",
+      prevSepatu: prev.sepatu || "-",
+      tanggal: new Date().toISOString().slice(0, 10),
+    });
+    storeSet(CHANGES_KEY, changes);
+    setStudentSizes(nim, { baju: size.baju, sepatu: size.sepatu });
+  }
+
+  function formatTanggal(iso) {
+    if (!iso) return "-";
+    var parts = iso.split("-");
+    if (parts.length !== 3) return iso;
+    var bulan = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
+    return parseInt(parts[2], 10) + " " + (bulan[parseInt(parts[1], 10) - 1] || "") + " " + parts[0];
+  }
+
+  function bannerHTML(icon, title, sub) {
+    return (
+      '<div class="bg-white shadow-card rounded-2xl p-4 flex items-start gap-3">' +
+      '<span class="material-symbols-outlined text-primary mt-0.5" aria-hidden="true">' +
+      icon +
+      "</span>" +
+      "<div>" +
+      '<p class="font-body-md text-body-md text-on-surface font-semibold">' +
+      title +
+      "</p>" +
+      '<p class="font-body-md text-[12px] text-secondary/60 mt-0.5">' +
+      sub +
+      "</p></div></div>"
+    );
+  }
+
+  function getSizeOptions() {
+    var event = getCurrentEvent();
+    var opts = event && event.sizeOptions;
+    return {
+      baju: (opts && opts.baju && opts.baju.length) ? opts.baju : DEFAULT_SIZE_OPTIONS.baju,
+      sepatu: (opts && opts.sepatu && opts.sepatu.length) ? opts.sepatu : DEFAULT_SIZE_OPTIONS.sepatu,
+    };
+  }
+
+  var selectedSizes = { baju: null, sepatu: null };
+
+  function initSizeFields() {
+    var opts = getSizeOptions();
+    var stored = getStudentSizes(CURRENT_NIM);
+    ["baju", "sepatu"].forEach(function (key) {
+      var list = opts[key];
+      var val = stored[key];
+      selectedSizes[key] = list.indexOf(val) >= 0 ? val : list[0];
+    });
+    updateSizeFields();
+  }
+
+  function updateSizeFields() {
+    var labels = { baju: "field-baju-value", sepatu: "field-sepatu-value" };
+    ["baju", "sepatu"].forEach(function (key) {
+      var el = document.getElementById(labels[key]);
+      if (el) el.textContent = selectedSizes[key] || "—";
+    });
+  }
+
+  function sizeSheetHTML(category) {
+    var opts = getSizeOptions();
+    var list = opts[category];
+    var title = category === "baju" ? "Ukuran Baju" : "Ukuran Sepatu";
+    return (
+      '<div class="py-2">' +
+      '<h3 class="font-headline-sm text-headline-sm text-on-surface mb-4">' +
+      title +
+      "</h3>" +
+      '<div class="space-y-1 max-h-[312px] overflow-y-auto overscroll-contain scrollbar-hide">' +
+      list
+        .map(function (size) {
+          var active = size === selectedSizes[category]
+            ? " bg-primary/5 text-primary font-semibold"
+            : " text-secondary/70";
+          return (
+            '<button type="button" class="size-option w-full flex items-center justify-between px-4 py-3.5 rounded-xl hover:bg-black/[0.02] transition-colors' +
+            active +
+            '" data-size-category="' +
+            category +
+            '" data-size-value="' +
+            size +
+            '"><span class="font-body-md text-body-md">' +
+            size +
+            '</span><span class="material-symbols-outlined text-[18px]">check</span></button>'
+          );
+        })
+        .join("") +
+      "</div></div>"
+    );
+  }
+
+  function readSelectedSizes() {
+    return { baju: selectedSizes.baju, sepatu: selectedSizes.sepatu };
+  }
+
+  function renderSizeStatus() {
+    var container = document.getElementById("size-status");
+    var saveBtn = document.querySelector("[data-save]");
+    if (!container) return;
+    var event = getCurrentEvent();
+    var nim = CURRENT_NIM;
+    if (!event) {
+      container.innerHTML = bannerHTML(
+        "event_busy",
+        "Tidak Ada Acara Aktif",
+        "Belum ada acara perubahan ukuran yang sedang berjalan."
+      );
+      if (saveBtn) saveBtn.disabled = true;
+      return;
+    }
+    var remaining = getRemaining(event, nim);
+    if (remaining <= 0) {
+      container.innerHTML = bannerHTML(
+        "block",
+        "Kuota Perubahan Habis",
+        "Kamu sudah memakai " +
+          event.batasPerubahan +
+          "x perubahan pada acara " +
+          event.nama +
+          "."
+      );
+      if (saveBtn) saveBtn.disabled = true;
+      return;
+    }
+    container.innerHTML = bannerHTML(
+      "straighten",
+      "Sisa Perubahan: " + remaining + " dari " + event.batasPerubahan,
+      "Acara: " +
+        event.nama +
+        " &bull; s/d " +
+        formatTanggal(event.tanggalSelesai)
+    );
+    if (saveBtn) saveBtn.disabled = false;
+  }
+
+  function initSizePage() {
+    initSizeFields();
+    renderSizeStatus();
+  }
+
+  function showSaveError(btn, message) {
+    var original = btn.innerHTML;
+    btn.innerHTML =
+      '<span class="material-symbols-outlined">block</span> ' + message;
+    btn.style.backgroundColor = "#ba1a1a";
+    btn.style.opacity = "0.9";
+    btn.disabled = true;
+    setTimeout(function () {
+      btn.innerHTML = original;
+      btn.style.backgroundColor = "";
+      btn.style.opacity = "1";
+      btn.disabled = false;
+      renderSizeStatus();
+    }, 2200);
+  }
+
+  // ── Modal Content ──
+  function modalContent(type) {
+    var map = {
+      "schedule-1":
+        '<div class="py-2">' +
+        '<h3 class="font-headline-sm text-headline-sm text-on-surface mb-5">Paket Atribut Wisuda</h3>' +
+        '<div class="space-y-4">' +
+        '<div class="flex items-start gap-3"><span class="material-symbols-outlined text-primary mt-0.5">calendar_month</span><div><p class="font-body-md text-body-md text-on-surface font-semibold">Tanggal</p><p class="font-body-md text-body-md text-secondary/60">24 Oktober 2024</p></div></div>' +
+        '<div class="flex items-start gap-3"><span class="material-symbols-outlined text-primary mt-0.5">schedule</span><div><p class="font-body-md text-body-md text-on-surface font-semibold">Waktu</p><p class="font-body-md text-body-md text-secondary/60">09:00 - 15:00 WIB</p></div></div>' +
+        '<div class="flex items-start gap-3"><span class="material-symbols-outlined text-primary mt-0.5">location_on</span><div><p class="font-body-md text-body-md text-on-surface font-semibold">Lokasi</p><p class="font-body-md text-body-md text-secondary/60">Gedung Serbaguna</p></div></div>' +
+        "</div>" +
+        '<div class="mt-5 p-4 bg-primary/5 rounded-xl"><p class="font-body-md text-body-md text-secondary">Paket terdiri dari toga, medali, dan sertifikat kelulusan. Harap periksa kelengkapan saat pengambilan.</p></div>' +
+        '<button type="button" class="close-sheet mt-6 w-full h-12 rounded-full bg-primary text-white font-headline-sm text-headline-sm shadow-button active:scale-[0.98] transition-transform duration-200">Tutup</button>' +
+        "</div>",
+
+      "schedule-2":
+        '<div class="py-2">' +
+        '<h3 class="font-headline-sm text-headline-sm text-on-surface mb-5">Modul Praktikum Genap</h3>' +
+        '<div class="space-y-4">' +
+        '<div class="flex items-start gap-3"><span class="material-symbols-outlined text-primary mt-0.5">calendar_month</span><div><p class="font-body-md text-body-md text-on-surface font-semibold">Tanggal</p><p class="font-body-md text-body-md text-secondary/60">28 Oktober 2024</p></div></div>' +
+        '<div class="flex items-start gap-3"><span class="material-symbols-outlined text-primary mt-0.5">location_on</span><div><p class="font-body-md text-body-md text-on-surface font-semibold">Lokasi</p><p class="font-body-md text-body-md text-secondary/60">Lab Dasar Komputer, Gedung F</p></div></div>' +
+        "</div>" +
+        '<div class="mt-5 p-4 bg-primary/5 rounded-xl"><p class="font-body-md text-body-md text-secondary">Modul praktikum untuk mata kuliah semester genap. Bawa kartu praktikum saat pengambilan.</p></div>' +
+        '<button type="button" class="close-sheet mt-6 w-full h-12 rounded-full bg-primary text-white font-headline-sm text-headline-sm shadow-button active:scale-[0.98] transition-transform duration-200">Tutup</button>' +
+        "</div>",
+
+      "transaction-1":
+        '<div class="py-2">' +
+        '<h3 class="font-headline-sm text-headline-sm text-on-surface mb-5">Jas Almamater</h3>' +
+        '<div class="space-y-4">' +
+        '<div class="flex items-start gap-3"><span class="material-symbols-outlined text-emerald-600 mt-0.5">check_circle</span><div><p class="font-body-md text-body-md text-on-surface font-semibold">Status</p><p class="font-body-md text-body-md text-emerald-600">Selesai</p></div></div>' +
+        '<div class="flex items-start gap-3"><span class="material-symbols-outlined text-primary mt-0.5">calendar_month</span><div><p class="font-body-md text-body-md text-on-surface font-semibold">Tanggal Pengambilan</p><p class="font-body-md text-body-md text-secondary/60">12 September 2023</p></div></div>' +
+        '<div class="flex items-start gap-3"><span class="material-symbols-outlined text-primary mt-0.5">receipt_long</span><div><p class="font-body-md text-body-md text-on-surface font-semibold">No. Transaksi</p><p class="font-body-md text-body-md text-secondary/60">TRX-2023-0912-01</p></div></div>' +
+        "</div>" +
+        '<button type="button" class="close-sheet mt-6 w-full h-12 rounded-full bg-primary text-white font-headline-sm text-headline-sm shadow-button active:scale-[0.98] transition-transform duration-200">Tutup</button>' +
+        "</div>",
+    };
+
+    // Barang detail by ID
+    if (type.indexOf("barang:") === 0) {
+      var id = type.split(":")[1];
+      var item = barangData.filter(function (i) {
+        return i.id === id;
+      })[0];
+      if (item) {
+        var sizeRow = item.size
+          ? '<div class="flex items-start gap-3"><span class="material-symbols-outlined text-primary mt-0.5">straighten</span><div><p class="font-body-md text-body-md text-on-surface font-semibold">Ukuran</p><p class="font-body-md text-body-md text-secondary/60">' +
+            item.size +
+            "</p></div></div>"
+          : "";
+        return (
+          '<div class="py-2">' +
+          '<h3 class="font-headline-sm text-headline-sm text-on-surface mb-5">' +
+          item.name +
+          "</h3>" +
+          '<div class="space-y-4">' +
+          '<div class="flex items-start gap-3"><span class="material-symbols-outlined text-primary mt-0.5">tag</span><div><p class="font-body-md text-body-md text-on-surface font-semibold">ID Barang</p><p class="font-body-md text-body-md text-secondary/60">#' +
+          item.id +
+          "</p></div></div>" +
+          sizeRow +
+          '<div class="flex items-start gap-3"><span class="material-symbols-outlined text-primary mt-0.5">info</span><div><p class="font-body-md text-body-md text-on-surface font-semibold">Status</p><p class="font-body-md text-body-md text-secondary/60 capitalize">' +
+          item.status +
+          "</p></div></div>" +
+          "</div>" +
+          '<button type="button" class="close-sheet mt-6 w-full h-12 rounded-full bg-primary text-white font-headline-sm text-headline-sm shadow-button active:scale-[0.98] transition-transform duration-200">Tutup</button>' +
+          "</div>"
+        );
+      }
+    }
+
+    return map[type] || "";
+  }
+
+  // ── Filter Options ──
+  function filterOptionsHTML() {
+    var statuses = ["all", "pending", "received"];
+    var labels = { all: "Semua", pending: "Pending", received: "Received" };
+    return (
+      '<div class="py-2">' +
+      '<h3 class="font-headline-sm text-headline-sm text-on-surface mb-4">Filter Status</h3>' +
+      '<div class="space-y-2">' +
+      statuses
+        .map(function (s) {
+          var active = s === currentFilter ? " bg-primary/5 text-primary font-semibold" : " text-secondary/70";
+          return (
+            '<button type="button" class="filter-option w-full text-left px-4 py-3 rounded-xl hover:bg-black/[0.02] transition-colors' +
+            active +
+            '" data-filter="' +
+            s +
+            '">' +
+            labels[s] +
+            "</button>"
+          );
+        })
+        .join("") +
+      "</div></div>"
+    );
+  }
+
+  // ── Change Password Form ──
+  function passwordFormHTML() {
+    return (
+      '<div class="py-2">' +
+      '<h3 class="font-headline-sm text-headline-sm text-on-surface mb-5">Ubah Password</h3>' +
+      '<div class="space-y-4">' +
+      '<div><label class="block font-label-md text-label-md text-secondary/70 mb-1.5">Password Saat Ini</label><input type="password" class="w-full h-12 px-4 rounded-xl bg-surface-container-low border border-black/[0.06] font-body-md focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors" placeholder="Masukkan password saat ini"></div>' +
+      '<div><label class="block font-label-md text-label-md text-secondary/70 mb-1.5">Password Baru</label><input type="password" class="w-full h-12 px-4 rounded-xl bg-surface-container-low border border-black/[0.06] font-body-md focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors" placeholder="Minimal 8 karakter"></div>' +
+      '<div><label class="block font-label-md text-label-md text-secondary/70 mb-1.5">Konfirmasi Password Baru</label><input type="password" class="w-full h-12 px-4 rounded-xl bg-surface-container-low border border-black/[0.06] font-body-md focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors" placeholder="Ulangi password baru"></div>' +
+      "</div>" +
+      '<button type="button" class="close-sheet mt-6 w-full h-12 rounded-full bg-primary text-white font-headline-sm text-headline-sm shadow-button active:scale-[0.98] transition-transform duration-200">Simpan Password</button>' +
+      '<button type="button" class="close-sheet mt-3 w-full h-12 rounded-full border-2 border-secondary/20 text-secondary/60 font-headline-sm text-headline-sm active:scale-[0.98] transition-transform duration-200">Batal</button>' +
+      "</div>"
+    );
+  }
+
+  // ── Kelola Email ──
+  var EMAILS_KEY = "horizon_emails";
+  var emailEditMode = false;
+
+  function getEmails() {
+    var stored = storeGet(EMAILS_KEY, null);
+    if (stored) return stored;
+    return [
+      { id: "kampus", label: "Email Kampus", email: "budi.santoso@univ.ac.id", verified: false, fixed: true },
+      { id: "pribadi", label: "Email Pribadi", email: "", verified: false, fixed: false },
+    ];
+  }
+
+  function saveEmails(list) {
+    storeSet(EMAILS_KEY, list);
+  }
+
+  function seedEmails() {
+    if (!storeGet(EMAILS_KEY, null)) saveEmails(getEmails());
+  }
+
+  function setEmailVerified(id, verified) {
+    var list = getEmails();
+    list.forEach(function (e) {
+      if (e.id === id) e.verified = verified;
+    });
+    saveEmails(list);
+  }
+
+  function savePersonalEmail(email) {
+    var list = getEmails();
+    list.forEach(function (e) {
+      if (e.id === "pribadi") e.email = email;
+    });
+    saveEmails(list);
+  }
+
+  function emailBadgeHTML(email) {
+    if (!email.email) {
+      return '<span class="inline-flex items-center gap-1 bg-amber-50 text-amber-700 px-2.5 py-1 rounded-full border border-amber-200/50"><span class="material-symbols-outlined text-[14px]" style="font-variation-settings: \'FILL\' 1;">priority_high</span><span class="text-[11px] font-semibold">Belum diisi</span></span>';
+    }
+    if (email.verified) {
+      return '<span class="inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-full border border-emerald-200/50"><span class="material-symbols-outlined text-[14px]" style="font-variation-settings: \'FILL\' 1;">check_circle</span><span class="text-[11px] font-semibold">Terverifikasi</span></span>';
+    }
+    return '<span class="inline-flex items-center gap-1 bg-amber-50 text-amber-700 px-2.5 py-1 rounded-full border border-amber-200/50"><span class="material-symbols-outlined text-[14px]" style="font-variation-settings: \'FILL\' 1;">priority_high</span><span class="text-[11px] font-semibold">Belum Verifikasi</span></span>';
+  }
+
+  function renderEmailCard() {
+    var container = document.getElementById("email-card");
+    if (!container) return;
+    var rows = getEmails()
+      .map(function (e) {
+        return (
+          '<div class="glass-card shadow-card rounded-2xl p-4 flex items-center gap-3 cursor-pointer active:scale-[0.99] transition-transform" data-verify-email data-email-id="' +
+          e.id +
+          '">' +
+          '<span class="material-symbols-outlined text-primary" aria-hidden="true">' +
+          (e.id === "kampus" ? "alternate_email" : "mail") +
+          "</span>" +
+          '<div class="flex-1 min-w-0">' +
+          '<h3 class="font-body-md text-body-md text-secondary uppercase tracking-wider">' +
+          e.label +
+          "</h3>" +
+          '<p class="font-body-md text-[13px] text-on-background truncate">' +
+          (e.email || "Belum ditambahkan") +
+          "</p></div>" +
+          emailBadgeHTML(e) +
+          "</div>"
+        );
+      })
+      .join("");
+    container.innerHTML = '<div class="space-y-3">' + rows + "</div>";
+  }
+
+  function emailsSheetHTML(id) {
+    var e = getEmails().filter(function (x) {
+      return x.id === id;
+    })[0];
+    if (!e) return "";
+    var inner;
+    if (e.id === "pribadi" && (emailEditMode || !e.email)) {
+      inner =
+        '<div class="bg-surface-container-low rounded-xl p-4">' +
+        '<label class="block font-label-md text-label-md text-secondary/70 mb-1.5">' +
+        e.label +
+        "</label>" +
+        '<input type="email" id="pribadi-email-input" value="' +
+        (e.email || "") +
+        '" placeholder="contoh@gmail.com" class="w-full h-12 px-4 rounded-xl bg-white border border-black/[0.06] font-body-md focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors">' +
+        '<button type="button" class="save-email-action mt-3 w-full h-12 rounded-full bg-primary text-white font-headline-sm text-headline-sm shadow-button active:scale-[0.98] transition-transform duration-200">Simpan Email</button>' +
+        "</div>";
+    } else {
+      var badge = e.verified
+        ? '<span class="inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-full border border-emerald-200/50 w-fit"><span class="material-symbols-outlined text-[14px]" style="font-variation-settings: \'FILL\' 1;">check_circle</span><span class="text-[11px] font-semibold">Terverifikasi</span></span>'
+        : "";
+      var action = "";
+      if (!e.verified) {
+        action =
+          '<button type="button" class="verify-email-action w-full h-12 rounded-full bg-primary text-white font-headline-sm text-headline-sm shadow-button active:scale-[0.98] transition-transform duration-200" data-email-id="' +
+          e.id +
+          '">Kirim Email Verifikasi</button>';
+        if (e.id === "pribadi") {
+          action +=
+            '<button type="button" class="edit-email-action mt-3 w-full h-12 rounded-full border-2 border-secondary/20 text-secondary/60 font-headline-sm text-headline-sm active:scale-[0.98] transition-transform duration-200" data-email-id="pribadi">Ubah Email</button>';
+        }
+      }
+      inner =
+        '<div class="bg-surface-container-low rounded-xl p-4 space-y-3">' +
+        '<div class="flex items-start justify-between gap-3">' +
+        '<div class="min-w-0">' +
+        '<p class="font-body-md text-body-md text-on-surface font-semibold">' +
+        e.label +
+        "</p>" +
+        '<p class="font-body-md text-[13px] text-secondary/70 break-all">' +
+        e.email +
+        "</p></div>" +
+        badge +
+        "</div>" +
+        action +
+        "</div>";
+    }
+    return (
+      '<div class="py-2">' +
+      '<h3 class="font-headline-sm text-headline-sm text-on-surface mb-5">' +
+      e.label +
+      "</h3>" +
+      inner +
+      '<button type="button" class="close-sheet mt-5 w-full h-12 rounded-full border-2 border-secondary/20 text-secondary/60 font-headline-sm text-headline-sm active:scale-[0.98] transition-transform duration-200">Tutup</button>' +
+      "</div>"
+    );
+  }
+
+  // ── SPA Page Switching ──
+  var PAGES = ["beranda", "ukuran", "qr", "barang", "profil"];
+
+  function renderBarangTabs() {
+    document.querySelectorAll("[data-tab]").forEach(function (t) {
+      var active = t.getAttribute("data-tab") === currentFilter;
+      t.classList.toggle("text-primary", active);
+      t.classList.toggle("text-black/30", !active);
+      var ind = t.querySelector(".active-tab-indicator");
+      if (active && !ind) {
+        var el = document.createElement("div");
+        el.className = "active-tab-indicator";
+        t.appendChild(el);
+      }
+      if (!active && ind) ind.remove();
+    });
+  }
+
+  function showPage(name) {
+    if (PAGES.indexOf(name) < 0) name = "beranda";
+
+    PAGES.forEach(function (p) {
+      var section = document.querySelector('.page[data-page="' + p + '"]');
+      if (section) section.classList.toggle("hidden", p !== name);
+    });
+
+    document.body.setAttribute("data-page", name);
+
+    document.querySelectorAll("[data-nav]").forEach(function (btn) {
+      var active = btn.getAttribute("data-nav") === name;
+      btn.classList.toggle("text-primary", active);
+      btn.classList.toggle("text-black/30", !active);
+      var icon = btn.querySelector(".material-symbols-outlined");
+      if (icon) {
+        icon.style.fontVariationSettings = active
+          ? "'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24"
+          : "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24";
+      }
+      if (active) btn.setAttribute("aria-current", "page");
+      else btn.removeAttribute("aria-current");
+    });
+
+    if (name === "beranda") renderEmailCard();
+    if (name === "barang") {
+      renderBarangTabs();
+      renderBarang(currentFilter);
+    }
+    if (name === "ukuran") renderSizeStatus();
+
+    window.scrollTo(0, 0);
+  }
+
+  // ── Click Delegation ──
+  document.addEventListener("click", function (e) {
+    var navBtn = e.target.closest("[data-nav]");
+    if (navBtn) {
+      showPage(navBtn.getAttribute("data-nav"));
+      return;
+    }
+
+    var sizeOption = e.target.closest("[data-size-value]");
+    if (sizeOption) {
+      selectedSizes[sizeOption.getAttribute("data-size-category")] = sizeOption.getAttribute("data-size-value");
+      updateSizeFields();
+      closeSheet();
+      return;
+    }
+
+    var sizeField = e.target.closest("[data-size-field]");
+    if (sizeField) {
+      openSheet(sizeSheetHTML(sizeField.getAttribute("data-size-field")));
+      return;
+    }
+
+    var verifyAction = e.target.closest(".verify-email-action");
+    if (verifyAction) {
+      var verifyId = verifyAction.getAttribute("data-email-id") || "kampus";
+      setEmailVerified(verifyId, true);
+      renderEmailCard();
+      openSheet(emailsSheetHTML(verifyId));
+      return;
+    }
+
+    var saveEmailBtn = e.target.closest(".save-email-action");
+    if (saveEmailBtn) {
+      var emailInput = document.getElementById("pribadi-email-input");
+      var emailVal = emailInput ? emailInput.value.trim() : "";
+      if (emailVal) {
+        savePersonalEmail(emailVal);
+        emailEditMode = false;
+        renderEmailCard();
+        openSheet(emailsSheetHTML("pribadi"));
+      }
+      return;
+    }
+
+    var editEmailBtn = e.target.closest(".edit-email-action");
+    if (editEmailBtn) {
+      emailEditMode = true;
+      openSheet(emailsSheetHTML("pribadi"));
+      return;
+    }
+
+    var closeBtn = e.target.closest(".close-sheet");
+    if (closeBtn) {
+      closeSheet();
+      return;
+    }
+
+    var filterOpt = e.target.closest(".filter-option");
+    if (filterOpt) {
+      currentFilter = filterOpt.getAttribute("data-filter") || "all";
+      renderBarang(currentFilter);
+      closeSheet();
+      return;
+    }
+
+    var navigateBtn = e.target.closest("[data-navigate]");
+    if (navigateBtn) {
+      var target = navigateBtn.getAttribute("data-navigate") || "profil.html";
+      showPage(target.replace(".html", ""));
+      return;
+    }
+
+    var modalBtn = e.target.closest("[data-modal]");
+    if (modalBtn) {
+      var key = modalBtn.getAttribute("data-modal");
+      if (key === "filter") {
+        openSheet(filterOptionsHTML());
+      } else if (key === "change-password") {
+        openSheet(passwordFormHTML());
+      } else if (key === "verify-email") {
+        openSheet(emailsSheetHTML("kampus"));
+      } else {
+        var html = modalContent(key);
+        if (html) openSheet(html);
+      }
+      return;
+    }
+
+    var verifyCard = e.target.closest("[data-verify-email]");
+    if (verifyCard) {
+      openSheet(emailsSheetHTML(verifyCard.getAttribute("data-email-id") || "kampus"));
+      return;
+    }
+
+    var scrollBtn = e.target.closest("[data-scroll]");
+    if (scrollBtn) {
+      var targetId = scrollBtn.getAttribute("data-scroll");
+      var target = document.getElementById(targetId);
+      if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
+      return;
+    }
+  });
+
+  // ── Tab Filter (barang) ──
+  var tabs = document.querySelectorAll("[data-tab]");
+  tabs.forEach(function (tab) {
+    tab.addEventListener("click", function () {
+      var status = this.getAttribute("data-tab") || "pending";
+      tabs.forEach(function (t) {
+        t.classList.remove("text-primary");
+        t.classList.add("text-black/30");
+        var indicator = t.querySelector(".active-tab-indicator");
+        if (indicator) indicator.remove();
+      });
+      this.classList.remove("text-black/30");
+      this.classList.add("text-primary");
+      var ind = document.createElement("div");
+      ind.className = "active-tab-indicator";
+      this.appendChild(ind);
+      currentFilter = status;
+      renderBarang(status);
+    });
+  });
+
+  // ── Download Button ──
+  var downloadBtn = document.querySelector("[data-download]");
+  if (downloadBtn) {
+    (function (btn) {
+      btn.addEventListener("click", function () {
+        var originalText = this.innerHTML;
+        this.innerHTML =
+          '<span class="material-symbols-outlined">sync</span> Mengunduh\u2026';
+        this.style.opacity = "0.8";
+        setTimeout(
+          function () {
+            this.innerHTML =
+              '<span class="material-symbols-outlined">check_circle</span> Berhasil';
+            this.style.backgroundColor = "#1b1c1c";
+            setTimeout(
+              function () {
+                this.innerHTML = originalText;
+                this.style.backgroundColor = "";
+                this.style.opacity = "1";
+              }.bind(this),
+              2000
+            );
+          }.bind(this),
+          1500
+        );
+      });
+    })(downloadBtn);
+  }
+
+  // ── Save Size Button ──
+  var saveBtn = document.querySelector("[data-save]");
+  if (saveBtn) {
+    saveBtn.addEventListener("click", function () {
+      var page = document.body.getAttribute("data-page");
+      if (page === "ukuran") {
+        var ev = getCurrentEvent();
+        var nim = CURRENT_NIM;
+        if (!ev) {
+          showSaveError(this, "Tidak ada acara aktif");
+          return;
+        }
+        if (!canChange(ev, nim)) {
+          showSaveError(this, "Kuota perubahan habis");
+          return;
+        }
+        recordChange(ev, nim, readSelectedSizes());
+      }
+      var originalText = this.textContent;
+      this.innerHTML =
+        '<span class="material-symbols-outlined">sync</span> Menyimpan\u2026';
+      this.style.opacity = "0.8";
+      var self = this;
+      setTimeout(function () {
+        self.innerHTML =
+          '<span class="material-symbols-outlined">check_circle</span> Tersimpan!';
+        self.style.backgroundColor = "#1b1c1c";
+        setTimeout(function () {
+          self.innerHTML = originalText;
+          self.style.backgroundColor = "";
+          self.style.opacity = "1";
+          if (document.body.getAttribute("data-page") === "ukuran") {
+            renderSizeStatus();
+          }
+        }, 2000);
+      }, 1500);
+    });
+  }
+
+  // ── Init ──
+  seedDemoEvent();
+  seedEmails();
+  initSizePage();
+  showPage("beranda");
+})();
+</script>
+</body>
+</html>

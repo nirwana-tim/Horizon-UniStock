@@ -21,17 +21,8 @@
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
 
-                    @if(session('success'))
-                        <div class="mb-4 p-4 bg-green-100 border border-green-300 text-green-800 rounded-md">
-                            {{ session('success') }}
-                        </div>
-                    @endif
-
-                    @if(session('error'))
-                        <div class="mb-4 p-4 bg-red-100 border border-red-300 text-red-800 rounded-md">
-                            {{ session('error') }}
-                        </div>
-                    @endif
+                    <x-alert type="success">{{ session('success') }}</x-alert>
+                    <x-alert type="error">{{ session('error') }}</x-alert>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                         <div class="bg-gray-50 p-4 rounded-lg">

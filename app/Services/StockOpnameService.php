@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Models\AuditLog;
 use App\Models\Item;
 use App\Models\StockBalance;
 use App\Models\StockBatch;
@@ -32,14 +31,7 @@ class StockOpnameService
             'created_by' => Auth::id(),
         ]);
 
-        AuditLog::create([
-            'user_id' => Auth::id(),
-            'action' => 'create',
-            'model_type' => StockOpname::class,
-            'model_id' => $batch->id,
-            'new_values' => $batch->toArray(),
-            'ip_address' => request()->ip(),
-        ]);
+        AuditService::log('create', StockOpname::class, $batch->id, null, $batch->toArray());
 
         return $batch;
     }
@@ -182,15 +174,7 @@ class StockOpnameService
                 'status' => 'approved',
             ]);
 
-            AuditLog::create([
-                'user_id' => $approver->id,
-                'action' => 'approve',
-                'model_type' => StockOpname::class,
-                'model_id' => $batch->id,
-                'old_values' => ['status' => 'counted'],
-                'new_values' => ['status' => 'approved'],
-                'ip_address' => request()->ip(),
-            ]);
+            AuditService::log('approve', StockOpname::class, $batch->id, ['status' => 'counted'], ['status' => 'approved']);
         });
     }
 }

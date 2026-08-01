@@ -40,9 +40,11 @@ class StudentImport implements ToCollection, WithMultipleSheets
         }
 
         foreach ($records as $record) {
-            $student = Student::updateOrCreate(
+            $student = Student::firstOrNew(
                 ['nim' => $record['nim']],
-                [
+            );
+            if (!$student->exists) {
+                $student->fill([
                     'name' => $record['name'],
                     'email_kampus' => $record['email_kampus'],
                     'email_pribadi' => $record['email_pribadi'],
@@ -52,8 +54,8 @@ class StudentImport implements ToCollection, WithMultipleSheets
                     'entitlement_code' => ($record['student_level'] ?? 'Y1S1')
                         . ($record['study_program']->faculty->code ?? 'FHS')
                         . $record['study_program']->code,
-                ]
-            );
+                ])->save();
+            }
 
             // Save shirt size & shoe size if provided
             if (!empty($record['shirt_size']) || !empty($record['shoe_size'])) {
@@ -126,10 +128,7 @@ class StudentImport implements ToCollection, WithMultipleSheets
                 continue;
             }
 
-            $emailKampus = $this->clean($values[6] ?? null);
-            if (!$emailKampus) {
-                $emailKampus = strtolower($nim) . '@krw.horizon.ac.id';
-            }
+            $emailKampus = $this->clean($values[6] ?? null) ?? strtolower($nim) . '@krw.horizon.ac.id';
 
             $records[] = [
                 'row' => $index + 1,
@@ -158,7 +157,7 @@ class StudentImport implements ToCollection, WithMultipleSheets
                 'nim' => ['required', 'string', 'max:20'],
                 'name' => ['required', 'string', 'max:255'],
                 'program' => ['required', 'string'],
-                'email_kampus' => ['required', 'email', 'max:255'],
+                'email_kampus' => ['nullable', 'email', 'max:255'],
                 'email_pribadi' => ['nullable', 'email', 'max:255'],
             ]);
 
@@ -189,6 +188,10 @@ class StudentImport implements ToCollection, WithMultipleSheets
                 str_contains($rawType, 'continuing') => 'Y2S1',
                 default => 'Y1S1',
             };
+
+            if ($rawType && !str_contains($rawType, $record['student_level'])) {
+                $failures[] = new Failure($record['row'], 'student_type_raw', ["Tipe mahasiswa '{$rawType}' tidak dikenali, default ke {$record['student_level']}."], $record);
+            }
         }
 
         return $failures;

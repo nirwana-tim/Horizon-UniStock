@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\Role;
 use App\Http\Requests\ProfileUpdateRequest;
 use App\Models\Student;
 use Illuminate\Http\RedirectResponse;
@@ -18,7 +19,7 @@ class ProfileController extends Controller
     public function edit(Request $request): View
     {
         $student = null;
-        if ($request->user()->hasRole('student')) {
+        if ($request->user()->hasRole(Role::Student->value)) {
             $student = Student::where('user_id', $request->user()->id)->first();
         }
 

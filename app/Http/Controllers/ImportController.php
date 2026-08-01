@@ -56,7 +56,8 @@ class ImportController extends Controller
         $batch = $this->importService->processImport(
             $request->input('import_type'),
             Storage::disk('local')->path($filePath),
-            $request->user()->id
+            $request->user()->id,
+            $request->integer('stock_opname_id') ?: null
         );
 
         if ($batch->status === 'completed') {

@@ -15,7 +15,7 @@
                 <p class="text-[10px] text-gray-400">{{ $activeSchedule->date->format('d M Y') }}</p>
             </div>
         @else
-            <span class="text-xs text-gray-400 bg-gray-100 px-3 py-1 rounded-full">Tidak ada jadwal aktif</span>
+            <x-badge type="neutral">Tidak ada jadwal aktif</x-badge>
         @endif
     </div>
 

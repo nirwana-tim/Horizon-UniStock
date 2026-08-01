@@ -10,11 +10,7 @@
 
     <div class="py-12">
         <div class="max-w-5xl mx-auto sm:px-6 lg:px-8">
-            @if(session('success'))
-                <div class="mb-4 px-4 py-3 bg-green-100 border border-green-300 text-green-700 rounded-md">
-                    {{ session('success') }}
-                </div>
-            @endif
+            <x-alert type="success">{{ session('success') }}</x-alert>
 
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
                 <div class="p-6">

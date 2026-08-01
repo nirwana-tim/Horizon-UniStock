@@ -12,6 +12,8 @@ class StudentSizeProfile extends Model
         'student_id',
         'is_filled',
         'filled_at',
+        'baju_size',
+        'sepatu_size',
     ];
 
     protected function casts(): array

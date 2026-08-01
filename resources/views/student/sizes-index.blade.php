@@ -1,83 +1,113 @@
 <x-app-layout>
-    @if(session('success'))
-        <x-alert type="success">{{ session('success') }}</x-alert>
-    @endif
+    @php
+        $hour = now()->format('H');
+        if ($hour < 12) $greeting = 'Selamat Pagi';
+        elseif ($hour < 15) $greeting = 'Selamat Siang';
+        elseif ($hour < 18) $greeting = 'Selamat Sore';
+        else $greeting = 'Selamat Malam';
 
-    @if(session('error'))
-        <x-alert type="error">{{ session('error') }}</x-alert>
-    @endif
+        $currentBaju = $profile?->baju_size ?? null;
+        $currentSepatu = $profile?->sepatu_size ?? null;
+    @endphp
 
-    <div class="mb-5">
-        <h2 class="text-lg font-bold text-gray-800">Pilih Event Pengisian Ukuran</h2>
-        <p class="text-xs text-gray-500 mt-0.5">Pilih event untuk mengisi ukuran seragam kamu</p>
-    </div>
-
-    @if($events->isEmpty())
-        <div class="bg-amber-50 border border-amber-200 rounded-xl p-5 text-center">
-            <div class="flex flex-col items-center gap-3">
-                <svg class="w-10 h-10 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                </svg>
-                <div>
-                    <p class="text-sm font-semibold text-amber-700">Belum ada event pengisian ukuran</p>
-                    <p class="text-xs text-amber-600 mt-1">Saat ini belum ada event pengisian ukuran yang aktif. Silakan hubungi admin untuk informasi lebih lanjut.</p>
+    <main class="flex-1 flex flex-col">
+        <div class="max-w-md mx-auto">
+            {{-- Hero Banner --}}
+            <div class="mb-6 overflow-hidden rounded-2xl h-48 relative shadow-card">
+                <div class="w-full h-full bg-cover bg-center" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCBt5P2HmtLID51h-uo7bahZP2QGNPaNUd_2L7Ek7GZEMKx0zkZ4TqbRU27lvZ2qQ4VITeTqkB_6VSZwUcm8rZUmO_OpP4Qxum37jkyH0-Kc5qWpdjnVTk5kEo6xr1pPYbpets4QQgDe8nKAMzKb10WM8zZWhZdx0O4o7z--UKhF2R2YUVm2nk25DjqqDuj4UjRB-2GUDAUZqv6tB3wppXKaQ-0EmOZ570do3Caux7jcLZH1IZqaROL')"></div>
+                <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent flex items-end p-5">
+                    <p class="text-white font-headline-sm text-headline-sm">Lengkapi Profil Distribusi</p>
                 </div>
             </div>
-        </div>
-    @else
-        <div class="space-y-3">
-            @foreach($events as $event)
-                @php
-                    $profile = $student->activeSizeProfile;
-                    $filledCount = $profile ? $profile->sizeItems->count() : 0;
-                    $sub = $submissions->get($event->id);
-                    $subCount = $sub?->submission_count ?? 0;
-                    $remaining = $event->max_changes - $subCount;
-                    $isMaxed = $remaining <= 0;
-                @endphp
 
-                <a href="{{ route('student.sizes.input', $event) }}"
-                   class="block bg-white rounded-xl border border-gray-200 shadow-sm p-5 hover:border-primary-300 hover:shadow-md transition-all active:scale-[0.99]">
-                    <div class="flex items-start gap-4">
-                        <div class="w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                            <svg class="w-5 h-5 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-                            </svg>
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <h3 class="text-sm font-semibold text-gray-800">{{ $event->title }}</h3>
-                            <div class="flex flex-wrap gap-x-4 gap-y-1 mt-1.5 text-xs text-gray-500">
-                                <span class="inline-flex items-center gap-1">
-                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                                    </svg>
-                                    {{ $event->start_date->format('d M Y') }} — {{ $event->end_date->format('d M Y H:i') }}
-                                </span>
-                                @if($event->max_changes > 0)
-                                    <span class="inline-flex items-center gap-1">
-                                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-                                        </svg>
-                                        @if($isMaxed)
-                                            Selesai ({{ $subCount }}/{{ $event->max_changes }})
-                                        @else
-                                            Sisa {{ $remaining }}x pengisian
-                                        @endif
-                                    </span>
+            {{-- Current Sizes --}}
+            <div id="size-status" class="mb-4">
+                @if($currentBaju || $currentSepatu)
+                    <div class="glass-card shadow-card rounded-2xl p-4 flex items-start gap-3">
+                        <span class="material-symbols-outlined text-primary mt-0.5">checkroom</span>
+                        <div>
+                            <p class="font-body-md text-body-md text-on-surface font-semibold">
+                                @if($currentBaju && $currentSepatu)
+                                    Ukuran: {{ $currentBaju }} / {{ $currentSepatu }}
+                                @elseif($currentBaju)
+                                    Baju: {{ $currentBaju }}
+                                @else
+                                    Sepatu: {{ $currentSepatu }}
                                 @endif
-                            </div>
-                            @if($event->description)
-                                <p class="text-xs text-gray-400 mt-1.5 line-clamp-2">{{ $event->description }}</p>
-                            @endif
-                        </div>
-                        <div class="flex-shrink-0 self-center">
-                            <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                            </svg>
+                            </p>
+                            <p class="font-body-md text-[12px] text-secondary/60 mt-0.5">Ukuran baju dan sepatu kamu saat ini.</p>
                         </div>
                     </div>
-                </a>
-            @endforeach
+                @else
+                    <div class="glass-card shadow-card rounded-2xl p-4 flex items-start gap-3">
+                        <span class="material-symbols-outlined text-primary mt-0.5">info</span>
+                        <div>
+                            <p class="font-body-md text-body-md text-on-surface font-semibold">Belum Ada Ukuran</p>
+                            <p class="font-body-md text-[12px] text-secondary/60 mt-0.5">Pilih ukuran baju dan sepatu dari event yang tersedia.</p>
+                        </div>
+                    </div>
+                @endif
+            </div>
+
+            {{-- Events --}}
+            <section>
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="font-headline-sm text-headline-sm text-on-background">Jadwal Distribusi</h2>
+                </div>
+
+                @if($events->isEmpty())
+                    {{-- Empty State --}}
+                    <div class="bg-white shadow-card rounded-2xl p-6 text-center">
+                        <span class="material-symbols-outlined text-4xl text-secondary/30 mb-3">event_busy</span>
+                        <p class="font-body-md text-body-md text-secondary/50">Tidak ada event aktif saat ini</p>
+                        <p class="font-body-md text-[12px] text-secondary/40 mt-1">Silakan hubungi admin untuk informasi lebih lanjut.</p>
+                    </div>
+                @else
+                    <div class="bg-white shadow-card rounded-2xl overflow-hidden">
+                        @foreach($events as $event)
+                            @php
+                                $sub = $submissions->get($event->id);
+                                $subCount = $sub?->submission_count ?? 0;
+                                $remaining = $event->max_changes - $subCount;
+                                $isMaxed = $remaining <= 0;
+
+                                $endDate = \Carbon\Carbon::parse($event->end_date);
+                                $month = $endDate->format('M');
+                                $day = $endDate->format('d');
+                            @endphp
+
+                            <a href="{{ route('student.sizes.input', $event) }}"
+                               class="flex items-center px-5 py-4 {{ !$loop->last ? 'divider-subtle' : '' }} active:bg-black/[0.02] transition-colors cursor-pointer group">
+                                {{-- Date Badge --}}
+                                <div class="w-12 h-12 rounded-xl {{ $isMaxed ? 'bg-surface-variant/50' : 'bg-primary/5' }} flex flex-col items-center justify-center mr-4 shrink-0">
+                                    <span class="text-[10px] font-bold {{ $isMaxed ? 'text-secondary' : 'text-primary' }} uppercase">{{ $month }}</span>
+                                    <span class="text-lg font-extrabold {{ $isMaxed ? 'text-secondary' : 'text-primary' }} leading-tight">{{ $day }}</span>
+                                </div>
+
+                                {{-- Info --}}
+                                <div class="flex-1 min-w-0">
+                                    <h4 class="font-headline-sm text-[15px] text-on-background">{{ $event->title }}</h4>
+                                    <p class="font-body-md text-[13px] text-secondary/60 mt-0.5">
+                                        {{ $event->start_date->format('d M') }} — {{ $event->end_date->format('d M Y') }}
+                                    </p>
+                                    @if($event->max_changes > 0)
+                                        <p class="font-body-md text-[12px] text-secondary/50 mt-1">
+                                            @if($isMaxed)
+                                                <span class="text-secondary/70">Selesai ({{ $subCount }}/{{ $event->max_changes }})</span>
+                                            @else
+                                                <span class="text-primary">Sisa {{ $remaining }}x pengisian</span>
+                                            @endif
+                                        </p>
+                                    @endif
+                                </div>
+
+                                {{-- Chevron --}}
+                                <span class="material-symbols-outlined text-primary shrink-0 group-hover:translate-x-0.5 transition-transform">chevron_right</span>
+                            </a>
+                        @endforeach
+                    </div>
+                @endif
+            </section>
         </div>
-    @endif
+    </main>
 </x-app-layout>

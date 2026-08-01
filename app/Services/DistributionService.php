@@ -119,10 +119,11 @@ class DistributionService
             $autoNotes = [];
 
             foreach ($items as $itemData) {
+                $item = null;
                 if (!empty($itemData['base_code'])) {
                     $item = $this->findItemByBaseCodeAndSize($itemData['base_code'], $itemData['actual_size']);
                 }
-                if (!isset($item) || !$item) {
+                if (!$item) {
                     $item = Item::find($itemData['item_id'] ?? 0);
                 }
                 if (! $item) {
@@ -139,7 +140,7 @@ class DistributionService
 
                 if ($variant) {
                     $balance = $this->stockService->getBalance($item->id, $variant->id);
-                    $availableStock = $balance ? $balance->quantity - $balance->reserved : 0;
+                    $availableStock = $balance ? $balance->quantity : 0;
                     $deductedQty = min($quantity, $availableStock);
 
                     if ($availableStock < $quantity) {
@@ -186,13 +187,17 @@ class DistributionService
 
             // Check if there are items in entitlement that were not checked (deferred)
             $checkedBaseCodes = [];
+            $resolveIds = collect($items)
+                ->filter(fn ($i) => empty($i['base_code']) && !empty($i['item_id']))
+                ->pluck('item_id');
+            $resolvedItems = Item::whereIn('id', $resolveIds)->pluck('base_code', 'id');
             foreach ($items as $itemData) {
                 if (!empty($itemData['base_code'])) {
                     $checkedBaseCodes[] = $itemData['base_code'];
                 } elseif (!empty($itemData['item_id'])) {
-                    $checkedItem = Item::find($itemData['item_id']);
-                    if ($checkedItem && $checkedItem->base_code) {
-                        $checkedBaseCodes[] = $checkedItem->base_code;
+                    $baseCode = $resolvedItems[$itemData['item_id']] ?? null;
+                    if ($baseCode) {
+                        $checkedBaseCodes[] = $baseCode;
                     }
                 }
             }
@@ -204,6 +209,7 @@ class DistributionService
             $studentSizesByBaseCode = [];
             $sizeProfile = $student->activeSizeProfile;
             if ($sizeProfile) {
+                $sizeProfile->load('sizeItems.item');
                 foreach ($sizeProfile->sizeItems as $sizeItem) {
                     $studentSizesByBaseCode[$sizeItem->item_id] = $sizeItem->size;
                     if ($sizeItem->item?->base_code) {

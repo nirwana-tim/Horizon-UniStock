@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Models\AuditLog;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Request;
 
 class AuditService
 {
@@ -17,7 +16,7 @@ class AuditService
             'model_id' => (string) $modelId,
             'old_values' => $oldValues,
             'new_values' => $newValues,
-            'ip_address' => Request::ip() ?? request()->ip() ?? '127.0.0.1',
+            'ip_address' => request()->ip() ?? '127.0.0.1',
         ]);
     }
 }

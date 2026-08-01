@@ -9,13 +9,17 @@ return new class extends Migration
 {
     public function up(): void
     {
-        DB::statement('ALTER TABLE students MODIFY student_level VARCHAR(50) DEFAULT "Y1S1"');
+        Schema::table('students', function (Blueprint $table) {
+            $table->string('student_level', 50)->default('Y1S1')->change();
+        });
+
         DB::statement('UPDATE students SET student_level = "Y1S1" WHERE student_level IS NULL');
     }
 
     public function down(): void
     {
-        DB::statement('UPDATE students SET student_level = NULL WHERE student_level = "Y1S1"');
-        DB::statement('ALTER TABLE students MODIFY student_level VARCHAR(50) DEFAULT NULL');
+        Schema::table('students', function (Blueprint $table) {
+            $table->string('student_level', 50)->nullable()->change();
+        });
     }
 };

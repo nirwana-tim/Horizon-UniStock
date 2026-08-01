@@ -1,22 +1,76 @@
 <x-app-layout>
-    <div class="mb-5">
-        <h2 class="text-lg font-bold text-gray-800">Profil</h2>
-        <p class="text-xs text-gray-500 mt-0.5">Kelola informasi akun kamu</p>
-    </div>
+    @php
+        $user = auth()->user();
+        $student = $user->student ?? null;
+    @endphp
 
-    <div class="space-y-4">
-        <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
-            @include('profile.partials.update-profile-information-form')
+    <main class="flex-grow px-container-margin pt-8 pb-32">
+        {{-- Avatar + Name --}}
+        <section class="flex flex-col items-center mb-8 text-center">
+            <div class="w-24 h-24 rounded-full bg-primary flex items-center justify-center text-white text-3xl font-bold mb-5 shadow-xl border-4 border-white ring-1 ring-black/[0.04]">
+                {{ substr($user->name, 0, 2) }}
+            </div>
+            <h1 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface mb-1 max-w-full min-w-0 break-words">{{ $user->name }}</h1>
+            <p class="font-body-lg text-body-lg text-secondary/60">NIM: {{ $student->nim ?? '-' }}</p>
+        </section>
+
+        {{-- Info Card --}}
+        <section class="bg-white rounded-2xl p-5 mb-6 shadow-card">
+            <div class="space-y-4">
+                <div class="flex justify-between items-start gap-3 pb-3 divider-subtle">
+                    <span class="font-label-md text-label-md text-secondary/60 uppercase tracking-wider shrink-0">Program Studi</span>
+                    <span class="font-body-md text-body-md text-on-surface font-semibold text-right min-w-0 break-words">{{ $student->studyProgram?->name ?? '-' }}</span>
+                </div>
+                <div class="flex justify-between items-start gap-3 pb-3 divider-subtle">
+                    <span class="font-label-md text-label-md text-secondary/60 uppercase tracking-wider shrink-0">Fakultas</span>
+                    <span class="font-body-md text-body-md text-on-surface font-semibold text-right min-w-0 break-words">{{ $student->studyProgram?->faculty?->name ?? '-' }}</span>
+                </div>
+                <div class="flex justify-between items-start gap-3">
+                    <span class="font-label-md text-label-md text-secondary/60 uppercase tracking-wider shrink-0">Email</span>
+                    <span class="font-body-md text-body-md text-on-surface font-semibold text-right min-w-0 break-all">{{ $user->email }}</span>
+                </div>
+            </div>
+        </section>
+
+        {{-- Action Buttons --}}
+        <section class="flex flex-col gap-4">
+            <button type="button"
+                    class="w-full h-14 rounded-full border-2 border-primary text-primary font-semibold text-body-lg flex items-center justify-center gap-2 active:scale-[0.98] transition-colors duration-200 hover:bg-primary/5"
+                    data-modal="change-password">
+                <span class="material-symbols-outlined">lock_reset</span>
+                Ubah Password
+            </button>
+            <button type="button"
+                    class="w-full h-14 rounded-full bg-primary text-white font-semibold text-body-lg flex items-center justify-center gap-2 shadow-button active:scale-[0.98] transition-transform duration-200"
+                    data-modal="verify-email">
+                <span class="material-symbols-outlined">verified_user</span>
+                Kelola Email
+            </button>
+        </section>
+
+        {{-- Inline Forms (hidden, toggle via modal) --}}
+        <div id="modal-password" class="hidden fixed inset-0 bg-black/30 z-[100] items-end justify-center" onclick="if(event.target===this)this.style.display='none'">
+            <div class="bg-white rounded-t-2xl w-full max-w-lg p-6 pt-3 pb-8 max-h-[85vh] overflow-y-auto">
+                <div class="w-10 h-1 bg-black/20 rounded-full mx-auto mb-4"></div>
+                <h3 class="font-headline-sm text-headline-sm text-on-surface mb-5">Ubah Password</h3>
+                @include('profile.partials.update-password-form')
+                <button type="button" onclick="document.getElementById('modal-password').style.display='none'"
+                        class="mt-4 w-full h-12 rounded-full border-2 border-secondary/20 text-secondary/60 font-headline-sm text-headline-sm active:scale-[0.98] transition-transform duration-200">
+                    Tutup
+                </button>
+            </div>
         </div>
 
-        <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
-            @include('profile.partials.update-password-form')
+        <div id="modal-profile" class="hidden fixed inset-0 bg-black/30 z-[100] items-end justify-center" onclick="if(event.target===this)this.style.display='none'">
+            <div class="bg-white rounded-t-2xl w-full max-w-lg p-6 pt-3 pb-8 max-h-[85vh] overflow-y-auto">
+                <div class="w-10 h-1 bg-black/20 rounded-full mx-auto mb-4"></div>
+                <h3 class="font-headline-sm text-headline-sm text-on-surface mb-5">Edit Profil</h3>
+                @include('profile.partials.update-profile-information-form')
+                <button type="button" onclick="document.getElementById('modal-profile').style.display='none'"
+                        class="mt-4 w-full h-12 rounded-full border-2 border-secondary/20 text-secondary/60 font-headline-sm text-headline-sm active:scale-[0.98] transition-transform duration-200">
+                    Tutup
+                </button>
+            </div>
         </div>
-
-        @unless($student)
-        <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
-            @include('profile.partials.delete-user-form')
-        </div>
-        @endunless
-    </div>
+    </main>
 </x-app-layout>

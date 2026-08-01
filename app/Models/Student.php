@@ -85,9 +85,9 @@ class Student extends Authenticatable
         return $this->belongsTo(StudentGeneration::class, 'generation_id');
     }
 
-    public function eligibilityRecords(): HasMany
+    public function eligibilityRecords(): HasOne
     {
-        return $this->hasMany(EligibilityRecord::class);
+        return $this->hasOne(EligibilityRecord::class);
     }
 
     public function sizeProfiles(): HasMany
