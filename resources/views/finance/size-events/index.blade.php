@@ -59,7 +59,8 @@
                                         <x-badge type="warning">Belum Mulai</x-badge>
                                     @endif
                                 </td>
-                                <td class="px-4 py-4 whitespace-nowrap text-right text-sm">
+                                <td class="px-4 py-4 whitespace-nowrap text-right text-sm space-x-3">
+                                    <a href="{{ route('distribution.size-events.edit', $event) }}" class="text-primary-600 hover:text-primary-900 font-medium">Edit</a>
                                     <form action="{{ route('distribution.size-events.destroy', $event) }}" method="POST" class="inline" onsubmit="return confirm('Hapus event ganti ukuran ini?')">
                                         @csrf
                                         @method('DELETE')

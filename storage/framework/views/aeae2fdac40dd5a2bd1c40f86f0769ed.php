@@ -7,6 +7,15 @@
 
     <title><?php echo e(config('app.name', 'Horizon')); ?></title>
     <meta name="description" content="Login to <?php echo e(config('app.name')); ?> — Student Uniform Distribution System">
+    <meta name="theme-color" content="#980416">
+
+    <!-- Favicon & Web App Manifest -->
+    <link rel="icon" type="image/png" href="<?php echo e(asset('favicon/favicon-96x96.png')); ?>" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="<?php echo e(asset('favicon/favicon.svg')); ?>" />
+    <link rel="shortcut icon" href="<?php echo e(asset('favicon/favicon.ico')); ?>" />
+    <link rel="apple-touch-icon" sizes="180x180" href="<?php echo e(asset('favicon/apple-touch-icon.png')); ?>" />
+    <meta name="apple-mobile-web-app-title" content="Horizon" />
+    <link rel="manifest" href="<?php echo e(asset('favicon/site.webmanifest')); ?>" />
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -41,13 +50,11 @@
         
         <div class="relative z-10 text-center px-12 max-w-md">
             
-            <div class="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mx-auto mb-8 border border-white/30">
-                <svg class="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10"/>
-                </svg>
-            </div>
+            <img src="<?php echo e(asset('images/logo.webp')); ?>" alt="<?php echo e(config('app.name', 'Horizon')); ?>"
+                 width="128" height="128" fetchpriority="high"
+                 class="w-32 h-32 object-contain mx-auto mb-8">
 
-            <h1 class="text-3xl font-bold text-white mb-3"><?php echo e(config('app.name', 'Horizon')); ?></h1>
+            <h1 translate="no" class="text-3xl font-bold text-white mb-3"><?php echo e(config('app.name', 'Horizon')); ?></h1>
             <p class="text-primary-200 text-base leading-relaxed mb-10">
                 Uniform distribution & inventory management system for new students
             </p>
@@ -78,13 +85,11 @@
 
             
             <div class="lg:hidden flex items-center gap-3 mb-8">
-                <div class="w-10 h-10 bg-primary-700 rounded-xl flex items-center justify-center">
-                    <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10"/>
-                    </svg>
-                </div>
+                <img src="<?php echo e(asset('images/logo.webp')); ?>" alt="<?php echo e(config('app.name', 'Horizon')); ?>"
+                     width="40" height="40" fetchpriority="high"
+                     class="w-10 h-10 object-contain">
                 <div>
-                    <p class="text-sm font-bold text-gray-900"><?php echo e(config('app.name', 'Horizon')); ?></p>
+                    <p translate="no" class="text-sm font-bold text-gray-900"><?php echo e(config('app.name', 'Horizon')); ?></p>
                     <p class="text-xs text-primary-700">Uniform Distribution System</p>
                 </div>
             </div>

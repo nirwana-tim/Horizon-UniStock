@@ -86,9 +86,8 @@ class StudentController extends Controller
     public function create(): View
     {
         $studyPrograms = StudyProgram::with('faculty')->orderBy('name')->get();
-        $generations = StudentGeneration::orderBy('name')->get();
 
-        return view('master.student.create', compact('studyPrograms', 'generations'));
+        return view('master.student.create', compact('studyPrograms'));
     }
 
     public function store(StudentRequest $request): RedirectResponse
@@ -160,9 +159,8 @@ class StudentController extends Controller
     public function edit(Student $student): View
     {
         $studyPrograms = StudyProgram::with('faculty')->orderBy('name')->get();
-        $generations = StudentGeneration::orderBy('name')->get();
 
-        return view('master.student.edit', compact('student', 'studyPrograms', 'generations'));
+        return view('master.student.edit', compact('student', 'studyPrograms'));
     }
 
     public function update(StudentRequest $request, Student $student): RedirectResponse

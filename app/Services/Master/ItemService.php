@@ -24,22 +24,26 @@ class ItemService
         $code = $category->code . '-' . $data['gender'] . '-' . ($type?->code ?? 'XX') . '-' . ($department?->code ?? '00');
         $name = $category->label . ' ' . ($genderLabels[$data['gender']] ?? '') . ' ' . ($type?->label ?? '') . ' ' . ($department?->label ?? '');
 
-        $item = Item::firstOrCreate(
-            ['code' => $code],
-            [
-                'base_code' => $code,
-                'name' => trim($name),
-                'gender' => $data['gender'],
-                'category_id' => $data['category_id'],
-                'type_id' => $data['type_id'] ?? null,
-                'department_id' => $data['department_id'] ?? null,
-                'unit' => $data['unit'] ?? 'pcs',
-                'selling_price' => $data['selling_price'] ?? 0,
-                'hpp' => $data['hpp'] ?? 0,
-                'min_stock' => $data['min_stock'] ?? 0,
-                'max_stock' => $data['max_stock'] ?? 0,
-            ]
-        );
+        if (Item::where('code', $code)->exists()) {
+            throw ValidationException::withMessages([
+                'category_id' => "Item dengan kode {$code} sudah ada.",
+            ]);
+        }
+
+        $item = Item::create([
+            'base_code' => $code,
+            'code' => $code,
+            'name' => trim($name),
+            'gender' => $data['gender'],
+            'category_id' => $data['category_id'],
+            'type_id' => $data['type_id'] ?? null,
+            'department_id' => $data['department_id'] ?? null,
+            'unit' => $data['unit'] ?? 'pcs',
+            'selling_price' => $data['selling_price'] ?? 0,
+            'hpp' => $data['hpp'] ?? 0,
+            'min_stock' => $data['min_stock'] ?? 0,
+            'max_stock' => $data['max_stock'] ?? 0,
+        ]);
 
         foreach ($sizes as $size) {
             $item->variants()->firstOrCreate(

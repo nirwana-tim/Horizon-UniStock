@@ -10,16 +10,12 @@ class MasterDataSeeder extends Seeder
     {
         $this->call([
             FacultySeeder::class,
-            StudentGenerationSeeder::class,
             ItemCategorySeeder::class,
             ItemTypeSeeder::class,
             ItemDepartmentSeeder::class,
             ItemSizeSeeder::class,
             VendorSeeder::class,
             StudyProgramSeeder::class,
-            ItemSeeder::class,
-            ItemVariantSeeder::class,
-            ItemPriceSeeder::class,
         ]);
     }
 }

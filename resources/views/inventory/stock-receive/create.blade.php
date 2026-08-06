@@ -15,10 +15,12 @@
         itemSearchLoading: false,
         searchItemsUrl: '{{ route('inventory.stock-receive.search-items') }}',
         variantUrlBase: '{{ url('inventory/stock-receive/variants-by-base-code') }}',
+        variantByItemUrl: '{{ url('inventory/stock-receive/variants-by-item') }}',
         newItem: { item_id: '', item_label: '', item_label_display: '', variant_id: '', variant_label: '', quantity: 1, unit_price: 0, hpp: 0 },
         variantOptions: [],
         debounceTimer: null,
         highlightedIdx: -1,
+        editIndex: null,
 
         addItem() {
             if (!this.newItem.item_label_display || !this.newItem.variant_id) {
@@ -33,7 +35,7 @@
                 return;
             }
 
-            this.items.push({
+            const itemData = {
                 item_id: varOpt.item_id,
                 item_label: this.newItem.item_label,
                 variant_id: this.newItem.variant_id,
@@ -41,12 +43,46 @@
                 quantity: this.newItem.quantity,
                 unit_price: this.newItem.unit_price,
                 hpp: this.newItem.hpp
-            });
+            };
 
+            if (this.editIndex !== null) {
+                this.items[this.editIndex] = itemData;
+                this.editIndex = null;
+            } else {
+                this.items.push(itemData);
+            }
+
+            this.resetForm();
+        },
+
+        editItem(index) {
+            const item = this.items[index];
+            this.editIndex = index;
+
+            this.newItem = {
+                item_id: item.item_id,
+                item_label: item.item_label,
+                item_label_display: item.item_label,
+                variant_id: item.variant_id,
+                variant_label: item.variant_label,
+                quantity: item.quantity,
+                unit_price: item.unit_price,
+                hpp: item.hpp
+            };
+
+            axios.get(this.variantByItemUrl + '/' + encodeURIComponent(item.item_id))
+                .then(res => {
+                    this.variantOptions = res.data;
+                    this.showModal = true;
+                });
+        },
+
+        resetForm() {
             this.newItem = { item_id: '', item_label: '', item_label_display: '', variant_id: '', variant_label: '', quantity: 1, unit_price: 0, hpp: 0 };
             this.itemSearch = '';
             this.itemSearchResults = [];
             this.variantOptions = [];
+            this.editIndex = null;
             this.showModal = false;
         },
 
@@ -153,7 +189,8 @@
                                                 <td class="px-6 py-4 text-sm text-gray-900 font-semibold" x-text="item.quantity"></td>
                                                 <td class="px-6 py-4 text-sm text-gray-500" x-text="'Rp ' + Number(item.unit_price).toLocaleString('id-ID')"></td>
                                                 <td class="px-6 py-4 text-sm text-gray-500" x-text="'Rp ' + Number(item.hpp).toLocaleString('id-ID')"></td>
-                                                <td class="px-6 py-4 text-sm text-center">
+                                                <td class="px-6 py-4 text-sm text-center space-x-2">
+                                                    <button type="button" @click="editItem(index)" class="text-primary-600 hover:text-primary-800 font-semibold transition">Edit</button>
                                                     <button type="button" @click="removeItem(index)" class="text-red-600 hover:text-red-800 font-semibold transition">Delete</button>
                                                 </td>
                                             </tr>
@@ -186,7 +223,7 @@
                  x-transition:leave="ease-in duration-200"
                  x-transition:leave-start="opacity-100"
                  x-transition:leave-end="opacity-0"
-                 class="fixed inset-0 bg-gray-500/75 backdrop-blur-sm transition-opacity" @click="showModal = false"></div>
+                 class="fixed inset-0 bg-gray-500/75 backdrop-blur-sm transition-opacity" @click="resetForm()"></div>
 
             <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
                 <div x-show="showModal"
@@ -199,8 +236,8 @@
                      class="relative transform overflow-hidden rounded-xl bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg p-6">
                     
                     <div class="flex items-center justify-between border-b pb-3 mb-4">
-                        <h3 class="text-base font-bold text-gray-900">Add Item</h3>
-                        <button type="button" @click="showModal = false" class="text-gray-400 hover:text-gray-500 transition">
+                        <h3 class="text-base font-bold text-gray-900" x-text="editIndex !== null ? 'Edit Item' : 'Add Item'">Add Item</h3>
+                        <button type="button" @click="resetForm()" class="text-gray-400 hover:text-gray-500 transition">
                             <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                             </svg>
@@ -266,8 +303,8 @@
                     </div>
 
                     <div class="mt-6 flex justify-end gap-2 border-t pt-4">
-                        <button type="button" @click="showModal = false" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold rounded-lg transition">Cancel</button>
-                        <button type="button" @click="addItem()" class="px-4 py-2 bg-primary-700 hover:bg-primary-800 text-white text-xs font-semibold rounded-lg transition shadow-sm">Add to List</button>
+                        <button type="button" @click="resetForm()" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold rounded-lg transition">Cancel</button>
+                        <button type="button" @click="addItem()" class="px-4 py-2 bg-primary-700 hover:bg-primary-800 text-white text-xs font-semibold rounded-lg transition shadow-sm" x-text="editIndex !== null ? 'Update Item' : 'Add to List'"></button>
                     </div>
                 </div>
             </div>

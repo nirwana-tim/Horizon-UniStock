@@ -15,13 +15,24 @@
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <x-input-label :value="__('Entitlement Code (Read-Only)')" />
+                                <x-input-label for="prodi_select" :value="__('Study Program')" />
+                                <select id="prodi_select" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500 text-sm">
+                                    <option value="">-- Select Study Program --</option>
+                                    @foreach($studyPrograms as $prodi)
+                                        <option value="{{ $prodi->code }}" data-faculty="{{ $prodi->faculty?->code ?? '' }}" {{ $matchedStudyProgramId == $prodi->id ? 'selected' : '' }}>
+                                            {{ $prodi->name }} (Faculty: {{ $prodi->faculty?->code ?? '-' }})
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div>
+                                <x-input-label :value="__('Entitlement Code')" />
                                 <x-text-input id="code_display" type="text" class="mt-1 block w-full bg-gray-50 text-gray-500 font-mono" :value="$entitlement->code" disabled />
-                                <input type="hidden" name="code" value="{{ $entitlement->code }}">
+                                <input type="hidden" name="code" id="code" value="{{ $entitlement->code }}">
                             </div>
                             <div>
                                 <x-input-label for="student_level" :value="__('Student Level')" />
-                                <select id="student_level" name="student_level" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500">
+                                <select id="student_level" name="student_level" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500 text-sm">
                                     <option value="">-- Select Type --</option>
                                     @foreach($studentLevels as $st)
                                         <option value="{{ $st->kode }}" {{ old('student_level', $entitlement->student_level) == $st->kode ? 'selected' : '' }}>{{ $st->deskripsi }}</option>
@@ -31,7 +42,7 @@
                             </div>
                             <div>
                                 <x-input-label for="is_active" :value="__('Status')" />
-                                <select id="is_active" name="is_active" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500">
+                                <select id="is_active" name="is_active" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500 text-sm">
                                     <option value="1" {{ old('is_active', $entitlement->is_active) == '1' ? 'selected' : '' }}>Active</option>
                                     <option value="0" {{ old('is_active', $entitlement->is_active) == '0' ? 'selected' : '' }}>Inactive</option>
                                 </select>
@@ -41,7 +52,7 @@
                                 <textarea id="description" name="description" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500" rows="2">{{ old('description', $entitlement->description) }}</textarea>
                                 <x-input-error :messages="$errors->get('description')" class="mt-2" />
                             </div>
-                            
+
                             {{-- Simplified Grid of Checked Items --}}
                             <div class="md:col-span-2">
                                 <div x-data="{ gridHtml: '' }" x-init="axios.get('{{ route('distribution.entitlement.items-grid') }}?entitlement_id={{ $entitlement->id }}').then(r => { gridHtml = r.data })">
@@ -60,4 +71,42 @@
             </div>
         </div>
     </div>
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const studentLevelSelect = document.getElementById('student_level');
+        const prodiSelect = document.getElementById('prodi_select');
+        const codeInput = document.getElementById('code');
+        const codeDisplay = document.getElementById('code_display');
+        const form = document.querySelector('form');
+
+        function updateCode() {
+            const levelCode = studentLevelSelect.value;
+            const selectedProdiOpt = prodiSelect.options[prodiSelect.selectedIndex];
+            const facultyCode = selectedProdiOpt ? selectedProdiOpt.dataset.faculty : '';
+            const prodiCode = prodiSelect.value;
+
+            if (levelCode && facultyCode && prodiCode) {
+                const newCode = `${levelCode}${facultyCode}${prodiCode}`;
+                codeInput.value = newCode;
+                codeDisplay.value = newCode;
+            } else {
+                codeInput.value = '';
+                codeDisplay.value = '';
+            }
+        }
+
+        studentLevelSelect.addEventListener('change', updateCode);
+        prodiSelect.addEventListener('change', updateCode);
+
+        form.addEventListener('submit', function (e) {
+            if (!codeInput.value) {
+                e.preventDefault();
+                alert('Silakan pilih Program Studi dan Student Level untuk menghasilkan kode entitlement.');
+            }
+        });
+    });
+</script>
+@endpush
 </x-app-layout>

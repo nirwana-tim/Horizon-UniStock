@@ -22,13 +22,10 @@
     {{-- Logo mobile (Staff/Student only) --}}
     @if ($simple)
         <a href="{{ route('dashboard') }}" class="flex items-center gap-2">
-            <div class="w-7 h-7 bg-primary-700 rounded-lg flex items-center justify-center">
-                <svg aria-hidden="true" class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10" />
-                </svg>
-            </div>
-            <span class="font-headline-sm text-headline-sm text-primary font-bold">{{ config('app.name', 'Horizon') }}</span>
+            <img src="{{ asset('images/logo.webp') }}" alt="{{ config('app.name', 'Horizon') }}"
+                 width="28" height="28" fetchpriority="high"
+                 class="w-7 h-7 object-contain">
+            <span translate="no" class="font-headline-sm text-headline-sm text-primary font-bold">{{ config('app.name', 'Horizon') }}</span>
         </a>
     @endif
 

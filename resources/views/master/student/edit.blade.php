@@ -54,18 +54,6 @@
                             </div>
 
                             <div>
-                                <x-input-label for="generation_id" :value="__('Generation')" />
-                                <select id="generation_id" name="generation_id"
-                                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500">
-                                    <option value="">-- Auto Detect from NIM --</option>
-                                    @foreach($generations as $l)
-                                        <option value="{{ $l->id }}" {{ old('generation_id', $student->generation_id) == $l->id ? 'selected' : '' }}>{{ $l->label }}</option>
-                                    @endforeach
-                                </select>
-                                <x-input-error :messages="$errors->get('generation_id')" class="mt-2" />
-                            </div>
-
-                            <div>
                                 <x-input-label for="student_level" :value="__('Student Level')" :required="true" />
                                 <select id="student_level" name="student_level" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500">
                                     @foreach($studentLevels as $st)

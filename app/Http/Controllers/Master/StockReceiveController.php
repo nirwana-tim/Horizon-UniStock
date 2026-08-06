@@ -93,10 +93,14 @@ class StockReceiveController extends Controller
         return response()->json($variants->sortBy('label')->values());
     }
 
-    public function variantsByItem(Item $item): JsonResponse
+    public function variantsByItem($itemId): JsonResponse
     {
+        $item = Item::find($itemId);
+        if (!$item) return response()->json([]);
+
         $variants = $item->variants()->orderBy('size')->get()->map(fn ($v) => [
             'id' => $v->id,
+            'item_id' => $item->id,
             'label' => $v->size_label . ' (' . $v->sku . ')',
         ]);
 

@@ -1,6 +1,6 @@
 @forelse($students as $student)
     @php
-        $record = $student->eligibilityRecords->first();
+        $record = $student->eligibilityRecords;
         $isEligible = $record && $record->is_eligible;
         $paymentStatus = $record ? $record->payment_status : 'Unpaid';
     @endphp

@@ -66,7 +66,18 @@ class EntitlementController extends Controller
         $entitlement->load('items');
         $studyPrograms = StudyProgram::with(['faculty'])->orderBy('name', 'asc')->get(['*']);
 
-        return view('distribution.entitlement.edit', compact('entitlement', 'studyPrograms'));
+        $matchedStudyProgramId = null;
+        if ($entitlement->student_level && $entitlement->code
+            && str_starts_with($entitlement->code, $entitlement->student_level)) {
+            $remainder = substr($entitlement->code, strlen($entitlement->student_level));
+            $matchedStudyProgramId = $studyPrograms->first(fn ($p) =>
+                $p->faculty?->code
+                && str_starts_with($remainder, $p->faculty->code)
+                && substr($remainder, strlen($p->faculty->code)) === $p->code
+            )?->id;
+        }
+
+        return view('distribution.entitlement.edit', compact('entitlement', 'studyPrograms', 'matchedStudyProgramId'));
     }
 
     public function update(EntitlementRequest $request, Entitlement $entitlement): RedirectResponse
@@ -83,7 +94,6 @@ class EntitlementController extends Controller
 
         if ($entitlementId = $request->input('entitlement_id')) {
             $entitlement = Entitlement::with('items.item')->findOrFail($entitlementId);
-            $this->authorize('view', $entitlement);
         }
 
         return view('distribution.entitlement._items-grid', compact('items', 'entitlement'));

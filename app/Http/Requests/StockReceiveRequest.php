@@ -16,7 +16,7 @@ class StockReceiveRequest extends FormRequest
         return [
             'vendor_id' => 'required|integer|exists:vendors,id',
             'receive_date' => 'required|date',
-            'reference_number' => 'required|string|max:50|unique:stock_receives,reference_number,' . $this->route('stock_receive'),
+            'reference_number' => 'nullable|string|max:50|unique:stock_receives,reference_number,' . $this->route('stock_receive'),
             'notes' => 'nullable|string|max:500',
             'items' => 'required|array|min:1',
             'items.*.item_id' => 'required|integer|exists:items,id',

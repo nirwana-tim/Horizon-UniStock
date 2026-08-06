@@ -9,6 +9,14 @@
     <title><?php echo e(isset($title) ? $title . ' — ' : ''); ?><?php echo e(config('app.name', 'Horizon')); ?></title>
     <meta name="description" content="Uniform Distribution & Inventory Management System — <?php echo e(config('app.name')); ?>">
 
+    <!-- Favicon & Web App Manifest -->
+    <link rel="icon" type="image/png" href="<?php echo e(asset('favicon/favicon-96x96.png')); ?>" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="<?php echo e(asset('favicon/favicon.svg')); ?>" />
+    <link rel="shortcut icon" href="<?php echo e(asset('favicon/favicon.ico')); ?>" />
+    <link rel="apple-touch-icon" sizes="180x180" href="<?php echo e(asset('favicon/apple-touch-icon.png')); ?>" />
+    <meta name="apple-mobile-web-app-title" content="Horizon" />
+    <link rel="manifest" href="<?php echo e(asset('favicon/site.webmanifest')); ?>" />
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
