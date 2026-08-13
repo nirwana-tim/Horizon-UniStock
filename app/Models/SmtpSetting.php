@@ -15,6 +15,7 @@ class SmtpSetting extends Model
         'port',
         'username',
         'password',
+        'verify_peer',
         'api_key',
         'from_address',
         'from_name',
@@ -27,6 +28,7 @@ class SmtpSetting extends Model
         return [
             'port' => 'integer',
             'is_active' => 'boolean',
+            'verify_peer' => 'boolean',
         ];
     }
 

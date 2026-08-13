@@ -63,6 +63,7 @@ class MailSettingsService
                 'password'     => $attr['password'] ?? null,
                 'timeout'      => null,
                 'local_domain' => parse_url(config('app.url', 'http://localhost'), PHP_URL_HOST),
+                'verify_peer'  => ! ($attr['verify_peer'] ?? false),
             ],
             'ses' => [
                 'transport' => 'ses',
@@ -196,6 +197,7 @@ class MailSettingsService
             'smtp_host'     => ['nullable', 'string'],
             'smtp_username' => ['nullable', 'string'],
             'smtp_password' => ['nullable', 'string'],
+            'smtp_verify_peer' => ['nullable', 'boolean'],
             'sendmail_path' => ['nullable', 'string'],
             'log_channel'   => ['nullable', 'string'],
             'api_key'       => ['nullable', 'string'],
@@ -229,6 +231,7 @@ class MailSettingsService
                 'port'     => $validated['smtp_port'] ?? null,
                 'username' => $validated['smtp_username'] ?? null,
                 'password' => $validated['smtp_password'] ?? null,
+                'verify_peer' => (bool) ($validated['smtp_verify_peer'] ?? false),
             ],
             'sendmail' => [
                 'host' => $validated['sendmail_path'] ?? null,
@@ -246,6 +249,7 @@ class MailSettingsService
             'port'         => $mapped['port'] ?? null,
             'username'     => $mapped['username'] ?? null,
             'password'     => $mapped['password'] ?? null,
+            'verify_peer'  => $mapped['verify_peer'] ?? false,
             'api_key'      => $validated['api_key'] ?? null,
             'from_address' => $validated['from_address'],
             'from_name'    => $validated['from_name'],

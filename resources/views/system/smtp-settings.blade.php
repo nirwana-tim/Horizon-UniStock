@@ -116,6 +116,17 @@
                             <x-input-error :messages="$errors->get('smtp_password')" class="mt-2" />
                             <p class="text-xs text-gray-500 mt-1">Menampilkan password agar mudah diverifikasi. Disimpan terenkripsi di database.</p>
                         </div>
+                        <div class="flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4">
+                            <input type="checkbox" id="smtp_verify_peer" name="smtp_verify_peer" value="1"
+                                @checked(old('smtp_verify_peer', $settings->verify_peer ?? false))
+                                class="mt-0.5 rounded border-gray-300 text-primary-700 focus:ring-primary-500">
+                            <div>
+                                <label for="smtp_verify_peer" class="text-sm font-medium text-amber-900 cursor-pointer">
+                                    {{ __('Nonaktifkan Verifikasi SSL') }}
+                                </label>
+                                <p class="text-xs text-amber-700 mt-1">Aktifkan hanya jika SMTP host gagal koneksi dengan error certificate mismatch (contoh: <code>smtp-relay.brevo.com</code>). Mematikan verifikasi SSL berarti koneksi tidak memvalidasi identitas server.</p>
+                            </div>
+                        </div>
                     </div>
 
                     {{-- Sendmail --}}
@@ -318,6 +329,7 @@
                 },
                 collectConfig() {
                     const val = id => document.getElementById(id)?.value || '';
+                    const checked = id => document.getElementById(id)?.checked || false;
                     return {
                         mailer: this.mailer,
                         smtp_scheme: val('smtp_scheme'),
@@ -325,6 +337,7 @@
                         smtp_port: val('smtp_port'),
                         smtp_username: val('smtp_username'),
                         smtp_password: val('smtp_password'),
+                        smtp_verify_peer: checked('smtp_verify_peer'),
                         sendmail_path: val('sendmail_path'),
                         log_channel: val('log_channel'),
                         api_key: val('api_key'),

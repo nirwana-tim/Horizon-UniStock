@@ -34,6 +34,21 @@ MAIL_FROM_NAME="${APP_NAME}"
 
 > **Gmail:** butuh App Password (aktifkan 2FA di akun Gmail → buat App Password).
 
+> **⚠️ Error certificate mismatch (provider load-balanced seperti Brevo):**
+> SMTP seperti `smtp-relay.brevo.com` memakai infrastruktur load-balanced,
+> sehingga SSL cert server tidak selalu cocok dengan hostname publik.
+> Laravel/Symfony menolak koneksi dengan error:
+> `Peer certificate CN="..." did not match expected CN="smtp-relay.brevo.com"`.
+>
+> **Solusi via UI (disarankan):** di halaman **Settings → SMTP** (super admin),
+> centang **"Nonaktifkan Verifikasi SSL"** lalu uji koneksi. Nilai ini disimpan
+> di kolom `verify_peer` tabel `smtp_settings` dan diterapkan sebagai stream
+> option `ssl.verify_peer=false` + `ssl.verify_peer_name=false` pada transport.
+>
+> **Solusi via .env (opsional):** tambahkan `MAIL_SCHEME=tls` dan set
+> `verify_peer` pada driver smtp di `config/mail.php` jika tidak memakai fitur
+> DB settings.
+
 **Untuk Mailtrap (testing):**
 ```
 MAIL_MAILER=smtp

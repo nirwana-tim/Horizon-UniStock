@@ -164,6 +164,12 @@ MAIL_FROM_NAME="${APP_NAME}"
 >
 > ⚠️ **Gmail:** Harus pakai **App Password** (2FA aktif). SMTP host lain
 > (Zoho, Mailgun, dll) sesuaikan `MAIL_HOST` dan `MAIL_PORT`.
+>
+> ⚠️ **Error certificate mismatch** (contoh Brevo `smtp-relay.brevo.com`):
+> beberapa provider SMTP memakai load-balanced server sehingga SSL cert
+> tidak cocok dengan hostname publik. Solusinya: di halaman **Settings →
+> SMTP**, centang **"Nonaktifkan Verifikasi SSL"**, lalu isi & uji koneksi
+> seperti biasa.
 
 ---
 
