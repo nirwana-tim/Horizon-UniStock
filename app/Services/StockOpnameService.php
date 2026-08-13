@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Models\Item;
 use App\Models\StockBalance;
 use App\Models\StockBatch;
 use App\Models\StockMovement;
@@ -18,9 +17,16 @@ class StockOpnameService
     public function __construct(
         private readonly StockService $stockService
     ) {}
+
     public function createBatch(array $data): StockOpname
     {
-        $referenceNumber = 'SO-' . date('Ym') . '-' . str_pad(StockOpname::count() + 1, 4, '0', STR_PAD_LEFT);
+        $period = $data['period'];
+        $seq = StockOpname::where('period', $period)->count() + 1;
+
+        do {
+            $referenceNumber = 'SO-'.$period.'-'.str_pad($seq, 4, '0', STR_PAD_LEFT);
+            $seq++;
+        } while (StockOpname::where('reference_number', $referenceNumber)->exists());
 
         $batch = StockOpname::create([
             'reference_number' => $referenceNumber,
@@ -67,7 +73,7 @@ class StockOpnameService
         foreach ($batch->items as $item) {
             $item->update([
                 'notes' => $item->variance != 0
-                    ? ($item->variance > 0 ? 'Surplus: +' . $item->variance : 'Shortage: ' . $item->variance)
+                    ? ($item->variance > 0 ? 'Surplus: +'.$item->variance : 'Shortage: '.$item->variance)
                     : 'Sesuai',
             ]);
         }
@@ -77,9 +83,14 @@ class StockOpnameService
     {
         DB::transaction(function () use ($batch, $approver) {
             $batch = StockOpname::whereKey($batch->id)->lockForUpdate()->first();
-            if (!$batch || $batch->status !== 'counted') {
+            if (! $batch || $batch->status !== 'counted') {
                 throw new \Exception('Stock opname sudah di-approve atau tidak dalam status counted.');
             }
+
+            if (! $batch->items()->exists()) {
+                throw new \Exception('Stock opname tidak memiliki item. Silakan upload data terlebih dahulu.');
+            }
+
             $batch->load('items.item', 'items.variant');
 
             foreach ($batch->items as $item) {
@@ -152,21 +163,7 @@ class StockOpnameService
                         'approved_at' => now(),
                     ]);
 
-                    $dbBalance = StockBalance::where('item_id', $item->item_id)
-                        ->where('variant_id', $item->variant_id)
-                        ->lockForUpdate()
-                        ->first();
-
-                    if ($dbBalance) {
-                        $dbBalance->increment('quantity', $quantity);
-                    } else {
-                        StockBalance::create([
-                            'item_id' => $item->item_id,
-                            'variant_id' => $item->variant_id,
-                            'quantity' => $quantity,
-                            'last_hpp' => $unitHpp,
-                        ]);
-                    }
+                    $this->stockService->increaseBalance($item->item_id, $item->variant_id, $quantity, $unitHpp);
                 }
             }
 
@@ -175,6 +172,6 @@ class StockOpnameService
             ]);
 
             AuditService::log('approve', StockOpname::class, $batch->id, ['status' => 'counted'], ['status' => 'approved']);
-        });
+        }, attempts: 5);
     }
 }

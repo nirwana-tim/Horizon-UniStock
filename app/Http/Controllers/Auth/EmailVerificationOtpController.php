@@ -26,13 +26,14 @@ class EmailVerificationOtpController extends Controller
 
         $student = Student::where('user_id', Auth::id())->firstOrFail();
 
-        OtpCode::where('nim', $student->nim)->whereNull('used_at')->where('expires_at', '>', now())->update(['used_at' => now()]);
+        OtpCode::where('user_id', Auth::id())->whereNull('used_at')->where('expires_at', '>', now())->update(['used_at' => now()]);
 
         session()->forget(['pending_email', 'otp_attempts']);
 
         $code = str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
 
         OtpCode::create([
+            'user_id' => Auth::id(),
             'nim' => $student->nim,
             'email' => $validated['email_kampus'],
             'code' => $code,
@@ -82,12 +83,12 @@ class EmailVerificationOtpController extends Controller
         $attempts = (int) session('otp_attempts', 0);
         if ($attempts >= 5) {
             session()->forget(['pending_email', 'otp_attempts']);
-            OtpCode::where('nim', $student->nim)->whereNull('used_at')->update(['used_at' => now()]);
+            OtpCode::where('user_id', Auth::id())->whereNull('used_at')->update(['used_at' => now()]);
             return redirect()->route('student.email.send-otp')
                 ->withErrors(['error' => 'Terlalu banyak percobaan. Silakan kirim ulang OTP.']);
         }
 
-        $otp = OtpCode::where('nim', $student->nim)
+        $otp = OtpCode::where('user_id', Auth::id())
             ->where('email', $pendingEmail)
             ->where('code', $validated['code'])
             ->where('type', 'email_verification')

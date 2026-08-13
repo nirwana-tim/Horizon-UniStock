@@ -82,6 +82,15 @@
                         <x-input-error :messages="$errors->get('max_changes')" class="mt-1" />
                     </div>
 
+                    <label class="flex items-start gap-3 p-4 bg-gray-50 rounded-lg border border-gray-200 cursor-pointer">
+                        <input type="checkbox" name="allow_reedit" value="1" {{ old('allow_reedit') ? 'checked' : '' }}
+                            class="mt-0.5 rounded border-gray-300 text-primary-700 shadow-sm focus:ring-primary-500">
+                        <span>
+                            <span class="block text-sm font-semibold text-gray-800">Izinkan Re-Edit Ukuran</span>
+                            <span class="block text-xs text-gray-500">Jika dicentang, mahasiswa dapat mengubah ukuran ulang sesuai batas "Maksimal Perubahan" di atas. Jika tidak dicentang, ukuran hanya bisa diisi <strong>sekali saja</strong> (re-edit diblokir).</span>
+                        </span>
+                    </label>
+
                     <hr class="my-4 border-gray-200">
 
                     <h4 class="text-sm font-semibold text-gray-800">Opsi Ukuran (Opsional)</h4>

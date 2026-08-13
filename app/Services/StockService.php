@@ -9,9 +9,7 @@ use App\Models\StockBatch;
 use App\Models\StockMovement;
 use App\Models\StockReceive;
 use App\Models\StockReceiveItem;
-use App\Models\Vendor;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class StockService
@@ -35,7 +33,9 @@ class StockService
             foreach ($data['items'] as $itemData) {
                 $item = $preloadedItems->get($itemData['item_id']);
                 $variant = $preloadedVariants->get($itemData['variant_id']);
-                if (!$item || !$variant) continue;
+                if (! $item || ! $variant) {
+                    continue;
+                }
 
                 $receiveItem = StockReceiveItem::create([
                     'stock_receive_id' => $receive->id,
@@ -57,49 +57,77 @@ class StockService
                     'notes' => "Penerimaan dari vendor: {$receive->reference_number}",
                 ]);
 
-                $balance = StockBalance::where('item_id', $item->id)
-                    ->where('variant_id', $variant->id)
-                    ->lockForUpdate()
-                    ->first();
-
-                $newHpp = $receiveItem->hpp;
-
                 StockBatch::create([
                     'item_id' => $item->id,
                     'variant_id' => $variant->id,
                     'quantity_remaining' => $itemData['quantity'],
-                    'unit_hpp' => $newHpp,
+                    'unit_hpp' => $receiveItem->hpp,
                     'received_date' => $data['receive_date'],
                     'stock_receive_item_id' => $receiveItem->id,
                 ]);
 
-                $balance = $this->getBalance($item->id, $variant->id);
-                $oldQty = $balance ? $balance->quantity : 0;
-                $oldHpp = $balance ? $balance->last_hpp : 0;
-                $totalQty = $oldQty + $itemData['quantity'];
-                $avgHpp = $totalQty > 0
-                    ? (($oldQty * $oldHpp) + ($itemData['quantity'] * $newHpp)) / $totalQty
-                    : $newHpp;
-
-                if ($balance) {
-                    $balance->update([
-                        'quantity' => $totalQty,
-                        'last_hpp' => round($avgHpp, 2),
-                    ]);
-                } else {
-                    StockBalance::create([
-                        'item_id' => $item->id,
-                        'variant_id' => $variant->id,
-                        'quantity' => $itemData['quantity'],
-                        'last_hpp' => round($newHpp, 2),
-                    ]);
-                }
+                $this->upsertBalance(
+                    $item->id,
+                    $variant->id,
+                    $itemData['quantity'],
+                    $receiveItem->hpp
+                );
             }
 
             AuditService::log('create', StockReceive::class, $receive->id, null, $receive->toArray());
 
             return $receive->fresh(['items.item', 'items.variant', 'vendor']);
-        });
+        }, attempts: 5);
+    }
+
+    private function upsertBalance(int $itemId, ?int $variantId, int $addedQty, float $newHpp): void
+    {
+        $balance = StockBalance::where('item_id', $itemId)
+            ->where('variant_id', $variantId)
+            ->lockForUpdate()
+            ->first();
+
+        if ($balance) {
+            $oldQty = $balance->quantity;
+            $oldHpp = $balance->last_hpp;
+            $totalQty = $oldQty + $addedQty;
+            $avgHpp = $totalQty > 0
+                ? (($oldQty * $oldHpp) + ($addedQty * $newHpp)) / $totalQty
+                : $newHpp;
+
+            $balance->update([
+                'quantity' => $totalQty,
+                'last_hpp' => round($avgHpp, 2),
+            ]);
+        } else {
+            retry(5, function () use ($itemId, $variantId, $addedQty, $newHpp) {
+                StockBalance::create([
+                    'item_id' => $itemId,
+                    'variant_id' => $variantId,
+                    'quantity' => $addedQty,
+                    'last_hpp' => round($newHpp, 2),
+                ]);
+            }, 100);
+        }
+    }
+
+    public function increaseBalance(int $itemId, ?int $variantId, int $quantity, float $unitHpp = 0): void
+    {
+        $balance = StockBalance::where('item_id', $itemId)
+            ->where('variant_id', $variantId)
+            ->lockForUpdate()
+            ->first();
+
+        if ($balance) {
+            $balance->increment('quantity', $quantity);
+        } else {
+            StockBalance::create([
+                'item_id' => $itemId,
+                'variant_id' => $variantId,
+                'quantity' => $quantity,
+                'last_hpp' => round($unitHpp, 2),
+            ]);
+        }
     }
 
     public function getBalance(int $itemId, ?int $variantId = null): ?StockBalance
@@ -164,11 +192,6 @@ class StockService
         return $query->get();
     }
 
-    public function deductStock(int $itemId, int $variantId, int $quantity, string $referenceType, int $referenceId, ?float $hpp = null, ?string $notes = null): void
-    {
-        $this->deductStockFifo($itemId, $variantId, $quantity, $referenceType, $referenceId, $notes);
-    }
-
     public function deductStockFifo(int $itemId, int $variantId, int $quantity, string $referenceType, int $referenceId, ?string $notes = null): array
     {
         return DB::transaction(function () use ($itemId, $variantId, $quantity, $referenceType, $referenceId, $notes) {
@@ -177,7 +200,7 @@ class StockService
                 ->lockForUpdate()
                 ->first();
 
-            if (!$balance || $balance->quantity < $quantity) {
+            if (! $balance || $balance->quantity < $quantity) {
                 throw new \Exception("Stok tidak mencukupi untuk item #{$itemId} varian #{$variantId}.");
             }
 
@@ -194,7 +217,9 @@ class StockService
             $consumedBatches = [];
 
             foreach ($batches as $batch) {
-                if ($remaining <= 0) break;
+                if ($remaining <= 0) {
+                    break;
+                }
 
                 $consume = min($remaining, $batch->quantity_remaining);
 
@@ -231,15 +256,21 @@ class StockService
                 'total_cost' => $totalCost,
                 'consumed_batches' => $consumedBatches,
             ];
-        });
+        }, attempts: 5);
     }
 
-    public function getLowStockItems(int $threshold = 5): Collection
+    public function getLowStockItems(?int $fallbackThreshold = 5): Collection
     {
         return StockBalance::with(['item.category', 'variant'])
-            ->where('quantity', '<=', $threshold)
-            ->where('quantity', '>', 0)
-            ->orderBy('quantity')
+            ->join('items', 'stock_balances.item_id', '=', 'items.id')
+            ->select('stock_balances.*')
+            ->where('stock_balances.quantity', '>', 0)
+            ->where(function ($q) use ($fallbackThreshold) {
+                $q->whereColumn('stock_balances.quantity', '<=', 'items.min_stock')
+                    ->orWhere(fn ($q) => $q->whereNull('items.min_stock')
+                        ->where('stock_balances.quantity', '<=', $fallbackThreshold));
+            })
+            ->orderBy('stock_balances.quantity')
             ->get();
     }
 
@@ -253,14 +284,34 @@ class StockService
 
     private function generateReferenceNumber(): string
     {
-        $todayCount = StockReceive::whereDate('created_at', today())->lockForUpdate()->count();
-        return 'SR-' . date('Ymd') . '-' . str_pad($todayCount + 1, 4, '0', STR_PAD_LEFT);
+        $dateStr = date('Ymd');
+        $seq = StockReceive::whereDate('created_at', today())->count() + 1;
+
+        do {
+            $ref = 'SR-'.$dateStr.'-'.str_pad($seq, 4, '0', STR_PAD_LEFT);
+            $seq++;
+        } while (StockReceive::where('reference_number', $ref)->exists());
+
+        return $ref;
     }
 
     public function reverseStockReceive(StockReceive $receive): void
     {
         DB::transaction(function () use ($receive) {
             $receive->load('items');
+
+            foreach ($receive->items as $item) {
+                $batchRemaining = StockBatch::where('stock_receive_item_id', $item->id)
+                    ->sum('quantity_remaining');
+
+                if ($batchRemaining < $item->quantity) {
+                    throw new \Exception(
+                        "Penerimaan {$item->item?->name} sudah ada distribusi/pengeluaran stok. "
+                        .'Gunakan Stock Opname untuk koreksi stok.'
+                    );
+                }
+            }
+
             foreach ($receive->items as $item) {
                 StockBatch::where('stock_receive_item_id', $item->id)->forceDelete();
 
@@ -279,7 +330,7 @@ class StockService
             $old = $receive->toArray();
             $receive->delete();
             AuditService::log('delete', StockReceive::class, $receive->id, $old, null);
-        });
+        }, attempts: 5);
     }
 
     public function returnStockToBatch(int $itemId, int $variantId, int $quantity, string $referenceType, int $referenceId, ?string $notes = null): void
@@ -296,9 +347,13 @@ class StockService
             $returnQty = $quantity;
 
             foreach ($outMovements as $movement) {
-                if ($returnQty <= 0) break;
+                if ($returnQty <= 0) {
+                    break;
+                }
                 $batch = StockBatch::find($movement->stock_batch_id);
-                if (!$batch) continue;
+                if (! $batch) {
+                    continue;
+                }
 
                 $returnToBatch = min($returnQty, $movement->quantity);
                 $batch->increment('quantity_remaining', $returnToBatch);
@@ -322,17 +377,10 @@ class StockService
                 throw new \Exception("Tidak dapat mengembalikan {$returnQty} unit: batch asal tidak ditemukan.");
             }
 
-            $balance = StockBalance::where('item_id', $itemId)
-                ->where('variant_id', $variantId)
-                ->lockForUpdate()
-                ->first();
-
-            if ($balance) {
-                $balance->increment('quantity', $quantity);
-            }
+            $this->increaseBalance($itemId, $variantId, $quantity);
 
             AuditService::log('return_stock', StockMovement::class, $referenceId, ['quantity' => $quantity], ['item_id' => $itemId, 'variant_id' => $variantId, 'reference' => $referenceType]);
-        });
+        }, attempts: 5);
     }
 
     public function getVendorReceivedItems(int $vendorId): Collection

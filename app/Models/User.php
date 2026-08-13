@@ -12,7 +12,7 @@ use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    protected $fillable = ['name', 'email', 'password', 'must_change_password'];
+    protected $fillable = ['name', 'email', 'password', 'must_change_password', 'is_active', 'last_login_at'];
 
     protected $hidden = ['password', 'remember_token'];
 
@@ -32,8 +32,10 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
+            'last_login_at' => 'datetime',
             'password' => 'hashed',
             'must_change_password' => 'boolean',
+            'is_active' => 'boolean',
         ];
     }
 }

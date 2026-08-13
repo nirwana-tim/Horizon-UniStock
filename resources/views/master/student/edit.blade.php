@@ -69,6 +69,12 @@
                                 <x-text-input id="password" name="password" type="password" class="mt-1 block w-full" placeholder="Leave blank to keep current password" />
                                 <x-input-error :messages="$errors->get('password')" class="mt-2" />
                             </div>
+
+                            <div>
+                                <x-input-label for="password_confirmation" :value="__('Confirm New Password')" />
+                                <x-text-input id="password_confirmation" name="password_confirmation" type="password" class="mt-1 block w-full" placeholder="Re-type new password" />
+                                <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
+                            </div>
                             @endif
                         </div>
 

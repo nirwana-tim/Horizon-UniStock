@@ -46,11 +46,13 @@ class SizeChangeEventController extends Controller
             'student_level' => ['nullable', 'string', 'exists:student_levels,kode'],
             'max_changes' => ['required', 'integer', 'min:0'],
             'is_active' => ['boolean'],
+            'allow_reedit' => ['boolean'],
             'baju_size_options_text' => ['nullable', 'string'],
             'sepatu_size_options_text' => ['nullable', 'string'],
         ]);
 
         $validated['is_active'] = $request->boolean('is_active', true);
+        $validated['allow_reedit'] = $request->boolean('allow_reedit', false);
         $validated['created_by'] = auth()->id();
 
         // Parse comma-separated size options into JSON arrays
@@ -95,11 +97,13 @@ class SizeChangeEventController extends Controller
             'student_level' => ['nullable', 'string', 'exists:student_levels,kode'],
             'max_changes' => ['required', 'integer', 'min:0'],
             'is_active' => ['boolean'],
+            'allow_reedit' => ['boolean'],
             'baju_size_options_text' => ['nullable', 'string'],
             'sepatu_size_options_text' => ['nullable', 'string'],
         ]);
 
         $validated['is_active'] = $request->boolean('is_active', true);
+        $validated['allow_reedit'] = $request->boolean('allow_reedit', false);
 
         // Parse comma-separated size options into JSON arrays
         if (! empty($validated['baju_size_options_text'])) {

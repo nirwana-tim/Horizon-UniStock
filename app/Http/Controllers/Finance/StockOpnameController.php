@@ -9,8 +9,8 @@ use App\Services\StockOpnameService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\View\View;
+use Maatwebsite\Excel\Facades\Excel;
 
 class StockOpnameController extends Controller
 {
@@ -22,9 +22,9 @@ class StockOpnameController extends Controller
     {
         $batches = StockOpname::with('creator')
             ->when($request->input('q'), function ($query, $search) {
-                $search = str_replace(['%', '_'], ['\%', '\_'], $search);
+                $search = $this->escapeLike($search);
                 $query->where('period', 'like', "%{$search}%")
-                      ->orWhere('status', 'like', "%{$search}%");
+                    ->orWhere('status', 'like', "%{$search}%");
             })
             ->latest()
             ->paginate(20);
@@ -32,6 +32,7 @@ class StockOpnameController extends Controller
         if ($request->ajax()) {
             $html = view('inventory.stock-opname._table', compact('batches'))->render();
             $pagination = view('components.alpine-pagination', ['paginator' => $batches])->render();
+
             return response()->json(compact('html', 'pagination'));
         }
 
@@ -60,8 +61,6 @@ class StockOpnameController extends Controller
     public function show(StockOpname $stockOpname): View
     {
         $stockOpname->load(['items.item', 'items.variant', 'creator', 'adjustments.approver']);
-
-        $this->service->calculateVariance($stockOpname);
 
         return view('inventory.stock-opname.show', ['batch' => $stockOpname]);
     }

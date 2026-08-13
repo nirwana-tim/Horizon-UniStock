@@ -28,6 +28,10 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
+        if (! $request->user()->last_login_at) {
+            $request->user()->forceFill(['last_login_at' => now()])->save();
+        }
+
         if ($request->user()->must_change_password) {
             return redirect()->route('password.change');
         }
@@ -46,6 +50,6 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerateToken();
 
-        return redirect('/');
+        return redirect()->route('login');
     }
 }

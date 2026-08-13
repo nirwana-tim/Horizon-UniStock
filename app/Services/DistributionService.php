@@ -21,6 +21,7 @@ class DistributionService
     public function __construct(
         private readonly StockService $stockService
     ) {}
+
     public function findStudent(string $query): ?Student
     {
         return Student::with(['studyProgram', 'generation'])
@@ -50,7 +51,7 @@ class DistributionService
             ->where('is_active', true)
             ->where(function ($q) use ($student) {
                 $q->where('student_level', $student->student_level)
-                  ->orWhereNull('student_level');
+                    ->orWhereNull('student_level');
             })
             ->with('items.item')
             ->first();
@@ -79,20 +80,26 @@ class DistributionService
             $eligibility = EligibilityRecord::where('student_id', $student->id)
                 ->lockForUpdate()
                 ->first();
-            if (!$eligibility || !$eligibility->is_eligible) {
+            if (! $eligibility || ! $eligibility->is_eligible) {
                 throw new \Exception('Mahasiswa ini belum memenuhi syarat distribusi. Status pembayaran belum lunas.');
             }
 
-            if (!$schedule->is_active) {
+            if (! $schedule->is_active) {
                 throw new \Exception('Jadwal distribusi sudah tidak aktif. Silakan hubungi admin.');
+            }
+
+            if ($schedule->date && $schedule->date->lt(today())) {
+                throw new \Exception(
+                    'Jadwal distribusi "'.$schedule->name.'" sudah berakhir pada '.$schedule->date->format('d M Y').'. Tidak dapat melakukan scan melewati tanggal jadwal.'
+                );
             }
 
             $isApplicable = DistributionSchedule::whereKey($schedule->id)
                 ->forStudent($student)
                 ->exists();
-            if (!$isApplicable) {
+            if (! $isApplicable) {
                 throw new \Exception(
-                    'Jadwal distribusi "' . $schedule->name . '" tidak sesuai dengan mahasiswa ini. ' .
+                    'Jadwal distribusi "'.$schedule->name.'" tidak sesuai dengan mahasiswa ini. '.
                     'Pastikan fakultas/prodi/angkatan sesuai.'
                 );
             }
@@ -104,7 +111,7 @@ class DistributionService
                 ->exists();
 
             if ($existingTransaction) {
-                throw new \Exception('Mahasiswa ini sudah melakukan pengambilan pada jadwal "' . $schedule->name . '". Tidak boleh mengambil ulang.');
+                throw new \Exception('Mahasiswa ini sudah melakukan pengambilan pada jadwal "'.$schedule->name.'". Tidak boleh mengambil ulang.');
             }
             $transaction = DistributionTransaction::create([
                 'student_id' => $student->id,
@@ -120,10 +127,10 @@ class DistributionService
 
             foreach ($items as $itemData) {
                 $item = null;
-                if (!empty($itemData['base_code'])) {
+                if (! empty($itemData['base_code'])) {
                     $item = $this->findItemByBaseCodeAndSize($itemData['base_code'], $itemData['actual_size']);
                 }
-                if (!$item) {
+                if (! $item) {
                     $item = Item::find($itemData['item_id'] ?? 0);
                 }
                 if (! $item) {
@@ -138,7 +145,10 @@ class DistributionService
                 $hppAtDistribution = 0;
                 $deductedQty = 0;
 
-                if ($variant) {
+                if (! $variant) {
+                    $allFullyStocked = false;
+                    $autoNotes[] = "Stok {$item->name} (Ukuran {$itemData['actual_size']}) tidak tersedia";
+                } else {
                     $balance = $this->stockService->getBalance($item->id, $variant->id);
                     $availableStock = $balance ? $balance->quantity : 0;
                     $deductedQty = min($quantity, $availableStock);
@@ -164,7 +174,7 @@ class DistributionService
                     }
                 }
 
-                $effectiveQty = $variant ? $deductedQty : $quantity;
+                $effectiveQty = $variant ? $deductedQty : 0;
 
                 $sellingPrice = $this->getDeferredPrice($student, $item->id)
                     ?? $this->getSellingPriceForPeriod($item->id, $schedule);
@@ -188,13 +198,13 @@ class DistributionService
             // Check if there are items in entitlement that were not checked (deferred)
             $checkedBaseCodes = [];
             $resolveIds = collect($items)
-                ->filter(fn ($i) => empty($i['base_code']) && !empty($i['item_id']))
+                ->filter(fn ($i) => empty($i['base_code']) && ! empty($i['item_id']))
                 ->pluck('item_id');
             $resolvedItems = Item::whereIn('id', $resolveIds)->pluck('base_code', 'id');
             foreach ($items as $itemData) {
-                if (!empty($itemData['base_code'])) {
+                if (! empty($itemData['base_code'])) {
                     $checkedBaseCodes[] = $itemData['base_code'];
-                } elseif (!empty($itemData['item_id'])) {
+                } elseif (! empty($itemData['item_id'])) {
                     $baseCode = $resolvedItems[$itemData['item_id']] ?? null;
                     if ($baseCode) {
                         $checkedBaseCodes[] = $baseCode;
@@ -259,8 +269,16 @@ class DistributionService
                 ]
             );
 
+            DB::afterCommit(function () use ($transaction) {
+                app(NotificationService::class)->sendDistributionConfirmation($transaction);
+
+                if ($transaction->status === 'partial') {
+                    app(NotificationService::class)->sendShortageAlert($transaction);
+                }
+            });
+
             return $transaction->fresh(['items.item', 'student', 'schedule']);
-        });
+        }, attempts: 5);
     }
 
     private function getSellingPriceForPeriod(int $itemId, DistributionSchedule $schedule): float
@@ -276,11 +294,11 @@ class DistributionService
     private function getDeferredPrice(Student $student, int $itemId): ?float
     {
         $partialPrice = DistributionItem::where('item_id', $itemId)
-            ->whereHas('transaction', fn($q) => $q
+            ->whereHas('transaction', fn ($q) => $q
                 ->where('student_id', $student->id)
                 ->where('status', 'partial')
             )
-            ->orderBy('distribution_items.id')
+            ->orderByDesc('distribution_items.id')
             ->value('selling_price_at_distribution');
 
         return $partialPrice > 0 ? $partialPrice : null;

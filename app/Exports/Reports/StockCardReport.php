@@ -5,13 +5,14 @@ namespace App\Exports\Reports;
 use App\Exports\BaseExport;
 use App\Models\Item;
 use App\Models\StockMovement;
-use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\FromQuery;
+use Maatwebsite\Excel\Concerns\WithChunkReading;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class StockCardReport extends BaseExport implements FromCollection, WithHeadings, WithMapping, WithStyles
+class StockCardReport extends BaseExport implements FromQuery, WithHeadings, WithMapping, WithStyles, WithChunkReading
 {
     use \Maatwebsite\Excel\Concerns\Exportable;
 
@@ -24,16 +25,10 @@ class StockCardReport extends BaseExport implements FromCollection, WithHeadings
         private ?string $endDate = null
     ) {}
 
-    public function collection()
+    public function query(): \Illuminate\Database\Eloquent\Builder
     {
-        $items = Item::where('code', $this->itemCode)->get();
-
-        if ($items->isEmpty()) {
-            return collect();
-        }
-
         $movements = StockMovement::with('item', 'variant')
-            ->whereIn('item_id', $items->pluck('id'))
+            ->whereIn('item_id', Item::where('code', $this->itemCode)->pluck('id'))
             ->orderBy('created_at')
             ->orderBy('id');
 
@@ -44,7 +39,12 @@ class StockCardReport extends BaseExport implements FromCollection, WithHeadings
             $movements->whereDate('created_at', '<=', $this->endDate);
         }
 
-        return $movements->get();
+        return $movements;
+    }
+
+    public function chunkSize(): int
+    {
+        return 500;
     }
 
     public function headings(): array

@@ -23,10 +23,10 @@ class ItemSizeController extends Controller
         $query = ItemSize::with('categories');
 
         if ($search = $request->input('q')) {
-            $search = str_replace(['%', '_'], ['\%', '\_'], $search);
+            $search = $this->escapeLike($search);
             $query->where(function ($q) use ($search) {
                 $q->where('label', 'like', "%{$search}%")
-                  ->orWhere('code', 'like', "%{$search}%");
+                    ->orWhere('code', 'like', "%{$search}%");
             });
         }
 

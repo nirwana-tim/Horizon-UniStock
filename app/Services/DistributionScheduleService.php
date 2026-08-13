@@ -7,6 +7,7 @@ use App\Models\Entitlement;
 use App\Models\Faculty;
 use App\Models\Item;
 use App\Models\StudyProgram;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 
 class DistributionScheduleService
@@ -34,6 +35,10 @@ class DistributionScheduleService
                 null,
                 array_merge($schedule->fresh()->toArray(), ['item_ids' => $itemIds])
             );
+
+            DB::afterCommit(function () use ($schedule) {
+                app(NotificationService::class)->notifyScheduleCreated($schedule);
+            });
 
             return $schedule;
         });
@@ -87,12 +92,18 @@ class DistributionScheduleService
         });
     }
 
-    public function fetchItems(?int $studyProgramId, ?int $facultyId, ?string $studentLevel, array $checkedIds = []): array
+    public function fetchItems(?int $studyProgramId, ?int $facultyId, ?string $studentLevel, array $checkedIds = [], ?string $search = null): array
     {
         if ($studyProgramId === null || $studyProgramId === 0) {
             $items = collect();
         } elseif ($studyProgramId === -1) {
-            $items = Item::orderBy('name')->get();
+            $items = Item::when($search, function ($q, $search) {
+                $search = str_replace(['%', '_'], ['\%', '\_'], $search);
+                $q->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                        ->orWhere('code', 'like', "%{$search}%");
+                });
+            })->orderBy('name')->get();
         } else {
             $studyProgram = StudyProgram::with('faculty')->find($studyProgramId);
             $faculty = $facultyId ? Faculty::find($facultyId) : null;
@@ -102,38 +113,33 @@ class DistributionScheduleService
             $allowedIds = collect();
 
             if ($prodiCode) {
-                $targetCode = $studentLevel ? ($studentLevel . $facultyCode . $prodiCode) : null;
-
                 $entitlements = Entitlement::with('items')
                     ->where('is_active', true)
-                    ->when($studentLevel, fn($q) => $q->where(function ($sub) use ($studentLevel, $targetCode) {
-                        $sub->where('student_level', $studentLevel);
-                        if ($targetCode) {
-                            $sub->orWhere('code', $targetCode);
-                        }
-                    }))
-                    ->where(function ($q) use ($facultyCode, $prodiCode) {
-                        if ($facultyCode) {
-                            $q->where('code', 'like', "%{$facultyCode}{$prodiCode}%")
-                                ->orWhere('code', 'like', "%{$prodiCode}%");
-                        } else {
-                            $q->where('code', 'like', "%{$prodiCode}%");
-                        }
-                    })
+                    ->when($studentLevel, fn ($q) => $q->where('student_level', $studentLevel))
+                    ->when($facultyCode, fn ($q) => $q->where('code', 'like', $studentLevel.$facultyCode.$prodiCode.'%'))
+                    ->when(! $facultyCode, fn ($q) => $q->where('code', 'like', '%'.$prodiCode.'%'))
                     ->get();
 
-                $allowedIds = $entitlements->flatMap(fn($e) => $e->items->pluck('item_id'))->unique()->values();
+                $allowedIds = $entitlements->flatMap(fn ($e) => $e->items->pluck('item_id'))->unique()->values();
             }
 
             $items = $allowedIds->isNotEmpty()
-                ? Item::whereIn('id', $allowedIds)->orderBy('name')->get()
+                ? Item::whereIn('id', $allowedIds)
+                    ->when($search, function ($q, $search) {
+                        $search = str_replace(['%', '_'], ['\%', '\_'], $search);
+                        $q->where(function ($q) use ($search) {
+                            $q->where('name', 'like', "%{$search}%")
+                                ->orWhere('code', 'like', "%{$search}%");
+                        });
+                    })
+                    ->orderBy('name')->get()
                 : collect();
         }
 
         return [$items, $checkedIds];
     }
 
-    public function getFilteredSchedules(?string $search, ?string $period, ?int $facultyId, ?int $studyProgramId): \Illuminate\Contracts\Pagination\LengthAwarePaginator
+    public function getFilteredSchedules(?string $search, ?string $period, ?int $facultyId, ?int $studyProgramId): LengthAwarePaginator
     {
         return DistributionSchedule::with('faculty', 'studyProgram', 'studentLevel')
             ->when($search, function ($query, $search) {
@@ -143,9 +149,9 @@ class DistributionScheduleService
                         ->orWhere('location', 'like', "%{$search}%");
                 });
             })
-            ->when($period, fn($query, $p) => $query->where('period', $p))
-            ->when($facultyId, fn($query, $f) => $query->where('faculty_id', $f))
-            ->when($studyProgramId, fn($query, $s) => $query->where('study_program_id', $s))
+            ->when($period, fn ($query, $p) => $query->where('period', $p))
+            ->when($facultyId, fn ($query, $f) => $query->where('faculty_id', $f))
+            ->when($studyProgramId, fn ($query, $s) => $query->where('study_program_id', $s))
             ->latest()
             ->paginate(20);
     }
@@ -153,20 +159,17 @@ class DistributionScheduleService
     public function getFormOptions(): array
     {
         return [
-            'faculties' => cache()->remember('faculties-all', 3600, fn() =>
-                Faculty::orderBy('name')->get()
+            'faculties' => cache()->remember('faculties-all', 3600, fn () => Faculty::orderBy('name')->get()
             ),
-            'studyPrograms' => cache()->remember('study-programs-faculty', 3600, fn() =>
-                StudyProgram::with('faculty')->orderBy('name')->get()
+            'studyPrograms' => cache()->remember('study-programs-faculty', 3600, fn () => StudyProgram::with('faculty')->orderBy('name')->get()
             ),
-            'periods' => cache()->remember('schedule-periods', 3600, fn() =>
-                DistributionSchedule::whereNotNull('period')
-                    ->distinct()
-                    ->orderBy('period', 'desc')
-                    ->pluck('period')
-                    ->map(fn($p) => (string)$p)
-                    ->values()
-                    ->toArray()
+            'periods' => cache()->remember('schedule-periods', 3600, fn () => DistributionSchedule::whereNotNull('period')
+                ->distinct()
+                ->orderBy('period', 'desc')
+                ->pluck('period')
+                ->map(fn ($p) => (string) $p)
+                ->values()
+                ->toArray()
             ),
         ];
     }

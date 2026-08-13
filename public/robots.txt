@@ -1,2 +1,19 @@
 User-agent: *
-Disallow:
+Allow: /
+Disallow: /login
+Disallow: /dashboard
+Disallow: /profile
+Disallow: /student
+Disallow: /admin
+Disallow: /distribution
+Disallow: /inventory
+Disallow: /report
+Disallow: /import
+Disallow: /system
+Disallow: /password
+Disallow: /email
+Disallow: /templates
+Disallow: /storage
+Disallow: /verify-email
+Disallow: /reset-password
+Disallow: /captcha

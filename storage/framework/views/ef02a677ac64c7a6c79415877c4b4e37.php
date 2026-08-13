@@ -13,7 +13,7 @@
         'master-data.vendor.*',
         'master-data.student-level.*',
     ];
-    $studentsRoutes = ['finance.eligibility.*', 'students.*'];
+    $studentsRoutes = ['finance.eligibility.*', 'students.*', 'students.credentials'];
     $studentsOpen = request()->routeIs($studentsRoutes) ? 'true' : 'false';
     $distributionRoutes = [
         'distribution.entitlement.*',
@@ -186,12 +186,16 @@
                         Eligibility
                     </a>
                     <a href="<?php echo e(route('students.index')); ?>"
-                        class="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm <?php echo e(request()->routeIs('students.*') && !request()->routeIs('students.generate-index') ? 'text-primary-700 font-medium bg-primary-50' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'); ?> transition-colors">
+                        class="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm <?php echo e(request()->routeIs('students.*') && !request()->routeIs('students.generate-index') && !request()->routeIs('students.credentials') ? 'text-primary-700 font-medium bg-primary-50' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'); ?> transition-colors">
                         Student Data
                     </a>
                     <a href="<?php echo e(route('students.generate-index')); ?>"
                         class="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm <?php echo e(request()->routeIs('students.generate-index') ? 'text-primary-700 font-medium bg-primary-50' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'); ?> transition-colors">
                         Generate Account
+                    </a>
+                    <a href="<?php echo e(route('students.credentials')); ?>"
+                        class="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm <?php echo e(request()->routeIs('students.credentials') ? 'text-primary-700 font-medium bg-primary-50' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'); ?> transition-colors">
+                        Distribusi Kredensial
                     </a>
                 </div>
             </div>
@@ -303,6 +307,18 @@
                     </a>
                 </div>
             </div>
+
+            <?php if (\Illuminate\Support\Facades\Blade::check('role', 'admin')): ?>
+                <div class="my-2 border-t border-gray-100"></div>
+                <a href="<?php echo e(route('admin.user.index')); ?>" title="Kelola Akun"
+                    class="flex items-center gap-3 px-2 py-2 rounded-lg text-sm <?php echo e(request()->routeIs('admin.user.*') ? 'sidebar-item-active' : 'sidebar-item'); ?>">
+                    <svg aria-hidden="true" class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <span x-show="!collapsed" class="truncate">Kelola Akun</span>
+                </a>
+            <?php endif; ?>
         <?php endif; ?>
 
         
@@ -329,8 +345,8 @@
 
                 <div x-show="systemOpen && !collapsed" x-cloak
                     class="mt-0.5 ml-4 pl-4 border-l border-gray-200 space-y-0.5">
-                    <a href="#"
-                        class="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-50 transition-colors">
+                    <a href="<?php echo e(route('admin.user.index')); ?>"
+                        class="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm <?php echo e(request()->routeIs('admin.user.*') ? 'text-primary-700 font-medium bg-primary-50' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'); ?> transition-colors">
                         <svg aria-hidden="true" class="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
@@ -345,8 +361,8 @@
                         </svg>
                         Audit Log
                     </a>
-                    <a href="#"
-                        class="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-50 transition-colors">
+                    <a href="<?php echo e(route('system.smtp.show')); ?>"
+                        class="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm <?php echo e(request()->routeIs('system.smtp*') ? 'bg-primary-50 text-primary-700 font-medium' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'); ?> transition-colors">
                         <svg aria-hidden="true" class="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />

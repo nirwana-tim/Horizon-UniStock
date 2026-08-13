@@ -3,13 +3,14 @@
 namespace App\Exports;
 
 use App\Models\StockBalance;
-use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\FromQuery;
+use Maatwebsite\Excel\Concerns\WithChunkReading;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class InventoryReportExport extends BaseExport implements FromCollection, WithHeadings, WithMapping, WithStyles
+class InventoryReportExport extends BaseExport implements FromQuery, WithHeadings, WithMapping, WithStyles, WithChunkReading
 {
     use \Maatwebsite\Excel\Concerns\Exportable;
 
@@ -21,7 +22,7 @@ class InventoryReportExport extends BaseExport implements FromCollection, WithHe
         private ?string $gender = null
     ) {}
 
-    public function collection()
+    public function query(): \Illuminate\Database\Eloquent\Builder
     {
         $query = StockBalance::with('item.category', 'variant')
             ->join('items', 'stock_balances.item_id', '=', 'items.id')
@@ -37,13 +38,19 @@ class InventoryReportExport extends BaseExport implements FromCollection, WithHe
                 'item_variants.size as variant_size'
             )
             ->orderBy('item_categories.code')
-            ->orderBy('items.name');
+            ->orderBy('items.name')
+            ->orderBy('stock_balances.id');
 
         if ($this->category) {
             $query->where('item_categories.code', $this->category);
         }
 
-        return $query->get();
+        return $query;
+    }
+
+    public function chunkSize(): int
+    {
+        return 500;
     }
 
     public function headings(): array

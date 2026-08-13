@@ -5,12 +5,14 @@ namespace App\Http\Controllers\Master;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\EntitlementRequest;
 use App\Models\Entitlement;
+use App\Models\Faculty;
 use App\Models\Item;
 use App\Models\StudyProgram;
 use App\Services\EntitlementService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\View\View;
 
 class EntitlementController extends Controller
@@ -21,12 +23,19 @@ class EntitlementController extends Controller
 
     public function index(Request $request): View|JsonResponse
     {
+        $facultyId = $request->integer('faculty_id') ?: null;
+        $faculty = $facultyId ? Faculty::find($facultyId) : null;
+        $facultyCode = $faculty?->code;
+
         $entitlements = Entitlement::with(['items.item', 'studentLevel'])
             ->when($request->input('q'), function ($query, $search) {
-                $search = str_replace(['%', '_'], ['\%', '\_'], $search);
-                $query->where('code', 'like', "%{$search}%")
-                      ->orWhere('description', 'like', "%{$search}%");
+                $search = $this->escapeLike($search);
+                $query->where(function ($q) use ($search) {
+                    $q->where('code', 'like', "%{$search}%")
+                        ->orWhere('description', 'like', "%{$search}%");
+                });
             })
+            ->when($facultyCode, fn ($q) => $q->where('code', 'like', "%{$facultyCode}%"))
             ->when($request->input('is_active'), fn ($q, $v) => $q->where('is_active', $v === '1'))
             ->latest()
             ->paginate(20);
@@ -34,10 +43,13 @@ class EntitlementController extends Controller
         if ($request->ajax()) {
             $html = view('distribution.entitlement._table', compact('entitlements'))->render();
             $pagination = view('components.alpine-pagination', ['paginator' => $entitlements])->render();
+
             return response()->json(compact('html', 'pagination'));
         }
 
-        return view('distribution.entitlement.index', compact('entitlements'));
+        $faculties = Faculty::orderBy('name')->get();
+
+        return view('distribution.entitlement.index', compact('entitlements', 'faculties'));
     }
 
     public function create(): View
@@ -70,8 +82,7 @@ class EntitlementController extends Controller
         if ($entitlement->student_level && $entitlement->code
             && str_starts_with($entitlement->code, $entitlement->student_level)) {
             $remainder = substr($entitlement->code, strlen($entitlement->student_level));
-            $matchedStudyProgramId = $studyPrograms->first(fn ($p) =>
-                $p->faculty?->code
+            $matchedStudyProgramId = $studyPrograms->first(fn ($p) => $p->faculty?->code
                 && str_starts_with($remainder, $p->faculty->code)
                 && substr($remainder, strlen($p->faculty->code)) === $p->code
             )?->id;
@@ -110,7 +121,7 @@ class EntitlementController extends Controller
      * Get items grouped by base_code (product level, not size level).
      * Returns one representative item per product group with size info.
      */
-    private function getGroupedItems(): \Illuminate\Support\Collection
+    private function getGroupedItems(): Collection
     {
         $items = Item::whereNotNull('base_code')
             ->with(['category', 'variants'])

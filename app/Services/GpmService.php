@@ -32,9 +32,10 @@ class GpmService
             ->groupBy('distribution_items.item_id', 'items.code', 'items.name', 'items.selling_price');
 
         $query->whereHas('transaction', function ($q) use ($period) {
-            $q->whereHas('schedule', function ($q2) use ($period) {
-                $q2->where('period', $period);
-            });
+            $q->where('status', 'completed')
+                ->whereHas('schedule', function ($q2) use ($period) {
+                    $q2->where('period', $period);
+                });
         });
 
         $results = $query->get();
@@ -91,8 +92,9 @@ class GpmService
                 'distribution_schedules.period',
                 DB::raw('SUM(distribution_items.quantity) as qty_sold'),
                 DB::raw('SUM(distribution_items.quantity * distribution_items.hpp) as total_hpp'),
-                DB::raw('SUM(distribution_items.quantity * items.selling_price) as total_selling_price')
+                DB::raw('SUM(distribution_items.quantity * distribution_items.selling_price_at_distribution) as total_selling_price')
             )
+            ->where('distribution_transactions.status', 'completed')
             ->groupBy('distribution_schedules.period')
             ->orderBy('distribution_schedules.period')
             ->get();

@@ -58,7 +58,7 @@ class SizeController extends Controller
         $submission = \App\Models\SizeEventSubmission::where('student_id', $student->id)
             ->where('event_id', $event->id)->first();
         $submissionCount = $submission?->submission_count ?? 0;
-        $canEdit = $submissionCount < $event->max_changes;
+        $canEdit = $event->canEdit($student);
         $remainingChanges = $event->max_changes - $submissionCount;
 
         return view('student.size-input', compact(

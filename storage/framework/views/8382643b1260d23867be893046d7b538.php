@@ -41,10 +41,10 @@
         
         <div>
             <label for="email" class="block font-label-md text-label-md text-secondary/70 mb-1.5">
-                Email / NIM <span class="text-error">*</span>
+                NIM <span class="text-error">*</span>
             </label>
             <input id="email" type="text" name="email" value="<?php echo e(old('email')); ?>" required autofocus
-                autocomplete="username" placeholder="Email atau NIM"
+                autocomplete="username" placeholder="Masukkan NIM"
                 class="w-full h-12 px-4 rounded-xl bg-surface-container-low border border-black/[0.06] font-body-md text-on-surface placeholder-secondary/40 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors <?php $__errorArgs = ['email'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
@@ -53,7 +53,6 @@ $message = $__bag->first($__errorArgs[0]); ?> border-error focus:border-error fo
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>">
-            <p class="mt-1 font-body-md text-[12px] text-secondary/40">Student: pakai NIM &bull; Staff/Admin: pakai email</p>
             <?php $__errorArgs = ['email'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
@@ -88,7 +87,15 @@ endif;
 unset($__errorArgs, $__bag); ?>">
                 <button type="button" @click="show = !show"
                     class="absolute right-3 top-1/2 -translate-y-1/2 text-secondary/40 hover:text-secondary transition-colors">
-                    <span class="material-symbols-outlined" x-text="show ? 'visibility_off' : 'visibility'">visibility</span>
+                    
+                    <svg x-show="!show" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                    </svg>
+                    
+                    <svg x-show="show" x-cloak class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.879L21 21"/>
+                    </svg>
                 </button>
             </div>
             <?php $__errorArgs = ['password'];
@@ -160,20 +167,14 @@ unset($__errorArgs, $__bag); ?>
         </button>
 
         
-        <div class="text-center pt-2">
-            <p class="font-body-md text-body-md text-secondary/50">
-                Lupa password?
-                <?php if(Route::has('password.request')): ?>
-                    <a href="<?php echo e(route('password.request')); ?>" class="text-primary font-semibold hover:underline">Staff/Admin</a>
-                <?php endif; ?>
-                <?php if(Route::has('password.request') && Route::has('password.student.forgot')): ?>
-                    <span class="mx-1">•</span>
-                <?php endif; ?>
-                <?php if(Route::has('password.student.forgot')): ?>
-                    <a href="<?php echo e(route('password.student.forgot')); ?>" class="text-primary font-semibold hover:underline">Student</a>
-                <?php endif; ?>
-            </p>
-        </div>
+        <?php if(Route::has('password.request')): ?>
+            <div class="text-center pt-2">
+                <p class="font-body-md text-body-md text-secondary/50">
+                    Lupa password?
+                    <a href="<?php echo e(route('password.request')); ?>" class="text-primary font-semibold hover:underline">Klik di sini</a>
+                </p>
+            </div>
+        <?php endif; ?>
     </form>
 
 <?php $__env->startPush('scripts'); ?>
@@ -184,7 +185,6 @@ unset($__errorArgs, $__bag); ?>
     }, 90000);
 </script>
 <?php $__env->stopPush(); ?>
-
  <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal69dc84650370d1d4dc1b42d016d7226b)): ?>

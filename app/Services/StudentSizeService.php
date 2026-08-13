@@ -185,6 +185,13 @@ class StudentSizeService
                 ->first();
 
             $submissionCount = $submission?->submission_count ?? 0;
+
+            if (! $event->allow_reedit && $submissionCount > 0) {
+                throw new \RuntimeException(
+                    'Ukuran hanya boleh diisi sekali untuk event ini (re-edit tidak diizinkan).'
+                );
+            }
+
             if ($submissionCount >= $event->max_changes) {
                 throw new \RuntimeException(
                     'Kamu sudah mencapai batas maksimal pengisian (' . $event->max_changes . 'x) untuk event ini.'

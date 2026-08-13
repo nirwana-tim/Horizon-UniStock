@@ -4,14 +4,15 @@ namespace App\Exports\Reports;
 
 use App\Exports\BaseExport;
 use App\Models\StockOpname;
-use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\FromQuery;
+use Maatwebsite\Excel\Concerns\WithChunkReading;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use PhpOffice\PhpSpreadsheet\Style\Color;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class StockOpnameReport extends BaseExport implements FromCollection, WithHeadings, WithMapping, WithStyles
+class StockOpnameReport extends BaseExport implements FromQuery, WithHeadings, WithMapping, WithStyles, WithChunkReading
 {
     use \Maatwebsite\Excel\Concerns\Exportable;
 
@@ -21,7 +22,7 @@ class StockOpnameReport extends BaseExport implements FromCollection, WithHeadin
         private StockOpname $stockOpname
     ) {}
 
-    public function collection()
+    public function query(): \Illuminate\Database\Eloquent\Relations\Relation
     {
         return $this->stockOpname->items()
             ->with('item.category', 'variant')
@@ -34,7 +35,12 @@ class StockOpnameReport extends BaseExport implements FromCollection, WithHeadin
                 'item_variants.size as variant_size'
             )
             ->orderBy('items.name')
-            ->get();
+            ->orderBy('stock_opname_items.id');
+    }
+
+    public function chunkSize(): int
+    {
+        return 500;
     }
 
     public function headings(): array

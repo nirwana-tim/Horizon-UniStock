@@ -368,13 +368,7 @@ class ReportService
 
         foreach ($categoriesList as $cat) {
             $catId = $cat->id;
-            $code = strtolower($cat->code);
-            $key = match($code) {
-                'unf' => 'uniform',
-                'shs' => 'shoes',
-                'tmb' => 'tumbler',
-                default => $code,
-            };
+            $key = strtolower($cat->code);
             
             $sold = (int) ($soldData[$catId] ?? 0);
             $stock = (int) ($stockData[$catId] ?? 0);

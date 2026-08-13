@@ -2,18 +2,22 @@
 
 namespace App\Http\Controllers\Master;
 
+use App\Exports\CredentialsExport;
+use App\Exports\StudentExport;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StudentRequest;
 use App\Models\DistributionItem;
 use App\Models\Entitlement;
-use App\Models\StudentGeneration;
 use App\Models\Student;
+use App\Models\StudentGeneration;
 use App\Models\StudyProgram;
 use App\Services\Master\StudentService;
+use App\Services\NotificationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class StudentController extends Controller
 {
@@ -26,7 +30,7 @@ class StudentController extends Controller
         $query = Student::with(['studyProgram', 'generation', 'studentLevel']);
 
         if ($search = $request->input('q')) {
-            $search = str_replace(['%', '_'], ['\%', '\_'], $search);
+            $search = $this->escapeLike($search);
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                     ->orWhere('nim', 'like', "%{$search}%")
@@ -71,12 +75,27 @@ class StudentController extends Controller
             ->with(['studyProgram', 'generation', 'studentLevel'])
             ->paginate(10, ['*'], 'account_page');
 
+        $studentsPending = Student::whereNotNull('user_id')
+            ->whereHas('user', fn ($q) => $q->where('must_change_password', true))
+            ->with(['studyProgram', 'generation', 'user'])
+            ->orderBy('nim')
+            ->limit(100)
+            ->get();
+
+        $notificationService = app(NotificationService::class);
+        $studentsPending = $studentsPending->map(function (Student $student) use ($notificationService) {
+            $student->latest_email = $notificationService->latestAccountNotification($student);
+
+            return $student;
+        });
+
         $totalStudents = cache()->remember('student-count-total', 300, fn () => Student::count());
         $totalWithAccount = cache()->remember('student-count-with-account', 300, fn () => Student::whereNotNull('user_id')->count());
         $totalWithoutAccount = cache()->remember('student-count-without-account', 300, fn () => Student::whereNull('user_id')->count());
 
         return view('master.student.generate', compact(
             'studentsWithoutAccount',
+            'studentsPending',
             'totalStudents',
             'totalWithAccount',
             'totalWithoutAccount',
@@ -189,9 +208,11 @@ class StudentController extends Controller
             ->get();
 
         $generated = [];
+        $passwords = session('credentials.passwords', []);
 
         foreach ($students as $student) {
             [$user, $password] = $this->studentService->generateAccount($student);
+            $passwords[$student->nim] = $password;
             $generated[] = [
                 'name' => $student->name,
                 'nim' => $student->nim,
@@ -204,20 +225,21 @@ class StudentController extends Controller
                 ->with('info', 'Tidak ada akun baru yang digenerate.');
         }
 
-        $message = 'Berhasil membuat '.count($generated).' akun mahasiswa. Password hanya ditampilkan sekali di bawah.';
+        session(['credentials.passwords' => $passwords]);
 
-        return redirect()->route('students.generate-index')
-            ->with('success', $message)
-            ->with('generated_passwords', $generated);
+        $message = 'Berhasil membuat '.count($generated).' akun mahasiswa. Distributed kredensial di halaman berikut.';
+
+        return redirect()->route('students.credentials')
+            ->with('success', $message);
     }
 
-    public function export(Request $request): \Symfony\Component\HttpFoundation\BinaryFileResponse
+    public function export(Request $request): BinaryFileResponse
     {
-        return (new \App\Exports\StudentExport(
+        return (new StudentExport(
             search: $request->input('q'),
             studyProgramId: $request->input('study_program_id'),
             generationId: $request->input('generation_id'),
-        ))->download('students-' . now()->format('Ymd') . '.xlsx');
+        ))->download('students-'.now()->format('Ymd').'.xlsx');
     }
 
     public function promoteForm(Request $request): View
@@ -267,9 +289,11 @@ class StudentController extends Controller
         }
 
         $generated = [];
+        $passwords = session('credentials.passwords', []);
 
         foreach ($students as $student) {
             [$user, $password] = $this->studentService->generateAccount($student);
+            $passwords[$student->nim] = $password;
             $generated[] = [
                 'name' => $student->name,
                 'nim' => $student->nim,
@@ -277,11 +301,131 @@ class StudentController extends Controller
             ];
         }
 
-        $message = 'Berhasil membuat '.count($generated).' akun mahasiswa. Password hanya ditampilkan sekali di bawah.';
+        $message = 'Berhasil membuat '.count($generated).' akun mahasiswa. Distributed kredensial di halaman berikut.';
 
-        return redirect()->route('students.generate-index')
-            ->with('success', $message)
-            ->with('generated_passwords', $generated);
+        session(['credentials.passwords' => $passwords]);
+
+        return redirect()->route('students.credentials')
+            ->with('success', $message);
+    }
+
+    public function showCredentials(): View
+    {
+        $students = Student::whereNotNull('user_id')
+            ->whereHas('user', fn ($q) => $q->where('must_change_password', true))
+            ->with(['studyProgram', 'generation', 'user'])
+            ->orderBy('nim')
+            ->get();
+
+        $passwords = session('credentials.passwords', []);
+        $notificationService = app(NotificationService::class);
+
+        $students = $students->map(function (Student $student) use ($passwords, $notificationService) {
+            $student->temp_password = $passwords[$student->nim] ?? null;
+            $student->latest_email = $notificationService->latestAccountNotification($student);
+
+            return $student;
+        });
+
+        $totalStudents = cache()->remember('student-count-total', 300, fn () => Student::count());
+        $totalWithAccount = cache()->remember('student-count-with-account', 300, fn () => Student::whereNotNull('user_id')->count());
+        $totalWithoutAccount = cache()->remember('student-count-without-account', 300, fn () => Student::whereNull('user_id')->count());
+
+        return view('master.student.credentials', compact(
+            'students',
+            'passwords',
+            'totalStudents',
+            'totalWithAccount',
+            'totalWithoutAccount',
+        ));
+    }
+
+    public function exportCredentials(): BinaryFileResponse
+    {
+        $students = Student::whereNotNull('user_id')
+            ->whereHas('user', fn ($q) => $q->where('must_change_password', true))
+            ->with(['studyProgram', 'user'])
+            ->orderBy('nim')
+            ->get();
+
+        $passwords = session('credentials.passwords', []);
+
+        return (new CredentialsExport($students->all(), $passwords))
+            ->download('kredensial-'.now()->format('Ymdhis').'.xlsx');
+    }
+
+    public function resetPassword(Student $student): RedirectResponse
+    {
+        if (! $student->user_id) {
+            return redirect()->route('students.credentials')
+                ->with('error', 'Mahasiswa belum memiliki akun.');
+        }
+
+        [$user, $password] = $this->studentService->resetPassword($student);
+
+        $passwords = session('credentials.passwords', []);
+        $passwords[$student->nim] = $password;
+        session(['credentials.passwords' => $passwords]);
+
+        return redirect()->route('students.credentials')
+            ->with('success', "Password untuk {$student->name} ({$student->nim}) berhasil di-reset.");
+    }
+
+    public function resendEmail(Student $student): RedirectResponse
+    {
+        if (! $student->user_id) {
+            return redirect()->route('students.credentials')
+                ->with('error', 'Mahasiswa belum memiliki akun.');
+        }
+
+        $passwords = session('credentials.passwords', []);
+        $password = $passwords[$student->nim] ?? null;
+
+        if (! $password) {
+            return redirect()->route('students.credentials')
+                ->with('warning', "Password sementara untuk {$student->nim} tidak tersedia. Reset password terlebih dahulu.");
+        }
+
+        $sent = app(NotificationService::class)->resendStudentAccount($student, $password);
+
+        return redirect()->route('students.credentials')
+            ->with($sent ? 'success' : 'error', $sent
+                ? "Email kredensial untuk {$student->name} berhasil dikirim."
+                : 'Email gagal dikirim. Periksa konfigurasi SMTP atau coba lagi.');
+    }
+
+    public function resendAllFailed(): RedirectResponse
+    {
+        $passwords = session('credentials.passwords', []);
+
+        $students = Student::whereNotNull('user_id')
+            ->whereHas('user', fn ($q) => $q->where('must_change_password', true))
+            ->get()
+            ->filter(fn (Student $student) => array_key_exists($student->nim, $passwords));
+
+        if ($students->isEmpty()) {
+            return redirect()->route('students.credentials')
+                ->with('info', 'Tidak ada kredensial yang tersedia untuk dikirim ulang.');
+        }
+
+        $sent = 0;
+        $failed = 0;
+
+        foreach ($students as $student) {
+            $ok = app(NotificationService::class)->resendStudentAccount($student, $passwords[$student->nim]);
+            $ok ? $sent++ : $failed++;
+        }
+
+        return redirect()->route('students.credentials')
+            ->with($failed ? 'warning' : 'success', "{$sent} email berhasil dikirim ulang".($failed ? ", {$failed} gagal." : '.'));
+    }
+
+    public function destroyCredentials(): RedirectResponse
+    {
+        session()->forget('credentials.passwords');
+
+        return redirect()->route('students.credentials')
+            ->with('success', 'Data kredensial sementara berhasil dibersihkan.');
     }
 
     public function toggleStatus(Student $student): RedirectResponse

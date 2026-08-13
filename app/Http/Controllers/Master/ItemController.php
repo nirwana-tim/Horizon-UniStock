@@ -7,9 +7,7 @@ use App\Http\Requests\ItemRequest;
 use App\Models\Item;
 use App\Models\ItemCategory;
 use App\Models\ItemDepartment;
-use App\Models\ItemSize;
 use App\Models\ItemType;
-use App\Models\ItemVariant;
 use App\Services\Master\ItemService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -27,11 +25,11 @@ class ItemController extends Controller
         $query = Item::with(['category', 'variants.itemSize']);
 
         if ($search = $request->input('q')) {
-            $search = str_replace(['%', '_'], ['\%', '\_'], $search);
+            $search = $this->escapeLike($search);
             $query->where(function ($q) use ($search) {
                 $q->where('code', 'like', "%{$search}%")
-                  ->orWhere('name', 'like', "%{$search}%")
-                  ->orWhere('base_code', 'like', "%{$search}%");
+                    ->orWhere('name', 'like', "%{$search}%")
+                    ->orWhere('base_code', 'like', "%{$search}%");
             });
         }
 

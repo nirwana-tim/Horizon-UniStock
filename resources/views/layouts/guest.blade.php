@@ -8,6 +8,7 @@
     <title>{{ config('app.name', 'Horizon') }}</title>
     <meta name="description" content="Login to {{ config('app.name') }} — Student Uniform Distribution System">
     <meta name="theme-color" content="#980416">
+    <meta name="robots" content="noindex, nofollow">
 
     <!-- Favicon & Web App Manifest -->
     <link rel="icon" type="image/png" href="{{ asset('favicon/favicon-96x96.png') }}" sizes="96x96" />
@@ -20,6 +21,7 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
 
     <!-- Scripts & Styles -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -106,6 +108,8 @@
     </div>
 
 </div>
+
+@stack('scripts')
 
 </body>
 </html>

@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Auth;
 
 use App\Models\Student;
+use App\Models\User;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -59,6 +60,14 @@ class LoginRequest extends FormRequest
             }
         }
 
+        $user = User::where('email', $credentials['email'])->first();
+
+        if ($user && !$user->is_active) {
+            throw ValidationException::withMessages([
+                'email' => 'Akun Anda telah dinonaktifkan. Hubungi administrator.',
+            ]);
+        }
+
         if (! Auth::attempt($credentials, $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey());
 
@@ -84,13 +93,7 @@ class LoginRequest extends FormRequest
         event(new Lockout($this));
 
         $seconds = RateLimiter::availableIn($this->throttleKey());
-
-        throw ValidationException::withMessages([
-            'email' => trans('auth.throttle', [
-                'seconds' => $seconds,
-                'minutes' => ceil($seconds / 60),
-            ]),
-        ]);
+        $minutes = ceil($seconds / 60);
     }
 
     /**

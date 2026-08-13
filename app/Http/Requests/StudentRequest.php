@@ -24,7 +24,7 @@ class StudentRequest extends FormRequest
             'study_program_id' => ['required', 'integer', 'exists:study_programs,id'],
             'generation_id' => ['nullable', 'integer', 'exists:student_generations,id'],
             'student_level' => ['required', 'string', 'exists:student_levels,kode'],
-            'password' => ['nullable', 'string', 'min:8'],
+            'password' => ['nullable', 'string', 'min:8', 'confirmed'],
         ];
     }
 }

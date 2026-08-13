@@ -25,6 +25,7 @@ Alpine.data('serverTable', (url) => ({
     search: '',
     page: 1,
     perPage: 20,
+    facultyId: '',
     studyProgramId: '',
     generationId: '',
     isActive: '',
@@ -56,6 +57,7 @@ Alpine.data('serverTable', (url) => ({
         const params = { page: this.page };
         if (this.search) params.q = this.search;
         if (this.perPage && this.perPage !== 20) params.per_page = this.perPage;
+        if (this.facultyId) params.faculty_id = this.facultyId;
         if (this.studyProgramId) params.study_program_id = this.studyProgramId;
         if (this.generationId) params.generation_id = this.generationId;
         if (this.isActive) params.is_active = this.isActive;
@@ -383,14 +385,7 @@ document.addEventListener('alpine:init', () => {
         categoryId: '',
         itemId: '',
         items: [],
-        kpis: {
-            ktm: { sold: 0, stock: 0 },
-            uniform: { sold: 0, stock: 0 },
-            shoes: { sold: 0, stock: 0 },
-            kit: { sold: 0, stock: 0 },
-            tumbler: { sold: 0, stock: 0 },
-            grand_total: { sold: 0, stock: 0 }
-        },
+        kpis: {},
         charts: {
             c1: null, c2: null, c3: null,
             c4: null, c5: null, c6: null
@@ -444,6 +439,8 @@ document.addEventListener('alpine:init', () => {
             return 'Rp ' + num.toLocaleString('id-ID');
         },
         renderCharts(data) {
+            this.kpis = data.kpis || {};
+
             const primaryColor = '#980416';
             const greenColor = '#10B981';
             const blueColor = '#3B82F6';

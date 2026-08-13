@@ -23,10 +23,10 @@ class StudyProgramController extends Controller
         $query = StudyProgram::with('faculty')->withCount('students');
 
         if ($search = $request->input('q')) {
-            $search = str_replace(['%', '_'], ['\%', '\_'], $search);
+            $search = $this->escapeLike($search);
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('code', 'like', "%{$search}%");
+                    ->orWhere('code', 'like', "%{$search}%");
             });
         }
 

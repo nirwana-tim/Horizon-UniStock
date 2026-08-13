@@ -18,11 +18,11 @@ class SizeMonitorController extends Controller
             'changedByUser',
         ])
             ->when($request->input('q'), function ($query, $search) {
-                $search = str_replace(['%', '_'], ['\%', '\_'], $search);
+                $search = $this->escapeLike($search);
                 $query->where(function ($q) use ($search) {
                     $q->whereHas('sizeItem.sizeProfile.student', function ($sq) use ($search) {
                         $sq->where('name', 'like', "%{$search}%")
-                           ->orWhere('nim', 'like', "%{$search}%");
+                            ->orWhere('nim', 'like', "%{$search}%");
                     })->orWhereHas('sizeItem.item', function ($iq) use ($search) {
                         $iq->where('name', 'like', "%{$search}%");
                     });
@@ -34,6 +34,7 @@ class SizeMonitorController extends Controller
         if ($request->ajax()) {
             $html = view('distribution.size-monitor._table', compact('histories'))->render();
             $pagination = view('components.alpine-pagination', ['paginator' => $histories])->render();
+
             return response()->json(compact('html', 'pagination'));
         }
 

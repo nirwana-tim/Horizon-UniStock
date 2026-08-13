@@ -22,12 +22,12 @@ class VendorController extends Controller
         $query = Vendor::withCount('stockReceives');
 
         if ($search = $request->input('q')) {
-            $search = str_replace(['%', '_'], ['\%', '\_'], $search);
+            $search = $this->escapeLike($search);
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%")
-                  ->orWhere('contact', 'like', "%{$search}%")
-                  ->orWhere('phone', 'like', "%{$search}%");
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('contact', 'like', "%{$search}%")
+                    ->orWhere('phone', 'like', "%{$search}%");
             });
         }
 

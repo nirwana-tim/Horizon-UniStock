@@ -3,13 +3,14 @@
 namespace App\Exports;
 
 use App\Models\DistributionItem;
-use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\FromQuery;
+use Maatwebsite\Excel\Concerns\WithChunkReading;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class DistributionReportExport extends BaseExport implements FromCollection, WithHeadings, WithMapping, WithStyles
+class DistributionReportExport extends BaseExport implements FromQuery, WithHeadings, WithMapping, WithStyles, WithChunkReading
 {
     use \Maatwebsite\Excel\Concerns\Exportable;
 
@@ -19,7 +20,7 @@ class DistributionReportExport extends BaseExport implements FromCollection, Wit
         private ?string $period = null
     ) {}
 
-    public function collection()
+    public function query(): \Illuminate\Database\Eloquent\Builder
     {
         $query = DistributionItem::with('item', 'transaction.student', 'transaction.schedule')
             ->join('distribution_transactions', 'distribution_items.transaction_id', '=', 'distribution_transactions.id')
@@ -37,7 +38,12 @@ class DistributionReportExport extends BaseExport implements FromCollection, Wit
             });
         }
 
-        return $query->orderBy('distribution_transactions.created_at')->get();
+        return $query->orderBy('distribution_transactions.created_at')->orderBy('distribution_items.id');
+    }
+
+    public function chunkSize(): int
+    {
+        return 500;
     }
 
     public function headings(): array

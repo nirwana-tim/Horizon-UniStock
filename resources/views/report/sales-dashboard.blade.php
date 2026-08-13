@@ -47,134 +47,84 @@
             </div>
         </div>
 
-        {{-- Section 2: KPI Scorecards --}}
-        <div class="grid grid-cols-2 lg:grid-cols-6 gap-4">
-            <!-- Card 1: KTM -->
-            <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-4 relative overflow-hidden flex flex-col justify-between">
-                <div class="absolute top-0 left-0 right-0 h-1 bg-red-600"></div>
-                <div>
-                    <div class="flex justify-between items-start mb-2">
-                        <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">KTM</span>
-                        <span class="p-1 bg-red-50 text-red-700 rounded-md">
-                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.33 0 4 1 4 2v1H5v-1c0-1 2.67-2 4-2z" />
-                            </svg>
-                        </span>
-                    </div>
-                    <div class="text-2xl font-bold text-gray-900" x-text="kpis.ktm ? kpis.ktm.sold.toLocaleString('id-ID') : 0">0</div>
-                    <div class="text-xs text-gray-400 font-medium">Unit Sold</div>
-                </div>
-                <div class="mt-4 pt-2 border-t border-gray-100 flex justify-between items-center text-xs">
-                    <span class="text-gray-500">Stock Avail:</span>
-                    <span class="font-bold text-gray-800" x-text="kpis.ktm ? kpis.ktm.stock.toLocaleString('id-ID') : 0">0</span>
-                </div>
+        {{-- Section 2: KPI Stat Strip --}}
+        <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+            <div class="px-4 py-2.5 border-b border-gray-100 flex items-center gap-2">
+                <svg class="w-4 h-4 text-primary-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 002 2h2a2 2 0 002-2z" />
+                </svg>
+                <h3 class="text-xs font-semibold text-gray-800 uppercase tracking-wider">Ringkasan Kategori</h3>
             </div>
-
-            <!-- Card 2: UNIFORM -->
-            <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-4 relative overflow-hidden flex flex-col justify-between">
-                <div class="absolute top-0 left-0 right-0 h-1 bg-primary-700"></div>
-                <div>
-                    <div class="flex justify-between items-start mb-2">
-                        <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Uniform</span>
-                        <span class="p-1 bg-red-50 text-primary-700 rounded-md">
-                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                            </svg>
-                        </span>
+            <div class="flex overflow-x-auto divide-x divide-gray-100">
+                <div class="sticky left-0 z-10 flex-shrink-0 px-4 py-3 min-w-[110px] bg-primary-50 border-r border-gray-200 shadow-[4px_0_10px_-4px_rgba(0,0,0,0.08)]">
+                    <div class="text-[11px] font-semibold text-primary-800 uppercase tracking-wide mb-1">Grand Total</div>
+                    <div class="text-lg font-bold text-primary-900 leading-tight" x-text="kpis.grand_total ? kpis.grand_total.sold.toLocaleString('id-ID') : 0">0</div>
+                    <div class="text-[10px] text-primary-700">
+                        Stok: <span class="font-medium" x-text="kpis.grand_total ? kpis.grand_total.stock.toLocaleString('id-ID') : 0">0</span>
                     </div>
-                    <div class="text-2xl font-bold text-gray-900" x-text="kpis.uniform ? kpis.uniform.sold.toLocaleString('id-ID') : 0">0</div>
-                    <div class="text-xs text-gray-400 font-medium">Unit Sold</div>
                 </div>
-                <div class="mt-4 pt-2 border-t border-gray-100 flex justify-between items-center text-xs">
-                    <span class="text-gray-500">Stock Avail:</span>
-                    <span class="font-bold text-gray-800" x-text="kpis.uniform ? kpis.uniform.stock.toLocaleString('id-ID') : 0">0</span>
-                </div>
-            </div>
-
-            <!-- Card 3: SHOES -->
-            <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-4 relative overflow-hidden flex flex-col justify-between">
-                <div class="absolute top-0 left-0 right-0 h-1 bg-emerald-600"></div>
-                <div>
-                    <div class="flex justify-between items-start mb-2">
-                        <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Shoes</span>
-                        <span class="p-1 bg-emerald-50 text-emerald-700 rounded-md">
-                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                            </svg>
-                        </span>
+                @foreach($categories as $cat)
+                    @php $code = strtolower($cat->code); @endphp
+                    <div class="flex-shrink-0 px-4 py-3 min-w-[96px] hover:bg-gray-50 transition-colors">
+                        <div class="text-[11px] font-semibold text-gray-600 uppercase tracking-wide mb-1">{{ $cat->code }}</div>
+                        <div class="text-lg font-bold text-primary-700 leading-tight" x-text="kpis['{{ $code }}'] ? kpis['{{ $code }}'].sold.toLocaleString('id-ID') : 0">0</div>
+                        <div class="text-[10px] text-gray-400">
+                            Stok: <span class="font-medium text-gray-500" x-text="kpis['{{ $code }}'] ? kpis['{{ $code }}'].stock.toLocaleString('id-ID') : 0">0</span>
+                        </div>
                     </div>
-                    <div class="text-2xl font-bold text-gray-900" x-text="kpis.shoes ? kpis.shoes.sold.toLocaleString('id-ID') : 0">0</div>
-                    <div class="text-xs text-gray-400 font-medium">Unit Sold</div>
-                </div>
-                <div class="mt-4 pt-2 border-t border-gray-100 flex justify-between items-center text-xs">
-                    <span class="text-gray-500">Stock Avail:</span>
-                    <span class="font-bold text-gray-800" x-text="kpis.shoes ? kpis.shoes.stock.toLocaleString('id-ID') : 0">0</span>
-                </div>
-            </div>
-
-            <!-- Card 4: KIT -->
-            <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-4 relative overflow-hidden flex flex-col justify-between">
-                <div class="absolute top-0 left-0 right-0 h-1 bg-amber-500"></div>
-                <div>
-                    <div class="flex justify-between items-start mb-2">
-                        <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Kit</span>
-                        <span class="p-1 bg-amber-50 text-amber-700 rounded-md">
-                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10" />
-                            </svg>
-                        </span>
-                    </div>
-                    <div class="text-2xl font-bold text-gray-900" x-text="kpis.kit ? kpis.kit.sold.toLocaleString('id-ID') : 0">0</div>
-                    <div class="text-xs text-gray-400 font-medium">Unit Sold</div>
-                </div>
-                <div class="mt-4 pt-2 border-t border-gray-100 flex justify-between items-center text-xs">
-                    <span class="text-gray-500">Stock Avail:</span>
-                    <span class="font-bold text-gray-800" x-text="kpis.kit ? kpis.kit.stock.toLocaleString('id-ID') : 0">0</span>
-                </div>
-            </div>
-
-            <!-- Card 5: TUMBLER -->
-            <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-4 relative overflow-hidden flex flex-col justify-between">
-                <div class="absolute top-0 left-0 right-0 h-1 bg-indigo-600"></div>
-                <div>
-                    <div class="flex justify-between items-start mb-2">
-                        <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Tumbler</span>
-                        <span class="p-1 bg-indigo-50 text-indigo-700 rounded-md">
-                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-                            </svg>
-                        </span>
-                    </div>
-                    <div class="text-2xl font-bold text-gray-900" x-text="kpis.tumbler ? kpis.tumbler.sold.toLocaleString('id-ID') : 0">0</div>
-                    <div class="text-xs text-gray-400 font-medium">Unit Sold</div>
-                </div>
-                <div class="mt-4 pt-2 border-t border-gray-100 flex justify-between items-center text-xs">
-                    <span class="text-gray-500">Stock Avail:</span>
-                    <span class="font-bold text-gray-800" x-text="kpis.tumbler ? kpis.tumbler.stock.toLocaleString('id-ID') : 0">0</span>
-                </div>
-            </div>
-
-            <!-- Card 6: GRAND TOTAL -->
-            <div class="bg-amber-100 rounded-xl border border-amber-200 shadow-sm p-4 relative overflow-hidden flex flex-col justify-between">
-                <div class="absolute top-0 left-0 right-0 h-1 bg-amber-600"></div>
-                <div>
-                    <div class="flex justify-between items-start mb-2">
-                        <span class="text-xs font-semibold text-amber-800 uppercase tracking-wider">Grand Total</span>
-                        <span class="p-1 bg-amber-200 text-amber-900 rounded-md">
-                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 002 2h2a2 2 0 002-2z" />
-                            </svg>
-                        </span>
-                    </div>
-                    <div class="text-2xl font-bold text-amber-950" x-text="kpis.grand_total ? kpis.grand_total.sold.toLocaleString('id-ID') : 0">0</div>
-                    <div class="text-xs text-amber-700 font-medium">Total Sold</div>
-                </div>
-                <div class="mt-4 pt-2 border-t border-amber-200 flex justify-between items-center text-xs">
-                    <span class="text-amber-800 font-semibold">Total Stock:</span>
-                    <span class="font-bold text-amber-950" x-text="kpis.grand_total ? kpis.grand_total.stock.toLocaleString('id-ID') : 0">0</span>
-                </div>
+                @endforeach
             </div>
         </div>
+
+        {{-- Section 2.5: Stock Alerts --}}
+        @if($lowStockItems->isNotEmpty() || $outOfStockItems->isNotEmpty())
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                <div class="px-4 py-2.5 border-b border-gray-100 flex items-center gap-2">
+                    <svg class="w-4 h-4 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                    <h3 class="text-xs font-semibold text-gray-800 uppercase tracking-wider">Peringatan Stok</h3>
+                    <x-badge type="warning">{{ $lowStockItems->count() }} stok rendah</x-badge>
+                    <x-badge type="danger">{{ $outOfStockItems->count() }} habis</x-badge>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kategori</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Varian</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stok</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Min. Stok</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-100">
+                            @foreach($outOfStockItems as $balance)
+                                <tr>
+                                    <td class="px-4 py-2 text-sm text-gray-800">{{ $balance->item->name }}</td>
+                                    <td class="px-4 py-2 text-sm text-gray-500">{{ $balance->item->category?->label ?? '-' }}</td>
+                                    <td class="px-4 py-2 text-sm text-gray-500">{{ $balance->variant?->size_label ?? '-' }}</td>
+                                    <td class="px-4 py-2 text-sm font-semibold text-red-600">{{ $balance->quantity }}</td>
+                                    <td class="px-4 py-2 text-sm text-gray-500">{{ $balance->item->min_stock ?? '-' }}</td>
+                                    <td class="px-4 py-2"><x-badge type="danger">Habis</x-badge></td>
+                                </tr>
+                            @endforeach
+                            @foreach($lowStockItems as $balance)
+                                <tr>
+                                    <td class="px-4 py-2 text-sm text-gray-800">{{ $balance->item->name }}</td>
+                                    <td class="px-4 py-2 text-sm text-gray-500">{{ $balance->item->category?->label ?? '-' }}</td>
+                                    <td class="px-4 py-2 text-sm text-gray-500">{{ $balance->variant?->size_label ?? '-' }}</td>
+                                    <td class="px-4 py-2 text-sm font-semibold text-amber-600">{{ $balance->quantity }}</td>
+                                    <td class="px-4 py-2 text-sm text-gray-500">{{ $balance->item->min_stock ?? 5 }}</td>
+                                    <td class="px-4 py-2"><x-badge type="warning">Stok Rendah</x-badge></td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        @endif
 
         {{-- Section 3: Visualisasi Grafik --}}
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

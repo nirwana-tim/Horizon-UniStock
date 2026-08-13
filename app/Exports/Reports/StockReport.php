@@ -4,13 +4,15 @@ namespace App\Exports\Reports;
 
 use App\Exports\BaseExport;
 use App\Models\StockBalance;
-use Maatwebsite\Excel\Concerns\FromCollection;
+use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Concerns\FromQuery;
+use Maatwebsite\Excel\Concerns\WithChunkReading;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class StockReport extends BaseExport implements FromCollection, WithHeadings, WithMapping, WithStyles
+class StockReport extends BaseExport implements FromQuery, WithHeadings, WithMapping, WithStyles, WithChunkReading
 {
     use \Maatwebsite\Excel\Concerns\Exportable;
 
@@ -22,12 +24,26 @@ class StockReport extends BaseExport implements FromCollection, WithHeadings, Wi
         private ?string $gender = null
     ) {}
 
-    public function collection()
+    public function query(): \Illuminate\Database\Eloquent\Builder
     {
+        $movementTotals = DB::table('stock_movements')
+            ->select(
+                'item_id',
+                'variant_id',
+                DB::raw('COALESCE(SUM(CASE WHEN type = "IN" THEN quantity ELSE 0 END), 0) as total_in'),
+                DB::raw('COALESCE(SUM(CASE WHEN type = "OUT" THEN quantity ELSE 0 END), 0) as total_out')
+            )
+            ->whereNull('deleted_at')
+            ->groupBy('item_id', 'variant_id');
+
         $query = StockBalance::with('item.category', 'item.variants', 'variant')
             ->join('items', 'stock_balances.item_id', '=', 'items.id')
             ->leftJoin('item_variants', 'stock_balances.variant_id', '=', 'item_variants.id')
             ->leftJoin('item_categories', 'items.category_id', '=', 'item_categories.id')
+            ->leftJoinSub($movementTotals, 'mv', function ($join) {
+                $join->on('stock_balances.item_id', '=', 'mv.item_id')
+                    ->on('stock_balances.variant_id', '=', 'mv.variant_id');
+            })
             ->select(
                 'stock_balances.*',
                 'items.name as item_name',
@@ -37,16 +53,24 @@ class StockReport extends BaseExport implements FromCollection, WithHeadings, Wi
                 'items.gender',
                 'item_categories.label as category_name',
                 'item_categories.code as category_code',
-                'item_variants.size as variant_size'
+                'item_variants.size as variant_size',
+                'mv.total_in',
+                'mv.total_out'
             )
             ->orderBy('item_categories.code')
-            ->orderBy('items.name');
+            ->orderBy('items.name')
+            ->orderBy('stock_balances.id');
 
         if ($this->category) {
             $query->where('item_categories.code', $this->category);
         }
 
-        return $query->get();
+        return $query;
+    }
+
+    public function chunkSize(): int
+    {
+        return 500;
     }
 
     public function headings(): array
@@ -69,12 +93,8 @@ class StockReport extends BaseExport implements FromCollection, WithHeadings, Wi
     public function map($balance): array
     {
         $this->row++;
-        $totalIn = $balance->item->stockMovements()
-            ->where('variant_id', $balance->variant_id)
-            ->where('type', 'IN')->sum('quantity');
-        $totalOut = $balance->item->stockMovements()
-            ->where('variant_id', $balance->variant_id)
-            ->where('type', 'OUT')->sum('quantity');
+        $totalIn = $balance->total_in ?? 0;
+        $totalOut = $balance->total_out ?? 0;
 
         return [
             $this->row,

@@ -7,10 +7,10 @@
         <td class="px-6 py-4 whitespace-nowrap">
             @if($batch->status === 'draft')
                 <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">Draft</span>
-            @elseif($batch->status === 'completed')
-                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">Completed</span>
-            @elseif($batch->status === 'adjusted')
-                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Adjusted</span>
+            @elseif($batch->status === 'counted')
+                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">Counted</span>
+            @elseif($batch->status === 'approved')
+                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Approved</span>
             @else
                 <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">{{ $batch->status }}</span>
             @endif

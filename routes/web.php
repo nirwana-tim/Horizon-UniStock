@@ -1,40 +1,40 @@
 <?php
 
-use App\Http\Controllers\Finance\StockOpnameController;
-use App\Http\Controllers\Finance\GpmController;
+use App\Http\Controllers\Auth\EmailVerificationOtpController;
+use App\Http\Controllers\Auth\PasswordChangeController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Finance\EligibilityController;
+use App\Http\Controllers\Finance\GpmController;
 use App\Http\Controllers\Finance\SizeChangeEventController;
+use App\Http\Controllers\Finance\StockOpnameController;
+use App\Http\Controllers\ImportController;
+use App\Http\Controllers\Inventory\StockBalanceController;
+use App\Http\Controllers\Inventory\StockMovementController;
 use App\Http\Controllers\Master\DistributionScheduleController;
 use App\Http\Controllers\Master\EntitlementController;
 use App\Http\Controllers\Master\FacultyController;
 use App\Http\Controllers\Master\ItemCategoryController;
 use App\Http\Controllers\Master\ItemController;
-use App\Http\Controllers\Master\ItemPriceController;
 use App\Http\Controllers\Master\ItemDepartmentController;
+use App\Http\Controllers\Master\ItemPriceController;
 use App\Http\Controllers\Master\ItemSizeController;
 use App\Http\Controllers\Master\ItemTypeController;
 use App\Http\Controllers\Master\ItemVariantController;
-use App\Http\Controllers\Master\StudentGenerationController;
-use App\Http\Controllers\Master\StudyProgramController;
-use App\Http\Controllers\Master\StockReceiveController;
-use App\Http\Controllers\Inventory\StockBalanceController;
-use App\Http\Controllers\Inventory\StockMovementController;
-use App\Http\Controllers\Master\VendorController;
-use App\Http\Controllers\Master\StudentLevelController;
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\ImportController;
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\Profile\EmailController as ProfileEmailController;
-use App\Http\Controllers\ReportController;
-use App\Http\Controllers\TemplateController;
-use App\Http\Controllers\Auth\EmailVerificationOtpController;
-use App\Http\Controllers\Auth\ForgotPasswordStudentController;
-use App\Http\Controllers\Auth\PasswordChangeController;
-use App\Http\Controllers\Master\StudentController;
 use App\Http\Controllers\Master\SizeMonitorController;
+use App\Http\Controllers\Master\StockReceiveController;
+use App\Http\Controllers\Master\StudentController;
+use App\Http\Controllers\Master\StudentGenerationController;
+use App\Http\Controllers\Master\StudentLevelController;
+use App\Http\Controllers\Master\StudyProgramController;
+use App\Http\Controllers\Master\VendorController;
+use App\Http\Controllers\Profile\EmailController as ProfileEmailController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\Staff\ScanController;
 use App\Http\Controllers\Student\SizeController;
-use Illuminate\Http\Request;
+use App\Http\Controllers\System\SmtpSettingController;
+use App\Http\Controllers\System\UserController;
+use App\Http\Controllers\TemplateController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -77,8 +77,6 @@ Route::middleware(['auth', 'password.changed', 'role:super_admin|admin', 'thrott
     Route::resource('item-price', ItemPriceController::class);
     Route::resource('student-level', StudentLevelController::class)->only(['index', 'show']);
 });
-
-
 
 Route::middleware(['auth', 'password.changed', 'role:super_admin|admin', 'throttle:30,1'])->prefix('distribution')->name('distribution.')->group(function () {
     Route::get('entitlement/items-grid', [EntitlementController::class, 'itemsGrid'])->name('entitlement.items-grid');
@@ -158,6 +156,12 @@ Route::middleware(['auth', 'password.changed', 'role:super_admin|admin', 'thrott
     Route::get('/export', [StudentController::class, 'export'])->name('export');
     Route::get('/promote', [StudentController::class, 'promoteForm'])->name('promote.form');
     Route::post('/promote', [StudentController::class, 'promote'])->name('promote');
+    Route::get('/credentials', [StudentController::class, 'showCredentials'])->name('credentials');
+    Route::get('/credentials/export', [StudentController::class, 'exportCredentials'])->name('credentials.export');
+    Route::post('/credentials/{student}/reset-password', [StudentController::class, 'resetPassword'])->name('credentials.reset-password');
+    Route::post('/credentials/{student}/resend-email', [StudentController::class, 'resendEmail'])->name('credentials.resend-email');
+    Route::post('/credentials/resend-all-failed', [StudentController::class, 'resendAllFailed'])->name('credentials.resend-all-failed');
+    Route::post('/credentials/destroy', [StudentController::class, 'destroyCredentials'])->name('credentials.destroy');
 });
 
 Route::middleware(['auth', 'password.changed', 'role:student'])->prefix('student')->name('student.')->group(function () {
@@ -176,7 +180,21 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/password/change', [PasswordChangeController::class, 'store'])->middleware('throttle:5,1')->name('password.change.store');
 });
 
-Route::get('/forgot-password/student', [ForgotPasswordStudentController::class, 'create'])->name('password.student.forgot');
-Route::post('/forgot-password/student/reset', [ForgotPasswordStudentController::class, 'sendResetLink'])->middleware('throttle:3,1')->name('password.student.send-reset');
+Route::middleware(['auth', 'password.changed', 'role:super_admin'])->prefix('system')->name('system.')->group(function () {
+    Route::get('/smtp', [SmtpSettingController::class, 'show'])->name('smtp.show');
+    Route::put('/smtp', [SmtpSettingController::class, 'store'])->name('smtp.store');
+    Route::post('/smtp/test', [SmtpSettingController::class, 'test'])->middleware('throttle:5,1')->name('smtp.test');
+    Route::post('/smtp/verify', [SmtpSettingController::class, 'verify'])->middleware('throttle:10,1')->name('smtp.verify');
+});
+
+Route::middleware(['auth', 'password.changed', 'role:super_admin|admin', 'throttle:30,1'])
+    ->prefix('admin/users')->name('admin.user.')->group(function () {
+        Route::get('/', [UserController::class, 'index'])->name('index');
+        Route::get('/create', [UserController::class, 'create'])->name('create');
+        Route::post('/', [UserController::class, 'store'])->name('store');
+        Route::get('/{user}/edit', [UserController::class, 'edit'])->name('edit');
+        Route::put('/{user}', [UserController::class, 'update'])->name('update');
+        Route::put('/{user}/active', [UserController::class, 'toggleActive'])->name('active');
+    });
 
 require __DIR__.'/auth.php';

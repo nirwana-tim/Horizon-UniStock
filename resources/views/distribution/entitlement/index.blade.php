@@ -32,6 +32,13 @@
                                    @input.debounce.300ms="page=1; fetchData()"
                                    placeholder="Search..."
                                    class="w-72 border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500 text-sm">
+                            <select x-model="facultyId" @change="page=1; fetchData()"
+                                class="w-56 border-gray-300 rounded-md shadow-sm text-sm focus:border-primary-500 focus:ring-primary-500">
+                                <option value="">All Faculties</option>
+                                @foreach($faculties as $faculty)
+                                    <option value="{{ $faculty->id }}">{{ $faculty->name }} ({{ $faculty->code }})</option>
+                                @endforeach
+                            </select>
                             <select x-model="isActive" @change="page=1; fetchData()"
                                 class="w-40 border-gray-300 rounded-md shadow-sm text-sm focus:border-primary-500 focus:ring-primary-500">
                                 <option value="">All Status</option>

@@ -60,7 +60,8 @@ class DistributionScheduleController extends Controller
             $studyProgramId,
             $request->integer('faculty_id') ?: null,
             $request->input('student_level'),
-            $checkedIds
+            $checkedIds,
+            $request->input('search')
         );
 
         $html = view('distribution.distribution-schedule._items', compact('items', 'checkedIds'))->render();
@@ -87,8 +88,8 @@ class DistributionScheduleController extends Controller
         $query = $distributionSchedule->transactions()->with('student', 'items.item');
 
         if ($search = $request->input('q')) {
-            $search = str_replace(['%', '_'], ['\%', '\_'], $search);
-            $query->whereHas('student', fn($q) => $q->where('name', 'like', "%{$search}%")->orWhere('nim', 'like', "%{$search}%"));
+            $search = $this->escapeLike($search);
+            $query->whereHas('student', fn ($q) => $q->where('name', 'like', "%{$search}%")->orWhere('nim', 'like', "%{$search}%"));
         }
 
         $transactions = $query->latest('pickup_time')->paginate(20);

@@ -16,6 +16,9 @@
                                 description="Are you sure you want to delete this price data? This action cannot be undone."
                                 :iconOnly="true"
                             />
+                            <button wire:click="$dispatch('open-modal', 'item-price-edit', {{$itemPrice->id}})" class="inline-flex items-center justify-center p-1.5 text-primary-600 hover:text-primary-800 hover:bg-primary-50 rounded-lg transition-colors" title="Edit Harga">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7m-7 4h6m0 0H5m4 4h6m0 0l2-2l2 2m-6-8l2 2L5 14"/></svg>
+                            </button>
                         </td>
                     </tr>
                 @empty

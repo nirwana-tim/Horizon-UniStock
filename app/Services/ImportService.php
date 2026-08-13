@@ -19,20 +19,20 @@ class ImportService
 {
     public function processImport(string $type, string $filePath, int $userId, ?int $stockOpnameId = null): ImportBatch
     {
+        $batch = null;
         $totalRows = 0;
-        $importer = null;
-
-        $batch = ImportBatch::create([
-            'import_type' => $type,
-            'file_name' => basename($filePath),
-            'total_rows' => 0,
-            'success_rows' => 0,
-            'failed_rows' => 0,
-            'status' => 'processing',
-            'imported_by' => $userId,
-        ]);
 
         try {
+            $batch = ImportBatch::create([
+                'import_type' => $type,
+                'file_name' => basename($filePath),
+                'total_rows' => 0,
+                'success_rows' => 0,
+                'failed_rows' => 0,
+                'status' => 'processing',
+                'imported_by' => $userId,
+            ]);
+
             $importer = $this->resolveImporter($type, $filePath, $stockOpnameId, $userId);
 
             $collection = Excel::toCollection(null, $filePath)->first() ?? collect();
@@ -53,6 +53,8 @@ class ImportService
                 'total_rows' => method_exists($importer, 'getTotalRows') ? $importer->getTotalRows() : $totalRows,
                 'success_rows' => $successRows,
             ]);
+
+            return $batch->fresh();
         } catch (ValidationException $e) {
             $failures = $e->failures();
             $errorLog = collect($failures)->map(fn ($f) => [
@@ -72,16 +74,20 @@ class ImportService
             ]);
 
             Log::error("Import {$type} failed", ['batch_id' => $batch->id, 'errors' => $errorLog]);
+
+            return $batch->fresh();
         } catch (\Exception $e) {
-            $batch->update([
-                'status' => 'failed',
-                'error_log' => ['message' => $e->getMessage()],
-            ]);
+            if ($batch) {
+                $batch->update([
+                    'status' => 'failed',
+                    'error_log' => ['message' => $e->getMessage()],
+                ]);
+            }
 
-            Log::error("Import {$type} exception", ['batch_id' => $batch->id, 'exception' => $e->getMessage()]);
+            Log::error("Import {$type} exception", ['exception' => $e->getMessage()]);
+
+            throw $e;
         }
-
-        return $batch->fresh();
     }
 
     protected function resolveImporter(string $type, string $filePath, ?int $stockOpnameId = null, ?int $userId = null): object

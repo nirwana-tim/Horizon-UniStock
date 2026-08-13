@@ -152,11 +152,7 @@
             @else
                 <a href="{{ route('login') }}"
                    class="w-full sm:w-auto px-8 py-3.5 bg-white text-primary-700 text-sm font-bold rounded-xl hover:bg-primary-50 transition-colors shadow-lg">
-                    Student Login
-                </a>
-                <a href="{{ route('login') }}"
-                   class="w-full sm:w-auto px-8 py-3.5 glass-card text-white text-sm font-medium rounded-xl hover:bg-white/15 transition-all">
-                    Login Staff / Admin
+                    Masuk
                 </a>
             @endauth
         </div>
@@ -167,7 +163,7 @@
         @foreach([
             ['value' => '< 5 min', 'label' => 'Per student'],
             ['value' => 'Real-time', 'label' => 'Stock tracking'],
-            ['value' => '4 Roles', 'label' => 'Managed access'],
+            ['value' => '1 System', 'label' => 'All-in-one flow'],
         ] as $stat)
         <div class="glass-card rounded-xl p-5 text-center">
             <p class="text-xl font-bold text-white">{{ $stat['value'] }}</p>
@@ -197,7 +193,7 @@
                 @foreach([
                     ['step' => '1', 'icon' => 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z', 'title' => 'Input Size', 'desc' => 'Students fill in uniform & shoes size profile independently'],
                     ['step' => '2', 'icon' => 'M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8H3a2 2 0 00-2 2v8a2 2 0 002 2h14a2 2 0 002-2v-8a2 2 0 00-2-2h-2', 'title' => 'Generate QR', 'desc' => 'System auto-generates permanent identity QR after data is complete'],
-                    ['step' => '3', 'icon' => 'M15 10l4.553-2.069A1 1 0 0121 8.816V15.18a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z', 'title' => 'Scan & Verify', 'desc' => 'Staff scans student QR, verifies eligibility & item checklist'],
+                    ['step' => '3', 'icon' => 'M15 10l4.553-2.069A1 1 0 0121 8.816V15.18a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z', 'title' => 'Scan & Verify', 'desc' => 'Scan your QR to verify eligibility and the item checklist'],
                     ['step' => '4', 'icon' => 'M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z', 'title' => 'Receive Uniform', 'desc' => 'Transaction recorded, stock auto-reduced, reports ready to export'],
                 ] as $item)
                 <div class="flex flex-col items-center text-center">
@@ -274,7 +270,7 @@
     <div class="absolute inset-0 hero-pattern opacity-50"></div>
     <div class="max-w-2xl mx-auto text-center relative z-10">
         <h2 class="text-2xl font-bold text-white mb-3">Ready to Start?</h2>
-        <p class="text-primary-200 text-sm mb-8">Sign in according to your role</p>
+        <p class="text-primary-200 text-sm mb-8">Masuk untuk melanjutkan</p>
         <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
             @auth
                 <a href="{{ url('/dashboard') }}"
@@ -284,7 +280,7 @@
             @else
                 <a href="{{ route('login') }}"
                    class="w-full sm:w-auto px-8 py-3 bg-white text-primary-700 text-sm font-bold rounded-xl hover:bg-primary-50 transition-colors">
-                    Login Now
+                    Masuk
                 </a>
             @endauth
         </div>

@@ -26,13 +26,24 @@ class ReportController extends Controller
 {
     public function index(): View
     {
-        $periods = DistributionSchedule::select('period')->whereNotNull('period')->groupBy('period')->orderBy('period', 'desc')->pluck('period', 'period');
-        $stockOpnames = StockOpname::orderBy('created_at', 'desc')->pluck('period', 'id');
-        $items = Item::orderBy('name', 'asc')->pluck('code', 'code');
-        $categories = ItemCategory::orderBy('code', 'asc')->get(['code', 'label']);
-        
-        $generations = StudentGeneration::orderBy('name', 'asc')->get();
-        $studyPrograms = StudyProgram::orderBy('name', 'asc')->get();
+        $periods = cache()->remember('report-periods', 3600, fn () =>
+            DistributionSchedule::select('period')->whereNotNull('period')->groupBy('period')->orderBy('period', 'desc')->pluck('period', 'period')
+        );
+        $stockOpnames = cache()->remember('report-stock-opnames', 3600, fn () =>
+            StockOpname::orderBy('created_at', 'desc')->pluck('period', 'id')
+        );
+        $items = cache()->remember('report-items', 3600, fn () =>
+            Item::orderBy('name', 'asc')->pluck('code', 'code')
+        );
+        $categories = cache()->remember('report-categories', 3600, fn () =>
+            ItemCategory::orderBy('code', 'asc')->get(['code', 'label'])
+        );
+        $generations = cache()->remember('report-generations', 3600, fn () =>
+            StudentGeneration::orderBy('name', 'asc')->get()
+        );
+        $studyPrograms = cache()->remember('report-study-programs', 3600, fn () =>
+            StudyProgram::orderBy('name', 'asc')->get()
+        );
 
         return view('report.index', compact('periods', 'stockOpnames', 'items', 'categories', 'generations', 'studyPrograms'));
     }
@@ -159,9 +170,21 @@ class ReportController extends Controller
         $defaultStart = $minDate ? \Carbon\Carbon::parse($minDate)->toDateString() : now()->startOfMonth()->toDateString();
         $defaultEnd = $maxDate ? \Carbon\Carbon::parse($maxDate)->toDateString() : now()->toDateString();
 
-        $categories = ItemCategory::orderBy('code', 'asc')->get(['id', 'code', 'label']);
+        $categories = cache()->remember('report-categories-options', 3600, fn () =>
+            ItemCategory::orderBy('code', 'asc')->get(['id', 'code', 'label'])
+        );
 
-        return view('report.sales-dashboard', compact('defaultStart', 'defaultEnd', 'categories'));
+        $stockService = app(\App\Services\StockService::class);
+        $lowStockItems = $stockService->getLowStockItems();
+        $outOfStockItems = $stockService->getOutOfStockItems();
+
+        return view('report.sales-dashboard', compact(
+            'defaultStart',
+            'defaultEnd',
+            'categories',
+            'lowStockItems',
+            'outOfStockItems'
+        ));
     }
 
     public function distributionRecap(Request $request): View|JsonResponse
@@ -176,8 +199,12 @@ class ReportController extends Controller
             return response()->json(compact('html'));
         }
 
-        $periods = DistributionSchedule::select('period')->whereNotNull('period')->groupBy('period')->orderBy('period', 'desc')->pluck('period', 'period');
-        $studyPrograms = StudyProgram::orderBy('name', 'asc')->get();
+        $periods = cache()->remember('report-periods', 3600, fn () =>
+            DistributionSchedule::select('period')->whereNotNull('period')->groupBy('period')->orderBy('period', 'desc')->pluck('period', 'period')
+        );
+        $studyPrograms = cache()->remember('report-study-programs', 3600, fn () =>
+            StudyProgram::orderBy('name', 'asc')->get()
+        );
 
         return view('report.distribution-recap', compact('data', 'periods', 'studyPrograms', 'period', 'studyProgramId'));
     }

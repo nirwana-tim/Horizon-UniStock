@@ -113,9 +113,9 @@ class EmailController extends Controller
                 ->withErrors(['error' => 'Sesi tidak valid. Silakan mulai ulang.']);
         }
 
-        $attempts = (int) session('otp_attempts', 0);
+        $attempts = (int) session('otp_attempts_change', 0);
         if ($attempts >= 5) {
-            session()->forget(['pending_email_pribadi', 'otp_attempts']);
+            session()->forget(['pending_email_pribadi', 'otp_attempts_change']);
             OtpCode::where('user_id', $user->id)->whereNull('used_at')->update(['used_at' => now()]);
             return redirect()->route('profile.email.change')
                 ->withErrors(['error' => 'Terlalu banyak percobaan. Silakan kirim ulang OTP.']);
@@ -131,12 +131,12 @@ class EmailController extends Controller
             ->first();
 
         if (!$otp) {
-            session(['otp_attempts' => $attempts + 1]);
+            session(['otp_attempts_change' => $attempts + 1]);
             return back()->withErrors(['code' => 'Kode OTP tidak valid atau sudah kedaluwarsa.']);
         }
 
         $otp->update(['used_at' => now()]);
-        session()->forget(['pending_email_pribadi', 'otp_attempts']);
+        session()->forget(['pending_email_pribadi', 'otp_attempts_change']);
 
         $oldEmail = $student->email_pribadi;
 

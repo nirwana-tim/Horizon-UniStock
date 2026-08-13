@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#980416">
+    <meta name="robots" content="noindex, nofollow">
     <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
 
     <title><?php echo e(isset($title) ? $title . ' — ' : ''); ?><?php echo e(config('app.name', 'Horizon')); ?></title>

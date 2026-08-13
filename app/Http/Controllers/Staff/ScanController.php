@@ -97,11 +97,11 @@ class ScanController extends Controller
         $request->merge(['items' => $items]);
 
         $request->validate([
-            'student_id' => 'required|integer',
-            'schedule_id' => 'required|integer',
+            'student_id' => 'required|integer|exists:students,id',
+            'schedule_id' => 'required|integer|exists:distribution_schedules,id',
             'notes' => 'nullable|string|max:1000',
             'items' => 'required|array|min:1',
-            'items.*.item_id' => 'required|integer',
+            'items.*.item_id' => 'required|integer|exists:items,id',
             'items.*.actual_size' => 'required|string|max:10',
             'items.*.expected_size' => 'nullable|string|max:10',
             'items.*.quantity' => 'required|integer|min:1',

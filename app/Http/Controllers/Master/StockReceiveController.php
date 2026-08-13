@@ -24,11 +24,11 @@ class StockReceiveController extends Controller
         $query = StockReceive::with('vendor', 'items');
 
         if ($search = $request->input('q')) {
-            $search = str_replace(['%', '_'], ['\%', '\_'], $search);
+            $search = $this->escapeLike($search);
             $query->where(function ($q) use ($search) {
                 $q->where('reference_number', 'like', "%{$search}%")
-                  ->orWhereRelation('vendor', 'name', 'like', "%{$search}%")
-                  ->orWhere('notes', 'like', "%{$search}%");
+                    ->orWhereRelation('vendor', 'name', 'like', "%{$search}%")
+                    ->orWhere('notes', 'like', "%{$search}%");
             });
         }
 
@@ -60,7 +60,7 @@ class StockReceiveController extends Controller
             ->orderBy('base_code');
 
         if ($q = $request->input('q')) {
-            $q = str_replace(['%', '_'], ['\%', '\_'], $q);
+            $q = $this->escapeLike($q);
             $query->where(function ($qry) use ($q) {
                 $qry->where('name', 'like', "%{$q}%")
                     ->orWhere('base_code', 'like', "%{$q}%");
@@ -69,7 +69,7 @@ class StockReceiveController extends Controller
 
         $items = $query->limit(20)->get()->map(fn ($row) => [
             'id' => $row->base_code,
-            'label' => ($row->name ?? '?') . ' (' . $row->base_code . ')',
+            'label' => ($row->name ?? '?').' ('.$row->base_code.')',
         ]);
 
         return response()->json($items);
@@ -85,7 +85,7 @@ class StockReceiveController extends Controller
                 $variants->push([
                     'id' => $variant->id,
                     'item_id' => $item->id,
-                    'label' => $variant->size_label . ' (' . $variant->sku . ')',
+                    'label' => $variant->size_label.' ('.$variant->sku.')',
                 ]);
             }
         }
@@ -96,12 +96,14 @@ class StockReceiveController extends Controller
     public function variantsByItem($itemId): JsonResponse
     {
         $item = Item::find($itemId);
-        if (!$item) return response()->json([]);
+        if (! $item) {
+            return response()->json([]);
+        }
 
         $variants = $item->variants()->orderBy('size')->get()->map(fn ($v) => [
             'id' => $v->id,
             'item_id' => $item->id,
-            'label' => $v->size_label . ' (' . $v->sku . ')',
+            'label' => $v->size_label.' ('.$v->sku.')',
         ]);
 
         return response()->json($variants);

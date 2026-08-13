@@ -39,6 +39,20 @@ class Student extends Authenticatable
         };
     }
 
+    public function isFreshman(): bool
+    {
+        return strtolower((string) ($this->studentLevel?->status ?? $this->student_level)) === 'freshman';
+    }
+
+    public function resolveNotificationEmail(): ?string
+    {
+        if ($this->isFreshman()) {
+            return $this->email_pribadi ?: $this->email_kampus;
+        }
+
+        return $this->email_kampus ?: $this->email_pribadi;
+    }
+
     protected function casts(): array
     {
         return [
@@ -118,5 +132,10 @@ class Student extends Authenticatable
     public function programLevel(): BelongsTo
     {
         return $this->belongsTo(StudentGeneration::class, 'generation_id');
+    }
+
+    public function summary(): HasOne
+    {
+        return $this->hasOne(StudentSummary::class);
     }
 }

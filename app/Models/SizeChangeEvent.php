@@ -30,6 +30,7 @@ class SizeChangeEvent extends Model
             'start_date' => 'datetime',
             'end_date' => 'datetime',
             'is_active' => 'boolean',
+            'allow_reedit' => 'boolean',
             'max_changes' => 'integer',
             'baju_size_options' => 'array',
             'sepatu_size_options' => 'array',
@@ -41,7 +42,13 @@ class SizeChangeEvent extends Model
         $submission = SizeEventSubmission::where('student_id', $student->id)
             ->where('event_id', $this->id)->first();
 
-        return ($submission?->submission_count ?? 0) < $this->max_changes;
+        $count = $submission?->submission_count ?? 0;
+
+        if (! $this->allow_reedit && $count > 0) {
+            return false;
+        }
+
+        return $count < $this->max_changes;
     }
 
     public function faculty(): BelongsTo

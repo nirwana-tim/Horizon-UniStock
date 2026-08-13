@@ -30,6 +30,7 @@
                               prodiByFaculty: {{ json_encode($prodiByFaculty) }},
                               allProdi: {{ json_encode($allProdi) }},
                               itemHtml: '',
+                              itemSearch: '',
                               selectedItemIds: @json($distributionSchedule->items->pluck('item_id')->toArray()),
                               get filteredProdi() {
                                   if (this.facultyId && this.prodiByFaculty[this.facultyId]) {
@@ -49,6 +50,7 @@
                                       faculty_id: this.facultyId || '',
                                       study_program_id: this.prodiId,
                                       student_level: this.studentLevel || '',
+                                      search: this.itemSearch || '',
                                   };
                                   if (this.selectedItemIds.length) {
                                       params.checked_ids = this.selectedItemIds.join(',');
@@ -130,7 +132,12 @@
                             <div x-show="prodiId" class="md:col-span-2">
                                 <x-input-label :value="__('Distributed Items')" />
                                 <p class="mt-1 mb-4 text-xs text-gray-500">Select items to be distributed in this schedule.</p>
-                                
+
+                                <input type="text" x-model="itemSearch"
+                                       @input.debounce.300ms="fetchItems()"
+                                       placeholder="Search items by name or code..."
+                                       class="mb-4 w-full sm:w-80 border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500 text-sm">
+
                                 <div x-html="itemHtml" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3"></div>
                                 <x-input-error :messages="$errors->get('item_ids')" class="mt-2" />
                             </div>

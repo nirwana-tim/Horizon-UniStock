@@ -3,11 +3,12 @@
 namespace App\Exports;
 
 use App\Models\Student;
-use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\FromQuery;
+use Maatwebsite\Excel\Concerns\WithChunkReading;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 
-class StudentExport implements FromCollection, WithHeadings, WithMapping
+class StudentExport implements FromQuery, WithHeadings, WithMapping, WithChunkReading
 {
     use \Maatwebsite\Excel\Concerns\Exportable;
 
@@ -19,7 +20,7 @@ class StudentExport implements FromCollection, WithHeadings, WithMapping
         private ?int $generationId = null,
     ) {}
 
-    public function collection()
+    public function query(): \Illuminate\Database\Eloquent\Builder
     {
         $query = Student::with(['studyProgram.faculty', 'generation', 'studentLevel']);
 
@@ -38,7 +39,12 @@ class StudentExport implements FromCollection, WithHeadings, WithMapping
             $query->where('generation_id', $this->generationId);
         }
 
-        return $query->latest()->get();
+        return $query->latest()->orderBy('id');
+    }
+
+    public function chunkSize(): int
+    {
+        return 500;
     }
 
     public function headings(): array
