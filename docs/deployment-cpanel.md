@@ -306,27 +306,33 @@ php artisan migrate --force
 # Membuat:
 #   - Roles       : super_admin, admin, staff, student
 #   - Permissions : manage-students, manage-distributions, manage-finance
+#   - Super admin (SuperadminSeeder)
 #   - Student levels (StudentLevelSeeder)
 #   - Test user (UserTestSeeder) — bisa dihapus setelah login
 php artisan db:seed --force
 
 # ============================================================
-# STEP 6C: Buat akun super_admin baru (disarankan)
+# STEP 6C: Buat akun super_admin (disarankan)
 # ============================================================
-# Seeder membuat test user dengan password default.
-# Buat akun sendiri lalu hapus test user di UI.
-php artisan tinker --execute="
-\$user = App\Models\User::firstOrCreate(
-    ['email' => 'admin@unistock.ac.id'],
-    ['name' => 'Super Admin', 'password' => bcrypt('PasswordBaru!123')]
-);
-\$user->assignRole('super_admin');
-echo 'Super admin siap: admin@unistock.ac.id';
-"
+# SuperadminSeeder sudah otomatis jalan di STEP 6B (termasuk
+# di DatabaseSeeder). Jika ingin buat ulang / jalankan sendiri:
+php artisan db:seed --class=SuperadminSeeder
+
+# Kredensial default yang dicetak di console:
+#   Email    : admin@horizon-unistock.ac.id
+#   Password : SuperAdmin!123
+
+# Untuk custom email/password, tambahkan di .env SEBELUM seed:
+#   SUPERADMIN_EMAIL=admin@kampus.ac.id
+#   SUPERADMIN_PASSWORD=PasswordRahasia!456
+# lalu jalankan ulang: php artisan db:seed --class=SuperadminSeeder
 ```
 
 > 💡 Seeder memakai `firstOrCreate()`, jadi **aman dijalankan ulang**.
 > Tidak akan duplikat data.
+>
+> ⚠️ Login di browser tetap diminta **CAPTCHA** — itu normal, selesaikan
+> soal penjumlahan saat login. Setelah login, ganti password di profil.
 
 ---
 

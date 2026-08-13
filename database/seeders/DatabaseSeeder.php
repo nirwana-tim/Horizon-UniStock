@@ -13,6 +13,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             RolePermissionSeeder::class,
+            SuperadminSeeder::class,
             UserTestSeeder::class,
             StudentLevelSeeder::class,
             // Uncomment to seed master data:

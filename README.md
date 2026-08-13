@@ -120,6 +120,14 @@ bun install && bun run build
 | Finance Admin | `finance@horizon-unistock.test` | `password` |
 | Staff | `staff@horizon-unistock.test` | `password` |
 
+> **Super admin production:** gunakan `SuperadminSeeder` (idempotent, env-configurable):
+> ```bash
+> php artisan db:seed --class=SuperadminSeeder
+> # Email    : admin@horizon-unistock.ac.id
+> # Password : SuperAdmin!123
+> # Kustom lewat env: SUPERADMIN_EMAIL / SUPERADMIN_PASSWORD
+> ```
+
 ### Master Data Seeder
 
 Seeder master data ada di `database/seeders/Master/`, masing-masing 1 record dari data Excel.
