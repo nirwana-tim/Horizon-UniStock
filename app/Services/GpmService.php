@@ -23,16 +23,16 @@ class GpmService
             'distribution_items.item_id',
             'items.code as item_code',
             'items.name as item_name_raw',
-            'items.selling_price',
+            DB::raw('AVG(distribution_items.selling_price_at_distribution) as selling_price'),
             DB::raw('SUM(distribution_items.quantity) as qty_sold'),
             DB::raw('SUM(distribution_items.quantity * distribution_items.hpp) as total_hpp'),
             DB::raw('SUM(distribution_items.quantity * distribution_items.selling_price_at_distribution) as total_selling_price')
         )
             ->join('items', 'distribution_items.item_id', '=', 'items.id')
-            ->groupBy('distribution_items.item_id', 'items.code', 'items.name', 'items.selling_price');
+            ->groupBy('distribution_items.item_id', 'items.code', 'items.name');
 
         $query->whereHas('transaction', function ($q) use ($period) {
-            $q->where('status', 'completed')
+            $q->where('status', '!=', 'cancelled')
                 ->whereHas('schedule', function ($q2) use ($period) {
                     $q2->where('period', $period);
                 });
@@ -59,7 +59,7 @@ class GpmService
                 'category_name' => $itemModel?->category?->name ?? '-',
                 'qty_sold' => $item->qty_sold,
                 'hpp' => $avgHpp,
-                'selling_price' => $item->selling_price ?? 0,
+                'selling_price' => round((float) $item->selling_price, 2),
                 'total_hpp' => $item->total_hpp,
                 'total_selling_price' => $item->total_selling_price,
                 'laba_rugi' => $labaRugi,
@@ -98,7 +98,7 @@ class GpmService
                 DB::raw('SUM(distribution_items.quantity * distribution_items.hpp) as total_hpp'),
                 DB::raw('SUM(distribution_items.quantity * distribution_items.selling_price_at_distribution) as total_selling_price')
             )
-            ->where('distribution_transactions.status', 'completed')
+            ->where('distribution_transactions.status', '!=', 'cancelled')
             ->groupBy('distribution_schedules.period')
             ->orderBy('distribution_schedules.period')
             ->get();

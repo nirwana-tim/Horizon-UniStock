@@ -47,8 +47,8 @@ class GpmReportExport extends BaseExport implements FromCollection, WithHeadings
     public function map($item): array
     {
         $this->row++;
-        $revenue = ($item['selling_price'] ?? 0) * ($item['qty_sold'] ?? 0);
-        $cost = ($item['hpp'] ?? 0) * ($item['qty_sold'] ?? 0);
+        $revenue = $item['total_selling_price'] ?? 0;
+        $cost = $item['total_hpp'] ?? 0;
         $profit = $revenue - $cost;
         $margin = $revenue > 0 ? $profit / $revenue : 0;
 

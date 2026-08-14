@@ -42,15 +42,8 @@ class StockReceiveImport implements ToCollection, WithHeadingRow, WithMultipleSh
         $stockService = app(StockService::class);
 
         foreach ($groups as $key => $group) {
-            $vendorCode = strtoupper(substr(preg_replace('/[^a-zA-Z0-9]/', '', $group['vendor_name']), 0, 3));
-            $baseCode = $vendorCode;
-            $suffix = 1;
-            while (Vendor::where('code', $vendorCode)->where('name', '!=', $group['vendor_name'])->exists()) {
-                $vendorCode = $baseCode . $suffix++;
-            }
             $vendor = Vendor::firstOrCreate(
-                ['name' => $group['vendor_name']],
-                ['code' => $vendorCode]
+                ['name' => $group['vendor_name']]
             );
 
             $data = [
@@ -219,8 +212,22 @@ class StockReceiveImport implements ToCollection, WithHeadingRow, WithMultipleSh
     private function parseDecimal(mixed $value): ?float
     {
         if ($value === null || $value === '' || $value === '-') return null;
-        $cleaned = str_replace(',', '.', (string) $value);
-        $cleaned = preg_replace('/[^0-9.]/', '', $cleaned);
+        if (is_numeric($value)) return (float) $value;
+
+        $text = trim((string) $value);
+
+        if (str_contains($text, ',')) {
+            $lastComma = strrpos($text, ',');
+            $lastDot = strrpos($text, '.');
+            if ($lastComma > $lastDot) {
+                $text = str_replace('.', '', $text);
+                $text = str_replace(',', '.', $text);
+            } else {
+                $text = str_replace(',', '', $text);
+            }
+        }
+
+        $cleaned = preg_replace('/[^0-9.]/', '', $text);
         return $cleaned !== '' ? (float) $cleaned : null;
     }
 }

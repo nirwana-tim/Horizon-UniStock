@@ -10,6 +10,7 @@ use Illuminate\Support\ServiceProvider;
 use App\Models\Entitlement;
 use App\Models\StudyProgram;
 use App\Policies\EntitlementPolicy;
+use Illuminate\Http\Middleware\TrustProxies;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -20,6 +21,11 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        $proxies = config('trustproxies.proxies');
+        if ($proxies !== []) {
+            TrustProxies::at($proxies);
+        }
+
         Route::bind('study_program', fn (string $value) => StudyProgram::findOrFail($value));
 
         Gate::policy(Entitlement::class, EntitlementPolicy::class);

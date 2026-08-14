@@ -79,6 +79,8 @@ class DistributionService
         ?string $manualNote = null
     ): DistributionTransaction {
         return DB::transaction(function () use ($student, $schedule, $staff, $items, $manualNote) {
+            Student::whereKey($student->id)->lockForUpdate()->first();
+
             $eligibility = EligibilityRecord::where('student_id', $student->id)
                 ->lockForUpdate()
                 ->first();

@@ -38,13 +38,15 @@ class ImportController extends Controller
             $validated = $request->validate($rules);
             $filePath = $request->input('file_path');
 
-            if (!str_starts_with($filePath, 'imports/')) {
+            if (!str_starts_with($filePath, 'imports/') || str_contains($filePath, '..') || str_contains($filePath, '\\')) {
                 return back()->with('error', 'Invalid file path.');
             }
 
             if (!Storage::disk('local')->exists($filePath)) {
                 return back()->with('error', 'File not found. Please upload again.');
             }
+
+            $filePath = Storage::disk('local')->path($filePath);
         } else {
             $rules['file'] = ['required', 'file', 'mimes:xlsx,xls,csv', 'max:10240'];
             $validated = $request->validate($rules);

@@ -75,7 +75,9 @@ class SmtpSetting extends Model
 
     public static function getActive(): ?self
     {
-        return static::where('is_active', true)->first();
+        return cache()->remember('smtp_setting.active', 60, function () {
+            return static::where('is_active', true)->first();
+        });
     }
 
     /**
@@ -104,6 +106,8 @@ class SmtpSetting extends Model
         $s->is_active  = true;
         $s->created_by = $createdBy ?? $s->created_by ?? auth()->id();
         $s->save();
+
+        cache()->forget('smtp_setting.active');
 
         return $s;
     }

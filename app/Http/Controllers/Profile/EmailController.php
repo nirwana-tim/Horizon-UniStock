@@ -67,6 +67,7 @@ class EmailController extends Controller
 
         OtpCode::create([
             'user_id' => $user->id,
+            'nim' => $student->nim,
             'email' => $request->input('email_pribadi'),
             'code' => hash_hmac('sha256', $code, (string) config('app.key')),
             'type' => 'email_pribadi_change',

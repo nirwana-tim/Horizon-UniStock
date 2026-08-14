@@ -50,7 +50,7 @@ Route::middleware(['auth', 'password.changed'])->group(function () {
 
     Route::prefix('profile/email')->name('profile.email.')->group(function () {
         Route::get('/change', [ProfileEmailController::class, 'showChangeForm'])->name('change');
-        Route::post('/verify-password', [ProfileEmailController::class, 'verifyPassword'])->name('verify-password');
+        Route::post('/verify-password', [ProfileEmailController::class, 'verifyPassword'])->middleware('throttle:5,1')->name('verify-password');
         Route::get('/input-email', [ProfileEmailController::class, 'showEmailForm'])->name('input-email');
         Route::post('/send-otp', [ProfileEmailController::class, 'sendOtp'])->middleware('throttle:3,1')->name('send-otp');
         Route::get('/verify', [ProfileEmailController::class, 'showOtpForm'])->name('verify-otp');
@@ -110,7 +110,7 @@ Route::middleware(['auth', 'password.changed', 'role:super_admin|admin', 'thrott
     Route::post('stock-opname/{stockOpname}/approve', [StockOpnameController::class, 'approve'])->middleware('throttle:5,1')->name('stock-opname.approve');
 });
 
-Route::middleware(['auth', 'password.changed', 'role:super_admin|admin'])->prefix('report')->name('report.')->group(function () {
+Route::middleware(['auth', 'password.changed', 'role:super_admin|admin', 'throttle:10,1'])->prefix('report')->name('report.')->group(function () {
     Route::get('/', [ReportController::class, 'index'])->name('index');
     Route::get('distribution', [ReportController::class, 'distribution'])->name('distribution');
     Route::get('distribution-recap', [ReportController::class, 'distributionRecap'])->name('distribution-recap');

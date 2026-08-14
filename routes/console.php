@@ -13,6 +13,8 @@ Artisan::command('inspire', function () {
 
 Schedule::command(CleanupOldLogs::class, ['--days=30'])->dailyAt('02:00');
 
+Schedule::command('queue:prune-failed', ['--hours=168'])->dailyAt('02:10');
+
 Schedule::command(CalculateStudentSummaries::class)->dailyAt('02:30');
 
 Schedule::command(AutoPromoteStudents::class, ['--semester=Y1S2'])->weeklyOn(6, '03:00');

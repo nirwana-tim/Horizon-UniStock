@@ -11,7 +11,7 @@
     Trigger:
     <button @click="$dispatch('open-bottom-sheet', { id: 'size-baju' })">Open</button>
 --}}
-@props(['id' => 'bottom-sheet-' . md5 microtime(true)])
+@props(['id' => 'bottom-sheet-' . md5(microtime(true))])
 
 <div x-data="{
         id: '{{ $id }}',

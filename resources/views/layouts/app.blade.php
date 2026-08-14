@@ -27,6 +27,7 @@
 
     <!-- Scripts & Styles -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <script>window.DASHBOARD_URL = @json(route('dashboard'));</script>
 
     @stack('styles')
 @php
@@ -86,6 +87,8 @@
                     </div>
                 @endif
 
+                {{ $header ?? '' }}
+
                 {{ $slot }}
             </main>
         </div>
@@ -140,6 +143,8 @@
                 </div>
             @endif
 
+            {{ $header ?? '' }}
+
             {{ $slot }}
         </main>
 
@@ -151,6 +156,8 @@
     {{-- ===== FALLBACK LAYOUT ===== --}}
     <div class="min-h-screen bg-gray-50">
         <main class="p-6">
+            {{ $header ?? '' }}
+
             {{ $slot }}
         </main>
     </div>

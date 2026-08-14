@@ -109,12 +109,12 @@
                         </div>
                         <div>
                             <x-input-label for="smtp_password" value="{{ __('Password') }}" />
-                            <x-text-input id="smtp_password" name="smtp_password" type="text"
+                            <x-text-input id="smtp_password" name="smtp_password" type="password"
                                 class="mt-1 block w-full"
-                                :value="old('smtp_password', $settings->password ?? '')"
-                                placeholder="Masukkan password" />
+                                :value="old('smtp_password')"
+                                placeholder="{{ $settings->password ? '•••••••• (biarkan kosong untuk mempertahankan)' : 'Masukkan password' }}" />
                             <x-input-error :messages="$errors->get('smtp_password')" class="mt-2" />
-                            <p class="text-xs text-gray-500 mt-1">Menampilkan password agar mudah diverifikasi. Disimpan terenkripsi di database.</p>
+                            <p class="text-xs text-gray-500 mt-1">Disimpan terenkripsi di database. Kosongkan untuk mempertahankan nilai yang sudah tersimpan.</p>
                         </div>
                         <div class="flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4">
                             <input type="checkbox" id="smtp_verify_peer" name="smtp_verify_peer" value="1"
@@ -150,12 +150,12 @@
                     {{-- API drivers --}}
                     <div x-show="apiDrivers.includes(mailer)" x-transition>
                         <x-input-label for="api_key" value="{{ __('API Key') }}" />
-                        <x-text-input id="api_key" name="api_key" type="text"
+                        <x-text-input id="api_key" name="api_key" type="password"
                             class="mt-1 block w-full"
-                            :value="old('api_key', $settings->api_key ?? '')"
-                            placeholder="Masukkan API key" />
+                            :value="old('api_key')"
+                            placeholder="{{ $settings->api_key ? '•••••••• (biarkan kosong untuk mempertahankan)' : 'Masukkan API key' }}" />
                         <x-input-error :messages="$errors->get('api_key')" class="mt-2" />
-                        <p class="text-xs text-gray-500 mt-1">Menampilkan API key agar mudah dipakai. Disimpan terenkripsi di database.</p>
+                        <p class="text-xs text-gray-500 mt-1">Disimpan terenkripsi di database. Kosongkan untuk mempertahankan nilai yang sudah tersimpan.</p>
                     </div>
 
                     {{-- From --}}

@@ -127,9 +127,9 @@ class StudentService
         });
     }
 
-    public function promoteStudents(array $ids, ?int $newLevelId = null, ?int $newStudyProgramId = null): int
+    public function promoteStudents(array $ids, ?int $newGenerationId = null, ?int $newStudyProgramId = null): int
     {
-        return DB::transaction(function () use ($ids, $newLevelId, $newStudyProgramId) {
+        return DB::transaction(function () use ($ids, $newGenerationId, $newStudyProgramId) {
             $students = Student::whereIn('id', $ids)->lockForUpdate()->get();
             $count = 0;
 
@@ -193,8 +193,8 @@ class StudentService
                     $updates['status'] = 'graduated';
                 }
 
-                if ($newLevelId) {
-                    $updates['student_level'] = $newLevelId;
+                if ($newGenerationId) {
+                    $updates['generation_id'] = $newGenerationId;
                 }
 
                 if ($newStudyProgramId) {
@@ -203,7 +203,7 @@ class StudentService
 
                 $student->update($updates);
 
-                $shouldRefresh = $newLevelId || $newStudyProgramId
+                $shouldRefresh = $newGenerationId || $newStudyProgramId
                     || ($oldValues['student_level'] ?? '') !== $student->fresh()->student_level
                     || ($oldValues['study_program_id'] ?? null) !== $student->fresh()->study_program_id;
 

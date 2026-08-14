@@ -10,33 +10,15 @@ class CleanupOldLogs extends Command
 {
     protected $signature = 'logs:cleanup {--days=30 : Hapus backup log lebih lama dari N hari}';
 
-    protected $description = 'Truncate failed_jobs/job_batches dan rotate laravel.log';
+    protected $description = 'Rotate dan bersihkan laravel.log';
 
     public function handle(): int
     {
         $days = (int) $this->option('days');
 
-        $this->cleanupJobTables();
         $this->rotateLogs($days);
 
         return self::SUCCESS;
-    }
-
-    private function cleanupJobTables(): void
-    {
-        foreach (['failed_jobs', 'job_batches'] as $table) {
-            try {
-                $count = DB::table($table)->count();
-                if ($count > 0) {
-                    DB::table($table)->truncate();
-                    $this->info("Truncated {$count} rows from {$table}");
-                } else {
-                    $this->line("No rows in {$table}");
-                }
-            } catch (\Throwable $e) {
-                $this->warn("Failed to truncate {$table}: {$e->getMessage()}");
-            }
-        }
     }
 
     private function rotateLogs(int $days): void

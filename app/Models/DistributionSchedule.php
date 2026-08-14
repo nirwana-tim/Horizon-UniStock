@@ -37,7 +37,8 @@ class DistributionSchedule extends Model
         return $query
             ->where(fn (Builder $q) => $q->whereNull('student_level')->orWhere('student_level', $student->student_level))
             ->where(fn (Builder $q) => $q->whereNull('faculty_id')->orWhere('faculty_id', $student->studyProgram?->faculty_id))
-            ->where(fn (Builder $q) => $q->whereNull('study_program_id')->orWhere('study_program_id', $student->study_program_id));
+            ->where(fn (Builder $q) => $q->whereNull('study_program_id')->orWhere('study_program_id', $student->study_program_id))
+            ->where(fn (Builder $q) => $q->whereNull('generation_id')->orWhere('generation_id', $student->generation_id));
     }
 
     public function getStudentLevelLabelAttribute(): string

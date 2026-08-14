@@ -265,13 +265,13 @@ class StudentController extends Controller
         $validated = $request->validate([
             'student_ids' => ['required', 'array'],
             'student_ids.*' => ['required', 'integer', 'exists:students,id'],
-            'target_level_id' => ['nullable', 'integer', 'exists:student_generations,id'],
+            'target_generation_id' => ['nullable', 'integer', 'exists:student_generations,id'],
             'target_study_program_id' => ['nullable', 'integer', 'exists:study_programs,id'],
         ]);
 
         $count = $this->studentService->promoteStudents(
             $validated['student_ids'],
-            $validated['target_level_id'] ?? null,
+            $validated['target_generation_id'] ?? null,
             $validated['target_study_program_id'] ?? null,
         );
 

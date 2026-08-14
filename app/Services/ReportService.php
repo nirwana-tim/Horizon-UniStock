@@ -84,7 +84,7 @@ class ReportService
             'distribution_items.item_id',
             DB::raw('SUM(distribution_items.quantity) as qty_sold'),
             DB::raw('SUM(distribution_items.quantity * distribution_items.hpp) as total_hpp'),
-            DB::raw('SUM(distribution_items.quantity * items.selling_price) as total_revenue')
+            DB::raw('SUM(distribution_items.quantity * distribution_items.selling_price_at_distribution) as total_revenue')
         )
             ->join('items', 'distribution_items.item_id', '=', 'items.id')
             ->groupBy('distribution_items.item_id');
@@ -144,7 +144,7 @@ class ReportService
             ->select(
                 'i.id', 'i.name', 'i.code',
                 DB::raw('SUM(di.quantity) as unit_sold'),
-                DB::raw('SUM(di.quantity * i.selling_price) as revenue')
+                DB::raw('SUM(di.quantity * di.selling_price_at_distribution) as revenue')
             )
             ->join('items as i', 'i.id', '=', 'di.item_id')
             ->join('distribution_transactions as dt', function ($join) use ($month, $year) {
@@ -159,7 +159,7 @@ class ReportService
         $monthlyRecap = DB::table('distribution_items as di')
             ->select(
                 DB::raw('SUM(di.quantity) as unit_sold'),
-                DB::raw('SUM(di.quantity * i.selling_price) as total_revenue')
+                DB::raw('SUM(di.quantity * di.selling_price_at_distribution) as total_revenue')
             )
             ->join('items as i', 'i.id', '=', 'di.item_id')
             ->join('distribution_transactions as dt', function ($join) use ($month, $year) {
@@ -195,7 +195,7 @@ class ReportService
                 DB::raw('YEAR(dt.pickup_time) as year'),
                 DB::raw('MONTH(dt.pickup_time) as month'),
                 DB::raw('SUM(di.quantity) as unit_sold'),
-                DB::raw('SUM(di.quantity * i.selling_price) as revenue')
+                DB::raw('SUM(di.quantity * di.selling_price_at_distribution) as revenue')
             )
             ->join('items as i', 'i.id', '=', 'di.item_id')
             ->join('distribution_transactions as dt', 'dt.id', '=', 'di.transaction_id')
@@ -428,7 +428,7 @@ class ReportService
         $c2Query = DB::table('distribution_items as di')
             ->join('distribution_transactions as dt', 'dt.id', '=', 'di.transaction_id')
             ->join('items as i', 'i.id', '=', 'di.item_id')
-            ->select('i.name', DB::raw('SUM(di.quantity * i.selling_price) as total_revenue'))
+            ->select('i.name', DB::raw('SUM(di.quantity * di.selling_price_at_distribution) as total_revenue'))
             ->whereIn('dt.status', ['completed', 'partial']);
 
         if ($start) {
@@ -469,7 +469,7 @@ class ReportService
                 DB::raw("DATE_FORMAT(dt.pickup_time, '%Y-%m') as month_val"),
                 DB::raw("DATE_FORMAT(dt.pickup_time, '%b-%y') as month_label"),
                 DB::raw('SUM(di.quantity) as total_sold'),
-                DB::raw('SUM(di.quantity * i.selling_price) as total_revenue')
+                DB::raw('SUM(di.quantity * di.selling_price_at_distribution) as total_revenue')
             )
             ->whereIn('dt.status', ['completed', 'partial']);
 

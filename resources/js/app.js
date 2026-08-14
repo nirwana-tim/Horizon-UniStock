@@ -406,7 +406,7 @@ document.addEventListener('alpine:init', () => {
             this.itemId = '';
             this.items = [];
             if (this.categoryId) {
-                axios.get('{{ route("dashboard") }}', {
+                axios.get(window.DASHBOARD_URL, {
                     params: { get_items: 1, category_id: this.categoryId }
                 }).then(response => { this.items = response.data; })
                   .catch(error => { console.error('Error fetching items:', error); });
@@ -418,7 +418,7 @@ document.addEventListener('alpine:init', () => {
         },
         fetchDashboardData() {
             if (chartLoadError) return;
-            axios.get('{{ route("dashboard") }}', {
+            axios.get(window.DASHBOARD_URL, {
                 params: {
                     ajax: 1,
                     start_date: this.startDate,

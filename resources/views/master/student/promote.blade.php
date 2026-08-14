@@ -16,14 +16,14 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                                 <div>
                                     <x-input-label value="Target Generation (Opsional)" />
-                                    <select name="target_level_id"
+                                    <select name="target_generation_id"
                                         class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500 text-sm">
                                         <option value="">-- Otomatis (Naikkan Semester) --</option>
                                         @foreach($generations as $level)
                                             <option value="{{ $level->id }}">{{ $level->label }} ({{ $level->code }})</option>
                                         @endforeach
                                     </select>
-                                    <x-input-error :messages="$errors->get('target_level_id')" class="mt-1" />
+                                    <x-input-error :messages="$errors->get('target_generation_id')" class="mt-1" />
                                 </div>
                                 <div>
                                     <x-input-label value="Target Program Studi (Opsional)" />

@@ -63,8 +63,10 @@ class LoginRequest extends FormRequest
         $user = User::where('email', $credentials['email'])->first();
 
         if ($user && !$user->is_active) {
+            RateLimiter::hit($this->throttleKey());
+
             throw ValidationException::withMessages([
-                'email' => 'Akun Anda telah dinonaktifkan. Hubungi administrator.',
+                'email' => trans('auth.failed'),
             ]);
         }
 
@@ -73,6 +75,15 @@ class LoginRequest extends FormRequest
 
             throw ValidationException::withMessages([
                 'email' => trans('auth.failed'),
+            ]);
+        }
+
+        if ($user && !$user->is_active) {
+            Auth::logout();
+            RateLimiter::hit($this->throttleKey());
+
+            throw ValidationException::withMessages([
+                'email' => 'Akun Anda telah dinonaktifkan. Hubungi administrator.',
             ]);
         }
 

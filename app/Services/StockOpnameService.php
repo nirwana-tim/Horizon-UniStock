@@ -21,12 +21,9 @@ class StockOpnameService
     public function createBatch(array $data): StockOpname
     {
         $period = $data['period'];
-        $seq = StockOpname::where('period', $period)->count() + 1;
+        $seq = $this->stockService->nextSequence('SO', $period);
 
-        do {
-            $referenceNumber = 'SO-'.$period.'-'.str_pad($seq, 4, '0', STR_PAD_LEFT);
-            $seq++;
-        } while (StockOpname::where('reference_number', $referenceNumber)->exists());
+        $referenceNumber = 'SO-'.$period.'-'.str_pad((string) $seq, 4, '0', STR_PAD_LEFT);
 
         $batch = StockOpname::create([
             'reference_number' => $referenceNumber,
@@ -122,7 +119,7 @@ class StockOpnameService
                         StockOpnameAdjustment::create([
                             'stock_opname_id' => $batch->id,
                             'stock_movement_id' => $movement->id,
-                            'type' => 'OUT',
+                            'type' => 'shortage',
                             'quantity' => $movement->quantity,
                             'reason' => 'Shortage',
                             'approved_by' => $approver->id,
@@ -156,7 +153,7 @@ class StockOpnameService
                     StockOpnameAdjustment::create([
                         'stock_opname_id' => $batch->id,
                         'stock_movement_id' => $stockMovement->id,
-                        'type' => 'IN',
+                        'type' => 'surplus',
                         'quantity' => $quantity,
                         'reason' => 'Surplus',
                         'approved_by' => $approver->id,

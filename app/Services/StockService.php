@@ -245,6 +245,13 @@ class StockService
                 ->lockForUpdate()
                 ->get();
 
+            $totalInBatches = $batches->sum('quantity_remaining');
+            if ($totalInBatches < $quantity) {
+                throw new \Exception(
+                    "Saldo batch tidak mencukupi untuk item #{$itemId} varian #{$variantId} (batch: {$totalInBatches}, diminta: {$quantity}). Lakukan Stock Opname untuk menyelaraskan saldo."
+                );
+            }
+
             $remaining = $quantity;
             $totalCost = 0;
             $consumedBatches = [];
@@ -396,14 +403,29 @@ class StockService
     private function generateReferenceNumber(): string
     {
         $dateStr = date('Ymd');
-        $seq = StockReceive::whereDate('created_at', today())->count() + 1;
+        $seq = $this->nextSequence('SR', now()->toDateString());
 
-        do {
-            $ref = 'SR-'.$dateStr.'-'.str_pad($seq, 4, '0', STR_PAD_LEFT);
-            $seq++;
-        } while (StockReceive::where('reference_number', $ref)->exists());
+        return 'SR-'.$dateStr.'-'.str_pad((string) $seq, 4, '0', STR_PAD_LEFT);
+    }
 
-        return $ref;
+    public function nextSequence(string $type, string $period): int
+    {
+        return DB::transaction(function () use ($type, $period) {
+            DB::table('document_sequences')->insertOrIgnore([
+                'type' => $type,
+                'period' => $period,
+                'value' => 0,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            DB::table('document_sequences')
+                ->where('type', $type)
+                ->where('period', $period)
+                ->update(['value' => DB::raw('LAST_INSERT_ID(value + 1)')]);
+
+            return (int) DB::scalar('SELECT LAST_INSERT_ID()');
+        });
     }
 
     public function reverseStockReceive(StockReceive $receive): void

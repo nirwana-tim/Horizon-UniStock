@@ -379,7 +379,8 @@ ls -ld storage bootstrap/cache
 # STEP 8: Aktifkan Laravel Scheduler
 # ============================================================
 # Laravel scheduler menjalankan task terjadwal:
-#   - logs:cleanup         (harian 02:00 — bersihkan failed_jobs & log)
+#   - logs:cleanup         (harian 02:00 — rotate & bersihkan log lama)
+#   - queue:prune-failed   (harian 02:10 — hapus failed_jobs > 7 hari)
 #   - summaries:calculate  (harian 02:30 — materialized view)
 #   - students:auto-promote (Minggu 03:00 — naikkan semester)
 #

@@ -88,13 +88,13 @@ class EntitlementImport implements ToCollection, WithHeadingRow, WithValidation
 
     protected function findItemByName(string $name): ?Item
     {
-        $trimmed = trim($name);
-        $escaped = escapeLike($trimmed);
-        return Item::where('name', $trimmed)->first()
-            ?? Item::where('name', 'like', "%{$escaped}%")
+        $normalized = strtolower(trim(str_replace('_', ' ', $name)));
+
+        return Item::whereRaw('LOWER(TRIM(name)) = ?', [$normalized])->first()
+            ?? Item::whereRaw('LOWER(name) LIKE ?', ['%' . escapeLike($normalized) . '%'])
                 ->orderByRaw('LENGTH(name) ASC')
                 ->first()
-            ?? Item::whereHas('category', fn ($q) => $q->where('label', 'like', "%{$escaped}%"))
+            ?? Item::whereHas('category', fn ($q) => $q->whereRaw('LOWER(label) LIKE ?', ['%' . escapeLike($normalized) . '%']))
                 ->orderByRaw('LENGTH(name) ASC')
                 ->first();
     }
