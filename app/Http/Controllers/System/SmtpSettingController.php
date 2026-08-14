@@ -17,16 +17,15 @@ class SmtpSettingController extends Controller
 {
     public function show(): View
     {
-        $s = SmtpSetting::firstOrCreate(
-            ['id' => 1],
-            [
+        $s = SmtpSetting::find(1);
+
+        if (! $s) {
+            $s = new SmtpSetting([
                 'mailer'       => config('mail.default', 'smtp'),
                 'from_address' => config('mail.from.address', 'hello@example.com'),
                 'from_name'    => config('mail.from.name', config('app.name')),
-                'is_active'    => true,
-                'created_by'   => Auth::id(),
-            ]
-        );
+            ]);
+        }
 
         return view('system.smtp-settings', [
             'settings'   => $s,

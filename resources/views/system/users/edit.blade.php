@@ -40,7 +40,12 @@
                             class="mt-1 block w-full bg-gray-100 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-100 transition-colors">
                             @foreach ($roles as $role)
                                 <option value="{{ $role }}" {{ $user->hasRole($role) ? 'selected' : '' }}>
-                                    {{ $role === 'admin' ? 'Admin (Finance)' : 'Staff' }}
+                                    {{ [
+                                        'super_admin' => 'Super Admin',
+                                        'admin' => 'Admin (Finance)',
+                                        'staff' => 'Staff',
+                                        'student' => 'Mahasiswa',
+                                    ][$role] ?? ucfirst($role) }}
                                 </option>
                             @endforeach
                         </select>

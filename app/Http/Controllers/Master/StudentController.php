@@ -7,6 +7,7 @@ use App\Exports\StudentExport;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StudentRequest;
 use App\Models\DistributionItem;
+use App\Services\AuditService;
 use App\Models\Entitlement;
 use App\Models\Student;
 use App\Models\StudentGeneration;
@@ -83,8 +84,9 @@ class StudentController extends Controller
             ->get();
 
         $notificationService = app(NotificationService::class);
-        $studentsPending = $studentsPending->map(function (Student $student) use ($notificationService) {
-            $student->latest_email = $notificationService->latestAccountNotification($student);
+        $latestEmails = $notificationService->latestAccountNotificationsForStudents($studentsPending);
+        $studentsPending = $studentsPending->map(function (Student $student) use ($latestEmails) {
+            $student->latest_email = $latestEmails[$student->id] ?? null;
 
             return $student;
         });
@@ -319,10 +321,11 @@ class StudentController extends Controller
 
         $passwords = session('credentials.passwords', []);
         $notificationService = app(NotificationService::class);
+        $latestEmails = $notificationService->latestAccountNotificationsForStudents($students);
 
-        $students = $students->map(function (Student $student) use ($passwords, $notificationService) {
+        $students = $students->map(function (Student $student) use ($passwords, $latestEmails) {
             $student->temp_password = $passwords[$student->nim] ?? null;
-            $student->latest_email = $notificationService->latestAccountNotification($student);
+            $student->latest_email = $latestEmails[$student->id] ?? null;
 
             return $student;
         });
@@ -343,6 +346,8 @@ class StudentController extends Controller
     public function getPassword(Student $student): JsonResponse
     {
         $passwords = session('credentials.passwords', []);
+
+        AuditService::log('get_password', Student::class, $student->id);
 
         return response()->json([
             'password' => $passwords[$student->nim] ?? null,

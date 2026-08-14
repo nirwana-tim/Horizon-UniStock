@@ -62,12 +62,7 @@ label="Delete Entitlement"
                                             @php
                                                 $item = $ei->item;
                                                 $baseCode = $item->base_code ?? $item->code;
-                                                $availableSizes = App\Models\Item::where('base_code', $baseCode)
-                                                    ->with('variants')
-                                                    ->get()
-                                                    ->pluck('variants.0.size_label')
-                                                    ->filter()
-                                                    ->implode(', ');
+                                                $availableSizes = $availableSizes[$baseCode] ?? null;
                                             @endphp
                                             <tr class="hover:bg-gray-50">
                                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $loop->iteration }}</td>

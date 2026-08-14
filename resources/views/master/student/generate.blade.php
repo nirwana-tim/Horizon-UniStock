@@ -64,10 +64,10 @@
                                         @foreach($studentsWithoutAccount as $student)
                                         <tr class="hover:bg-gray-50"
                                             x-show="search === '' ||
-                                                    '{{ $student->nim }}'.toLowerCase().includes(search.toLowerCase()) ||
-                                                    '{{ $student->name }}'.toLowerCase().includes(search.toLowerCase()) ||
-                                                    '{{ $student->studyProgram?->name ?? '' }}'.toLowerCase().includes(search.toLowerCase()) ||
-                                                    '{{ $student->email_kampus ?? '' }}'.toLowerCase().includes(search.toLowerCase())">
+                                                    @js($student->nim).toLowerCase().includes(search.toLowerCase()) ||
+                                                    @js($student->name).toLowerCase().includes(search.toLowerCase()) ||
+                                                    @js($student->studyProgram?->name ?? '').toLowerCase().includes(search.toLowerCase()) ||
+                                                    @js($student->email_kampus ?? '').toLowerCase().includes(search.toLowerCase())">
                                             <td class="px-3 py-4 whitespace-nowrap">
                                                 <input type="checkbox" name="student_ids[]" value="{{ $student->id }}" class="student-checkbox rounded border-gray-300">
                                             </td>
@@ -137,9 +137,9 @@
                                         @foreach ($studentsPending as $student)
                                         <tr class="hover:bg-gray-50"
                                             x-show="search === '' ||
-                                                    '{{ $student->nim }}'.toLowerCase().includes(search.toLowerCase()) ||
-                                                    '{{ $student->name }}'.toLowerCase().includes(search.toLowerCase()) ||
-                                                    '{{ $student->studyProgram?->name ?? '' }}'.toLowerCase().includes(search.toLowerCase())">
+                                                    @js($student->nim).toLowerCase().includes(search.toLowerCase()) ||
+                                                    @js($student->name).toLowerCase().includes(search.toLowerCase()) ||
+                                                    @js($student->studyProgram?->name ?? '').toLowerCase().includes(search.toLowerCase())">
                                             <td class="px-3 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $student->nim }}</td>
                                             <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-700">{{ $student->name }}</td>
                                             <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-500">{{ $student->studyProgram?->name ?? '-' }}</td>

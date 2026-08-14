@@ -13,8 +13,8 @@ class SuperadminSeeder extends Seeder
 {
     public function run(): void
     {
-        $email = config('superadmin.email', env('SUPERADMIN_EMAIL', 'admin@horizon-unistock.ac.id'));
-        $password = config('superadmin.password', env('SUPERADMIN_PASSWORD'));
+        $email = config('superadmin.email');
+        $password = config('superadmin.password');
 
         if (! $password) {
             $password = Str::password(20);
@@ -41,7 +41,7 @@ class SuperadminSeeder extends Seeder
         $this->command->info('Super admin siap digunakan!');
         $this->command->info('Email    : ' . $email);
 
-        if (! config('superadmin.password') && ! env('SUPERADMIN_PASSWORD')) {
+        if (! config('superadmin.password')) {
             $this->command->warn('Password sementara: ' . $password . ' — ganti segera setelah login.');
         }
     }

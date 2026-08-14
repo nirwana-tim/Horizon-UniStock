@@ -1,5 +1,7 @@
 # Database Design — ERD
 
+> Diperbarui otomatis mengikuti skema aktual (8 tabel legacy `distribution_periods`, `distribution_stages`, `period_id`, `qr_token` sudah dihapus/diganti).
+
 ## Legend Relasi
 
 | Simbol | Arti | Contoh |
@@ -33,322 +35,447 @@
 ```mermaid
 erDiagram
     USERS {
-        int id PK
+        bigint id PK
         string name
         string email UK
         string password
+        timestamp email_verified_at
+        timestamp last_login_at
+        boolean must_change_password
+        boolean is_active
     }
 
     FACULTIES {
-        int id PK
+        bigint id PK
         string name
         string code UK
     }
 
     STUDY_PROGRAMS {
-        int id PK
+        bigint id PK
         string name
         string code UK
-        int faculty_id FK
+        bigint faculty_id FK
     }
 
     STUDENT_GENERATIONS {
-        int id PK
+        bigint id PK
         string name
-        string code
+        string code UK
+    }
+
+    STUDENT_LEVELS {
+        bigint id PK
+        string kode UK
+        string deskripsi
+        string status
     }
 
     STUDENTS {
-        int id PK
-        int user_id FK
+        bigint id PK
+        bigint user_id FK
         string nim UK
         string name
         string email_kampus UK
         string email_pribadi
-        string qr_token UK
-        datetime qr_generated_at
-        int study_program_id FK
-        int generation_id FK
+        bigint study_program_id FK
+        bigint generation_id FK
         string student_level
+        enum status
+        string current_semester
+        string entitlement_code
+        timestamp email_verified_at
     }
 
     ITEM_CATEGORIES {
-        int id PK
-        string name
-        string description
+        bigint id PK
+        string code UK
+        string label
+    }
+
+    ITEM_TYPES {
+        bigint id PK
+        string code UK
+        string label
+    }
+
+    ITEM_DEPARTMENTS {
+        bigint id PK
+        string code UK
+        string label
+    }
+
+    ITEM_SIZES {
+        bigint id PK
+        string code UK
+        string label
     }
 
     ITEMS {
-        int id PK
+        bigint id PK
         string name
-        string code
-        int category_id FK
+        string code UK
+        string base_code
+        string gender
+        bigint category_id FK
+        bigint type_id FK
+        bigint department_id FK
         string unit
         decimal selling_price
         decimal hpp
+        boolean is_active
     }
 
     ITEM_VARIANTS {
-        int id PK
-        int item_id FK
+        bigint id PK
+        bigint item_id FK
+        bigint size_id FK
         string size
-        string sku
+        string size_label
+        string sku UK
+        decimal weight
+    }
+
+    CATEGORY_ITEM_SIZE {
+        bigint id PK
+        bigint category_id FK
+        bigint item_id FK
+        bigint size_id FK
     }
 
     ITEM_PRICES {
-        int id PK
-        int item_id FK
-        int period_id FK
+        bigint id PK
+        bigint item_id FK
         decimal selling_price
         decimal hpp
         date effective_date
     }
 
     VENDORS {
-        int id PK
+        bigint id PK
         string name
         string email
         string contact
         string phone
     }
 
-    DISTRIBUTION_PERIODS {
-        int id PK
-        string name
-        string start_date
-        string end_date
-        datetime size_change_deadline
-        boolean is_active
-    }
-
-    DISTRIBUTION_STAGES {
-        int id PK
-        int period_id FK
-        string name
-        int stage_order
-        string start_date
-        string end_date
-        string notes
-    }
-
     ELIGIBILITY_RECORDS {
-        int id PK
-        int student_id FK
-        int period_id FK
+        bigint id PK
+        bigint student_id FK
         boolean is_eligible
         string payment_status
     }
 
     STUDENT_SIZE_PROFILES {
-        int id PK
-        int student_id FK
-        int period_id FK
+        bigint id PK
+        bigint student_id FK
         boolean is_filled
         datetime filled_at
+        string baju_size
+        string sepatu_size
     }
 
     STUDENT_SIZE_ITEMS {
-        int id PK
-        int size_profile_id FK
-        int item_id FK
+        bigint id PK
+        bigint size_profile_id FK
+        bigint item_id FK
         string size
         int change_count
     }
 
     STUDENT_SIZE_HISTORIES {
-        int id PK
-        int size_item_id FK
+        bigint id PK
+        bigint size_item_id FK
         string old_size
         string new_size
-        int changed_by FK
+        bigint changed_by FK
         datetime changed_at
     }
 
+    SIZE_CHANGE_EVENTS {
+        bigint id PK
+        string title
+        text description
+        datetime start_date
+        datetime end_date
+        bigint faculty_id FK
+        bigint study_program_id FK
+        bigint generation_id FK
+        string student_level
+        int max_changes
+        json baju_size_options
+        json sepatu_size_options
+        boolean is_active
+        boolean allow_reedit
+        bigint created_by FK
+    }
+
+    SIZE_EVENT_SUBMISSIONS {
+        bigint id PK
+        bigint student_id FK
+        bigint event_id FK
+        int submission_count
+    }
+
     ENTITLEMENTS {
-        int id PK
-        int study_program_id FK
-        int generation_id FK
-        int period_id FK
+        bigint id PK
+        string code
         string student_level
         string description
+        boolean is_active
     }
 
     ENTITLEMENT_ITEMS {
-        int id PK
-        int entitlement_id FK
-        int item_id FK
+        bigint id PK
+        bigint entitlement_id FK
+        bigint item_id FK
         int quantity
     }
 
     DISTRIBUTION_SCHEDULES {
-        int id PK
-        int stage_id FK
+        bigint id PK
         string name
-        string date
+        string period
+        string student_level
+        date date
         string location
         string session
+        bigint generation_id FK
+        bigint faculty_id FK
+        bigint study_program_id FK
         boolean is_active
     }
 
     DIST_SCHEDULE_ITEMS {
-        int id PK
-        int schedule_id FK
-        int item_id FK
+        bigint id PK
+        bigint schedule_id FK
+        bigint item_id FK
     }
 
     DISTRIBUTION_TRANSACTIONS {
-        int id PK
-        int student_id FK
-        int schedule_id FK
-        int stage_id FK
-        int staff_id FK
-        string status
+        bigint id PK
+        bigint student_id FK
+        bigint schedule_id FK
+        bigint staff_id FK
+        enum status
         datetime pickup_time
+        text notes
     }
 
     DISTRIBUTION_ITEMS {
-        int id PK
-        int transaction_id FK
-        int item_id FK
+        bigint id PK
+        bigint transaction_id FK
+        bigint item_id FK
+        bigint variant_id FK
         string expected_size
         string actual_size
         int quantity
+        decimal hpp
+        decimal selling_price_at_distribution
+        decimal unit_price
     }
 
     STOCK_RECEIVES {
-        int id PK
-        string reference_number
-        int vendor_id FK
-        string receive_date
-        string status
+        bigint id PK
+        string reference_number UK
+        bigint vendor_id FK
+        date receive_date
+        enum status
+        text notes
     }
 
     STOCK_RECEIVE_ITEMS {
-        int id PK
-        int stock_receive_id FK
-        int item_id FK
-        int variant_id FK
+        bigint id PK
+        bigint stock_receive_id FK
+        bigint item_id FK
+        bigint variant_id FK
         int quantity
         decimal unit_price
         decimal hpp
     }
 
+    STOCK_BATCHES {
+        bigint id PK
+        bigint item_id FK
+        bigint variant_id FK
+        int quantity_remaining
+        decimal unit_hpp
+        date received_date
+        bigint stock_receive_item_id FK
+    }
+
     STOCK_MOVEMENTS {
-        int id PK
-        int item_id FK
-        int variant_id FK
-        string type
+        bigint id PK
+        bigint item_id FK
+        bigint variant_id FK
+        enum type
         int quantity
+        decimal hpp
+        bigint stock_batch_id FK
         string reference_type
-        int reference_id
+        bigint reference_id
+        text notes
     }
 
     STOCK_BALANCES {
-        int id PK
-        int item_id FK
-        int variant_id FK
+        bigint id PK
+        bigint item_id FK
+        bigint variant_id FK
         int quantity
         int reserved
         decimal last_hpp
     }
 
     IMPORT_BATCHES {
-        int id PK
+        bigint id PK
         string import_type
         string file_name
         int total_rows
         int success_rows
         int failed_rows
-        string status
-        int imported_by FK
+        enum status
+        json error_log
+        bigint imported_by FK
     }
 
     EMAIL_NOTIFICATIONS {
-        int id PK
-        int student_id FK
-        int schedule_id FK
+        bigint id PK
+        bigint student_id FK
+        bigint schedule_id FK
         string type
         string status
         datetime sent_at
+        text error_message
     }
 
     AUDIT_LOGS {
-        int id PK
-        int user_id FK
+        bigint id PK
+        bigint user_id FK
         string action
         string model_type
-        int model_id
+        bigint model_id
+        json old_values
+        json new_values
         string ip_address
     }
 
+    OTP_CODES {
+        bigint id PK
+        bigint user_id FK
+        string nim
+        string email
+        string code
+        string type
+        datetime expires_at
+        datetime used_at
+    }
+
+    SMTP_SETTINGS {
+        bigint id PK
+        string mailer
+        enum scheme
+        string host
+        int port
+        string username
+        text password
+        boolean verify_peer
+        text api_key
+        string from_address
+        string from_name
+        boolean is_active
+        bigint created_by FK
+    }
+
+    DOCUMENT_SEQUENCES {
+        bigint id PK
+        string type
+        string period
+        int value
+    }
+
+    STUDENT_SUMMARIES {
+        bigint id PK
+        bigint student_id FK UK
+        int total_transactions
+        int total_items_received
+        decimal total_spend
+        datetime last_distribution_at
+        datetime last_calculated_at
+    }
+
     STOCK_OPNAMES {
-        int id PK
+        bigint id PK
         string reference_number UK
         date opname_date
         string period
-        string notes
-        string status
-        int created_by FK
-        datetime created_at
+        text notes
+        enum status
+        bigint created_by FK
     }
 
     STOCK_OPNAME_ITEMS {
-        int id PK
-        int stock_opname_id FK
-        int item_id FK
-        int variant_id FK
+        bigint id PK
+        bigint stock_opname_id FK
+        bigint item_id FK
+        bigint variant_id FK
         int system_quantity
         int physical_quantity
-        int variance
-        string notes
+        int computed_variance
+        text notes
     }
 
     STOCK_OPNAME_ADJUSTMENTS {
-        int id PK
-        int stock_opname_id FK
-        int stock_movement_id FK
-        string type
+        bigint id PK
+        bigint stock_opname_id FK
+        bigint stock_movement_id FK
+        enum type
         int quantity
-        string reason
-        int approved_by FK
+        text reason
+        bigint approved_by FK
         datetime approved_at
     }
 
-    USERS ||--|| STUDENTS : "fk.user_id -> id"
+    USERS ||--o| STUDENTS : "fk.user_id -> id"
     FACULTIES ||--o{ STUDY_PROGRAMS : "fk.faculty_id -> id"
     STUDY_PROGRAMS ||--o{ STUDENTS : "fk.study_program_id -> id"
     STUDENT_GENERATIONS ||--o{ STUDENTS : "fk.generation_id -> id"
+    STUDENTS }o--|| STUDENT_LEVELS : "fk.student_level -> kode"
     ITEM_CATEGORIES ||--o{ ITEMS : "fk.category_id -> id"
+    ITEM_TYPES ||--o{ ITEMS : "fk.type_id -> id"
+    ITEM_DEPARTMENTS ||--o{ ITEMS : "fk.department_id -> id"
     ITEMS ||--o{ ITEM_VARIANTS : "fk.item_id -> id"
+    ITEM_SIZES ||--o{ ITEM_VARIANTS : "fk.size_id -> id"
+    ITEM_CATEGORIES ||--o{ CATEGORY_ITEM_SIZE : "fk.category_id -> id"
+    ITEMS ||--o{ CATEGORY_ITEM_SIZE : "fk.item_id -> id"
+    ITEM_SIZES ||--o{ CATEGORY_ITEM_SIZE : "fk.size_id -> id"
     ITEMS ||--o{ ITEM_PRICES : "fk.item_id -> id"
-    ITEM_PRICES }o--|| DISTRIBUTION_PERIODS : "fk.period_id -> id"
     VENDORS ||--o{ STOCK_RECEIVES : "fk.vendor_id -> id"
 
     STUDENTS ||--o{ ELIGIBILITY_RECORDS : "fk.student_id -> id"
-    STUDENTS ||--|| STUDENT_SIZE_PROFILES : "fk.student_id -> id"
+    STUDENTS ||--o| STUDENT_SIZE_PROFILES : "fk.student_id -> id"
     STUDENT_SIZE_PROFILES ||--o{ STUDENT_SIZE_ITEMS : "fk.size_profile_id -> id"
     STUDENT_SIZE_ITEMS }o--|| ITEMS : "fk.item_id -> id"
     STUDENT_SIZE_ITEMS ||--o{ STUDENT_SIZE_HISTORIES : "fk.size_item_id -> id"
     STUDENT_SIZE_HISTORIES }o--o| USERS : "fk.changed_by -> id"
-    DISTRIBUTION_PERIODS ||--o{ ELIGIBILITY_RECORDS : "fk.period_id -> id"
-    DISTRIBUTION_PERIODS ||--o{ STUDENT_SIZE_PROFILES : "fk.period_id -> id"
-    DISTRIBUTION_PERIODS ||--o{ DISTRIBUTION_STAGES : "fk.period_id -> id"
 
-    ENTITLEMENTS }o--|| STUDY_PROGRAMS : "fk.study_program_id -> id"
-    ENTITLEMENTS }o--|| STUDENT_GENERATIONS : "fk.generation_id -> id"
-    ENTITLEMENTS }o--|| DISTRIBUTION_PERIODS : "fk.period_id -> id"
+    SIZE_CHANGE_EVENTS }o--o| FACULTIES : "fk.faculty_id -> id"
+    SIZE_CHANGE_EVENTS }o--o| STUDY_PROGRAMS : "fk.study_program_id -> id"
+    SIZE_CHANGE_EVENTS }o--o| STUDENT_GENERATIONS : "fk.generation_id -> id"
+    SIZE_CHANGE_EVENTS }o--o| USERS : "fk.created_by -> id"
+    SIZE_CHANGE_EVENTS ||--o{ SIZE_EVENT_SUBMISSIONS : "fk.event_id -> id"
+    STUDENTS ||--o{ SIZE_EVENT_SUBMISSIONS : "fk.student_id -> id"
+
     ENTITLEMENTS ||--o{ ENTITLEMENT_ITEMS : "fk.entitlement_id -> id"
     ENTITLEMENT_ITEMS }o--|| ITEMS : "fk.item_id -> id"
 
-    DISTRIBUTION_STAGES ||--o{ DISTRIBUTION_SCHEDULES : "fk.stage_id -> id"
     DISTRIBUTION_SCHEDULES ||--o{ DIST_SCHEDULE_ITEMS : "fk.schedule_id -> id"
     DIST_SCHEDULE_ITEMS }o--|| ITEMS : "fk.item_id -> id"
     DISTRIBUTION_SCHEDULES ||--o{ DISTRIBUTION_TRANSACTIONS : "fk.schedule_id -> id"
-    DISTRIBUTION_STAGES ||--o{ DISTRIBUTION_TRANSACTIONS : "fk.stage_id -> id"
     STUDENTS ||--o{ DISTRIBUTION_TRANSACTIONS : "fk.student_id -> id"
     USERS ||--o{ DISTRIBUTION_TRANSACTIONS : "fk.staff_id -> id"
     DISTRIBUTION_TRANSACTIONS ||--o{ DISTRIBUTION_ITEMS : "fk.transaction_id -> id"
     DISTRIBUTION_ITEMS }o--|| ITEMS : "fk.item_id -> id"
+    DISTRIBUTION_ITEMS }o--o| ITEM_VARIANTS : "fk.variant_id -> id"
 
     DISTRIBUTION_SCHEDULES ||--o{ EMAIL_NOTIFICATIONS : "fk.schedule_id -> id"
     EMAIL_NOTIFICATIONS }o--|| STUDENTS : "fk.student_id -> id"
@@ -356,8 +483,12 @@ erDiagram
     STOCK_RECEIVES ||--o{ STOCK_RECEIVE_ITEMS : "fk.stock_receive_id -> id"
     STOCK_RECEIVE_ITEMS }o--|| ITEMS : "fk.item_id -> id"
     STOCK_RECEIVE_ITEMS }o--|| ITEM_VARIANTS : "fk.variant_id -> id"
+    STOCK_BATCHES }o--|| ITEMS : "fk.item_id -> id"
+    STOCK_BATCHES }o--|| ITEM_VARIANTS : "fk.variant_id -> id"
+    STOCK_BATCHES }o--o| STOCK_RECEIVE_ITEMS : "fk.stock_receive_item_id -> id"
     STOCK_MOVEMENTS }o--|| ITEMS : "fk.item_id -> id"
     STOCK_MOVEMENTS }o--|| ITEM_VARIANTS : "fk.variant_id -> id"
+    STOCK_MOVEMENTS }o--o| STOCK_BATCHES : "fk.stock_batch_id -> id"
     STOCK_BALANCES }o--|| ITEMS : "fk.item_id -> id"
     STOCK_BALANCES }o--|| ITEM_VARIANTS : "fk.variant_id -> id"
 
@@ -365,10 +496,13 @@ erDiagram
     STOCK_OPNAME_ITEMS }o--|| ITEMS : "fk.item_id -> id"
     STOCK_OPNAME_ITEMS }o--|| ITEM_VARIANTS : "fk.variant_id -> id"
     STOCK_OPNAMES ||--o{ STOCK_OPNAME_ADJUSTMENTS : "fk.stock_opname_id -> id"
-    STOCK_OPNAME_ADJUSTMENTS }o--|| STOCK_MOVEMENTS : "fk.stock_movement_id -> id"
+    STOCK_OPNAME_ADJUSTMENTS }o--o| STOCK_MOVEMENTS : "fk.stock_movement_id -> id"
 
     IMPORT_BATCHES }o--|| USERS : "fk.imported_by -> id"
-    AUDIT_LOGS }o--|| USERS : "fk.user_id -> id"
+    AUDIT_LOGS }o--o| USERS : "fk.user_id -> id"
+    OTP_CODES }o--o| USERS : "fk.user_id -> id"
+    SMTP_SETTINGS }o--o| USERS : "fk.created_by -> id"
+    STUDENT_SUMMARIES ||--|| STUDENTS : "fk.student_id -> id"
 ```
 
 ---
@@ -379,399 +513,508 @@ erDiagram
 
 | Kolom | Tipe | Keterangan |
 |-------|------|-----------|
-| `id` | int (PK) | Identifier unik user |
+| `id` | bigint (PK) | Identifier unik user |
 | `name` | string | Nama lengkap |
 | `email` | string (UK) | Email login |
 | `password` | string | Password ter-hash (bcrypt) |
 | `email_verified_at` | datetime | Waktu email terverifikasi |
-| `created_at` | datetime | Waktu dibuat |
-| `updated_at` | datetime | Waktu diperbarui |
+| `last_login_at` | datetime | Waktu login terakhir |
+| `must_change_password` | boolean | Wajib ganti password (default false) |
+| `is_active` | boolean | Status aktif (default true) |
+| `remember_token` | string | Token "remember me" |
+| `created_at` / `updated_at` | datetime | Timestamp |
 
 ### `faculties`
 
 | Kolom | Tipe | Keterangan |
 |-------|------|-----------|
-| `id` | int (PK) | Identifier unik |
+| `id` | bigint (PK) | Identifier unik |
 | `name` | string | Nama fakultas |
 | `code` | string (UK) | Kode fakultas (FKIP, FEB) |
-| `created_at` | datetime | Waktu dibuat |
+| `deleted_at` | datetime | Soft delete |
 
 ### `study_programs`
 
 | Kolom | Tipe | Keterangan |
 |-------|------|-----------|
-| `id` | int (PK) | Identifier unik |
+| `id` | bigint (PK) | Identifier unik |
 | `name` | string | Nama program studi |
 | `code` | string (UK) | Kode prodi |
-| `faculty_id` | int (FK) | Fakultas induk |
-| `created_at` | datetime | Waktu dibuat |
+| `faculty_id` | bigint (FK) | Fakultas induk |
+| `deleted_at` | datetime | Soft delete |
 
 ### `student_generations`
 
 | Kolom | Tipe | Keterangan |
 |-------|------|-----------|
-| `id` | int (PK) | Identifier unik |
+| `id` | bigint (PK) | Identifier unik |
 | `name` | string | Nama generasi (Semester 1, Angkatan 2024) |
-| `code` | string | Kode generasi |
-| `created_at` | datetime | Waktu dibuat |
-
-### `students`
-
-| Kolom | Tipe | Keterangan |
-|-------|------|-----------|
-| `id` | int (PK) | Identifier unik |
-| `user_id` | int (FK) | Relasi ke akun login |
-| `nim` | string (UK) | Nomor Induk Mahasiswa |
-| `name` | string | Nama lengkap |
-| `email_kampus` | string (UK) | Email @krw.horizon.ac.id |
-| `email_pribadi` | string | Email pribadi |
-| `qr_token` | string (UK, nullable) | Token QR permanen |
-| `qr_generated_at` | datetime | Waktu QR digenerate |
-| `study_program_id` | int (FK) | Program studi |
-| `generation_id` | int (FK) | Generasi |
-| `student_level` | string (FK ke `student_levels.kode`) | Lihat master data Student Level |
-| `email_verified_at` | datetime | Waktu verifikasi email |
-| `created_at` | datetime | Waktu dibuat |
+| `code` | string (UK) | Kode generasi |
+| `deleted_at` | datetime | Soft delete |
 
 ### `student_levels`
 
 | Kolom | Tipe | Keterangan |
 |-------|------|-----------|
-| `id` | int (PK) | Identifier unik |
-| `kode` | string (UK) | Identifier internal (contoh: `year_1_sem_1`) |
-| `label` | string | Label tampilan (contoh: `Year 1 Sem 1 (Freshman)`) |
-| `is_active` | boolean | Status aktif |
-| `sort_order` | int | Urutan tampilan |
-| `created_at` | datetime | Waktu dibuat |
-| `updated_at` | datetime | Waktu diupdate |
+| `id` | bigint (PK) | Identifier unik |
+| `kode` | string (UK) | Identifier internal (`Y1S1`, `Y1S2`, ...) |
+| `deskripsi` | string | Deskripsi level |
+| `status` | string | Status opsional |
+
+### `students`
+
+| Kolom | Tipe | Keterangan |
+|-------|------|-----------|
+| `id` | bigint (PK) | Identifier unik |
+| `user_id` | bigint (FK, nullable) | Relasi ke akun login |
+| `nim` | string (UK) | Nomor Induk Mahasiswa |
+| `name` | string | Nama lengkap |
+| `email_kampus` | string (UK, nullable) | Email @krw.horizon.ac.id |
+| `email_pribadi` | string | Email pribadi |
+| `study_program_id` | bigint (FK) | Program studi |
+| `generation_id` | bigint (FK) | Generasi |
+| `student_level` | string (default `Y1S1`) | Level mahasiswa (ref `student_levels.kode`) |
+| `status` | enum | `active` / `leave` / `graduated` / `non_active` |
+| `current_semester` | string | Semester berjalan (default `Y1S1`) |
+| `entitlement_code` | string (nullable) | Kode entitlement aktif |
+| `email_verified_at` | datetime | Waktu verifikasi email |
+| `deleted_at` | datetime | Soft delete |
 
 ### `item_categories`
 
 | Kolom | Tipe | Keterangan |
 |-------|------|-----------|
-| `id` | int (PK) | Identifier unik |
-| `name` | string | Nama kategori |
-| `description` | text | Deskripsi |
-| `created_at` | datetime | Waktu dibuat |
+| `id` | bigint (PK) | Identifier unik |
+| `code` | string (UK, 3) | Kode kategori (`UNF`, `UNM`, `UWK`) |
+| `label` | string | Nama kategori |
+| `deleted_at` | datetime | Soft delete |
+
+### `item_types`
+
+| Kolom | Tipe | Keterangan |
+|-------|------|-----------|
+| `id` | bigint (PK) | Identifier unik |
+| `code` | string (UK, 3) | Kode tipe (`SCB`, `PTS`) |
+| `label` | string | Nama tipe |
+| `deleted_at` | datetime | Soft delete |
+
+### `item_departments`
+
+| Kolom | Tipe | Keterangan |
+|-------|------|-----------|
+| `id` | bigint (PK) | Identifier unik |
+| `code` | string (UK, 2) | Kode departemen (`01`) |
+| `label` | string | Nama departemen |
+| `deleted_at` | datetime | Soft delete |
+
+### `item_sizes`
+
+| Kolom | Tipe | Keterangan |
+|-------|------|-----------|
+| `id` | bigint (PK) | Identifier unik |
+| `code` | string (UK, 10) | Kode ukuran (`S`, `M`, `L`, `XL`, `40`, `42`) |
+| `label` | string | Label ukuran |
+| `deleted_at` | datetime | Soft delete |
 
 ### `items`
 
 | Kolom | Tipe | Keterangan |
 |-------|------|-----------|
-| `id` | int (PK) | Identifier unik |
+| `id` | bigint (PK) | Identifier unik |
 | `name` | string | Nama item |
-| `code` | string | Kode item |
-| `category_id` | int (FK) | Kategori item |
+| `code` | string (UK) | Kode item penuh (`KATEGORI-GENDER-TIPE-VARIANT-SIZE`) |
+| `base_code` | string | Kode dasar (`KATEGORI-GENDER-TIPE`) |
+| `gender` | char | L / P / U |
+| `category_id` | bigint (FK) | Kategori item |
+| `type_id` | bigint (FK, nullable) | Tipe item |
+| `department_id` | bigint (FK, nullable) | Departemen item |
 | `unit` | string | Satuan (pcs, pasang, set) |
-| `selling_price` | decimal | Harga jual |
-| `hpp` | decimal | Harga Pokok Pembelian |
-| `created_at` | datetime | Waktu dibuat |
+| `selling_price` | decimal(15,2) | Harga jual |
+| `hpp` | decimal(15,2) | HPP |
+| `is_active` | boolean | Status aktif |
+| `deleted_at` | datetime | Soft delete |
 
 ### `item_variants`
 
 | Kolom | Tipe | Keterangan |
 |-------|------|-----------|
-| `id` | int (PK) | Identifier unik |
-| `item_id` | int (FK) | Item induk |
+| `id` | bigint (PK) | Identifier unik |
+| `item_id` | bigint (FK) | Item induk |
+| `size_id` | bigint (FK, nullable) | Ref `item_sizes` |
 | `size` | string | Ukuran (S, M, L, XL, 40, 42) |
-| `sku` | string | Stock Keeping Unit |
-| `weight` | decimal | Berat item (opsional) |
-| `created_at` | datetime | Waktu dibuat |
+| `size_label` | string | Label ukuran |
+| `sku` | string (UK) | Stock Keeping Unit |
+| `weight` | decimal(8,2) | Berat item (opsional) |
+| `deleted_at` | datetime | Soft delete |
+
+### `category_item_size`
+
+Pivot (M : M) antara kategori, item, dan ukuran.
+
+| Kolom | Tipe | Keterangan |
+|-------|------|-----------|
+| `id` | bigint (PK) | Identifier unik |
+| `category_id` | bigint (FK) | Kategori |
+| `item_id` | bigint (FK) | Item |
+| `size_id` | bigint (FK) | Ukuran |
 
 ### `item_prices`
 
 | Kolom | Tipe | Keterangan |
 |-------|------|-----------|
-| `id` | int (PK) | Identifier unik |
-| `item_id` | int (FK) | Item terkait |
-| `period_id` | int (FK, nullable) | Periode harga |
-| `selling_price` | decimal | Harga jual periode ini |
-| `hpp` | decimal | HPP periode ini |
-| `effective_date` | date | Tanggal efektif |
-| `created_at` | datetime | Waktu dibuat |
+| `id` | bigint (PK) | Identifier unik |
+| `item_id` | bigint (FK) | Item terkait |
+| `selling_price` | decimal(15,2) | Harga jual |
+| `hpp` | decimal(15,2) | HPP |
+| `effective_date` | date (nullable) | Tanggal efektif |
 
 ### `vendors`
 
 | Kolom | Tipe | Keterangan |
 |-------|------|-----------|
-| `id` | int (PK) | Identifier unik |
+| `id` | bigint (PK) | Identifier unik |
 | `name` | string | Nama vendor |
 | `email` | string | Email vendor |
 | `contact` | string | Kontak person |
 | `phone` | string | No telepon |
-| `created_at` | datetime | Waktu dibuat |
-
-### `distribution_periods`
-
-| Kolom | Tipe | Keterangan |
-|-------|------|-----------|
-| `id` | int (PK) | Identifier unik |
-| `name` | string | Nama periode |
-| `start_date` | date | Tanggal mulai |
-| `end_date` | date | Tanggal akhir |
-| `size_change_deadline` | datetime | Batas input/ubah ukuran |
-| `is_active` | boolean | Status aktif |
-| `created_at` | datetime | Waktu dibuat |
-
-### `distribution_stages`
-
-| Kolom | Tipe | Keterangan |
-|-------|------|-----------|
-| `id` | int (PK) | Identifier unik |
-| `period_id` | int (FK) | Periode induk |
-| `name` | string | Nama stage |
-| `stage_order` | int | Urutan stage |
-| `start_date` | date | Tanggal mulai |
-| `end_date` | date | Tanggal akhir |
-| `notes` | text | Catatan |
-| `created_at` | datetime | Waktu dibuat |
+| `deleted_at` | datetime | Soft delete |
 
 ### `eligibility_records`
 
 | Kolom | Tipe | Keterangan |
 |-------|------|-----------|
-| `id` | int (PK) | Identifier unik |
-| `student_id` | int (FK) | Mahasiswa terkait |
-| `period_id` | int (FK) | Periode distribusi |
-| `is_eligible` | boolean | Status kelayakan |
-| `payment_status` | string | Status pembayaran |
-| `created_at` | datetime | Waktu dibuat |
+| `id` | bigint (PK) | Identifier unik |
+| `student_id` | bigint (FK) | Mahasiswa terkait |
+| `is_eligible` | boolean | Status kelayakan (default false) |
+| `payment_status` | string | Status pembayaran (default `belum`) |
 
 ### `student_size_profiles`
 
 | Kolom | Tipe | Keterangan |
 |-------|------|-----------|
-| `id` | int (PK) | Identifier unik |
-| `student_id` | int (FK) | Mahasiswa terkait |
-| `period_id` | int (FK) | Periode distribusi |
+| `id` | bigint (PK) | Identifier unik |
+| `student_id` | bigint (FK) | Mahasiswa terkait |
 | `is_filled` | boolean | Sudah isi ukuran? |
 | `filled_at` | datetime | Waktu isi pertama |
-| `created_at` | datetime | Waktu dibuat |
-| `updated_at` | datetime | Waktu diperbarui |
+| `baju_size` | string | Ukuran baju |
+| `sepatu_size` | string | Ukuran sepatu |
 
 ### `student_size_items`
 
 | Kolom | Tipe | Keterangan |
 |-------|------|-----------|
-| `id` | int (PK) | Identifier unik |
-| `size_profile_id` | int (FK) | Profil ukuran induk |
-| `item_id` | int (FK) | Item yg dipilihkan ukuran |
+| `id` | bigint (PK) | Identifier unik |
+| `size_profile_id` | bigint (FK) | Profil ukuran induk |
+| `item_id` | bigint (FK) | Item yg dipilihkan ukuran |
 | `size` | string | Ukuran yg dipilih |
-| `change_count` | int | Jumlah perubahan (maks 1) |
-| `created_at` | datetime | Waktu dibuat |
-| `updated_at` | datetime | Waktu diperbarui |
+| `change_count` | int | Jumlah perubahan |
 
 ### `student_size_histories`
 
 | Kolom | Tipe | Keterangan |
 |-------|------|-----------|
-| `id` | int (PK) | Identifier unik |
-| `size_item_id` | int (FK) | Item ukuran terkait |
+| `id` | bigint (PK) | Identifier unik |
+| `size_item_id` | bigint (FK) | Item ukuran terkait |
 | `old_size` | string | Ukuran sebelum |
 | `new_size` | string | Ukuran setelah |
-| `changed_by` | int (FK, nullable) | Student=null, Staff=user_id |
+| `changed_by` | bigint (FK, nullable) | Student=null, Staff=user_id |
 | `changed_at` | datetime | Waktu perubahan |
-| `created_at` | datetime | Waktu dibuat |
+
+### `size_change_events`
+
+| Kolom | Tipe | Keterangan |
+|-------|------|-----------|
+| `id` | bigint (PK) | Identifier unik |
+| `title` | string | Judul event |
+| `description` | text | Deskripsi |
+| `start_date` | datetime | Mulai |
+| `end_date` | datetime | Selesai |
+| `faculty_id` | bigint (FK, nullable) | Filter fakultas |
+| `study_program_id` | bigint (FK, nullable) | Filter prodi |
+| `generation_id` | bigint (FK, nullable) | Filter generasi |
+| `student_level` | string | Filter level |
+| `max_changes` | tinyint | Maksimal perubahan (default 1) |
+| `baju_size_options` | json | Pilihan ukuran baju |
+| `sepatu_size_options` | json | Pilihan ukuran sepatu |
+| `is_active` | boolean | Status aktif |
+| `allow_reedit` | boolean | Izinkan edit ulang |
+| `created_by` | bigint (FK) | Pembuat |
+
+### `size_event_submissions`
+
+| Kolom | Tipe | Keterangan |
+|-------|------|-----------|
+| `id` | bigint (PK) | Identifier unik |
+| `student_id` | bigint (FK) | Mahasiswa |
+| `event_id` | bigint (FK) | Event |
+| `submission_count` | tinyint | Jumlah submit |
 
 ### `entitlements`
 
 | Kolom | Tipe | Keterangan |
 |-------|------|-----------|
-| `id` | int (PK) | Identifier unik |
-| `study_program_id` | int (FK) | Program studi |
-| `generation_id` | int (FK) | Generasi |
-| `period_id` | int (FK) | Periode distribusi |
-| `student_level` | string (FK ke `student_levels.kode`) | Lihat master data Student Level |
+| `id` | bigint (PK) | Identifier unik |
+| `code` | string | Kode entitlement |
+| `student_level` | string | Level mahasiswa target |
 | `description` | string | Deskripsi hak barang |
-| `created_at` | datetime | Waktu dibuat |
+| `is_active` | boolean | Status aktif |
+| `deleted_at` | datetime | Soft delete |
 
 ### `entitlement_items`
 
 | Kolom | Tipe | Keterangan |
 |-------|------|-----------|
-| `id` | int (PK) | Identifier unik |
-| `entitlement_id` | int (FK) | Entitlement induk |
-| `item_id` | int (FK) | Item yang diberikan |
+| `id` | bigint (PK) | Identifier unik |
+| `entitlement_id` | bigint (FK) | Entitlement induk |
+| `item_id` | bigint (FK) | Item yang diberikan |
 | `quantity` | int | Jumlah item |
-| `created_at` | datetime | Waktu dibuat |
 
 ### `distribution_schedules`
 
 | Kolom | Tipe | Keterangan |
 |-------|------|-----------|
-| `id` | int (PK) | Identifier unik |
-| `stage_id` | int (FK) | Stage distribusi |
+| `id` | bigint (PK) | Identifier unik |
 | `name` | string | Nama jadwal |
+| `period` | string (nullable) | Periode distribusi |
+| `student_level` | string (nullable) | Level target |
 | `date` | date | Tanggal distribusi |
 | `location` | string | Lokasi distribusi |
 | `session` | string | Sesi/jam |
+| `generation_id` | bigint (FK, nullable) | Filter generasi |
+| `faculty_id` | bigint (FK, nullable) | Filter fakultas |
+| `study_program_id` | bigint (FK, nullable) | Filter prodi |
 | `is_active` | boolean | Status aktif |
-| `created_at` | datetime | Waktu dibuat |
+| `deleted_at` | datetime | Soft delete |
 
 ### `dist_schedule_items`
 
 | Kolom | Tipe | Keterangan |
 |-------|------|-----------|
-| `id` | int (PK) | Identifier unik |
-| `schedule_id` | int (FK) | Jadwal distribusi |
-| `item_id` | int (FK) | Item yang dibagikan |
+| `id` | bigint (PK) | Identifier unik |
+| `schedule_id` | bigint (FK) | Jadwal distribusi |
+| `item_id` | bigint (FK) | Item yang dibagikan |
 
 ### `distribution_transactions`
 
 | Kolom | Tipe | Keterangan |
 |-------|------|-----------|
-| `id` | int (PK) | Identifier unik |
-| `student_id` | int (FK) | Mahasiswa |
-| `schedule_id` | int (FK) | Jadwal |
-| `stage_id` | int (FK) | Stage |
-| `staff_id` | int (FK) | Staff pelayanan |
-| `status` | string | completed/partial/cancelled |
+| `id` | bigint (PK) | Identifier unik |
+| `student_id` | bigint (FK) | Mahasiswa |
+| `schedule_id` | bigint (FK) | Jadwal |
+| `staff_id` | bigint (FK) | Staff pelayanan |
+| `status` | enum | `completed` / `partial` / `cancelled` |
 | `pickup_time` | datetime | Waktu pengambilan |
-| `notes` | string | Catatan |
-| `created_at` | datetime | Waktu dibuat |
+| `notes` | text | Catatan |
+| `deleted_at` | datetime | Soft delete |
+
+> Unique index `(student_id, schedule_id)` — satu transaksi per mahasiswa per jadwal.
 
 ### `distribution_items`
 
 | Kolom | Tipe | Keterangan |
 |-------|------|-----------|
-| `id` | int (PK) | Identifier unik |
-| `transaction_id` | int (FK) | Transaksi induk |
-| `item_id` | int (FK) | Item yang diambil |
+| `id` | bigint (PK) | Identifier unik |
+| `transaction_id` | bigint (FK) | Transaksi induk |
+| `item_id` | bigint (FK) | Item yang diambil |
+| `variant_id` | bigint (FK, nullable) | Varian/ukuran |
 | `expected_size` | string | Ukuran input mahasiswa |
 | `actual_size` | string | Ukuran yang diberikan |
 | `quantity` | int | Jumlah |
-| `created_at` | datetime | Waktu dibuat |
+| `hpp` | decimal(15,2) | HPP saat transaksi |
+| `selling_price_at_distribution` | decimal(15,2) | Harga jual captured |
+| `unit_price` | decimal(15,2) | Harga satuan |
 
 ### `stock_receives`
 
 | Kolom | Tipe | Keterangan |
 |-------|------|-----------|
-| `id` | int (PK) | Identifier unik |
-| `reference_number` | string | No referensi |
-| `vendor_id` | int (FK) | Vendor |
+| `id` | bigint (PK) | Identifier unik |
+| `reference_number` | string (UK) | No referensi (`SR-PERIODE-XXXX`) |
+| `vendor_id` | bigint (FK) | Vendor |
 | `receive_date` | date | Tanggal terima |
-| `status` | string | pending/received/cancelled |
-| `notes` | string | Catatan |
-| `created_at` | datetime | Waktu dibuat |
+| `status` | enum | `pending` / `received` / `cancelled` |
+| `notes` | text | Catatan |
+| `deleted_at` | datetime | Soft delete |
 
 ### `stock_receive_items`
 
 | Kolom | Tipe | Keterangan |
 |-------|------|-----------|
-| `id` | int (PK) | Identifier unik |
-| `stock_receive_id` | int (FK) | Penerimaan induk |
-| `item_id` | int (FK) | Item |
-| `variant_id` | int (FK) | Varian/ukuran |
+| `id` | bigint (PK) | Identifier unik |
+| `stock_receive_id` | bigint (FK) | Penerimaan induk |
+| `item_id` | bigint (FK) | Item |
+| `variant_id` | bigint (FK) | Varian/ukuran |
 | `quantity` | int | Jumlah |
-| `unit_price` | decimal | Harga satuan |
-| `hpp` | decimal | HPP per batch |
-| `created_at` | datetime | Waktu dibuat |
+| `unit_price` | decimal(15,2) | Harga satuan |
+| `hpp` | decimal(15,2) | HPP per batch |
+
+### `stock_batches`
+
+| Kolom | Tipe | Keterangan |
+|-------|------|-----------|
+| `id` | bigint (PK) | Identifier unik |
+| `item_id` | bigint (FK) | Item |
+| `variant_id` | bigint (FK) | Varian/ukuran |
+| `quantity_remaining` | int | Sisa stok batch (FIFO) |
+| `unit_hpp` | decimal(15,2) | HPP satuan |
+| `received_date` | date | Tanggal terima |
+| `stock_receive_item_id` | bigint (FK, nullable) | Sumber receive item |
+| `deleted_at` | datetime | Soft delete |
 
 ### `stock_movements`
 
 | Kolom | Tipe | Keterangan |
 |-------|------|-----------|
-| `id` | int (PK) | Identifier unik |
-| `item_id` | int (FK) | Item |
-| `variant_id` | int (FK) | Varian/ukuran |
-| `type` | string | IN / OUT |
+| `id` | bigint (PK) | Identifier unik |
+| `item_id` | bigint (FK) | Item |
+| `variant_id` | bigint (FK) | Varian/ukuran |
+| `type` | enum | `IN` / `OUT` |
 | `quantity` | int | Jumlah |
-| `reference_type` | string | stock_receive / distribution |
-| `reference_id` | int | ID referensi |
-| `notes` | string | Catatan |
-| `created_at` | datetime | Waktu tercatat |
+| `hpp` | decimal(15,2) | HPP saat transaksi |
+| `stock_batch_id` | bigint (FK, nullable) | Batch FIFO |
+| `reference_type` | string | `stock_receive` / `distribution` / dll |
+| `reference_id` | bigint | ID referensi |
+| `notes` | text | Catatan |
+| `deleted_at` | datetime | Soft delete |
 
 ### `stock_balances`
 
 | Kolom | Tipe | Keterangan |
 |-------|------|-----------|
-| `id` | int (PK) | Identifier unik |
-| `item_id` | int (FK) | Item |
-| `variant_id` | int (FK) | Varian/ukuran |
+| `id` | bigint (PK) | Identifier unik |
+| `item_id` | bigint (FK) | Item |
+| `variant_id` | bigint (FK) | Varian/ukuran |
 | `quantity` | int | Saldo stok |
 | `reserved` | int | Stok di-reserve |
-| `last_hpp` | decimal | HPP terakhir |
-| `updated_at` | datetime | Waktu diperbarui |
+| `last_hpp` | decimal(15,2) | HPP terakhir |
 
 ### `stock_opnames`
 
 | Kolom | Tipe | Keterangan |
 |-------|------|-----------|
-| `id` | int (PK) | Identifier unik |
-| `reference_number` | string (UK) | No referensi |
+| `id` | bigint (PK) | Identifier unik |
+| `reference_number` | string (UK) | No referensi (`SO-PERIODE-XXXX`) |
 | `opname_date` | date | Tanggal opname |
-| `period` | string | Periode ("Agustus 2026") |
+| `period` | string | Periode ("2026/2027") |
 | `notes` | text | Catatan |
-| `status` | string | draft/completed/adjusted |
-| `created_by` | int (FK) | Pembuat batch |
-| `created_at` | datetime | Waktu dibuat |
+| `status` | enum | `draft` / `counted` / `approved` |
+| `created_by` | bigint (FK) | Pembuat batch |
 
 ### `stock_opname_items`
 
 | Kolom | Tipe | Keterangan |
 |-------|------|-----------|
-| `id` | int (PK) | Identifier unik |
-| `stock_opname_id` | int (FK) | Batch opname |
-| `item_id` | int (FK) | Item |
-| `variant_id` | int (FK) | Varian/ukuran |
+| `id` | bigint (PK) | Identifier unik |
+| `stock_opname_id` | bigint (FK) | Batch opname |
+| `item_id` | bigint (FK) | Item |
+| `variant_id` | bigint (FK) | Varian/ukuran |
 | `system_quantity` | int | Stok sistem |
 | `physical_quantity` | int | Stok fisik |
-| `variance` | int | Selisih |
+| `computed_variance` | int | Selisih (VIRTUAL GENERATED) |
 | `notes` | text | Catatan |
-| `created_at` | datetime | Waktu dibuat |
 
 ### `stock_opname_adjustments`
 
 | Kolom | Tipe | Keterangan |
 |-------|------|-----------|
-| `id` | int (PK) | Identifier unik |
-| `stock_opname_id` | int (FK) | Batch opname |
-| `stock_movement_id` | int (FK) | Stock movement |
-| `type` | string | surplus / shortage |
+| `id` | bigint (PK) | Identifier unik |
+| `stock_opname_id` | bigint (FK) | Batch opname |
+| `stock_movement_id` | bigint (FK, nullable) | Stock movement |
+| `type` | enum | `surplus` / `shortage` |
 | `quantity` | int | Jumlah adjustment |
 | `reason` | text | Alasan |
-| `approved_by` | int (FK) | Approver |
+| `approved_by` | bigint (FK, nullable) | Approver |
 | `approved_at` | datetime | Waktu approve |
-| `created_at` | datetime | Waktu dibuat |
 
 ### `import_batches`
 
 | Kolom | Tipe | Keterangan |
 |-------|------|-----------|
-| `id` | int (PK) | Identifier unik |
-| `import_type` | string | students/eligible/items |
+| `id` | bigint (PK) | Identifier unik |
+| `import_type` | string | students / eligible / items / item_prices / stock_receive |
 | `file_name` | string | Nama file |
 | `total_rows` | int | Total baris |
 | `success_rows` | int | Berhasil |
 | `failed_rows` | int | Gagal |
-| `status` | string | processing/completed/failed |
+| `status` | enum | `processing` / `completed` / `failed` |
 | `error_log` | json | Log error per baris |
-| `imported_by` | int (FK) | User pengimport |
-| `created_at` | datetime | Waktu import |
+| `imported_by` | bigint (FK) | User pengimport |
 
 ### `email_notifications`
 
 | Kolom | Tipe | Keterangan |
 |-------|------|-----------|
-| `id` | int (PK) | Identifier unik |
-| `student_id` | int (FK) | Penerima |
-| `schedule_id` | int (FK) | Jadwal terkait |
-| `type` | string | event_invite/credentials/password_reset |
-| `status` | string | pending/sent/failed |
+| `id` | bigint (PK) | Identifier unik |
+| `student_id` | bigint (FK) | Penerima |
+| `schedule_id` | bigint (FK, nullable) | Jadwal terkait |
+| `type` | string | event_invite / credentials / password_reset |
+| `status` | string | pending / sent / failed |
 | `sent_at` | datetime | Waktu terkirim |
 | `error_message` | text | Error jika gagal |
-| `created_at` | datetime | Waktu dibuat |
 
 ### `audit_logs`
 
 | Kolom | Tipe | Keterangan |
 |-------|------|-----------|
-| `id` | int (PK) | Identifier unik |
-| `user_id` | int (FK) | User pelaku |
-| `action` | string | create/update/delete/login/export |
+| `id` | bigint (PK) | Identifier unik |
+| `user_id` | bigint (FK, nullable) | User pelaku |
+| `action` | string | create / update / delete / activate / get_password / dll |
 | `model_type` | string | Model terpengaruh |
-| `model_id` | int | ID model |
+| `model_id` | bigint | ID model |
 | `old_values` | json | Data sebelum |
 | `new_values` | json | Data setelah |
-| `ip_address` | string | IP address |
-| `created_at` | datetime | Waktu aksi |
+| `ip_address` | string(45) | IP address |
+
+### `otp_codes`
+
+| Kolom | Tipe | Keterangan |
+|-------|------|-----------|
+| `id` | bigint (PK) | Identifier unik |
+| `user_id` | bigint (FK, nullable) | User terkait |
+| `nim` | string (nullable) | NIM pemohon |
+| `email` | string | Email tujuan |
+| `code` | string(64) | Hash kode OTP |
+| `type` | string | password_reset / dll |
+| `expires_at` | datetime | Kedaluwarsa |
+| `used_at` | datetime | Waktu dipakai |
+
+### `smtp_settings`
+
+| Kolom | Tipe | Keterangan |
+|-------|------|-----------|
+| `id` | bigint (PK) | Identifier unik |
+| `mailer` | string | smtp / api / sendmail / log |
+| `scheme` | enum | `tls` / `ssl` / `null` |
+| `host` | string | Host SMTP |
+| `port` | int | Port |
+| `username` | string | Username |
+| `password` | text | Password ter-encrypt |
+| `verify_peer` | boolean | Nonaktifkan verifikasi SSL |
+| `api_key` | text | API key ter-encrypt |
+| `from_address` | string | Pengirim |
+| `from_name` | string | Nama pengirim |
+| `is_active` | boolean | Status aktif |
+| `created_by` | bigint (FK) | Pembuat |
+
+### `document_sequences`
+
+| Kolom | Tipe | Keterangan |
+|-------|------|-----------|
+| `id` | bigint (PK) | Identifier unik |
+| `type` | string(4) | `SR` / `SO` |
+| `period` | string | Periode ("2026/2027") |
+| `value` | int | Nomor urut terakhir |
+
+> Unique index `(type, period)` — dipakai `StockService::nextSequence()` dengan `LAST_INSERT_ID(value + 1)` (atomic).
+
+### `student_summaries`
+
+| Kolom | Tipe | Keterangan |
+|-------|------|-----------|
+| `id` | bigint (PK) | Identifier unik |
+| `student_id` | bigint (FK, UK) | Mahasiswa (unik) |
+| `total_transactions` | int | Total transaksi |
+| `total_items_received` | int | Total barang diterima |
+| `total_spend` | decimal(15,2) | Total pengeluaran |
+| `last_distribution_at` | datetime | Distribusi terakhir |
+| `last_calculated_at` | datetime | Terakhir dihitung |

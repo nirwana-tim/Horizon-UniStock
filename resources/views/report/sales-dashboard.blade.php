@@ -103,10 +103,7 @@
                         <tbody class="bg-white divide-y divide-gray-100">
                             @foreach($outOfStockItems as $balance)
                                 @php
-                                    $demand = \Illuminate\Support\Facades\DB::table('student_size_items')
-                                        ->where('item_id', $balance->item_id)
-                                        ->where('size', $balance->variant?->size)
-                                        ->count();
+                                    $demand = $balance->demand;
                                 @endphp
                                 @if($demand > 0)
                                     <tr>

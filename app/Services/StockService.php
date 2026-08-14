@@ -394,10 +394,23 @@ class StockService
 
     public function getOutOfStockItems(): Collection
     {
-        return StockBalance::with(['item.category', 'variant'])
+        $balances = StockBalance::with(['item.category', 'variant'])
             ->where('quantity', '<=', 0)
             ->orderBy('item_id')
             ->get();
+
+        $demands = DB::table('student_size_items')
+            ->select('item_id', 'size')
+            ->selectRaw('COUNT(*) as total')
+            ->groupBy('item_id', 'size')
+            ->get()
+            ->mapWithKeys(fn ($row) => [$row->item_id.'|'.$row->size => (int) $row->total]);
+
+        return $balances->map(function (StockBalance $balance) use ($demands) {
+            $balance->demand = $demands[$balance->item_id.'|'.$balance->variant?->size] ?? 0;
+
+            return $balance;
+        });
     }
 
     private function generateReferenceNumber(): string

@@ -11,11 +11,7 @@
         <td class="px-6 py-4 whitespace-nowrap text-sm text-right tabular-nums text-gray-900 font-medium">Rp {{ number_format(($balance->quantity * ($balance->last_hpp ?? 0)), 0, ',', '.') }}</td>
         <td class="px-6 py-4 whitespace-nowrap text-center">
             @php
-                $demand = \Illuminate\Support\Facades\DB::table('student_size_items')
-                    ->join('student_size_profiles', 'student_size_items.size_profile_id', '=', 'student_size_profiles.id')
-                    ->where('student_size_items.item_id', $balance->item_id)
-                    ->where('student_size_items.size', $balance->variant?->size)
-                    ->count();
+                $demand = $balance->demand;
                 $qty = $balance->quantity;
             @endphp
             @if($qty <= 0 && $demand > 0)

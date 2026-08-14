@@ -175,4 +175,27 @@ class NotificationService
             ->latest('id')
             ->first();
     }
+
+    /**
+     * Load the latest account notification per student in a single query.
+     *
+     * @param  iterable<\App\Models\Student>  $students
+     */
+    public function latestAccountNotificationsForStudents($students): \Illuminate\Support\Collection
+    {
+        $ids = collect($students)->map(fn ($s) => $s->id)->filter()->unique()->values();
+
+        if ($ids->isEmpty()) {
+            return collect();
+        }
+
+        return EmailNotification::whereIn('student_id', $ids)
+            ->whereIn('type', ['student_account', 'resend_account'])
+            ->whereIn('id', fn ($q) => $q->selectRaw('MAX(id)')->from('email_notifications')
+                ->whereIn('student_id', $ids)
+                ->whereIn('type', ['student_account', 'resend_account'])
+                ->groupBy('student_id'))
+            ->get()
+            ->keyBy('student_id');
+    }
 }

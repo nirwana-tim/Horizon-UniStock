@@ -70,7 +70,21 @@ class EntitlementController extends Controller
     {
         $entitlement->load(['items.item', 'studentLevel']);
 
-        return view('distribution.entitlement.show', compact('entitlement'));
+        $baseCodes = $entitlement->items
+            ->map(fn ($ei) => $ei->item?->base_code ?? $ei->item?->code)
+            ->filter()
+            ->unique()
+            ->values();
+
+        $availableSizes = App\Models\Item::whereIn('base_code', $baseCodes)
+            ->orWhereIn('code', $baseCodes)
+            ->with('variants')
+            ->get()
+            ->groupBy('base_code')
+            ->map(fn ($items) => $items->pluck('variants.0.size_label')->filter()->implode(', '))
+            ->all();
+
+        return view('distribution.entitlement.show', compact('entitlement', 'availableSizes'));
     }
 
     public function edit(Entitlement $entitlement): View

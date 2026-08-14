@@ -262,13 +262,11 @@
                         <div class="flex gap-2 justify-between items-end">
                             <div class="flex gap-2">
                                 <template x-for="(box, i) in [0,1,2,3]" :key="i">
-                                    <input type="text" inputmode="numeric" maxlength="1"
+                                    <input type="text" inputmode="numeric" maxlength="1" class="otp-input w-12 h-14 text-center text-lg font-semibold text-gray-800 bg-gray-100 border border-gray-200 rounded-lg focus:bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-100 transition-colors"
                                         x-model="otp[i]"
-                                        :x-ref="'otp'+i"
-                                        @keydown.backspace="if(!otp[i] && i>0) $refs['otp'+(i-1)].focus()"
-                                        @input="otp[i]=otp[i].replace(/[^0-9]/g,''); if(otp[i] && i<3) $refs['otp'+(i+1)].focus()"
-                                        @keydown.enter.prevent="i===3 ? verifyOtp() : null"
-                                        class="w-12 h-14 text-center text-lg font-semibold text-gray-800 bg-gray-100 border border-gray-200 rounded-lg focus:bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-100 transition-colors">
+                                        @keydown.backspace="if(!otp[i] && i>0) focusOtp(i-1)"
+                                        @input="otp[i]=otp[i].replace(/[^0-9]/g,''); if(otp[i] && i<3) focusOtp(i+1)"
+                                        @keydown.enter.prevent="i===3 ? verifyOtp() : null">
                                 </template>
                             </div>
                             <button type="button" @click="verifyOtp()" :disabled="verifying || otp.join('').length !== 4"
@@ -350,6 +348,10 @@
                     this.messageType = type;
                     clearTimeout(this._msgTimer);
                     this._msgTimer = setTimeout(() => this.message = '', 6000);
+                },
+                focusOtp(i) {
+                    const el = this.$el.querySelectorAll('.otp-input')[i];
+                    if (el) el.focus();
                 },
                 openTestModal() {
                     this.modalError = '';

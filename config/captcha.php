@@ -15,7 +15,7 @@ return [
         'quality' => 90,
         'math' => true,
         'expire' => 60,
-        'encrypt' => false,
+        'encrypt' => true,
     ],
     'flat' => [
         'length' => 6,

@@ -91,7 +91,9 @@ class UserController extends Controller
     {
         abort_unless($this->userService->manageableQuery()->whereKey($user->id)->exists(), 404);
 
-        $activated = $this->userService->setActive($user, $request->boolean('active'))->is_active;
+        $active = $request->has('active') ? $request->boolean('active') : ! $user->is_active;
+
+        $activated = $this->userService->setActive($user, $active)->is_active;
 
         return redirect()->route('admin.user.index')->with('success', $activated ? 'Akun berhasil diaktifkan.' : 'Akun berhasil dinonaktifkan.');
     }

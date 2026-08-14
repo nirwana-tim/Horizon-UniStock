@@ -7,6 +7,7 @@ use App\Models\ItemCategory;
 use App\Models\StockBalance;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class StockBalanceController extends Controller
@@ -33,6 +34,22 @@ class StockBalanceController extends Controller
         }
 
         $balances = $query->orderBy('item_id')->orderBy('variant_id')->paginate(20);
+
+        $demands = DB::table('student_size_items')
+            ->join('student_size_profiles', 'student_size_items.size_profile_id', '=', 'student_size_profiles.id')
+            ->select('student_size_items.item_id', 'student_size_items.size')
+            ->selectRaw('COUNT(*) as total')
+            ->groupBy('student_size_items.item_id', 'student_size_items.size')
+            ->get()
+            ->mapWithKeys(fn ($row) => [$row->item_id.'|'.$row->size => (int) $row->total]);
+
+        $balances->setCollection(
+            $balances->getCollection()->map(function (StockBalance $balance) use ($demands) {
+                $balance->demand = $demands[$balance->item_id.'|'.$balance->variant?->size] ?? 0;
+
+                return $balance;
+            })
+        );
 
         if ($request->ajax()) {
             return response()->json([
