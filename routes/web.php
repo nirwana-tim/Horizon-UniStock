@@ -152,7 +152,7 @@ Route::middleware(['auth', 'password.changed', 'role:super_admin|admin', 'thrott
     Route::patch('/students-data/{student}/toggle-status', [StudentController::class, 'toggleStatus'])->name('toggle-status');
     Route::get('/generate', [StudentController::class, 'generateIndex'])->name('generate-index');
     Route::post('/generate', [StudentController::class, 'generate'])->middleware('throttle:5,1')->name('generate');
-    Route::post('/generate-all', [StudentController::class, 'generateAll'])->middleware('throttle:2,1')->name('generateAll');
+    Route::post('/generate-all', [StudentController::class, 'generateAll'])->name('generateAll');
     Route::get('/export', [StudentController::class, 'export'])->name('export');
     Route::get('/promote', [StudentController::class, 'promoteForm'])->name('promote.form');
     Route::post('/promote', [StudentController::class, 'promote'])->name('promote');
