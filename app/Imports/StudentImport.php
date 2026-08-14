@@ -174,22 +174,24 @@ class StudentImport implements ToCollection, WithMultipleSheets
             $record['program_level'] = $this->resolveProgramLevel($record['nim']);
 
             $rawType = $record['student_type_raw'] ?? '';
+            $type = strtolower($rawType);
 
             $record['student_level'] = match (true) {
-                str_contains($rawType, 'graduated') || str_contains($rawType, 'lulus') || str_contains($rawType, 'alumni') => 'graduated',
-                str_contains($rawType, 'year 1 sem 1') || str_contains($rawType, 'y1s1') || str_contains($rawType, 'freshman') => 'Y1S1',
-                str_contains($rawType, 'year 1 sem 2') || str_contains($rawType, 'y1s2') => 'Y1S2',
-                str_contains($rawType, 'year 2 sem 1') || str_contains($rawType, 'year 2 sem 3') || str_contains($rawType, 'y2s1') || str_contains($rawType, 'y2s3') => 'Y2S1',
-                str_contains($rawType, 'year 2 sem 2') || str_contains($rawType, 'year 2 sem 4') || str_contains($rawType, 'y2s2') || str_contains($rawType, 'y2s4') => 'Y2S2',
-                str_contains($rawType, 'year 3 sem 1') || str_contains($rawType, 'y3s1') => 'Y3S1',
-                str_contains($rawType, 'year 3 sem 2') || str_contains($rawType, 'y3s2') => 'Y3S2',
-                str_contains($rawType, 'year 4 sem 1') || str_contains($rawType, 'y4s1') => 'Y4S1',
-                str_contains($rawType, 'year 4 sem 2') || str_contains($rawType, 'y4s2') => 'Y4S2',
-                str_contains($rawType, 'continuing') => 'Y2S1',
+                str_contains($type, 'graduated') || str_contains($type, 'lulus') || str_contains($type, 'alumni') => 'graduated',
+                str_contains($type, 'year 1 sem 1') || str_contains($type, 'y1s1') || str_contains($type, 'freshman') => 'Y1S1',
+                str_contains($type, 'year 1 sem 2') || str_contains($type, 'y1s2') => 'Y1S2',
+                str_contains($type, 'year 2 sem 1') || str_contains($type, 'year 2 sem 3') || str_contains($type, 'y2s1') || str_contains($type, 'y2s3') => 'Y2S1',
+                str_contains($type, 'year 2 sem 2') || str_contains($type, 'year 2 sem 4') || str_contains($type, 'y2s2') || str_contains($type, 'y2s4') => 'Y2S2',
+                str_contains($type, 'year 3 sem 1') || str_contains($type, 'y3s1') => 'Y3S1',
+                str_contains($type, 'year 3 sem 2') || str_contains($type, 'y3s2') => 'Y3S2',
+                str_contains($type, 'year 4 sem 1') || str_contains($type, 'y4s1') => 'Y4S1',
+                str_contains($type, 'year 4 sem 2') || str_contains($type, 'y4s2') => 'Y4S2',
+                str_contains($type, 'continuing') => 'Y2S1',
                 default => 'Y1S1',
             };
 
-            if ($rawType && !str_contains($rawType, $record['student_level'])) {
+            if ($rawType && $record['student_level'] === 'Y1S1' && !str_contains($type, 'year 1 sem 1')
+                && !str_contains($type, 'y1s1') && !str_contains($type, 'freshman')) {
                 $failures[] = new Failure($record['row'], 'student_type_raw', ["Tipe mahasiswa '{$rawType}' tidak dikenali, default ke {$record['student_level']}."], $record);
             }
         }

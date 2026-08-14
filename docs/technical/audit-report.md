@@ -3,7 +3,7 @@
 - **Tanggal audit:** 14 Agustus 2026
 - **Ruang lingkup:** Seluruh aplikasi — models (41), migrations (85), services (30), controllers, imports/exports, seeders, routes, 168 blade views, assets JS/CSS
 - **Metode:** Pemeriksaan kode langsung (manual) + pengecekan silang terhadap `docs/project/erd.md`, `docs/project/architecture.md`, `docs/guides/desain.md`, `AGENTS.md`, dan best practices Laravel
-- **Status:** Belum ada perbaikan yang dieksekusi — dokumen ini adalah baseline temuan
+- **Status:** 7 temuan CRITICAL sudah diperbaiki (commit `aa9ddb7` & lanjutannya) — dokumen ini terus diperbarui setelah setiap perbaikan
 
 ---
 
@@ -27,47 +27,47 @@
 
 ## 2. 🔴 CRITICAL
 
-### C1. Login lockout per-akun tidak pernah aktif (dead code)
+### C1. Login lockout per-akun tidak pernah aktif (dead code) ✅ DIPERBAIKI
 - **Lokasi:** `app/Http/Requests/Auth/LoginRequest.php:87-97`
 - **Masalah:** `ensureIsNotRateLimited()` menghitung `$seconds`/`$minutes` tetapi **tidak pernah `throw`**. Satu-satunya proteksi adalah `throttle:5,1` di route (per-IP), sehingga brute force terdistribusi per-akun bisa lolos.
 - **Dampak:** Akun pengguna rentan terhadap serangan brute force terdistribusi.
-- **Perbaikan:** Tambahkan `throw ValidationException::withMessages(['email' => trans('auth.throttle', ['seconds' => $seconds])]);` setelah menghitung `$seconds`.
+- **Perbaikan:** ✅ `throw ValidationException::withMessages(['email' => trans('auth.throttle', ['seconds' => $seconds, 'minutes' => ceil($seconds/60)])])` sudah ditambahkan.
 
-### C2. Password default super admin dikenal publik
+### C2. Password default super admin dikenal publik ✅ DIPERBAIKI
 - **Lokasi:** `database/seeders/SuperadminSeeder.php:15,25,34-37`
 - **Masalah:** Fallback password `SuperAdmin!123` dipakai bila `SUPERADMIN_PASSWORD` tidak di-set (dan `.env.example` tidak mendokumentasikannya), dicetak ke console saat seeder jalan, dan `must_change_password=false`.
 - **Dampak:** Deployment tanpa set env var menghasilkan akun super admin dengan password publik yang tetap berlaku.
-- **Perbaikan:** Wajibkan `SUPERADMIN_PASSWORD` dari env (tanpa fallback), randomize, jangan cetak, dan set `must_change_password=true`.
+- **Perbaikan:** ✅ Hapus fallback publik (password acak dibuat bila env kosong), baca via `config('superadmin.*')` (aman `config:cache`), `must_change_password=true`, password tidak dicetak ke console. Tambah `config/superadmin.php` + dokumentasi `.env.example`.
 
-### C3. OTP email disimpan plaintext
+### C3. OTP email disimpan plaintext ✅ DIPERBAIKI
 - **Lokasi:** `app/Http/Controllers/Auth/EmailVerificationOtpController.php:35-42`, `app/Http/Controllers/Profile/EmailController.php:68-74`
 - **Masalah:** Kode OTP disimpan apa adanya di tabel `otp_codes`.
 - **Dampak:** Siapa pun dengan akses DB (atau lewat SQLi) bisa membaca kode OTP dan lolos verifikasi email / ganti email.
-- **Perbaikan:** Simpan hanya hash/HMAC dari kode (contoh yang sudah ada: `MailSettingsService::otpHashed`).
+- **Perbaikan:** ✅ Simpan hanya `hash_hmac('sha256', $code, config('app.key'))`; verifikasi membandingkan hash.
 
-### C4. Import mahasiswa selalu gagal saat kolom "Tipe" terisi
+### C4. Import mahasiswa selalu gagal saat kolom "Tipe" terisi ✅ DIPERBAIKI
 - **Lokasi:** `app/Imports/StudentImport.php:192-194`
 - **Masalah:** Setelah memetakan `student_level` (mis. `"Year 1 Sem 1"` → `Y1S1`), kode memvalidasi `str_contains($rawType, $record['student_level'])`. Untuk semua nilai real hasilnya `false` (kasus & konten tidak pernah cocok), sehingga `Failure` ditambahkan untuk **setiap baris** yang mengisi kolom "Tipe". Template resmi (`MahasiswaTemplateExport`) mengisi kolom ini → `validateRecords()` selalu mengembalikan `$failures` → `collection()` melempar `ValidationException` → import 100% gagal.
 - **Dampak:** Fitur import mahasiswa (jalur utama input data) tidak berfungsi dengan template resmi.
-- **Perbaikan:** Hapus cross-check `str_contains` tersebut, atau bandingkan terhadap cabang match yang benar dengan normalisasi `strtolower` (dan `str_contains(strtolower($rawType), ...)`).
+- **Perbaikan:** ✅ Normalisasi `strtolower` untuk match, dan failure hanya muncul saat nilai benar-benar tidak dikenali (bukan salah bandingkan output vs input).
 
-### C5. Submit ukuran (POST) lolos otorisasi event
+### C5. Submit ukuran (POST) lolos otorisasi event ✅ DIPERBAIKI
 - **Lokasi:** `app/Http/Controllers/Student/SizeController.php:70-91`, `app/Services/StudentSizeService.php:153-236`
 - **Masalah:** `store()` hanya memvalidasi `event_id exists`; `saveSizes()` mengecek `max_changes`/`allow_reedit` tetapi **tidak pernah memanggil `$event->isApplicableToStudent($student)`** (status aktif, window tanggal, fakultas/prodi/generasi/level). Endpoint GET `input` mengecek ini (403), tapi POST bisa langsung submit event non-aktif / milik fakultas lain.
 - **Dampak:** Mahasiswa bisa mengirim ukuran ke event yang salah / tidak berlaku dan menghabiskan kuota `max_changes`.
-- **Perbaikan:** Panggil `$event->isApplicableToStudent($student)` (abort 403) di dalam `saveSizes()`/`store()`.
+- **Perbaikan:** ✅ `saveSizes()` kini memanggil `$event->isApplicableToStudent($student)` dan throw `RuntimeException` bila tidak berlaku.
 
-### C6. Konflik unique constraint vs alur cancel/retry distribusi
+### C6. Konflik unique constraint vs alur cancel/retry distribusi ✅ DIPERBAIKI
 - **Lokasi:** `database/migrations/2026_08_06_000001_fix_logic_integrity.php:18` (unique `(student_id, schedule_id)`); `app/Services/DistributionService.php:107-115`
 - **Masalah:** Unique index berlaku untuk semua status. Guard di service memblokir transaksi non-`cancelled`, namun status `cancelled` tidak pernah dihasilkan oleh kode mana pun (tidak ada alur cancel/void). Jika sebuah baris `cancelled` pernah ada, transaksi baru untuk `(student, schedule)` yang sama akan melanggar unique key — pengambilan ulang tidak mungkin.
 - **Dampak:** Desain bertentangan; salah-scan/double-submit mengunci mahasiswa selamanya dari jadwal tersebut; status `cancelled` = dead code.
-- **Perbaikan:** Hapus unique constraint dan andalkan guard + alur cancel/void, atau tambah mekanisme idempotensi yang benar-benar me-void baris lama sebelum mengganti.
+- **Perbaikan:** ✅ Unique `(student_id, schedule_id)` di-drop (migration `2026_08_14_100004`); proteksi anti-duplikat diandalkan pada guard + index `(student_id, schedule_id, status)` yang sudah ada.
 
-### C7. Relasi model mereferensikan kolom FK yang tidak ada
+### C7. Relasi model mereferensikan kolom FK yang tidak ada ✅ DIPERBAIKI
 - **Lokasi:** `app/Models/StudyProgram.php:26-29`, `app/Models/StudentGeneration.php:30-33`
 - **Masalah:** `hasMany(Entitlement::class)` dan `hasMany(Entitlement::class, 'generation_id')` mereferensikan kolom `study_program_id`/`generation_id` di tabel `entitlements`, tetapi migration `2026_07_02_100020_create_entitlements_table.php` hanya membuat `code, student_level, description, is_active`.
 - **Dampak:** Query pada relasi ini akan melempar SQL error. Saat ini tidak tereksekusi, tapi menjadi bom waktu.
-- **Perbaikan:** Hapus relasi, atau tambahkan kolom FK di migration `entitlements` sesuai kebutuhan bisnis.
+- **Perbaikan:** ✅ Kedua relasi dihapus (kolom FK memang tidak ada; entitlement berbasis `code + student_level`).
 
 ---
 

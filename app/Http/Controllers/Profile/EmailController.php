@@ -68,7 +68,7 @@ class EmailController extends Controller
         OtpCode::create([
             'user_id' => $user->id,
             'email' => $request->input('email_pribadi'),
-            'code' => $code,
+            'code' => hash_hmac('sha256', $code, (string) config('app.key')),
             'type' => 'email_pribadi_change',
             'expires_at' => now()->addMinutes(10),
         ]);
@@ -123,7 +123,7 @@ class EmailController extends Controller
 
         $otp = OtpCode::where('user_id', $user->id)
             ->where('email', $pendingEmail)
-            ->where('code', $request->input('code'))
+            ->where('code', hash_hmac('sha256', $request->input('code'), (string) config('app.key')))
             ->where('type', 'email_pribadi_change')
             ->whereNull('used_at')
             ->where('expires_at', '>', now())

@@ -26,9 +26,4 @@ class StudentGeneration extends Model
     {
         return $this->hasMany(Student::class, 'generation_id');
     }
-
-    public function entitlements(): HasMany
-    {
-        return $this->hasMany(Entitlement::class, 'generation_id');
-    }
 }

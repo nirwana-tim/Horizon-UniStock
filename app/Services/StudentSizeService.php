@@ -288,6 +288,10 @@ class StudentSizeService
             throw new \RuntimeException('Tidak ada event pengisian ukuran yang aktif saat ini.');
         }
 
+        if (! $event->isApplicableToStudent($student)) {
+            throw new \RuntimeException('Event ini tidak berlaku untuk kamu atau sudah tidak aktif.');
+        }
+
         $baju = $sizes['baju'] ?? null;
         $sepatu = $sizes['sepatu'] ?? null;
 

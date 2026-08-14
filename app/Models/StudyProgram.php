@@ -23,9 +23,4 @@ class StudyProgram extends Model
         return $this->hasMany(Student::class);
     }
 
-    public function entitlements(): HasMany
-    {
-        return $this->hasMany(Entitlement::class);
-    }
-
 }

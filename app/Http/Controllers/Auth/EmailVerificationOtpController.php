@@ -36,7 +36,7 @@ class EmailVerificationOtpController extends Controller
             'user_id' => Auth::id(),
             'nim' => $student->nim,
             'email' => $validated['email_kampus'],
-            'code' => $code,
+            'code' => hash_hmac('sha256', $code, (string) config('app.key')),
             'type' => 'email_verification',
             'expires_at' => now()->addMinutes(10),
         ]);
@@ -90,7 +90,7 @@ class EmailVerificationOtpController extends Controller
 
         $otp = OtpCode::where('user_id', Auth::id())
             ->where('email', $pendingEmail)
-            ->where('code', $validated['code'])
+            ->where('code', hash_hmac('sha256', $validated['code'], (string) config('app.key')))
             ->where('type', 'email_verification')
             ->whereNull('used_at')
             ->where('expires_at', '>', now())
