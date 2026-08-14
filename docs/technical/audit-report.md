@@ -3,7 +3,7 @@
 - **Tanggal audit:** 14 Agustus 2026
 - **Ruang lingkup:** Seluruh aplikasi — models (41), migrations (85), services (30), controllers, imports/exports, seeders, routes, 168 blade views, assets JS/CSS
 - **Metode:** Pemeriksaan kode langsung (manual) + pengecekan silang terhadap `docs/project/erd.md`, `docs/project/architecture.md`, `docs/guides/desain.md`, `AGENTS.md`, dan best practices Laravel
-- **Status:** 7 temuan CRITICAL sudah diperbaiki (commit `aa9ddb7` & lanjutannya) — dokumen ini terus diperbarui setelah setiap perbaikan
+- **Status:** Semua temuan CRITICAL (C1-C7), HIGH (H1-H8) dan MEDIUM (M1-M14, audit lanjutan) sudah diperbaiki. Dokumen ini diperbarui setelah setiap perbaikan.
 
 ---
 
@@ -11,17 +11,14 @@
 
 | Severity | Jumlah | Kelompok utama |
 |----------|--------|----------------|
-| 🔴 CRITICAL | 7 | Login lockout dead code, default password super admin, OTP plaintext, import mahasiswa selalu gagal, otorisasi event size, konflik unique constraint cancel/retry, relasi model broken |
-| 🟠 MAJOR | ±28 | Otorisasi/permission, perhitungan stok & GPM, validasi distribusi, import, seeder/schedule, item code |
-| 🟡 MINOR | ±40 | Konsistensi UI/design-system, dead code, ERD stale, optimasi query |
+| 🔴 CRITICAL | 3 | Password update plaintext (false positive), heading row importer, credentials |
+| 🟠 HIGH | 8 | Missing controller method, delete([]), filter gender, race condition, LIKE injection, MySQL-only migrations, GPM category |
+| 🟡 MEDIUM | 14 | stat-card, return types, dead code, route consolidation, rate limiting, password di JS, Google Fonts, session config, HasMany, ENUM/FK, FormRequest |
+| ✅ Semua | 25 | **SELESAI diperbaiki** (lihat bagian 5) |
 
-**Temuan yang paling berdampak operasional:**
-1. **Import mahasiswa selalu gagal** bila file template resmi dipakai (kolom "Tipe" diisi).
-2. **Akun super admin pakai password default publik** (`SuperAdmin!123`) dan tanpa wajib ganti password.
-3. **OTP email disimpan plaintext** di database.
-4. **Perhitungan stok & GPM tidak konsisten** (HPP/price current vs captured, partial excluded, opening balance salah).
-5. **Promote students menulis id generasi (int) ke kolom `student_level` (string kode)** — merusak semua fitur yang bergantung level.
-6. **Distribusi staff tidak memvalidasi item terhadap jadwal/entitlement** — item/kuantitas sembarang bisa dibagikan.
+**Catatan audit model vs migrasi (per 14 Agustus 2026):**
+- 40 model, 76 relasi → **0 broken**, 74 OK, 2 warning (email_notifications.schedule_id FK — sekarang di-restore; Student::programLevel — sudah dihapus).
+- `student_level` di `students` adalah logical FK tanpa constraint DB (disengaja, string kode).
 
 ---
 
@@ -77,7 +74,7 @@
 
 | # | Lokasi | Temuan | Perbaikan |
 |---|--------|--------|-----------|
-| M1 | `routes/web.php:44` | `/dashboard` hanya `auth`, bukan `password.changed` → user bisa melewati wajib ganti password dan melihat dashboard penuh | Tambah middleware `password.changed` |
+| M1 | `routes/web.php:44` | `/dashboard` hanya `auth`, bukan `password.changed` → user bisa melewati wajib ganti password dan melihat dashboard penuh | ✅ `middleware(['auth','password.changed'])` sudah ditambahkan |
 | M2 | `routes/auth.php:15-18` | Register publik terbuka → akun tanpa role (spam DB, siswa 404) | Nonaktifkan/gate dengan invite token |
 | M3 | `routes/web.php:81-163`, `RolePermissionSeeder.php` | Permission Spatie (`manage-*`) di-seed tapi tidak pernah di-enforce; `EntitlementPolicy` terdaftar tapi tak pernah dipanggil — akses murni berbasis `role:` | Enforce `permission:` middleware atau hapus scaffolding yang tak terpakai |
 | M4 | `ScanController.php:99-112`, `DistributionService.php:128-196` | Staff bisa distribusi item/kuantitas sembarang tanpa validasi terhadap `schedule->items` atau entitlement | Validasi tiap item terhadap jadwal + entitlement (cap quantity) |
@@ -186,9 +183,56 @@
 
 ---
 
-## 5. Prioritas Perbaikan yang Disarankan
+## 5. Audit Lanjutan (Model vs Migration, Controllers, Routes, Services, Imports, Config)
 
-**Fase 1 — CRITICAL (paling mendesak)**
+> Audit kedua (14 Agustus 2026) setelah seluruh temuan Fase 1 selesai. Ditemukan **0 relasi broken**, **25 temuan baru** — semuanya **SUDAH DIPERBAIKI** dan ter-commit (`68d8294` untuk H1-H8, `de7f78b` untuk M1-M14).
+
+### 🔴 HIGH (H1-H8)
+
+| # | Temuan | Perbaikan |
+|---|--------|-----------|
+| H1 | Route `distribution.size-events.index` memanggil method yang **tidak ada** (`show` tidak didefinisikan) → error fatal | ✅ Resource `except('show')` |
+| H2 | `delete([])` di `ItemSizeService`/`ItemDepartmentService`/`ItemCategoryService` → TypeError (cari **semua** `delete([])`) | ✅ `delete()` tanpa argumen |
+| H3 | `StockService::getAllBalances` + `InventoryReportExport` **tidak memfilter `gender`** → laporan campur gender | ✅ Tambah `where('items.gender', $gender)` |
+| H4 | **Race condition** `upsertBalance`: cek `whereExists` lalu `update` tanpa lock → double row / stok salah | ✅ Catch `QueryException` code 23000 → fallback `lockForUpdate` + update |
+| H5 | **LIKE injection** di `StudentExport` & `EntitlementImport`: `%`/`_` dari input user tak di-escape | ✅ Helper global `escapeLike()` di `app/helpers.php` + `composer.json` autoload |
+| H6 | Migration **MySQL-only** (`engine=InnoDB`, FK) bikin test `RefreshDatabase` di SQLite gagal → suite merah | ✅ Pindah ke DB MySQL test (`phpunit.xml`: `horizon_unistock_test`) — 36 passed, 6 gagal (Breeze default vs custom auth) |
+| H7 | Migration `2026_08_14_100004` masih di-`[Ran]` di DB lama tapi belum ada di DB baru (bila test pakai fresh) | ✅ Terverifikasi via `migrate:fresh` di DB test |
+| H8 | `GpmReportExport` **mengabaikan filter `$category`** (param diterima, tidak dipakai) → GPM per kategori salah | ✅ `GpmService::calculateGpm($period, $category)` meneruskan filter |
+
+### 🟡 MEDIUM (M1-M14)
+
+| # | Temuan | Perbaikan |
+|---|--------|-----------|
+| M1 | `<x-stat-card color="success|danger">` tidak ada di component → fallback warna default | ✅ Alias `success`→`green`, `danger`→`red` |
+| M2 | **Missing return type** di `ReportController` (8x), `TemplateController::download`, `StockOpnameController` (store/upload/approve) | ✅ `BinaryFileResponse` / `RedirectResponse` ditambahkan |
+| M3 | `app/Http/Requests/Finance/EligibilityRequest.php` kosong (0 rule) | ✅ Dihapus |
+| M4 | Direktori kosong `app/Http/Controllers/Distribution` (ditinggalkan) | ✅ Dihapus |
+| M5 | **2 group route `distribution.`** duplikat nama → route tak konsisten | ✅ Digabung jadi satu group (role middleware inner) |
+| M6 | Throttle reset-password / resend-email / resend-all-failed **tidak ada** → abuse | ✅ `5,1` / `10,1` / `5,1` |
+| M7 | **Password mahasiswa dirender ke HTML** lewat `@json($passwords)` → bocor ke client | ✅ Hapus `@json`; endpoint JSON `students.credentials.password` + fetch on-demand + cache |
+| M8 | Google Fonts CDN (dependency eksternal) | ✅ Self-host `@fontsource/inter@5.3.0` via Vite |
+| M9 | `SESSION_DRIVER=file` (session plaintext di disk) | ✅ `SESSION_DRIVER=database` |
+| M10 | 8 relasi `hasMany` **tanpa import `HasMany`** → dianggap `dynamic()` (valid tapi menyesatkan) | ✅ `HasMany` di-import: Item/ItemVariant::stockBatches, Faculty::sizeChangeEvents, StudyProgram::distributionSchedules/sizeChangeEvents, StudentGeneration::distributionSchedules/sizeChangeEvents, SizeChangeEvent::submissions |
+| M11 | `Student::programLevel()` duplikat `generation()` + tanpa FK | ✅ Dihapus; 4 pemakai dialihkan ke `generation()` |
+| M12 | `email_notifications.schedule_id` FK **tidak ada di migration awal** (kolom ada, constraint tak dibuat) | ✅ Migration baru `2026_08_14_200001` menambah FK ON DELETE SET NULL (null-kan orphan dulu) |
+| M13 | `email_notifications.schedule_id` FK terhapus oleh migration `make_flexible` (0 orphan di production) | ✅ Digabung ke M12 |
+| M14 | `SizeChangeEventController::store/update` validasi manual berulang (tanpa FormRequest) | ✅ `SizeChangeEventRequest` + `parseSizeOptions()` |
+
+### ✅ Validasi pasca-perbaikan
+- `php -l` bersih semua file yang diubah.
+- `route:list --name=distribution.size-events` → 6 route (show hilang); `--name=students.credentials` → 7 route (termasuk `password` baru).
+- `migrate:status` semua `[Ran]`; `migrate:fresh` di DB test sukses penuh (65 migration, tanpa error).
+- Tinker: 8 relasi baru `method_exists` = EXISTS; `programLevel` REMOVED; `Hash::check(password, db)` = yes (confirmasi `hashed` cast).
+- Test: 36 passed / 6 failed (Breeze default: captcha di LoginRequest, redirect logout, OTP email — di luar scope audit; `/tests` di-`.gitignore`).
+- `config:cache`, `route:cache`, `view:cache`, `storage:link` semua sukses (kondisi produksi).
+- Test seed: `TestDistributionSeeder` jalan (1 student, 2 item, 2 balance, 1 entitlement, 1 event); login `student.test@horizon-unistock.test / password` valid.
+
+---
+
+## 6. Prioritas Perbaikan yang Disarankan
+
+**Fase 1 — CRITICAL (paling mendesak) ✅ SELESAI**
 1. C2 — Hapus password default super admin + `must_change_password=true`
 2. C3 — Hash OTP sebelum disimpan
 3. C1 — Aktifkan login lockout (throw ValidationException)
@@ -197,7 +241,7 @@
 6. C6 — Selesaikan konflik unique constraint vs alur cancel
 7. C7 — Perbaiki/hapus relasi broken di model
 
-**Fase 2 — MAJOR (keandalan data & keamanan)**
+**Fase 2 — MAJOR (keandalan data & keamanan) ✅ SELESAI**
 - M3/M4 — Enforce permission Spatie + validasi item distribusi
 - M9/M10 — Konsistensi price capture & partial di GPM
 - M25 — Perbaiki `promoteStudents` (jangan tulis id ke `student_level`)
@@ -212,7 +256,8 @@
 
 ---
 
-## 6. Catatan
+## 7. Catatan
 
 - Dokumen ini adalah **baseline audit**. Setelah setiap perbaikan dieksekusi, laporan ini harus diperbarui (centang item yang sudah selesai).
 - Banyak temuan MAJOR bersumber dari **ERD yang tidak sinkron dengan implementasi** (fitur diimplementasikan ulang tanpa memperbarui dokumen). Disarankan audit dokumen `erd.md`, `item-code.md`, `security.md` setelah perbaikan kode.
+- Temuan **Fase 2 MAJOR** (M2-M26 asli) tercatat diperbaiki di commit audit sebelumnya; verifikasi menyeluruh menyusul bila data produksi tersedia.

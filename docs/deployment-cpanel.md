@@ -145,7 +145,7 @@ DB_DATABASE=u1234567_horizon   # ← Dari Step 5 (prefix user cPanel)
 DB_USERNAME=u1234567_admin     # ← Dari Step 5
 DB_PASSWORD=password_anda      # ← Dari Step 5
 
-SESSION_DRIVER=file             # ← Sudah benar, jangan diubah
+SESSION_DRIVER=database         # ← Session disimpan di tabel sessions (lebih aman dari file)
 QUEUE_CONNECTION=database       # ← Sudah benar (queue pakai DB)
 CACHE_STORE=database            # ← Sudah benar (cache pakai DB)
 
@@ -366,8 +366,9 @@ ls -ld storage bootstrap/cache
 5. Ulangi untuk folder bootstrap/cache
 ```
 
-> ⚠️ Dengan `SESSION_DRIVER=file`, folder `storage/framework/sessions/`
-> harus writable, atau user akan gagal login / session hilang.
+> ⚠️ Dengan `SESSION_DRIVER=database`, session disimpan di tabel `sessions`
+> (dibuat oleh migration Laravel). Tabel `sessions` harus writable — set
+> permission pada `storage/` sudah cukup untuk koneksi DB.
 
 ---
 
@@ -564,9 +565,9 @@ tail -f storage/logs/laravel.log
 | **Class not found** | Vendor belum diinstall | `composer install --no-dev` |
 | **SQLSTATE connection refused** | `DB_HOST` / kredensial salah | Cek `.env`, pastikan DB dibuat di Step 5 |
 | **Permission denied** | `storage/` tidak writable | `chmod -R 775 storage/ bootstrap/cache/` |
-| **Session hilang saat login** | `storage/framework/sessions/` tidak writable | `chmod -R 775 storage/framework/sessions` |
+| **Session hilang saat login** | `storage/` tidak writable / tabel `sessions` tidak ada | `chmod -R 775 storage/ bootstrap/cache/` lalu `php artisan migrate --force` |
 | **Email tidak terkirim** | Queue worker mati / SMTP salah | Jalankan worker (Step 9), cek SMTP di Settings |
-| **Token mismatch (419)** | Session file tidak writable / `SESSION_DOMAIN` salah | `chmod 775 storage/framework/sessions`, set `SESSION_DOMAIN=.domain.com` |
+| **Token mismatch (419)** | Session tidak tersimpan / `SESSION_DOMAIN` salah | Cek tabel `sessions` (SESSION_DRIVER=database), set `SESSION_DOMAIN=.domain.com` |
 | **Layout maroon hilang** | Build asset belum update | Rebuild & re-upload `public/build/` |
 
 ---
