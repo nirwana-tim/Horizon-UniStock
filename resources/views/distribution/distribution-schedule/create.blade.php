@@ -31,6 +31,7 @@
                               allProdi: {{ json_encode($allProdi) }},
                               itemHtml: '',
                               itemSearch: '',
+                              selectedItemIds: @json(old('item_ids', [])),
                               get filteredProdi() {
                                   if (this.facultyId && this.prodiByFaculty[this.facultyId]) {
                                       return this.prodiByFaculty[this.facultyId];
@@ -45,14 +46,25 @@
                                   if (this.prodiId) this.fetchItems();
                               },
                               fetchItems() {
-                                  axios.get('{{ route('distribution.distribution-schedule.fetch-items') }}', {
-                                      params: {
-                                          faculty_id: this.facultyId || '',
-                                          study_program_id: this.prodiId,
-                                          student_level: this.studentLevel || '',
-                                          search: this.itemSearch || '',
-                                      },
-                                  }).then(res => this.itemHtml = res.data.html);
+                                  let params = {
+                                      faculty_id: this.facultyId || '',
+                                      study_program_id: this.prodiId,
+                                      student_level: this.studentLevel || '',
+                                      search: this.itemSearch || '',
+                                  };
+                                  if (this.selectedItemIds.length) {
+                                      params.checked_ids = this.selectedItemIds.join(',');
+                                  }
+                                  axios.get('{{ route('distribution.distribution-schedule.fetch-items') }}', { params })
+                                      .then(res => this.itemHtml = res.data.html);
+                              },
+                              onItemChange(event) {
+                                  const cb = event.target;
+                                  if (cb.name !== 'item_ids[]') return;
+                                  const val = String(cb.value);
+                                  const idx = this.selectedItemIds.indexOf(val);
+                                  if (cb.checked && idx === -1) this.selectedItemIds.push(val);
+                                  if (!cb.checked && idx !== -1) this.selectedItemIds.splice(idx, 1);
                               }
                           }">
                         @csrf
@@ -134,7 +146,7 @@
                                        placeholder="Search items by name or code..."
                                        class="mb-4 w-full sm:w-80 border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500 text-sm">
 
-                                <div x-html="itemHtml" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3"></div>
+                                <div x-html="itemHtml" @change="onItemChange($event)" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3"></div>
                                 <x-input-error :messages="$errors->get('item_ids')" class="mt-2" />
                             </div>
                         </div>

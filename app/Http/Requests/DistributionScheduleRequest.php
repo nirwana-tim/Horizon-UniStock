@@ -16,6 +16,7 @@ class DistributionScheduleRequest extends FormRequest
         $this->merge([
             'is_active' => $this->boolean('is_active'),
             'student_level' => $this->input('student_level') ?: null,
+            'study_program_id' => $this->input('study_program_id') === 'all' ? null : $this->input('study_program_id'),
         ]);
     }
 
