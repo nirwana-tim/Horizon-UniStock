@@ -97,7 +97,7 @@ class SizeController extends Controller
 
         $qrDataUrl = $this->qrCodeService->getQrPngDataUrl($student);
 
-        $activeSchedules = DistributionSchedule::with('programLevel', 'faculty')
+        $activeSchedules = DistributionSchedule::with('faculty', 'generation')
             ->where('is_active', true)
             ->where('date', '>=', now()->format('Y-m-d'))
             ->forStudent($student)
