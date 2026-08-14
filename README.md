@@ -18,7 +18,7 @@
 
 | Komponen | Teknologi |
 |----------|-----------|
-| Framework | Laravel 13 |
+| Framework | Laravel 12 |
 | Database | MySQL |
 | Frontend | Blade + Tailwind CSS + Vite |
 | Auth | Laravel Breeze |
@@ -62,7 +62,7 @@ php artisan key:generate
 php artisan migrate:fresh --seed
 ```
 
-Master data (fakultas, prodi, item, dll) dari Excel bisa ditambahkan dengan:
+Seeder bawaan hanya membuat **role/permission + akun super admin** (data bisnis kosong). Master data (fakultas, prodi, item, dll) dari Excel ditambahkan terpisah:
 ```bash
 php artisan db:seed --class="Database\Seeders\Master\MasterDataSeeder"
 ```
@@ -113,24 +113,25 @@ bun install && bun run build
 
 > **Catatan:** `npm install && npm run build` (atau `bun install && bun run build`) wajib dijalankan jika ada perubahan pada file JavaScript, CSS, atau dependensi frontend. Keempat `php artisan ...:clear` membersihkan cache Laravel yang mungkin masih menyimpan versi lama.
 
-### Login Default
+### Login Super Admin
+
+Setelah `migrate:fresh --seed`, hanya ada satu akun bawaan (super admin). Kredensial diambil dari `.env`:
+
 | Role | Email | Password |
 |------|-------|----------|
-| Super Admin | `superadmin@horizon-unistock.test` | `password` |
-| Finance Admin | `finance@horizon-unistock.test` | `password` |
-| Staff | `staff@horizon-unistock.test` | `password` |
+| Super Admin | `SUPERADMIN_EMAIL` (default `admin@horizon-unistock.ac.id`) | `SUPERADMIN_PASSWORD` |
 
-> **Super admin production:** gunakan `SuperadminSeeder` (idempotent, env-configurable):
-> ```bash
-> php artisan db:seed --class=SuperadminSeeder
-> # Email    : admin@horizon-unistock.ac.id
-> # Password : SuperAdmin!123
-> # Kustom lewat env: SUPERADMIN_EMAIL / SUPERADMIN_PASSWORD
-> ```
+> **Setup super admin:**
+> 1. Set `SUPERADMIN_EMAIL` & `SUPERADMIN_PASSWORD` di `.env` (lihat `.env.example`)
+> 2. Jalankan: `php artisan db:seed --class=SuperadminSeeder`
+> 3. Jika `SUPERADMIN_PASSWORD` kosong, seeder membuat password acak & mencetaknya di console
+> 4. Akun dibuat dengan `must_change_password=true` — ganti password saat login pertama
+>
+> ⚠️ Seeder memakai `firstOrCreate` (idempotent) — aman dijalankan ulang, tapi **tidak mengubah** user yang sudah ada. Untuk menerapkan password baru ke akun lama, update manual di database.
 
 ### Master Data Seeder
 
-Seeder master data ada di `database/seeders/Master/`, masing-masing 1 record dari data Excel.
+Seeder master data ada di `database/seeders/Master/`, masing-masing 1 record dari data Excel. **Tidak otomatis di-seed** oleh `migrate:fresh --seed`.
 
 **Jalankan semua:**
 ```bash
