@@ -9,7 +9,7 @@ Sebelum mengerjakan **task apa pun**, AI WAJIB mengikuti urutan ini:
 1. **Baca docs/** — Semua file relevan di `docs/project/*`, `docs/technical/*`, `docs/guides/*`
 2. **Cek kode existing** — Model, Controller, Service, Routes yang sudah ada
 3. **Cek dokumentasi online** — Framework/package terkait (laravel.com, docs.laravel-excel.com, spatie.be, dll)
-4. **Kerjakan** — Jika sudah jelas dari langkah 1-3, kerjakan dengan Laravel 13 + Blade best practices
+4. **Kerjakan** — Jika sudah jelas dari langkah 1-3, kerjakan dengan Laravel 12 + Blade best practices
 5. **Buat baru** — Jika tidak ditemukan di dokumentasi manapun, buat solusi sendiri dengan best practices
 
 ## Dokumentasi yang WAJIB Dibaca
@@ -34,7 +34,7 @@ Sebelum mengerjakan **task apa pun**, AI WAJIB mengikuti urutan ini:
 
 ## Aturan Kode
 
-- **Laravel 13** style (PHP 8 attributes, Enums, typed properties)
+- **Laravel 12** style (PHP 8 attributes, Enums, typed properties)
 - Logic bisnis di **Service Layer**, bukan Controller
 - Setiap perubahan data tercatat di **Audit Log**
 - Migration **idempotent**, Seeder pake `firstOrCreate`

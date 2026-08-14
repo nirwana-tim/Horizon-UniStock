@@ -49,7 +49,7 @@ routes
 
 | Komponen | Teknologi |
 |----------|-----------|
-| Framework | Laravel 13 |
+| Framework | Laravel 12 |
 | Database | MySQL |
 | Frontend | Blade + Tailwind CSS + Vite |
 | Auth | Laravel Breeze |
@@ -90,7 +90,7 @@ resources/views
 
 ## Aturan Kode
 
-- Gunakan **Laravel 13** style (PHP 8 attributes, Enums, typed properties)
+- Gunakan **Laravel 12** style (PHP 8 attributes, Enums, typed properties)
 - Blade views menggunakan **Tailwind CSS**
 - Semua logic bisnis di **Service Layer** (bukan di Controller)
 - Setiap perubahan data tercatat di **Audit Log**

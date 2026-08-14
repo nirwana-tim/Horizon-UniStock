@@ -2,7 +2,7 @@
 
 ## Apa Itu?
 
-Package untuk generate QR Code di Laravel. Fork dari `simplesoftwareio/simple-qrcode` v5 yang kompatibel dengan Laravel 13 (menggunakan bacon/bacon-qr-code v3).
+Package untuk generate QR Code di Laravel. Fork dari `simplesoftwareio/simple-qrcode` v5 yang kompatibel dengan Laravel 12 (menggunakan bacon/bacon-qr-code v3).
 
 ## Fitur yg Terinstall
 
