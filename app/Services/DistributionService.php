@@ -19,7 +19,8 @@ use Illuminate\Support\Facades\DB;
 class DistributionService
 {
     public function __construct(
-        private readonly StockService $stockService
+        private readonly StockService $stockService,
+        private readonly StudentSizeService $studentSizeService,
     ) {}
 
     public function findStudent(string $query): ?Student
@@ -312,26 +313,42 @@ class DistributionService
             return;
         }
 
+        $item->loadMissing('category');
+
+        $resolved = $this->studentSizeService->resolveSizeValue($item, $newSize);
+        $newCode = $resolved['code'] ?? $newSize;
+        $newLabel = $resolved['label'] ?? $newSize;
+
         $sizeItem = $sizeProfile->sizeItems->firstWhere('item_id', $item->id);
 
         if ($sizeItem) {
             StudentSizeHistory::create([
                 'size_item_id' => $sizeItem->id,
                 'old_size' => $oldSize,
-                'new_size' => $newSize,
+                'new_size' => $newCode,
                 'changed_by' => $staff->id,
                 'changed_at' => now(),
             ]);
 
-            $sizeItem->update(['size' => $newSize]);
-
-            AuditService::log(
-                'size.updated',
-                StudentSizeItem::class,
-                $sizeItem->id,
-                ['size' => $oldSize],
-                ['size' => $newSize, 'changed_by' => $staff->id, 'item_id' => $item->id]
-            );
+            $sizeItem->update([
+                'size' => $newCode,
+                'change_count' => $sizeItem->change_count + 1,
+            ]);
         }
+
+        $catCode = $item->category?->code;
+        if ($catCode === 'UNF') {
+            $sizeProfile->update(['baju_size' => $newLabel]);
+        } elseif ($catCode === 'SHO') {
+            $sizeProfile->update(['sepatu_size' => $newLabel]);
+        }
+
+        AuditService::log(
+            'size.updated',
+            StudentSizeItem::class,
+            $sizeItem?->id ?? $sizeProfile->id,
+            ['size' => $oldSize],
+            ['size' => $newCode, 'changed_by' => $staff->id, 'item_id' => $item->id]
+        );
     }
 }
