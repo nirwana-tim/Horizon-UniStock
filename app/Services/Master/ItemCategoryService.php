@@ -26,6 +26,6 @@ class ItemCategoryService
     public function destroy(ItemCategory $category): void
     {
         AuditService::log('delete', 'item_category', $category->id, $category->toArray(), null);
-        $category->delete([]);
+        $category->delete();
     }
 }

@@ -61,6 +61,6 @@ class ItemSizeService
     public function destroy(ItemSize $itemSize): void
     {
         AuditService::log('delete', 'item_size', $itemSize->id, $itemSize->toArray(), null);
-        $itemSize->delete([]);
+        $itemSize->delete();
     }
 }

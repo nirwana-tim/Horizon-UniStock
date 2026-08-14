@@ -101,12 +101,41 @@ class StockService
             ]);
         } else {
             retry(5, function () use ($itemId, $variantId, $addedQty, $newHpp) {
-                StockBalance::create([
-                    'item_id' => $itemId,
-                    'variant_id' => $variantId,
-                    'quantity' => $addedQty,
-                    'last_hpp' => round($newHpp, 2),
-                ]);
+                try {
+                    StockBalance::create([
+                        'item_id' => $itemId,
+                        'variant_id' => $variantId,
+                        'quantity' => $addedQty,
+                        'last_hpp' => round($newHpp, 2),
+                    ]);
+                } catch (\Illuminate\Database\QueryException $e) {
+                    if ((int) $e->getCode() !== 23000) {
+                        throw $e;
+                    }
+
+                    $existing = StockBalance::where('item_id', $itemId)
+                        ->where('variant_id', $variantId)
+                        ->lockForUpdate()
+                        ->first();
+
+                    if ($existing) {
+                        $oldQty = $existing->quantity;
+                        $oldHpp = $existing->last_hpp;
+                        $totalQty = $oldQty + $addedQty;
+                        $avgHpp = $totalQty > 0
+                            ? (($oldQty * $oldHpp) + ($addedQty * $newHpp)) / $totalQty
+                            : $newHpp;
+
+                        $existing->update([
+                            'quantity' => $totalQty,
+                            'last_hpp' => round($avgHpp, 2),
+                        ]);
+
+                        return;
+                    }
+
+                    throw $e;
+                }
             }, 100);
         }
     }
@@ -165,6 +194,10 @@ class StockService
 
         if ($category) {
             $query->where('item_categories.code', $category);
+        }
+
+        if ($gender) {
+            $query->where('items.gender', $gender);
         }
 
         return $query->get();

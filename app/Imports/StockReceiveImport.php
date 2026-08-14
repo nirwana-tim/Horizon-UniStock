@@ -20,6 +20,11 @@ class StockReceiveImport implements ToCollection, WithHeadingRow, WithMultipleSh
     private int $importedCount = 0;
     private int $totalRows = 0;
 
+    public function headingRow(): int
+    {
+        return 4;
+    }
+
     public function collection(Collection $rows): void
     {
         $records = $this->recordsFromRows($rows);

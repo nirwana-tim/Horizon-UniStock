@@ -27,6 +27,11 @@ class ItemImport implements ToCollection, WithHeadingRow, WithMultipleSheets
 
     private array $sizeCodes = [];
 
+    public function headingRow(): int
+    {
+        return 4;
+    }
+
     public function __construct()
     {
         $this->sizeCodes = ItemSize::pluck('code', 'label')->toArray();

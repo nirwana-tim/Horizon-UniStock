@@ -58,7 +58,8 @@ class SizesMigrateLegacyCommand extends Command
                     'sepatu_size' => $profile->sepatu_size ?? $sepatuSize,
                 ]);
                 $migrated++;
-                $this->info("Migrated: {$profile->student?->name ?? 'ID:' . $profile->student_id} — Baju: {$bajuSize}, Sepatu: {$sepatuSize}");
+                $studentLabel = $profile->student?->name ?: ('ID:' . $profile->student_id);
+                $this->info("Migrated: {$studentLabel} — Baju: {$bajuSize}, Sepatu: {$sepatuSize}");
             } else {
                 $skipped++;
             }

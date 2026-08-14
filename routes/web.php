@@ -85,7 +85,7 @@ Route::middleware(['auth', 'password.changed', 'role:super_admin|admin', 'thrott
     Route::get('distribution-schedule/{distributionSchedule}/transactions', [DistributionScheduleController::class, 'transactions'])->name('distribution-schedule.transactions');
     Route::resource('distribution-schedule', DistributionScheduleController::class);
     Route::get('size-monitor', [SizeMonitorController::class, 'index'])->name('size-monitor.index');
-    Route::resource('size-events', SizeChangeEventController::class);
+    Route::resource('size-events', SizeChangeEventController::class)->except('show');
 });
 
 Route::middleware(['auth', 'password.changed', 'role:super_admin|admin|staff'])->prefix('distribution')->name('distribution.')->group(function () {

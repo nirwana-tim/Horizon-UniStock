@@ -40,6 +40,6 @@ class ItemDepartmentService
     public function destroy(ItemDepartment $itemDepartment): void
     {
         AuditService::log('delete', 'item_department', $itemDepartment->id, $itemDepartment->toArray(), null);
-        $itemDepartment->delete([]);
+        $itemDepartment->delete();
     }
 }

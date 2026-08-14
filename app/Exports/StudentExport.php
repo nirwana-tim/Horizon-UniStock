@@ -25,9 +25,10 @@ class StudentExport implements FromQuery, WithHeadings, WithMapping, WithChunkRe
         $query = Student::with(['studyProgram.faculty', 'generation', 'studentLevel']);
 
         if ($this->search) {
-            $query->where(function ($q) {
-                $q->where('name', 'like', "%{$this->search}%")
-                    ->orWhere('nim', 'like', "%{$this->search}%");
+            $search = escapeLike($this->search);
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('nim', 'like', "%{$search}%");
             });
         }
 

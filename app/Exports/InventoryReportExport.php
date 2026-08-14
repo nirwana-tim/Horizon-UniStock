@@ -45,6 +45,10 @@ class InventoryReportExport extends BaseExport implements FromQuery, WithHeading
             $query->where('item_categories.code', $this->category);
         }
 
+        if ($this->gender) {
+            $query->where('items.gender', $this->gender);
+        }
+
         return $query;
     }
 

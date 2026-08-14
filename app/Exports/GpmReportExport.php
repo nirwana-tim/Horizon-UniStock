@@ -24,7 +24,7 @@ class GpmReportExport extends BaseExport implements FromCollection, WithHeadings
     {
         $service = new GpmService();
 
-        return $service->calculateGpm($this->period);
+        return $service->calculateGpm($this->period, $this->category);
     }
 
     public function headings(): array

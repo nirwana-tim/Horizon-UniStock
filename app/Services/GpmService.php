@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\DB;
 
 class GpmService
 {
-    public function calculateGpm(?string $period = null): Collection
+    public function calculateGpm(?string $period = null, ?string $category = null): Collection
     {
         if (!$period) {
             $latestPeriod = DistributionSchedule::whereNotNull('period')->latest('period')->value('period');
@@ -37,6 +37,10 @@ class GpmService
                     $q2->where('period', $period);
                 });
         });
+
+        if ($category) {
+            $query->whereHas('item.category', fn ($q) => $q->where('code', $category));
+        }
 
         $results = $query->get();
         $itemIds = $results->pluck('item_id');

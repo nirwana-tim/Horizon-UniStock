@@ -17,6 +17,11 @@ class StockOpnameImport implements ToCollection, WithHeadingRow, WithValidation
 
     private int $importedCount = 0;
 
+    public function headingRow(): int
+    {
+        return 4;
+    }
+
     public function __construct(int $stockOpnameId)
     {
         $this->stockOpnameId = $stockOpnameId;
