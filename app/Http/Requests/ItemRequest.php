@@ -25,8 +25,6 @@ class ItemRequest extends FormRequest
             'unit' => 'required|string|max:20',
             'selling_price' => 'nullable|numeric|min:0',
             'hpp' => 'nullable|numeric|min:0',
-            'min_stock' => 'nullable|integer|min:0',
-            'max_stock' => 'nullable|integer|min:0',
             'size_ids' => 'required|array|min:1',
             'size_ids.*' => 'exists:item_sizes,id',
         ];

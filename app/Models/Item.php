@@ -27,8 +27,6 @@ class Item extends Model
         'unit',
         'selling_price',
         'hpp',
-        'min_stock',
-        'max_stock',
         'is_active',
     ];
 
@@ -37,8 +35,6 @@ class Item extends Model
         return [
             'selling_price' => 'decimal:2',
             'hpp' => 'decimal:2',
-            'min_stock' => 'integer',
-            'max_stock' => 'integer',
             'is_active' => 'boolean',
         ];
     }

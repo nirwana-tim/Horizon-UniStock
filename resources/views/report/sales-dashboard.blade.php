@@ -76,48 +76,59 @@
             </div>
         </div>
 
-        {{-- Section 2.5: Stock Alerts --}}
-        @if($lowStockItems->isNotEmpty() || $outOfStockItems->isNotEmpty())
+        {{-- Section 2.5: Stock Alerts (Demand vs Supply) --}}
+        @if($shortageItems->isNotEmpty() || $outOfStockItems->isNotEmpty())
             <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
                 <div class="px-4 py-2.5 border-b border-gray-100 flex items-center gap-2">
                     <svg class="w-4 h-4 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                     </svg>
-                    <h3 class="text-xs font-semibold text-gray-800 uppercase tracking-wider">Peringatan Stok</h3>
-                    <x-badge type="warning">{{ $lowStockItems->count() }} stok rendah</x-badge>
+                    <h3 class="text-xs font-semibold text-gray-800 uppercase tracking-wider">Peringatan Stok (Berdasarkan Demand)</h3>
                     <x-badge type="danger">{{ $outOfStockItems->count() }} habis</x-badge>
+                    <x-badge type="warning">{{ $shortageItems->count() }} kurang</x-badge>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                             <tr>
                                 <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item</th>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kategori</th>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Varian</th>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stok</th>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Min. Stok</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ukuran</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SKU</th>
+                                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Demand</th>
+                                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Stok</th>
+                                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Kurang</th>
                                 <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-100">
                             @foreach($outOfStockItems as $balance)
-                                <tr>
-                                    <td class="px-4 py-2 text-sm text-gray-800">{{ $balance->item->name }}</td>
-                                    <td class="px-4 py-2 text-sm text-gray-500">{{ $balance->item->category?->label ?? '-' }}</td>
-                                    <td class="px-4 py-2 text-sm text-gray-500">{{ $balance->variant?->size_label ?? '-' }}</td>
-                                    <td class="px-4 py-2 text-sm font-semibold text-red-600">{{ $balance->quantity }}</td>
-                                    <td class="px-4 py-2 text-sm text-gray-500">{{ $balance->item->min_stock ?? '-' }}</td>
-                                    <td class="px-4 py-2"><x-badge type="danger">Habis</x-badge></td>
-                                </tr>
+                                @php
+                                    $demand = \Illuminate\Support\Facades\DB::table('student_size_items')
+                                        ->where('item_id', $balance->item_id)
+                                        ->where('size', $balance->variant?->size)
+                                        ->count();
+                                @endphp
+                                @if($demand > 0)
+                                    <tr>
+                                        <td class="px-4 py-2 text-sm text-gray-800">{{ $balance->item->name }}</td>
+                                        <td class="px-4 py-2 text-sm text-gray-500">{{ $balance->variant?->size_label ?? '-' }}</td>
+                                        <td class="px-4 py-2 text-sm font-mono text-gray-500">{{ $balance->variant?->sku ?? '-' }}</td>
+                                        <td class="px-4 py-2 text-sm text-right text-gray-700">{{ number_format($demand) }}</td>
+                                        <td class="px-4 py-2 text-sm text-right font-semibold text-red-600">{{ number_format($balance->quantity) }}</td>
+                                        <td class="px-4 py-2 text-sm text-right font-semibold text-red-600">{{ number_format($demand) }}</td>
+                                        <td class="px-4 py-2"><x-badge type="danger">Habis</x-badge></td>
+                                    </tr>
+                                @endif
                             @endforeach
-                            @foreach($lowStockItems as $balance)
+                            @foreach($shortageItems as $row)
                                 <tr>
-                                    <td class="px-4 py-2 text-sm text-gray-800">{{ $balance->item->name }}</td>
-                                    <td class="px-4 py-2 text-sm text-gray-500">{{ $balance->item->category?->label ?? '-' }}</td>
-                                    <td class="px-4 py-2 text-sm text-gray-500">{{ $balance->variant?->size_label ?? '-' }}</td>
-                                    <td class="px-4 py-2 text-sm font-semibold text-amber-600">{{ $balance->quantity }}</td>
-                                    <td class="px-4 py-2 text-sm text-gray-500">{{ $balance->item->min_stock ?? 5 }}</td>
-                                    <td class="px-4 py-2"><x-badge type="warning">Stok Rendah</x-badge></td>
+                                    <td class="px-4 py-2 text-sm text-gray-800">{{ $row->item_name }}</td>
+                                    <td class="px-4 py-2 text-sm text-gray-500">{{ $row->size_label }}</td>
+                                    <td class="px-4 py-2 text-sm font-mono text-gray-500">{{ $row->sku }}</td>
+                                    <td class="px-4 py-2 text-sm text-right text-gray-700">{{ number_format($row->demand) }}</td>
+                                    <td class="px-4 py-2 text-sm text-right font-semibold text-amber-600">{{ number_format($row->stock) }}</td>
+                                    <td class="px-4 py-2 text-sm text-right font-semibold text-red-600">{{ number_format($row->shortage) }}</td>
+                                    <td class="px-4 py-2"><x-badge type="warning">Kurang {{ $row->shortage }}</x-badge></td>
                                 </tr>
                             @endforeach
                         </tbody>

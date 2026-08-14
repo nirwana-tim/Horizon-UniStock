@@ -62,13 +62,18 @@
                     <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">HPP</p>
                     <p class="mt-1 text-sm text-gray-900">Rp {{ number_format($item->hpp, 2) }}</p>
                 </div>
+                @php
+                    $demandData = \Illuminate\Support\Facades\DB::table('student_size_items')
+                        ->join('student_size_profiles', 'student_size_items.size_profile_id', '=', 'student_size_profiles.id')
+                        ->where('student_size_items.item_id', $item->id)
+                        ->groupBy('student_size_items.size')
+                        ->select('student_size_items.size', \Illuminate\Support\Facades\DB::raw('COUNT(*) as total'))
+                        ->get()
+                        ->keyBy('size');
+                @endphp
                 <div>
-                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Min. Stok</p>
-                    <p class="mt-1 text-sm text-gray-900">{{ $item->min_stock ?? 0 }}</p>
-                </div>
-                <div>
-                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Max. Stok</p>
-                    <p class="mt-1 text-sm text-gray-900">{{ $item->max_stock ?? 0 }}</p>
+                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Total Demand</p>
+                    <p class="mt-1 text-sm text-gray-900">{{ $demandData->sum('total') }} pcs</p>
                 </div>
             </div>
         </div>
@@ -233,8 +238,10 @@
                             <tr class="bg-gray-50 border-b border-gray-200">
                                 <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Ukuran</th>
                                 <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">SKU</th>
+                                <th class="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Demand</th>
                                 <th class="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Stok</th>
-                                <th class="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Reserved</th>
+                                <th class="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Selisih</th>
+                                <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100">
@@ -242,28 +249,39 @@
                                 @php
                                     $balance = $item->stockBalances->firstWhere('variant_id', $variant->id);
                                     $qty = $balance?->quantity ?? 0;
-                                    $reserved = $balance?->reserved ?? 0;
+                                    $demand = $demandData->get($variant->size)?->total ?? 0;
+                                    $shortage = max(0, $demand - $qty);
                                     $totalAllStock += $qty;
-                                    $variantMin = $item->min_stock ?? 0;
-                                    $variantMax = $item->max_stock ?? 0;
                                 @endphp
                                 <tr class="hover:bg-gray-50 transition-colors">
                                     <td class="px-4 py-3 text-sm text-gray-800">{{ $variant->size_label ?? $variant->size }}</td>
                                     <td class="px-4 py-3 text-sm font-mono text-gray-600">{{ $variant->sku }}</td>
-                                    <td class="px-4 py-3 text-sm text-right font-semibold {{ $qty <= 0 ? 'text-red-600' : ($variantMin > 0 && $qty <= $variantMin ? 'text-amber-600' : ($variantMax > 0 && $qty >= $variantMax ? 'text-gray-800' : 'text-gray-800')) }}">
+                                    <td class="px-4 py-3 text-sm text-right text-gray-700">{{ number_format($demand) }}</td>
+                                    <td class="px-4 py-3 text-sm text-right font-semibold {{ $qty <= 0 ? 'text-red-600' : 'text-gray-800' }}">
                                         {{ number_format($qty) }}
                                     </td>
-                                    <td class="px-4 py-3 text-sm text-right text-gray-500">
-                                        {{ $reserved > 0 ? number_format($reserved) : '-' }}
+                                    <td class="px-4 py-3 text-sm text-right font-semibold {{ $shortage > 0 ? 'text-red-600' : 'text-green-600' }}">
+                                        {{ $shortage > 0 ? '-' . number_format($shortage) : '+' . number_format(max(0, $qty - $demand)) }}
+                                    </td>
+                                    <td class="px-4 py-3 text-center">
+                                        @if($qty <= 0 && $demand > 0)
+                                            <x-badge type="danger">Habis</x-badge>
+                                        @elseif($shortage > 0)
+                                            <x-badge type="warning">Kurang {{ $shortage }}</x-badge>
+                                        @elseif($demand > 0)
+                                            <x-badge type="success">Cukup</x-badge>
+                                        @else
+                                            <x-badge type="info">Tanpa Demand</x-badge>
+                                        @endif
                                     </td>
                                 </tr>
                             @endforeach
                         </tbody>
                         <tfoot class="bg-gray-50 border-t border-gray-200">
                             <tr>
-                                <td colspan="2" class="px-4 py-3 text-sm font-semibold text-gray-700">Total</td>
+                                <td colspan="3" class="px-4 py-3 text-sm font-semibold text-gray-700">Total</td>
                                 <td class="px-4 py-3 text-sm font-bold text-gray-800 text-right">{{ number_format($totalAllStock) }}</td>
-                                <td class="px-4 py-3"></td>
+                                <td colspan="2"></td>
                             </tr>
                         </tfoot>
                     </table>

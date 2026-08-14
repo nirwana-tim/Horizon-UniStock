@@ -41,8 +41,6 @@ class ItemService
             'unit' => $data['unit'] ?? 'pcs',
             'selling_price' => $data['selling_price'] ?? 0,
             'hpp' => $data['hpp'] ?? 0,
-            'min_stock' => $data['min_stock'] ?? 0,
-            'max_stock' => $data['max_stock'] ?? 0,
         ]);
 
         foreach ($sizes as $size) {

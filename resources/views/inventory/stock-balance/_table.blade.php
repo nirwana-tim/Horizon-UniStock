@@ -11,18 +11,21 @@
         <td class="px-6 py-4 whitespace-nowrap text-sm text-right tabular-nums text-gray-900 font-medium">Rp {{ number_format(($balance->quantity * ($balance->last_hpp ?? 0)), 0, ',', '.') }}</td>
         <td class="px-6 py-4 whitespace-nowrap text-center">
             @php
-                $min = $balance->item?->min_stock ?? 0;
-                $max = $balance->item?->max_stock ?? 0;
+                $demand = \Illuminate\Support\Facades\DB::table('student_size_items')
+                    ->join('student_size_profiles', 'student_size_items.size_profile_id', '=', 'student_size_profiles.id')
+                    ->where('student_size_items.item_id', $balance->item_id)
+                    ->where('student_size_items.size', $balance->variant?->size)
+                    ->count();
                 $qty = $balance->quantity;
             @endphp
-            @if($qty <= 0)
+            @if($qty <= 0 && $demand > 0)
                 <x-badge type="danger">Out of Stock</x-badge>
-            @elseif($min > 0 && $qty <= $min)
-                <x-badge type="warning">Low Stock</x-badge>
-            @elseif($max > 0 && $qty >= $max)
-                <x-badge type="info">Overstock</x-badge>
+            @elseif($demand > 0 && $qty < $demand)
+                <x-badge type="warning">Kurang {{ $demand - $qty }}</x-badge>
+            @elseif($demand > 0 && $qty >= $demand)
+                <x-badge type="success">Cukup</x-badge>
             @else
-                <x-badge type="success">In Stock</x-badge>
+                <x-badge type="info">Tanpa Demand</x-badge>
             @endif
         </td>
     </tr>

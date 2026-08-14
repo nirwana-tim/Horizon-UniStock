@@ -127,25 +127,6 @@
                                 @enderror
                             </div>
 
-                            <div>
-                                <label for="min_stock" class="block text-sm font-medium text-gray-700">Min. Stock</label>
-                                <input type="number" name="min_stock" id="min_stock" value="{{ old('min_stock', $item->min_stock) }}" min="0"
-                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-gray-500 sm:text-sm">
-                                @error('min_stock')
-                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                @enderror
-                            </div>
-
-                            <div>
-                                <label for="max_stock" class="block text-sm font-medium text-gray-700">Max. Stock</label>
-                                <input type="number" name="max_stock" id="max_stock" value="{{ old('max_stock', $item->max_stock) }}" min="0"
-                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-gray-500 sm:text-sm">
-                                @error('max_stock')
-                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                @enderror
-                            </div>
-                        </div>
-
                         <div class="mt-6">
                             <label class="block text-sm font-medium text-gray-700 font-semibold mb-1">Sizes <span class="text-red-500">*</span></label>
                             <div id="size_checkboxes" class="grid grid-cols-2 sm:grid-cols-3 gap-2">

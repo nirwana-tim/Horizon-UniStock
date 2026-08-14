@@ -259,19 +259,97 @@ class StockService
         }, attempts: 5);
     }
 
-    public function getLowStockItems(?int $fallbackThreshold = 5): Collection
+    public function getDemandShortageItems(): Collection
     {
-        return StockBalance::with(['item.category', 'variant'])
-            ->join('items', 'stock_balances.item_id', '=', 'items.id')
-            ->select('stock_balances.*')
-            ->where('stock_balances.quantity', '>', 0)
-            ->where(function ($q) use ($fallbackThreshold) {
-                $q->whereColumn('stock_balances.quantity', '<=', 'items.min_stock')
-                    ->orWhere(fn ($q) => $q->whereNull('items.min_stock')
-                        ->where('stock_balances.quantity', '<=', $fallbackThreshold));
+        return DB::table('student_size_items')
+            ->join('student_size_profiles', 'student_size_items.size_profile_id', '=', 'student_size_profiles.id')
+            ->join('items', 'student_size_items.item_id', '=', 'items.id')
+            ->leftJoin('item_variants', function ($join) {
+                $join->on('student_size_items.item_id', '=', 'item_variants.item_id')
+                     ->on('student_size_items.size', '=', 'item_variants.size');
             })
-            ->orderBy('stock_balances.quantity')
-            ->get();
+            ->leftJoin('stock_balances', function ($join) {
+                $join->on('item_variants.id', '=', 'stock_balances.variant_id');
+            })
+            ->select(
+                'items.id as item_id',
+                'items.name as item_name',
+                'items.code as item_code',
+                'items.unit',
+                'student_size_items.size',
+                DB::raw('COALESCE(item_variants.size_label, student_size_items.size) as size_label'),
+                DB::raw('COALESCE(item_variants.sku, CONCAT(items.code, \'-\', student_size_items.size)) as sku'),
+                DB::raw('COUNT(*) as demand'),
+                DB::raw('COALESCE(MAX(stock_balances.quantity), 0) as stock')
+            )
+            ->groupBy(
+                'items.id',
+                'items.name',
+                'items.code',
+                'items.unit',
+                'student_size_items.size',
+                'item_variants.size_label',
+                'item_variants.sku'
+            )
+            ->havingRaw('COUNT(*) > COALESCE(MAX(stock_balances.quantity), 0)')
+            ->orderBy('items.name')
+            ->orderBy('student_size_items.size')
+            ->get()
+            ->map(function ($row) {
+                $row->shortage = $row->demand - $row->stock;
+                $row->status = $row->stock <= 0 ? 'out_of_stock' : 'shortage';
+                return $row;
+            });
+    }
+
+    public function getDemandData(): Collection
+    {
+        return DB::table('student_size_items')
+            ->join('student_size_profiles', 'student_size_items.size_profile_id', '=', 'student_size_profiles.id')
+            ->join('items', 'student_size_items.item_id', '=', 'items.id')
+            ->leftJoin('item_variants', function ($join) {
+                $join->on('student_size_items.item_id', '=', 'item_variants.item_id')
+                     ->on('student_size_items.size', '=', 'item_variants.size');
+            })
+            ->leftJoin('stock_balances', function ($join) {
+                $join->on('item_variants.id', '=', 'stock_balances.variant_id');
+            })
+            ->select(
+                'items.id as item_id',
+                'items.name as item_name',
+                'items.code as item_code',
+                'items.unit',
+                'student_size_items.size',
+                DB::raw('COALESCE(item_variants.size_label, student_size_items.size) as size_label'),
+                DB::raw('COALESCE(item_variants.sku, CONCAT(items.code, \'-\', student_size_items.size)) as sku'),
+                DB::raw('COUNT(*) as demand'),
+                DB::raw('COALESCE(MAX(stock_balances.quantity), 0) as stock')
+            )
+            ->groupBy(
+                'items.id',
+                'items.name',
+                'items.code',
+                'items.unit',
+                'student_size_items.size',
+                'item_variants.size_label',
+                'item_variants.sku'
+            )
+            ->orderBy('items.name')
+            ->orderBy('student_size_items.size')
+            ->get()
+            ->map(function ($row) {
+                $row->shortage = max(0, $row->demand - $row->stock);
+                if ($row->stock <= 0 && $row->demand > 0) {
+                    $row->status = 'out_of_stock';
+                } elseif ($row->shortage > 0) {
+                    $row->status = 'shortage';
+                } elseif ($row->demand > 0 && $row->stock >= $row->demand) {
+                    $row->status = 'fulfilled';
+                } else {
+                    $row->status = 'excess';
+                }
+                return $row;
+            });
     }
 
     public function getOutOfStockItems(): Collection
