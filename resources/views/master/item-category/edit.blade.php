@@ -7,18 +7,18 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
-                    <form action="{{ route('master-data.item-category.update', $category) }}" method="POST">
+                    <form action="{{ route('master-data.item-category.update', $itemCategory) }}" method="POST">
                         @csrf
                         @method('PUT')
 
                         <div class="mb-4">
                             <x-input-label :value="__('Code')" />
-                            <p class="mt-1 text-sm font-mono text-gray-900 bg-gray-100 p-2.5 rounded-md border border-gray-200">{{ $category->code }}</p>
+                            <p class="mt-1 text-sm font-mono text-gray-900 bg-gray-100 p-2.5 rounded-md border border-gray-200">{{ $itemCategory->code }}</p>
                         </div>
 
                         <div class="mb-4">
                             <x-input-label for="label" :value="__('Label')" />
-                            <x-text-input id="label" name="label" type="text" class="mt-1 block w-full" :value="old('label', $category->label)" required />
+                            <x-text-input id="label" name="label" type="text" class="mt-1 block w-full" :value="old('label', $itemCategory->label)" required />
                             <x-input-error :messages="$errors->get('label')" class="mt-2" />
                         </div>
 
