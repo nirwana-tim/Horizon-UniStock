@@ -16,8 +16,7 @@ class DatabaseSeeder extends Seeder
             SuperadminSeeder::class,
             UserTestSeeder::class,
             StudentLevelSeeder::class,
-            // Uncomment to seed master data:
-            // Master\MasterDataSeeder::class,
+            Master\MasterDataSeeder::class,
         ]);
     }
 }

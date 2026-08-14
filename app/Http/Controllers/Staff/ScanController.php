@@ -173,23 +173,27 @@ class ScanController extends Controller
 
                 $sizeItem = $sizeItemsByItemId->get($item->id);
 
-                if ($stored === null) {
-                    if ($sizeItem) {
-                        $resolved = $this->studentSizeService->resolveSizeValue($item, $sizeItem->size);
-                        $studentSizes[$baseCode] = [
-                            'size' => $resolved['code'],
-                            'size_label' => $resolved['label'],
-                            'change_count' => $sizeItem->change_count,
-                        ];
-                    }
+                if (empty($stored) && ! $sizeItem) {
                     continue;
                 }
 
-                $resolved = $this->studentSizeService->resolveSizeValue($item, $stored);
+                if (! empty($stored)) {
+                    $resolved = $this->studentSizeService->resolveSizeValue($item, $stored)
+                        ?? ['code' => $stored, 'label' => $stored];
+                    $studentSizes[$baseCode] = [
+                        'size' => $resolved['code'],
+                        'size_label' => $resolved['label'],
+                        'change_count' => $sizeItem?->change_count ?? 0,
+                    ];
+                    continue;
+                }
+
+                $resolved = $this->studentSizeService->resolveSizeValue($item, $sizeItem->size)
+                    ?? ['code' => $sizeItem->size, 'label' => $sizeItem->size];
                 $studentSizes[$baseCode] = [
                     'size' => $resolved['code'],
                     'size_label' => $resolved['label'],
-                    'change_count' => $sizeItem?->change_count ?? 0,
+                    'change_count' => $sizeItem->change_count,
                 ];
             }
         }

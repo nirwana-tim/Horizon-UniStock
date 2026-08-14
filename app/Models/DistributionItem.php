@@ -10,6 +10,7 @@ class DistributionItem extends Model
     protected $fillable = [
         'transaction_id',
         'item_id',
+        'variant_id',
         'expected_size',
         'actual_size',
         'quantity',
@@ -36,5 +37,10 @@ class DistributionItem extends Model
     public function item(): BelongsTo
     {
         return $this->belongsTo(Item::class);
+    }
+
+    public function variant(): BelongsTo
+    {
+        return $this->belongsTo(ItemVariant::class, 'variant_id');
     }
 }

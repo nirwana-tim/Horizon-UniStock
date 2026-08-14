@@ -8,6 +8,7 @@ use App\Models\DistributionTransaction;
 use App\Models\EligibilityRecord;
 use App\Models\Entitlement;
 use App\Models\Item;
+use App\Models\ItemCategory;
 use App\Models\ItemPrice;
 use App\Models\ItemVariant;
 use App\Models\Student;
@@ -32,7 +33,7 @@ class DistributionService
 
     public function getStudentEligibility(Student $student): ?EligibilityRecord
     {
-        return $student->eligibilityRecords()->first();
+        return $student->eligibilityRecords()->latest()->first();
     }
 
     public function isStudentEligible(Student $student): bool
@@ -183,6 +184,7 @@ class DistributionService
                 DistributionItem::create([
                     'transaction_id' => $transaction->id,
                     'item_id' => $item->id,
+                    'variant_id' => $variant?->id,
                     'expected_size' => $itemData['expected_size'] ?? $itemData['actual_size'],
                     'actual_size' => $itemData['actual_size'],
                     'quantity' => $effectiveQty,
@@ -219,12 +221,30 @@ class DistributionService
 
             $studentSizesByBaseCode = [];
             $sizeProfile = $student->activeSizeProfile;
-            if ($sizeProfile) {
-                $sizeProfile->load('sizeItems.item');
-                foreach ($sizeProfile->sizeItems as $sizeItem) {
-                    $studentSizesByBaseCode[$sizeItem->item_id] = $sizeItem->size;
-                    if ($sizeItem->item?->base_code) {
-                        $studentSizesByBaseCode[$sizeItem->item->base_code] = $sizeItem->size;
+            if ($sizeProfile && $entitlement) {
+                $catIds = $entitlement->items->pluck('item.category_id')->filter()->unique();
+                $categories = ItemCategory::whereIn('id', $catIds)->pluck('code', 'id');
+
+                foreach ($entitlement->items as $entitlementItem) {
+                    $item = $entitlementItem->item;
+                    if (! $item) {
+                        continue;
+                    }
+
+                    $catCode = $categories[$item->category_id] ?? null;
+                    $stored = $catCode === 'UNF' ? $sizeProfile->baju_size
+                        : ($catCode === 'SHO' ? $sizeProfile->sepatu_size : null);
+
+                    if (empty($stored)) {
+                        continue;
+                    }
+
+                    $resolved = $this->studentSizeService->resolveSizeValue($item, $stored);
+                    $label = $resolved['label'] ?? $stored;
+
+                    $studentSizesByBaseCode[$entitlementItem->item_id] = $label;
+                    if ($item->base_code) {
+                        $studentSizesByBaseCode[$item->base_code] = $label;
                     }
                 }
             }
@@ -319,9 +339,26 @@ class DistributionService
         $newCode = $resolved['code'] ?? $newSize;
         $newLabel = $resolved['label'] ?? $newSize;
 
-        $sizeItem = $sizeProfile->sizeItems->firstWhere('item_id', $item->id);
+        $sizeItem = StudentSizeItem::where('size_profile_id', $sizeProfile->id)
+            ->where('item_id', $item->id)
+            ->first();
 
-        if ($sizeItem) {
+        if (! $sizeItem) {
+            $sizeItem = StudentSizeItem::create([
+                'size_profile_id' => $sizeProfile->id,
+                'item_id' => $item->id,
+                'size' => $newCode,
+                'change_count' => 1,
+            ]);
+
+            StudentSizeHistory::create([
+                'size_item_id' => $sizeItem->id,
+                'old_size' => $oldSize,
+                'new_size' => $newCode,
+                'changed_by' => $staff->id,
+                'changed_at' => now(),
+            ]);
+        } else {
             StudentSizeHistory::create([
                 'size_item_id' => $sizeItem->id,
                 'old_size' => $oldSize,
