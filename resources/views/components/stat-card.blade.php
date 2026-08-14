@@ -13,8 +13,11 @@
 $colorMap = [
     'primary' => ['bg' => 'bg-primary-50', 'text' => 'text-primary-700', 'icon_bg' => 'bg-primary-100'],
     'green'   => ['bg' => 'bg-green-50',   'text' => 'text-green-700',   'icon_bg' => 'bg-green-100'],
+    'success' => ['bg' => 'bg-green-50',   'text' => 'text-green-700',   'icon_bg' => 'bg-green-100'],
     'amber'   => ['bg' => 'bg-amber-50',   'text' => 'text-amber-700',   'icon_bg' => 'bg-amber-100'],
+    'warning' => ['bg' => 'bg-amber-50',   'text' => 'text-amber-700',   'icon_bg' => 'bg-amber-100'],
     'red'     => ['bg' => 'bg-red-50',     'text' => 'text-red-700',     'icon_bg' => 'bg-red-100'],
+    'danger'  => ['bg' => 'bg-red-50',     'text' => 'text-red-700',     'icon_bg' => 'bg-red-100'],
     'blue'    => ['bg' => 'bg-blue-50',    'text' => 'text-blue-700',    'icon_bg' => 'bg-blue-100'],
     'teal'    => ['bg' => 'bg-teal-50',    'text' => 'text-teal-700',    'icon_bg' => 'bg-teal-100'],
 ];

@@ -79,6 +79,11 @@ class Item extends Model
         return $this->hasMany(StockBalance::class);
     }
 
+    public function stockBatches(): HasMany
+    {
+        return $this->hasMany(StockBatch::class);
+    }
+
     public function sizeItems(): HasMany
     {
         return $this->hasMany(StudentSizeItem::class);

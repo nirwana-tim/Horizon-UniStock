@@ -7,6 +7,7 @@ use App\Imports\StockOpnameImport;
 use App\Models\StockOpname;
 use App\Services\StockOpnameService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
@@ -44,7 +45,7 @@ class StockOpnameController extends Controller
         return view('inventory.stock-opname.create');
     }
 
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
             'opname_date' => 'required|date',
@@ -65,7 +66,7 @@ class StockOpnameController extends Controller
         return view('inventory.stock-opname.show', ['batch' => $stockOpname]);
     }
 
-    public function upload(Request $request, StockOpname $stockOpname)
+    public function upload(Request $request, StockOpname $stockOpname): RedirectResponse
     {
         $request->validate([
             'opname_file' => 'required|file|mimes:xlsx,xls,csv|max:10240',
@@ -82,7 +83,7 @@ class StockOpnameController extends Controller
             ->with('total_imported', $import->getImportedRows());
     }
 
-    public function approve(Request $request, StockOpname $stockOpname)
+    public function approve(Request $request, StockOpname $stockOpname): RedirectResponse
     {
         $this->service->createAdjustments($stockOpname, Auth::user());
 

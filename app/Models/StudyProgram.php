@@ -23,4 +23,14 @@ class StudyProgram extends Model
         return $this->hasMany(Student::class);
     }
 
+    public function distributionSchedules(): HasMany
+    {
+        return $this->hasMany(DistributionSchedule::class);
+    }
+
+    public function sizeChangeEvents(): HasMany
+    {
+        return $this->hasMany(SizeChangeEvent::class);
+    }
+
 }

@@ -21,6 +21,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class ReportController extends Controller
 {
@@ -48,7 +49,7 @@ class ReportController extends Controller
         return view('report.index', compact('periods', 'stockOpnames', 'items', 'categories', 'generations', 'studyPrograms'));
     }
 
-    public function sizeRecap(Request $request)
+    public function sizeRecap(Request $request): BinaryFileResponse
     {
         $request->validate([
             'generation_id' => 'nullable|integer|exists:student_generations,id',
@@ -62,7 +63,7 @@ class ReportController extends Controller
         return Excel::download(new SizeRecapReport($levelId, $prodiId), $filename);
     }
 
-    public function distribution(Request $request)
+    public function distribution(Request $request): BinaryFileResponse
     {
         $request->validate([
             'period' => 'nullable|string',
@@ -74,7 +75,7 @@ class ReportController extends Controller
         return Excel::download(new DistributionReportExport($period), $filename);
     }
 
-    public function inventory(Request $request)
+    public function inventory(Request $request): BinaryFileResponse
     {
         $request->validate([
             'category' => 'nullable|string',
@@ -86,7 +87,7 @@ class ReportController extends Controller
         return Excel::download(new InventoryReportExport($category), $filename);
     }
 
-    public function gpm(Request $request)
+    public function gpm(Request $request): BinaryFileResponse
     {
         $request->validate([
             'period' => 'nullable|string',
@@ -98,7 +99,7 @@ class ReportController extends Controller
         return Excel::download(new GpmReportExport($period), $filename);
     }
 
-    public function stock(Request $request)
+    public function stock(Request $request): BinaryFileResponse
     {
         $request->validate([
             'category' => 'nullable|string',
@@ -113,7 +114,7 @@ class ReportController extends Controller
         );
     }
 
-    public function stockOpname(Request $request)
+    public function stockOpname(Request $request): BinaryFileResponse
     {
         $request->validate([
             'stock_opname_id' => ['required', 'integer', 'exists:stock_opnames,id'],
@@ -125,7 +126,7 @@ class ReportController extends Controller
         return Excel::download(new StockOpnameReport($stockOpname), $filename);
     }
 
-    public function stockCard(Request $request)
+    public function stockCard(Request $request): BinaryFileResponse
     {
         $request->validate([
             'item_code' => ['required', 'string', 'exists:items,code'],
@@ -209,7 +210,7 @@ class ReportController extends Controller
         return view('report.distribution-recap', compact('data', 'periods', 'studyPrograms', 'period', 'studyProgramId'));
     }
 
-    public function loss(Request $request)
+    public function loss(Request $request): BinaryFileResponse
     {
         $request->validate([
             'period' => 'nullable|string',

@@ -3,13 +3,13 @@
 namespace App\Http\Controllers\Finance;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Finance\SizeChangeEventRequest;
 use App\Models\Faculty;
 use App\Models\StudentGeneration;
 use App\Models\StudentLevel;
 use App\Models\SizeChangeEvent;
 use App\Models\StudyProgram;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class SizeChangeEventController extends Controller
@@ -33,37 +33,15 @@ class SizeChangeEventController extends Controller
         return view('finance.size-events.create', compact('faculties', 'studyPrograms', 'generations', 'studentLevels'));
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(SizeChangeEventRequest $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'title' => ['required', 'string', 'max:255'],
-            'description' => ['nullable', 'string'],
-            'start_date' => ['required', 'date'],
-            'end_date' => ['required', 'date', 'after_or_equal:start_date'],
-            'faculty_id' => ['nullable', 'integer', 'exists:faculties,id'],
-            'study_program_id' => ['nullable', 'integer', 'exists:study_programs,id'],
-            'generation_id' => ['nullable', 'integer', 'exists:student_generations,id'],
-            'student_level' => ['nullable', 'string', 'exists:student_levels,kode'],
-            'max_changes' => ['required', 'integer', 'min:0'],
-            'is_active' => ['boolean'],
-            'allow_reedit' => ['boolean'],
-            'baju_size_options_text' => ['nullable', 'string'],
-            'sepatu_size_options_text' => ['nullable', 'string'],
-        ]);
+        $validated = $request->validated();
 
         $validated['is_active'] = $request->boolean('is_active', true);
         $validated['allow_reedit'] = $request->boolean('allow_reedit', false);
         $validated['created_by'] = auth()->id();
 
-        // Parse comma-separated size options into JSON arrays
-        if (! empty($validated['baju_size_options_text'])) {
-            $validated['baju_size_options'] = array_map('trim', explode(',', $validated['baju_size_options_text']));
-        }
-        if (! empty($validated['sepatu_size_options_text'])) {
-            $validated['sepatu_size_options'] = array_map('trim', explode(',', $validated['sepatu_size_options_text']));
-        }
-
-        unset($validated['baju_size_options_text'], $validated['sepatu_size_options_text']);
+        $validated = $this->parseSizeOptions($validated);
 
         SizeChangeEvent::create($validated);
 
@@ -84,36 +62,14 @@ class SizeChangeEventController extends Controller
         return view('finance.size-events.edit', compact('sizeEvent', 'faculties', 'studyPrograms', 'generations', 'studentLevels', 'bajuOptionsText', 'sepatuOptionsText'));
     }
 
-    public function update(Request $request, SizeChangeEvent $sizeEvent): RedirectResponse
+    public function update(SizeChangeEventRequest $request, SizeChangeEvent $sizeEvent): RedirectResponse
     {
-        $validated = $request->validate([
-            'title' => ['required', 'string', 'max:255'],
-            'description' => ['nullable', 'string'],
-            'start_date' => ['required', 'date'],
-            'end_date' => ['required', 'date', 'after_or_equal:start_date'],
-            'faculty_id' => ['nullable', 'integer', 'exists:faculties,id'],
-            'study_program_id' => ['nullable', 'integer', 'exists:study_programs,id'],
-            'generation_id' => ['nullable', 'integer', 'exists:student_generations,id'],
-            'student_level' => ['nullable', 'string', 'exists:student_levels,kode'],
-            'max_changes' => ['required', 'integer', 'min:0'],
-            'is_active' => ['boolean'],
-            'allow_reedit' => ['boolean'],
-            'baju_size_options_text' => ['nullable', 'string'],
-            'sepatu_size_options_text' => ['nullable', 'string'],
-        ]);
+        $validated = $request->validated();
 
         $validated['is_active'] = $request->boolean('is_active', true);
         $validated['allow_reedit'] = $request->boolean('allow_reedit', false);
 
-        // Parse comma-separated size options into JSON arrays
-        if (! empty($validated['baju_size_options_text'])) {
-            $validated['baju_size_options'] = array_map('trim', explode(',', $validated['baju_size_options_text']));
-        }
-        if (! empty($validated['sepatu_size_options_text'])) {
-            $validated['sepatu_size_options'] = array_map('trim', explode(',', $validated['sepatu_size_options_text']));
-        }
-
-        unset($validated['baju_size_options_text'], $validated['sepatu_size_options_text']);
+        $validated = $this->parseSizeOptions($validated);
 
         $sizeEvent->update($validated);
 
@@ -127,5 +83,19 @@ class SizeChangeEventController extends Controller
 
         return redirect()->route('distribution.size-events.index')
             ->with('success', 'Event Pengisian / Perubahan Ukuran berhasil dihapus.');
+    }
+
+    private function parseSizeOptions(array $validated): array
+    {
+        if (! empty($validated['baju_size_options_text'])) {
+            $validated['baju_size_options'] = array_map('trim', explode(',', $validated['baju_size_options_text']));
+        }
+        if (! empty($validated['sepatu_size_options_text'])) {
+            $validated['sepatu_size_options'] = array_map('trim', explode(',', $validated['sepatu_size_options_text']));
+        }
+
+        unset($validated['baju_size_options_text'], $validated['sepatu_size_options_text']);
+
+        return $validated;
     }
 }

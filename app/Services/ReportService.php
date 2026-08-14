@@ -16,7 +16,7 @@ class ReportService
 {
     public function getDistributionReportData(?string $period = null, ?int $studyProgramId = null): Collection
     {
-        $query = DistributionTransaction::with(['student.studyProgram', 'student.programLevel', 'items.item', 'schedule']);
+        $query = DistributionTransaction::with(['student.studyProgram', 'student.generation', 'items.item', 'schedule']);
 
         if ($period) {
             $query->whereHas('schedule', function ($q) use ($period) {

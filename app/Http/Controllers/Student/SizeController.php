@@ -111,7 +111,7 @@ class SizeController extends Controller
     public function items(): View
     {
         $student = Student::where('user_id', auth()->id())->firstOrFail();
-        $student->load(['activeSizeProfile.sizeItems.item', 'studyProgram', 'programLevel']);
+        $student->load(['activeSizeProfile.sizeItems.item', 'studyProgram', 'generation']);
 
         $entitlementItems = $this->sizeService->getEntitlementItems($student);
 

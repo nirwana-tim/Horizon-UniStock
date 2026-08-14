@@ -52,7 +52,7 @@ class DashboardController extends Controller
     private function studentDashboard(): View
     {
         $student = Student::where('user_id', Auth::id())->firstOrFail();
-        $student->load(['activeSizeProfile', 'studyProgram', 'programLevel']);
+        $student->load(['activeSizeProfile', 'studyProgram', 'generation']);
 
         $sizeService = app(StudentSizeService::class);
         $sizeEvents = $sizeService->getEventsForStudent($student);

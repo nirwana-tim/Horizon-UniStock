@@ -16,4 +16,9 @@ class Faculty extends Model
     {
         return $this->hasMany(StudyProgram::class);
     }
+
+    public function sizeChangeEvents(): HasMany
+    {
+        return $this->hasMany(SizeChangeEvent::class);
+    }
 }

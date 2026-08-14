@@ -26,4 +26,14 @@ class StudentGeneration extends Model
     {
         return $this->hasMany(Student::class, 'generation_id');
     }
+
+    public function distributionSchedules(): HasMany
+    {
+        return $this->hasMany(DistributionSchedule::class, 'generation_id');
+    }
+
+    public function sizeChangeEvents(): HasMany
+    {
+        return $this->hasMany(SizeChangeEvent::class, 'generation_id');
+    }
 }

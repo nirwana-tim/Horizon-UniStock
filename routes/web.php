@@ -78,22 +78,24 @@ Route::middleware(['auth', 'password.changed', 'role:super_admin|admin', 'thrott
     Route::resource('student-level', StudentLevelController::class)->only(['index', 'show']);
 });
 
-Route::middleware(['auth', 'password.changed', 'role:super_admin|admin', 'throttle:30,1'])->prefix('distribution')->name('distribution.')->group(function () {
-    Route::get('entitlement/items-grid', [EntitlementController::class, 'itemsGrid'])->name('entitlement.items-grid');
-    Route::resource('entitlement', EntitlementController::class);
-    Route::get('distribution-schedule/fetch-items', [DistributionScheduleController::class, 'fetchItems'])->name('distribution-schedule.fetch-items');
-    Route::get('distribution-schedule/{distributionSchedule}/transactions', [DistributionScheduleController::class, 'transactions'])->name('distribution-schedule.transactions');
-    Route::resource('distribution-schedule', DistributionScheduleController::class);
-    Route::get('size-monitor', [SizeMonitorController::class, 'index'])->name('size-monitor.index');
-    Route::resource('size-events', SizeChangeEventController::class)->except('show');
-});
+Route::middleware(['auth', 'password.changed', 'throttle:30,1'])->prefix('distribution')->name('distribution.')->group(function () {
+    Route::middleware('role:super_admin|admin')->group(function () {
+        Route::get('entitlement/items-grid', [EntitlementController::class, 'itemsGrid'])->name('entitlement.items-grid');
+        Route::resource('entitlement', EntitlementController::class);
+        Route::get('distribution-schedule/fetch-items', [DistributionScheduleController::class, 'fetchItems'])->name('distribution-schedule.fetch-items');
+        Route::get('distribution-schedule/{distributionSchedule}/transactions', [DistributionScheduleController::class, 'transactions'])->name('distribution-schedule.transactions');
+        Route::resource('distribution-schedule', DistributionScheduleController::class);
+        Route::get('size-monitor', [SizeMonitorController::class, 'index'])->name('size-monitor.index');
+        Route::resource('size-events', SizeChangeEventController::class)->except('show');
+    });
 
-Route::middleware(['auth', 'password.changed', 'role:super_admin|admin|staff'])->prefix('distribution')->name('distribution.')->group(function () {
-    Route::get('/scan', [ScanController::class, 'index'])->name('scan.index');
-    Route::get('/student/{nim}', [ScanController::class, 'showByNim'])->name('scan.student');
-    Route::post('/search', [ScanController::class, 'search'])->middleware('throttle:30,1')->name('search');
-    Route::get('/search', [ScanController::class, 'searchByQuery'])->name('search.get');
-    Route::post('/process', [ScanController::class, 'process'])->middleware('throttle:10,1')->name('process');
+    Route::middleware('role:super_admin|admin|staff')->group(function () {
+        Route::get('/scan', [ScanController::class, 'index'])->name('scan.index');
+        Route::get('/student/{nim}', [ScanController::class, 'showByNim'])->name('scan.student');
+        Route::post('/search', [ScanController::class, 'search'])->middleware('throttle:30,1')->name('search');
+        Route::get('/search', [ScanController::class, 'searchByQuery'])->name('search.get');
+        Route::post('/process', [ScanController::class, 'process'])->middleware('throttle:10,1')->name('process');
+    });
 });
 
 Route::middleware(['auth', 'password.changed', 'role:super_admin|admin', 'throttle:30,1'])->prefix('inventory')->name('inventory.')->group(function () {
@@ -157,10 +159,11 @@ Route::middleware(['auth', 'password.changed', 'role:super_admin|admin', 'thrott
     Route::get('/promote', [StudentController::class, 'promoteForm'])->name('promote.form');
     Route::post('/promote', [StudentController::class, 'promote'])->name('promote');
     Route::get('/credentials', [StudentController::class, 'showCredentials'])->name('credentials');
+    Route::get('/credentials/{student}/password', [StudentController::class, 'getPassword'])->middleware('throttle:30,1')->name('credentials.password');
     Route::get('/credentials/export', [StudentController::class, 'exportCredentials'])->name('credentials.export');
-    Route::post('/credentials/{student}/reset-password', [StudentController::class, 'resetPassword'])->name('credentials.reset-password');
-    Route::post('/credentials/{student}/resend-email', [StudentController::class, 'resendEmail'])->name('credentials.resend-email');
-    Route::post('/credentials/resend-all-failed', [StudentController::class, 'resendAllFailed'])->name('credentials.resend-all-failed');
+    Route::post('/credentials/{student}/reset-password', [StudentController::class, 'resetPassword'])->middleware('throttle:5,1')->name('credentials.reset-password');
+    Route::post('/credentials/{student}/resend-email', [StudentController::class, 'resendEmail'])->middleware('throttle:10,1')->name('credentials.resend-email');
+    Route::post('/credentials/resend-all-failed', [StudentController::class, 'resendAllFailed'])->middleware('throttle:5,1')->name('credentials.resend-all-failed');
     Route::post('/credentials/destroy', [StudentController::class, 'destroyCredentials'])->name('credentials.destroy');
 });
 

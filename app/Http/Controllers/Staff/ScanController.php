@@ -112,7 +112,7 @@ class ScanController extends Controller
             'items.min' => 'Pilih minimal satu barang yang akan didistribusikan.',
         ]);
 
-        $student = Student::with(['studyProgram', 'programLevel'])->findOrFail($request->input('student_id'));
+        $student = Student::with(['studyProgram', 'generation'])->findOrFail($request->input('student_id'));
         $schedule = DistributionSchedule::findOrFail($request->input('schedule_id'));
         $staff = auth()->user();
 

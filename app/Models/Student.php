@@ -129,11 +129,6 @@ class Student extends Authenticatable
         return $this->belongsTo(StudentLevel::class, 'student_level', 'kode');
     }
 
-    public function programLevel(): BelongsTo
-    {
-        return $this->belongsTo(StudentGeneration::class, 'generation_id');
-    }
-
     public function summary(): HasOne
     {
         return $this->hasOne(StudentSummary::class);

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class SizeChangeEvent extends Model
 {
@@ -69,6 +70,11 @@ class SizeChangeEvent extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function submissions(): HasMany
+    {
+        return $this->hasMany(SizeEventSubmission::class, 'event_id');
     }
 
     public function isApplicableToStudent(Student $student): bool

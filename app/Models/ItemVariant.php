@@ -44,6 +44,11 @@ class ItemVariant extends Model
         return $this->hasMany(StockBalance::class, 'variant_id');
     }
 
+    public function stockBatches(): HasMany
+    {
+        return $this->hasMany(StockBatch::class, 'variant_id');
+    }
+
     public function stockOpnameItems(): HasMany
     {
         return $this->hasMany(StockOpnameItem::class, 'variant_id');

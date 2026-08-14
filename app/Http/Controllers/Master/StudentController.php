@@ -340,6 +340,15 @@ class StudentController extends Controller
         ));
     }
 
+    public function getPassword(Student $student): JsonResponse
+    {
+        $passwords = session('credentials.passwords', []);
+
+        return response()->json([
+            'password' => $passwords[$student->nim] ?? null,
+        ]);
+    }
+
     public function exportCredentials(): BinaryFileResponse
     {
         $students = Student::whereNotNull('user_id')

@@ -9,10 +9,11 @@ use App\Exports\Templates\KatalogTemplateExport;
 use App\Exports\Templates\MahasiswaTemplateExport;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class TemplateController extends Controller
 {
-    public function download(Request $request, string $type)
+    public function download(Request $request, string $type): BinaryFileResponse
     {
         $validTypes = [
             'mahasiswa' => MahasiswaTemplateExport::class,
