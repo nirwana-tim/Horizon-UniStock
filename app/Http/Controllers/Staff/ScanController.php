@@ -5,11 +5,12 @@ namespace App\Http\Controllers\Staff;
 use App\Http\Controllers\Controller;
 use App\Models\DistributionSchedule;
 use App\Models\Item;
+use App\Models\ItemCategory;
 use App\Models\ItemPrice;
-use App\Models\ItemVariant;
 use App\Models\StockBalance;
 use App\Models\Student;
 use App\Services\DistributionService;
+use App\Services\StudentSizeService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -19,7 +20,8 @@ use Illuminate\View\View;
 class ScanController extends Controller
 {
     public function __construct(
-        private readonly DistributionService $distributionService
+        private readonly DistributionService $distributionService,
+        private readonly StudentSizeService $studentSizeService,
     ) {}
 
     public function index(): View
@@ -145,25 +147,49 @@ class ScanController extends Controller
 
         if ($activeSchedule) {
             $entitlement = $this->distributionService->getEntitlementForStudent($student);
-            $activeSchedule->load('items.item.variants');
+            $activeSchedule->load('items.item.variants', 'items.item.category');
             $scheduleItems = $activeSchedule->items->pluck('item')->filter();
         }
 
         $eligibility = $this->distributionService->getStudentEligibility($student);
 
         $sizeProfile = $student->activeSizeProfile;
-        if ($sizeProfile) {
-            $sizeProfile->load('sizeItems.item');
-            $variantIds = $sizeProfile->sizeItems->pluck('item_id')->unique();
-            $preloadedVariants = ItemVariant::whereIn('item_id', $variantIds)->get()->groupBy('item_id');
-            foreach ($sizeProfile->sizeItems as $sizeItem) {
-                $baseCode = $sizeItem->item->base_code;
-                if (!$baseCode) continue;
-                $matchingVariant = $preloadedVariants->get($sizeItem->item_id)?->firstWhere('size', $sizeItem->size);
+        $studentSizes = [];
+        if ($sizeProfile && $scheduleItems->isNotEmpty()) {
+            $sizeProfile->load('sizeItems');
+            $sizeItemsByItemId = $sizeProfile->sizeItems->keyBy('item_id');
+            $categories = ItemCategory::whereIn('id', $scheduleItems->pluck('category_id'))
+                ->pluck('code', 'id');
+
+            foreach ($scheduleItems as $item) {
+                $baseCode = $item->base_code ?? $item->code;
+                if (! $baseCode) {
+                    continue;
+                }
+
+                $catCode = $categories[$item->category_id] ?? null;
+                $stored = $catCode === 'UNF' ? $sizeProfile->baju_size
+                    : ($catCode === 'SHO' ? $sizeProfile->sepatu_size : null);
+
+                $sizeItem = $sizeItemsByItemId->get($item->id);
+
+                if ($stored === null) {
+                    if ($sizeItem) {
+                        $resolved = $this->studentSizeService->resolveSizeValue($item, $sizeItem->size);
+                        $studentSizes[$baseCode] = [
+                            'size' => $resolved['code'],
+                            'size_label' => $resolved['label'],
+                            'change_count' => $sizeItem->change_count,
+                        ];
+                    }
+                    continue;
+                }
+
+                $resolved = $this->studentSizeService->resolveSizeValue($item, $stored);
                 $studentSizes[$baseCode] = [
-                    'size' => $sizeItem->size,
-                    'size_label' => $matchingVariant?->size_label ?? $sizeItem->size,
-                    'change_count' => $sizeItem->change_count,
+                    'size' => $resolved['code'],
+                    'size_label' => $resolved['label'],
+                    'change_count' => $sizeItem?->change_count ?? 0,
                 ];
             }
         }

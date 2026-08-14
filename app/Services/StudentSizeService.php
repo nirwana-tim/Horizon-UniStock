@@ -6,6 +6,7 @@ use App\Models\Entitlement;
 use App\Models\Item;
 use App\Models\ItemCategory;
 use App\Models\ItemSize;
+use App\Models\ItemVariant;
 use App\Models\SizeChangeEvent;
 use App\Models\SizeEventSubmission;
 use App\Models\Student;
@@ -144,6 +145,133 @@ class StudentSizeService
     }
 
     /**
+     * Normalize a size value (label or code) to its canonical code + label for a category.
+     *
+     * @return array{code: string, label: string}|null
+     */
+    public function normalizeSize(?string $value, string $categoryCode): ?array
+    {
+        if (empty($value)) {
+            return null;
+        }
+
+        $categoryId = ItemCategory::where('code', $categoryCode)->value('id');
+        if (! $categoryId) {
+            return ['code' => $value, 'label' => $value];
+        }
+
+        $pairs = ItemSize::whereHas('categories', fn ($q) => $q->where('item_category_id', $categoryId))
+            ->get(['code', 'label'])
+            ->map(fn ($size) => ['code' => $size->code, 'label' => $size->label]);
+
+        if ($pairs->isNotEmpty()) {
+            $found = $this->resolveFromPairs($pairs, $value);
+            if ($found) {
+                return $found;
+            }
+        }
+
+        $pairs = ItemVariant::whereHas('item', fn ($q) => $q->where('category_id', $categoryId))
+            ->get(['size', 'size_label'])
+            ->map(fn ($variant) => ['code' => $variant->size, 'label' => $variant->size_label]);
+
+        if ($pairs->isNotEmpty()) {
+            $found = $this->resolveFromPairs($pairs, $value);
+            if ($found) {
+                return $found;
+            }
+        }
+
+        return ['code' => $value, 'label' => $value];
+    }
+
+    /**
+     * Resolve a size value (label or code) to its canonical code + label for a given item.
+     *
+     * @return array{code: string, label: string}|null
+     */
+    public function resolveSizeValue(Item $item, ?string $value): ?array
+    {
+        if (empty($value)) {
+            return null;
+        }
+
+        $item->loadMissing('variants', 'category');
+
+        $pairs = $item->variants
+            ->map(fn ($variant) => ['code' => $variant->size, 'label' => $variant->size_label]);
+
+        if ($pairs->isNotEmpty()) {
+            $found = $this->resolveFromPairs($pairs, $value);
+            if ($found) {
+                return $found;
+            }
+        }
+
+        $categoryCode = $item->category?->code;
+        if ($categoryCode) {
+            $normalized = $this->normalizeSize($value, $categoryCode);
+            if ($normalized) {
+                return $normalized;
+            }
+        }
+
+        return ['code' => $value, 'label' => $value];
+    }
+
+    /**
+     * Match a value (code or label) against a collection of code/label pairs.
+     *
+     * @param  Collection<int, array{code: string, label: string}>  $pairs
+     * @return array{code: string, label: string}|null
+     */
+    private function resolveFromPairs(Collection $pairs, string $value): ?array
+    {
+        $byCode = $pairs->firstWhere('code', $value);
+        if ($byCode) {
+            return ['code' => $byCode['code'], 'label' => $byCode['label']];
+        }
+
+        $byLabel = $pairs->firstWhere('label', $value);
+        if ($byLabel) {
+            return ['code' => $byLabel['code'], 'label' => $byLabel['label']];
+        }
+
+        return null;
+    }
+
+    /**
+     * Keep the legacy per-item table in sync for a generic size (baju/sepatu).
+     */
+    private function syncGenericSizeItems(StudentSizeProfile $profile, string $categoryCode, ?string $size): void
+    {
+        if (empty($size)) {
+            return;
+        }
+
+        $normalized = $this->normalizeSize($size, $categoryCode);
+        $code = $normalized['code'] ?? $size;
+
+        $categoryId = ItemCategory::where('code', $categoryCode)->value('id');
+        if (! $categoryId) {
+            return;
+        }
+
+        $itemIds = Item::where('category_id', $categoryId)->pluck('id');
+
+        foreach ($itemIds as $itemId) {
+            $existing = StudentSizeItem::where('size_profile_id', $profile->id)
+                ->where('item_id', $itemId)
+                ->first();
+
+            StudentSizeItem::updateOrCreate(
+                ['size_profile_id' => $profile->id, 'item_id' => $itemId],
+                ['size' => $code, 'change_count' => ($existing ? $existing->change_count : 0) + 1]
+            );
+        }
+    }
+
+    /**
      * Save student sizes (baju + sepatu) for a given event.
      *
      * @param  Student  $student
@@ -203,10 +331,12 @@ class StudentSizeService
 
             if (! empty($baju)) {
                 $profile->update(['baju_size' => $baju]);
+                $this->syncGenericSizeItems($profile, 'UNF', $baju);
             }
 
             if (! empty($sepatu)) {
                 $profile->update(['sepatu_size' => $sepatu]);
+                $this->syncGenericSizeItems($profile, 'SHO', $sepatu);
             }
 
             if (! $submission) {
