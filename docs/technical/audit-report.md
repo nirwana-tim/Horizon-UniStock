@@ -123,7 +123,7 @@
 | M24 | `AutoPromoteStudents.php:64-66` vs `StudentService.php:139-142,148-185` | Preview menghitung semester dari `current_semester` saja, tapi `promoteStudents()` mendahulukan `student_level` → preview berbeda dari hasil aktual | Gunakan resolusi "effective semester" yang sama |
 | M25 | `StudentService.php:196-198` | **`promoteStudents` menulis id generasi (int) ke kolom `student_level` (string kode)** → entitlement code, `scopeForStudent`, `isFreshman`, import level semuanya rusak | Tulis kode `StudentLevel` (mis. `Y2S1`); simpan kenaikan generasi di `generation_id` |
 | M26 | `CalculateStudentSummaries.php:37-46` | `COUNT(*)` atas join `distribution_items` menghitung baris item, bukan transaksi | `COUNT(DISTINCT distribution_transactions.id)` |
-| M27 | `SuperadminSeeder.php:14-15,25` | `env()` dipakai langsung (gagal setelah `config:cache`); `must_change_password=false` bertentangan dengan security.md | Baca via `config()`, wajibkan ganti password |
+| M27 | `SuperadminSeeder.php:14-15,25` | `env()` dipakai langsung (gagal setelah `config:cache`); `must_change_password=false` bertentangan dengan security.md | ✅ Baca via `config('superadmin.*')` (file `config/superadmin.php`), `must_change_password=true`, password acak bila env kosong |
 
 ### 3.6 Item Code & Data Integrity
 

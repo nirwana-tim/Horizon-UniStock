@@ -307,14 +307,12 @@ php artisan migrate --force
 
 ```bash
 # ============================================================
-# STEP 6B: Seed data awal (roles & permissions)
+# STEP 6B: Seed data awal (roles, permissions & super admin)
 # ============================================================
 # Membuat:
 #   - Roles       : super_admin, admin, staff, student
 #   - Permissions : manage-students, manage-distributions, manage-finance
 #   - Super admin (SuperadminSeeder)
-#   - Student levels (StudentLevelSeeder)
-#   - Test user (UserTestSeeder) — bisa dihapus setelah login
 php artisan db:seed --force
 
 # ============================================================
@@ -324,14 +322,13 @@ php artisan db:seed --force
 # di DatabaseSeeder). Jika ingin buat ulang / jalankan sendiri:
 php artisan db:seed --class=SuperadminSeeder
 
-# Kredensial default yang dicetak di console:
-#   Email    : admin@horizon-unistock.ac.id
-#   Password : SuperAdmin!123
-
-# Untuk custom email/password, tambahkan di .env SEBELUM seed:
+# Kredensial diambil dari .env (lihat Step 5):
 #   SUPERADMIN_EMAIL=admin@kampus.ac.id
 #   SUPERADMIN_PASSWORD=PasswordRahasia!456
-# lalu jalankan ulang: php artisan db:seed --class=SuperadminSeeder
+#
+# WAJIB set SUPERADMIN_PASSWORD di .env. Jika tidak di-set, seeder
+# membuat password acak dan WAJIB diganti saat login pertama.
+# Akun super admin dibuat dengan must_change_password=true.
 ```
 
 > 💡 Seeder memakai `firstOrCreate()`, jadi **aman dijalankan ulang**.
