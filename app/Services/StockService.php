@@ -444,12 +444,19 @@ class StockService
                 'updated_at' => now(),
             ]);
 
-            DB::table('document_sequences')
+            $row = DB::table('document_sequences')
                 ->where('type', $type)
                 ->where('period', $period)
-                ->update(['value' => DB::raw('LAST_INSERT_ID(value + 1)')]);
+                ->lockForUpdate()
+                ->first();
 
-            return (int) DB::scalar('SELECT LAST_INSERT_ID()');
+            $next = (int) $row->value + 1;
+
+            DB::table('document_sequences')
+                ->where('id', $row->id)
+                ->update(['value' => $next, 'updated_at' => now()]);
+
+            return $next;
         });
     }
 

@@ -40,8 +40,8 @@ class ReportService
             'study_programs.name as study_program_name',
             DB::raw('COUNT(DISTINCT distribution_transactions.student_id) as total_students'),
             DB::raw('COUNT(*) as total_transactions'),
-            DB::raw('SUM(CASE WHEN distribution_transactions.status = "completed" THEN 1 ELSE 0 END) as completed'),
-            DB::raw('SUM(CASE WHEN distribution_transactions.status = "partial" THEN 1 ELSE 0 END) as partial')
+            DB::raw("SUM(CASE WHEN distribution_transactions.status = 'completed' THEN 1 ELSE 0 END) as completed"),
+            DB::raw("SUM(CASE WHEN distribution_transactions.status = 'partial' THEN 1 ELSE 0 END) as partial")
         )
             ->join('students', 'distribution_transactions.student_id', '=', 'students.id')
             ->join('study_programs', 'students.study_program_id', '=', 'study_programs.id')
@@ -190,19 +190,21 @@ class ReportService
 
     public function getMonthlySalesTrend(int $months = 6): Collection
     {
+        $cutoff = now()->subMonths($months);
+
         return DB::table('distribution_items as di')
             ->select(
-                DB::raw('YEAR(dt.pickup_time) as year'),
-                DB::raw('MONTH(dt.pickup_time) as month'),
+                DB::raw('EXTRACT(YEAR FROM dt.pickup_time) as year'),
+                DB::raw('EXTRACT(MONTH FROM dt.pickup_time) as month'),
                 DB::raw('SUM(di.quantity) as unit_sold'),
                 DB::raw('SUM(di.quantity * di.selling_price_at_distribution) as revenue')
             )
             ->join('items as i', 'i.id', '=', 'di.item_id')
             ->join('distribution_transactions as dt', 'dt.id', '=', 'di.transaction_id')
-            ->whereRaw('dt.pickup_time >= DATE_SUB(NOW(), INTERVAL ? MONTH)', [$months])
-            ->groupBy(DB::raw('YEAR(dt.pickup_time)'), DB::raw('MONTH(dt.pickup_time)'))
-            ->orderBy('year')
-            ->orderBy('month')
+            ->where('dt.pickup_time', '>=', $cutoff)
+            ->groupBy(DB::raw('EXTRACT(YEAR FROM dt.pickup_time)'), DB::raw('EXTRACT(MONTH FROM dt.pickup_time)'))
+            ->orderBy(DB::raw('EXTRACT(YEAR FROM dt.pickup_time)'))
+            ->orderBy(DB::raw('EXTRACT(MONTH FROM dt.pickup_time)'))
             ->get();
     }
 
@@ -462,12 +464,20 @@ class ReportService
         ];
 
         // 6. Chart 3: Combo Chart (Revenue & Unit Sold by Month)
+        $isPgsql = DB::connection()->getDriverName() === 'pgsql';
+        $monthVal = $isPgsql
+            ? "TO_CHAR(dt.pickup_time, 'YYYY-MM') as month_val"
+            : "DATE_FORMAT(dt.pickup_time, '%Y-%m') as month_val";
+        $monthLabel = $isPgsql
+            ? "TO_CHAR(dt.pickup_time, 'Mon-YY') as month_label"
+            : "DATE_FORMAT(dt.pickup_time, '%b-%y') as month_label";
+
         $c3Query = DB::table('distribution_items as di')
             ->join('distribution_transactions as dt', 'dt.id', '=', 'di.transaction_id')
             ->join('items as i', 'i.id', '=', 'di.item_id')
             ->select(
-                DB::raw("DATE_FORMAT(dt.pickup_time, '%Y-%m') as month_val"),
-                DB::raw("DATE_FORMAT(dt.pickup_time, '%b-%y') as month_label"),
+                DB::raw($monthVal),
+                DB::raw($monthLabel),
                 DB::raw('SUM(di.quantity) as total_sold'),
                 DB::raw('SUM(di.quantity * di.selling_price_at_distribution) as total_revenue')
             )

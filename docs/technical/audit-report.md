@@ -1,7 +1,7 @@
 # Laporan Audit Horizon-UniStock
 
 - **Tanggal audit:** 14 Agustus 2026
-- **Ruang lingkup:** Seluruh aplikasi — models (41), migrations (2 aktif + 84 arsip + 1 schema dump), services (30), controllers, imports/exports, seeders, routes, 168 blade views, assets JS/CSS
+- **Ruang lingkup:** Seluruh aplikasi — models (41), migrations (55 bersih, portabel MySQL & PostgreSQL), services (30), controllers, imports/exports, seeders, routes, 168 blade views, assets JS/CSS
 - **Metode:** Pemeriksaan kode langsung (manual) + pengecekan silang terhadap `docs/project/erd.md`, `docs/project/architecture.md`, `docs/guides/desain.md`, `AGENTS.md`, dan best practices Laravel
 - **Status:** Semua temuan CRITICAL (C1-C7), HIGH (H1-H8) dan MEDIUM (M1-M14, audit lanjutan) sudah diperbaiki. Dokumen ini diperbarui setelah setiap perbaikan.
 
@@ -55,7 +55,7 @@
 - **Perbaikan:** ✅ `saveSizes()` kini memanggil `$event->isApplicableToStudent($student)` dan throw `RuntimeException` bila tidak berlaku.
 
 ### C6. Konflik unique constraint vs alur cancel/retry distribusi ✅ DIPERBAIKI
-- **Lokasi:** `database/migrations_archive/2026_08_06_000001_fix_logic_integrity.php:18` (unique `(student_id, schedule_id)`); `app/Services/DistributionService.php:107-115`
+- **Lokasi:** migrasi `2026_08_16_000039_create_distribution_transactions_table.php` (unique `(student_id, schedule_id)`); `app/Services/DistributionService.php:107-115`
 - **Masalah:** Unique index berlaku untuk semua status. Guard di service memblokir transaksi non-`cancelled`, namun status `cancelled` tidak pernah dihasilkan oleh kode mana pun (tidak ada alur cancel/void). Jika sebuah baris `cancelled` pernah ada, transaksi baru untuk `(student, schedule)` yang sama akan melanggar unique key — pengambilan ulang tidak mungkin.
 - **Dampak:** Desain bertentangan; salah-scan/double-submit mengunci mahasiswa selamanya dari jadwal tersebut; status `cancelled` = dead code.
 - **Perbaikan:** ✅ Unique `(student_id, schedule_id)` di-drop (migration `2026_08_14_100004`); proteksi anti-duplikat diandalkan pada guard + index `(student_id, schedule_id, status)` yang sudah ada.
@@ -222,7 +222,7 @@
 ### ✅ Validasi pasca-perbaikan
 - `php -l` bersih semua file yang diubah.
 - `route:list --name=distribution.size-events` → 6 route (show hilang); `--name=students.credentials` → 7 route (termasuk `password` baru).
-- `migrate:status` semua `[Ran]`; `migrate:fresh` di DB test sukses penuh (schema dump + 2 migrasi, tanpa error).
+- `migrate:status` semua `[Ran]`; `migrate:fresh` di DB test sukses penuh (55 clean migrations, tanpa error).
 - Tinker: 8 relasi baru `method_exists` = EXISTS; `programLevel` REMOVED; `Hash::check(password, db)` = yes (confirmasi `hashed` cast).
 - Test: 36 passed / 6 failed (Breeze default: captcha di LoginRequest, redirect logout, OTP email — di luar scope audit; `/tests` di-`.gitignore`).
 - `config:cache`, `route:cache`, `view:cache`, `storage:link` semua sukses (kondisi produksi).
@@ -260,6 +260,12 @@
 - Migrasi aktif tersisa 2: `2026_08_16_000001_fix_unique_indexes_eligibility_and_size_profiles` (perbaiki drift unik `student_id` di `eligibility_records` & `student_size_profiles`) + `2026_08_16_000002_backfill_stock_batches_from_receive_items` (data migration, tidak di-squash)
 - Verifikasi: `migrate:fresh` di DB test = 54 tabel identik dengan skema aktual + 2 tabel hanya berbeda pada unique index (drift yang diperbaiki); **test 36/6 tanpa regresi**
 - Catatan: `--env=testing` tidak memakai `.env.testing` (file tidak ada), pastikan pakai override `DB_DATABASE=horizon_unistock_test` untuk fresh di DB test; `mysqldump`/`mysql` CLI harus ada di PATH untuk memuat schema dump
+
+**Fase 5 — Clean Migrations Dual-Driver ✅ SELESAI (16 Agustus 2026)**
+- Pendekatan schema dump dihapus total: `database/schema/mysql-schema.sql` (55 tabel) dan `database/migrations_archive/` (84 file) di-remove; kode MySQL-only yang semula di active migrations (`information_schema.STATISTICS`/`DATABASE()` untuk unique index, `LAST_INSERT_ID` di `StockService::nextSequence`, `YEAR()/MONTH()/DATE_SUB()/DATE_FORMAT()` di `ReportService`, kutip ganda `"IN"`/`"completed"` di `ReportService`/`StockReport`) dihapus/diubah ke konstruksi portabel.
+- `database/migrations/` kini **55 migrasi bersih (1 tabel = 1 file)** ditulis dari skema aktual sebagai source of truth; unique `student_id` di `eligibility_records` & `student_size_profiles` + data migration `backfill_stock_batches` diserap langsung ke create migration / file terakhir.
+- Portabilitas: enum → `varchar + CHECK` (PostgresGrammar), generated column `computed_variance` memakai `storedAs` (Postgres tidak dukung VIRTUAL), tanpa `unsigned*`, tanpa raw SQL MySQL-only.
+- Verifikasi: `migrate:fresh` **55 tabel** sukses di MySQL 9.5 (Laragon) dan **PostgreSQL 18.6** (Laragon); **test 36/6 identik di kedua driver** (tanpa regresi).
 
 ---
 

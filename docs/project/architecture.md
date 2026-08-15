@@ -15,9 +15,7 @@ app
 ├── Console/Commands        # AutoPromoteStudents, CalculateStudentSummaries, CleanupOldLogs
 
 database
-├── schema/                 # mysql-schema.sql — dump skema 55 tabel (dimuat saat migrate:fresh)
-├── migrations/             # 2 migrasi aktif (fix unique index + backfill data)
-├── migrations_archive/     # 84 migrasi historis (referensi, tidak dijalankan)
+├── migrations/             # 55 migrasi bersih (1 tabel = 1 file), portabel MySQL & PostgreSQL
 ├── seeders                 # DatabaseSeeder, RolePermissionSeeder, StudentLevelSeeder,
 │                           # SuperadminSeeder, FakeDataSeeder, TestDistributionSeeder, UserTestSeeder
 
@@ -70,7 +68,7 @@ routes
 | Komponen | Teknologi |
 |----------|-----------|
 | Framework | Laravel 13 |
-| Database | MySQL 8 |
+| Database | MySQL 8 / PostgreSQL 18 (migrasi portabel dual-driver) |
 | Frontend | Blade + Tailwind CSS + Alpine.js + Vite |
 | Auth | Laravel Breeze (login/password, register & 2FA nonaktif) |
 | Permission | Spatie Laravel Permission (role-based, via middleware `role:`) |
