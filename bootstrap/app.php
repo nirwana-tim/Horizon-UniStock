@@ -1,8 +1,18 @@
 <?php
 
+use App\Http\Middleware\EnsurePasswordChanged;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Exceptions\ThrottleRequestsException;
+use Illuminate\Http\Request;
+use Illuminate\Routing\Middleware\ThrottleRequests;
+use Illuminate\Session\TokenMismatchException;
+use Illuminate\Support\Facades\Log;
+use Spatie\Permission\Middleware\PermissionMiddleware;
+use Spatie\Permission\Middleware\RoleMiddleware;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -12,36 +22,49 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
-            'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
-            'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
-            'password.changed' => \App\Http\Middleware\EnsurePasswordChanged::class,
+            'role' => RoleMiddleware::class,
+            'permission' => PermissionMiddleware::class,
+            'password.changed' => EnsurePasswordChanged::class,
         ]);
+
+        $middleware->append(ThrottleRequests::using('web'));
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        $exceptions->render(function (Throwable $e, \Illuminate\Http\Request $request) {
+        $exceptions->render(function (Throwable $e, Request $request) {
             if ($request->expectsJson()) {
+                if ($e instanceof ThrottleRequestsException) {
+                    return response()->json([
+                        'error' => 'Terlalu banyak permintaan',
+                        'message' => 'Silakan tunggu beberapa saat sebelum mencoba lagi.',
+                    ], 429);
+                }
+
                 return response()->json([
                     'error' => 'Terjadi kesalahan server',
                     'message' => config('app.debug') ? $e->getMessage() : null,
                 ], 500);
             }
 
-            if ($e instanceof \Symfony\Component\HttpKernel\Exception\NotFoundHttpException) {
+            if ($e instanceof ThrottleRequestsException) {
+                return response()->view('errors.429', [], 429);
+            }
+
+            if ($e instanceof NotFoundHttpException) {
                 return response()->view('errors.404', [], 404);
             }
 
-            if ($e instanceof \Illuminate\Auth\Access\AuthorizationException) {
+            if ($e instanceof AuthorizationException) {
                 return response()->view('errors.403', ['message' => $e->getMessage()], 403);
             }
 
-            if ($e instanceof \Illuminate\Session\TokenMismatchException) {
+            if ($e instanceof TokenMismatchException) {
                 return redirect()->back()->with('error', 'Sesi Anda telah berakhir. Silakan coba lagi.');
             }
         });
 
         $exceptions->reportable(function (Throwable $e) {
             if (config('app.env') === 'production') {
-                \Illuminate\Support\Facades\Log::error($e->getMessage(), [
+                Log::error($e->getMessage(), [
                     'file' => $e->getFile(),
                     'line' => $e->getLine(),
                 ]);

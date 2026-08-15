@@ -2,15 +2,17 @@
 
 namespace App\Providers;
 
+use App\Models\Entitlement;
 use App\Models\StudentLevel;
+use App\Models\StudyProgram;
+use App\Policies\EntitlementPolicy;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Middleware\TrustProxies;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
-use App\Models\Entitlement;
-use App\Models\StudyProgram;
-use App\Policies\EntitlementPolicy;
-use Illuminate\Http\Middleware\TrustProxies;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -21,6 +23,12 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        RateLimiter::for('web', function ($request) {
+            return Limit::perMinute(120)->by(
+                $request->user()?->id ?: $request->ip()
+            );
+        });
+
         $proxies = config('trustproxies.proxies');
         if ($proxies !== []) {
             TrustProxies::at($proxies);

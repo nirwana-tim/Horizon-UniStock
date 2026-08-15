@@ -58,7 +58,7 @@ Route::middleware(['auth', 'password.changed'])->group(function () {
     });
 });
 
-Route::middleware(['auth', 'password.changed', 'role:super_admin|admin', 'throttle:30,1'])->prefix('master-data')->name('master-data.')->group(function () {
+Route::middleware(['auth', 'password.changed', 'role:super_admin|admin', 'throttle:web'])->prefix('master-data')->name('master-data.')->group(function () {
     Route::resource('faculty', FacultyController::class);
     Route::resource('study-program', StudyProgramController::class);
     Route::resource('student-generation', StudentGenerationController::class);
@@ -78,7 +78,7 @@ Route::middleware(['auth', 'password.changed', 'role:super_admin|admin', 'thrott
     Route::resource('student-level', StudentLevelController::class)->only(['index', 'show']);
 });
 
-Route::middleware(['auth', 'password.changed', 'throttle:30,1'])->prefix('distribution')->name('distribution.')->group(function () {
+Route::middleware(['auth', 'password.changed', 'throttle:web'])->prefix('distribution')->name('distribution.')->group(function () {
     Route::middleware('role:super_admin|admin')->group(function () {
         Route::get('entitlement/items-grid', [EntitlementController::class, 'itemsGrid'])->name('entitlement.items-grid');
         Route::resource('entitlement', EntitlementController::class);
@@ -94,11 +94,11 @@ Route::middleware(['auth', 'password.changed', 'throttle:30,1'])->prefix('distri
         Route::get('/student/{nim}', [ScanController::class, 'showByNim'])->name('scan.student');
         Route::post('/search', [ScanController::class, 'search'])->middleware('throttle:30,1')->name('search');
         Route::get('/search', [ScanController::class, 'searchByQuery'])->name('search.get');
-        Route::post('/process', [ScanController::class, 'process'])->middleware('throttle:10,1')->name('process');
+        Route::post('/process', [ScanController::class, 'process'])->middleware('throttle:15,1')->name('process');
     });
 });
 
-Route::middleware(['auth', 'password.changed', 'role:super_admin|admin', 'throttle:30,1'])->prefix('inventory')->name('inventory.')->group(function () {
+Route::middleware(['auth', 'password.changed', 'role:super_admin|admin', 'throttle:web'])->prefix('inventory')->name('inventory.')->group(function () {
     Route::get('stock-receive/search-items', [StockReceiveController::class, 'searchItems'])->name('stock-receive.search-items');
     Route::get('stock-receive/variants-by-item/{item}', [StockReceiveController::class, 'variantsByItem'])->name('stock-receive.variants-by-item');
     Route::get('stock-receive/variants-by-base-code/{baseCode}', [StockReceiveController::class, 'variantsByBaseCode'])->name('stock-receive.variants-by-base-code')->where('baseCode', '.*');
@@ -110,7 +110,7 @@ Route::middleware(['auth', 'password.changed', 'role:super_admin|admin', 'thrott
     Route::post('stock-opname/{stockOpname}/approve', [StockOpnameController::class, 'approve'])->middleware('throttle:5,1')->name('stock-opname.approve');
 });
 
-Route::middleware(['auth', 'password.changed', 'role:super_admin|admin', 'throttle:10,1'])->prefix('report')->name('report.')->group(function () {
+Route::middleware(['auth', 'password.changed', 'role:super_admin|admin', 'throttle:30,1'])->prefix('report')->name('report.')->group(function () {
     Route::get('/', [ReportController::class, 'index'])->name('index');
     Route::get('distribution', [ReportController::class, 'distribution'])->name('distribution');
     Route::get('distribution-recap', [ReportController::class, 'distributionRecap'])->name('distribution-recap');
@@ -132,15 +132,15 @@ Route::middleware(['auth', 'password.changed', 'role:super_admin|admin'])->prefi
     Route::get('/', [ImportController::class, 'index'])->name('index');
     Route::get('/{importBatch}', [ImportController::class, 'result'])->name('result');
     Route::post('/', [ImportController::class, 'store'])->middleware('throttle:5,1')->name('store');
-    Route::post('/preview', [ImportController::class, 'preview'])->middleware('throttle:10,1')->name('preview');
+    Route::post('/preview', [ImportController::class, 'preview'])->middleware('throttle:15,1')->name('preview');
 });
 
 Route::middleware(['auth', 'password.changed', 'role:super_admin|admin'])->prefix('student')->name('finance.eligibility.')->group(function () {
     Route::get('/eligibility', [EligibilityController::class, 'index'])->name('index');
-    Route::post('/eligibility/{student}/toggle', [EligibilityController::class, 'toggle'])->middleware('throttle:10,1')->name('toggle');
+    Route::post('/eligibility/{student}/toggle', [EligibilityController::class, 'toggle'])->middleware('throttle:15,1')->name('toggle');
 });
 
-Route::middleware(['auth', 'password.changed', 'role:super_admin|admin', 'throttle:30,1'])->prefix('student')->name('students.')->group(function () {
+Route::middleware(['auth', 'password.changed', 'role:super_admin|admin', 'throttle:web'])->prefix('student')->name('students.')->group(function () {
     Route::get('/students-data', [StudentController::class, 'index'])->name('index');
     Route::get('/students-data/create', [StudentController::class, 'create'])->name('create');
     Route::post('/students-data', [StudentController::class, 'store'])->name('store');
@@ -190,7 +190,7 @@ Route::middleware(['auth', 'password.changed', 'role:super_admin'])->prefix('sys
     Route::post('/smtp/verify', [SmtpSettingController::class, 'verify'])->middleware('throttle:10,1')->name('smtp.verify');
 });
 
-Route::middleware(['auth', 'password.changed', 'role:super_admin|admin', 'throttle:30,1'])
+Route::middleware(['auth', 'password.changed', 'role:super_admin|admin', 'throttle:web'])
     ->prefix('admin/users')->name('admin.user.')->group(function () {
         Route::get('/', [UserController::class, 'index'])->name('index');
         Route::get('/create', [UserController::class, 'create'])->name('create');

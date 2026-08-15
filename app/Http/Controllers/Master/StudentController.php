@@ -7,11 +7,11 @@ use App\Exports\StudentExport;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StudentRequest;
 use App\Models\DistributionItem;
-use App\Services\AuditService;
 use App\Models\Entitlement;
 use App\Models\Student;
 use App\Models\StudentGeneration;
 use App\Models\StudyProgram;
+use App\Services\AuditService;
 use App\Services\Master\StudentService;
 use App\Services\NotificationService;
 use Illuminate\Http\JsonResponse;
@@ -92,9 +92,9 @@ class StudentController extends Controller
             return $student;
         });
 
-        $totalStudents = cache()->remember('student-count-total', 300, fn () => Student::count());
-        $totalWithAccount = cache()->remember('student-count-with-account', 300, fn () => Student::whereNotNull('user_id')->count());
-        $totalWithoutAccount = cache()->remember('student-count-without-account', 300, fn () => Student::whereNull('user_id')->count());
+        $totalStudents = cache()->remember('student-count-total', 120, fn () => Student::count());
+        $totalWithAccount = cache()->remember('student-count-with-account', 120, fn () => Student::whereNotNull('user_id')->count());
+        $totalWithoutAccount = cache()->remember('student-count-without-account', 120, fn () => Student::whereNull('user_id')->count());
 
         return view('master.student.generate', compact(
             'studentsWithoutAccount',
@@ -328,9 +328,9 @@ class StudentController extends Controller
             return $student;
         });
 
-        $totalStudents = cache()->remember('student-count-total', 300, fn () => Student::count());
-        $totalWithAccount = cache()->remember('student-count-with-account', 300, fn () => Student::whereNotNull('user_id')->count());
-        $totalWithoutAccount = cache()->remember('student-count-without-account', 300, fn () => Student::whereNull('user_id')->count());
+        $totalStudents = cache()->remember('student-count-total', 120, fn () => Student::count());
+        $totalWithAccount = cache()->remember('student-count-with-account', 120, fn () => Student::whereNotNull('user_id')->count());
+        $totalWithoutAccount = cache()->remember('student-count-without-account', 120, fn () => Student::whereNull('user_id')->count());
 
         return view('master.student.credentials', compact(
             'students',
