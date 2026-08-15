@@ -5,7 +5,7 @@
 | Warna | Role |
 |-------|------|
 | Ungu | Super Admin |
-| Biru | Admin Admin |
+| Biru | Admin |
 | Oranye | Staff |
 | Hijau | Student |
 
@@ -21,7 +21,7 @@ flowchart TD
     B --> C{Pilih Role Login}
 
     C -->|Super Admin| SA([Super Admin])
-    C -->|Admin Admin| FA([Admin Admin])
+    C -->|Admin| FA([Admin])
     C -->|Staff| ST([Staff])
     C -->|Student| SU([Student])
 
@@ -43,10 +43,7 @@ flowchart TD
     classDef dashboard fill:#065f46,color:#fff,stroke:#047857,stroke-width:2px
     classDef warning fill:#d97706,color:#fff,stroke:#b45309,stroke-width:2px
 
-    M1[Login NIM + Password] --> M1X{Percobaan Login > 3?}
-    M1X -->|Ya| M1Y[Akun Terkunci 15 Menit]
-    M1Y --> M1
-    M1X -->|Tidak| M2{Akun Valid?}
+    M1[Login NIM + Password] --> M2{Akun Valid?}
 
     M2 -->|Tidak| M3[Error Login]
     M2 -->|Ya| M4{First Login?}
@@ -69,13 +66,13 @@ flowchart TD
 
     M8[Input Profile & Data Diri] --> M9[Input Ukuran Seragam & Sepatu]
     M9 --> M10{Sudah Pernah Update?}
-    M10 -->|Ya| M11[Notifikasi: Maks 1x Update]
+    M10 -->|Ya| M11[Notifikasi: Batas Perubahan Tercapai]
     M11 --> M13
     M10 -->|Tidak| M12[Simpan Ukuran]
 
     M12 --> M13{Data Lengkap?}
     M13 -->|Tidak| M8
-    M13 -->|Ya| M14[Generate QR Token]
+    M13 -->|Ya| M14[QR Identity — berisi NIM]
     M14 --> M15[Lihat QR & Jadwal]
     M15 --> M7
 
@@ -89,11 +86,11 @@ flowchart TD
 
     class M1,M6,M8,M9,M12,M14,M15,M20,M21,M24 student
     class M2,M4,M10,M13,M22,M25 decision
-    class M3,M11,M23,M1X error
+    class M3,M11,M23 error
     class M7,M7A,M7B,M7C,M7D dashboard
     class E1 startEnd
     class M5,M19 process
-    class M1Y,M7C warning
+    class M7C warning
 ```
 
 ---
@@ -125,14 +122,14 @@ flowchart TD
 
     S7 --> S10
 
-    S10 --> S10A[System Deteksi Tahap Aktif]
-    S10A --> S10B[Tampilkan Status Tahap: 1 / 2 / 3]
+    S10 --> S10A[System Deteksi Jadwal Aktif Hari Ini]
+    S10A --> S10B[Tampilkan Jadwal Aktif + Data Mahasiswa]
 
-    S10B --> S11[Cek Eligible per Tahap]
+    S10B --> S11[Cek Eligibility Mahasiswa]
     S11 --> S12{Eligible?}
     S12 -->|Tidak| S13[Pengambilan Ditolak]
     S13 --> S4
-    S12 -->|Ya| S14[Ambil Entitlement Tahap Ini]
+    S12 -->|Ya| S14[Ambil Entitlement Mahasiswa]
 
     S14 --> S15[Tampilkan List Item + Ukuran Expected]
     S15 --> S16[Checklist Item]
@@ -150,7 +147,7 @@ flowchart TD
     S19 -->|Ya| S21
     S21 --> S23[Submit Pengambilan]
 
-    S23 --> S24[Simpan Distribution Transaction + Stage]
+    S23 --> S24[Simpan Distribution Transaction + Schedule]
     S24 --> S25[Simpan Distribution Items]
     S25 --> S26[Stock Movement OUT]
     S26 --> S27[Update Stock Balance -]
@@ -196,17 +193,13 @@ flowchart TD
     F13 --> F14[Upload Validasi Preview Commit Log]
 
     F4 --> F15[Kelola Master Data]
-    F15 --> F15A[Fakultas, Prodi, Level]
-    F15 --> F15B[Item, Kategori, Size, Variant]
-
-    F4 --> F15C[Kelola Distribution Stages]
-    F15C --> F15D[Buat Tahap: Nama, Periode, Tanggal, Item]
-    F15D --> F15E[Simpan Stage]
+    F15 --> F15A[Fakultas, Prodi, Level, Generasi]
+    F15 --> F15B[Item, Kategori, Type, Departemen, Size, Variant]
 
     F4 --> F16[Create Entitlement]
-    F16 --> F16A[Pilih Stage]
-    F16A --> F17[Set: Prodi + Level + Period + Student Type]
-    F17 --> F18[Atur Item & Qty per Stage]
+    F16 --> F16A[Pilih Student Level]
+    F16A --> F17[Set: Kode + Deskripsi]
+    F17 --> F18[Atur Item & Qty]
     F18 --> F19[Simpan Entitlement]
 
     F4 --> F20[Generate Akun Mahasiswa]
@@ -222,41 +215,36 @@ flowchart TD
     F28 --> F29[Update Stock Balance +]
 
     F4 --> F30[Buat Jadwal Distribusi]
-    F30 --> F30A[Pilih Stage Aktif]
+    F30 --> F30A[Set: Period, Level, Fakultas/Prodi/Generasi]
     F30A --> F30B[System Tampilkan Stok Per Item & Size]
     F30B --> F30C[Pilih Item untuk Jadwal Ini]
-    F30C --> F30D[Isi Info: Nama, Lokasi, Tanggal, Jam]
+    F30C --> F30D[Isi Info: Nama, Lokasi, Tanggal, Sesi]
     F30D --> F31[Simpan Schedule + Schedule Items]
     F31 --> F32[System Cari Eligible + Email Kampus]
     F32 --> F33{Sudah Kirim?}
     F33 -->|Ya, Skip| F34[Anti Duplikat]
     F33 -->|Tidak, Kirim| F35[Kirim Notifikasi ke Email Kampus]
 
-    F4 --> F36[Create Distribution Schedule per Stage]
-    F36 --> F37[Jadwal Aktif]
-
     F4 --> F38[Monitor Perubahan Ukuran]
     F38 --> F38A[Lihat Log: Student, From, To, Staff, Date]
 
     F4 --> F39[Monitor Distribution]
-    F39 --> F40[Lihat Report per Stage]
+    F39 --> F40[Lihat Report]
     F40 --> F41[Export Excel: Distribusi & Stock]
 
     F12 --> E3([Logout])
     F14 --> E3
     F15A --> E3
     F15B --> E3
-    F15E --> E3
     F19 --> E3
     F23 --> E3
     F29 --> E3
     F34 --> E3
     F35 --> E3
-    F37 --> E3
     F38A --> E3
     F41 --> E3
 
-    class F1,F4,F5,F6,F7,F8,F11,F12,F13,F14,F15,F15A,F15B,F15C,F15D,F15E,F16,F16A,F17,F18,F19,F20,F21,F22,F23,F24,F25,F26,F27,F28,F29,F30,F30A,F30B,F30C,F30D,F31,F32,F35,F36,F37,F38,F38A,F39,F40,F41 finance
+    class F1,F4,F5,F6,F7,F8,F11,F12,F13,F14,F15,F15A,F15B,F16,F16A,F17,F18,F19,F20,F21,F22,F23,F24,F25,F26,F27,F28,F29,F30,F30A,F30B,F30C,F30D,F31,F32,F35,F38,F38A,F39,F40,F41 finance
     class F2,F9,F33 decision
     class F3,F10,F34 error
     class E3 startEnd
@@ -281,26 +269,22 @@ flowchart TD
     A2 -->|Ya| A4[Dashboard Super Admin]
 
     A4 --> A5[Manage User]
-    A5 --> A6[CRUD User, Role, Permission]
+    A5 --> A6[CRUD User, Role, Status Aktif]
 
-    A4 --> A7[System Config]
-    A7 --> A8[Setting Sistem, Maintenance Mode]
+    A4 --> A7[System Config SMTP]
+    A7 --> A8[Atur & Test Koneksi SMTP]
 
     A4 --> A9[Audit Log]
-    A9 --> A10[Filter & Export Log]
-
-    A4 --> A11[Backup Database]
-    A11 --> A12[Download / Restore]
+    A9 --> A10[Pantau Aktivitas]
 
     A4 --> A13[Monitoring Semua Modul]
 
     A6 --> E4([Logout])
     A8 --> E4
     A10 --> E4
-    A12 --> E4
     A13 --> E4
 
-    class A1,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13 superAdmin
+    class A1,A4,A5,A6,A7,A8,A9,A10,A13 superAdmin
     class A2 decision
     class A3 error
     class E4 startEnd
@@ -341,12 +325,11 @@ flowchart LR
 | Langkah | Detail |
 |---------|--------|
 | Login | Username = NIM, Password = 12 char random dari Admin |
-| Batas Login Gagal | Maks 3x, akun terkunci 15 menit |
-| First Login | Wajib ganti password |
+| First Login | Wajib ganti password (rate limit login: 5x/menit) |
 | Dashboard | Info email, notifikasi, status, riwayat |
 | Profile Lengkap | Data diri & ukuran seragam |
-| Update Ukuran | Maksimal 1x |
-| QR Token | Generate otomatis setelah data lengkap |
+| Update Ukuran | Dibatasi change count per size event |
+| QR Identity | QR berisi NIM, muncul setelah data lengkap |
 | Lupa Password | OTP 6 digit ke email kampus |
 
 ### 6.2 Alur Staff
@@ -354,12 +337,12 @@ flowchart LR
 | Langkah | Detail |
 |---------|--------|
 | Metode Cari | Scan QR atau Cari NIM (fallback) |
-| Deteksi Jadwal | System deteksi jadwal aktif |
-| Eligible | Cek status pembayaran |
+| Deteksi Jadwal | System deteksi jadwal aktif hari ini |
+| Eligible | Cek status kelayakan mahasiswa |
 | Actual Size | Staff bisa edit — dicatat log |
 | Cek Stok | Validasi sebelum konfirmasi |
 | Partial Pickup | Jika stok kurang |
-| Transaksi | Simpan, kurangi stok, update balance |
+| Transaksi | Simpan, kurangi stok, update balance (anti double submit) |
 
 ### 6.3 Alur Admin
 
@@ -367,18 +350,17 @@ flowchart LR
 |---------|--------|
 | Import | Upload → Validasi → Preview → Commit → Log |
 | Stock Receive | Input barang masuk dari vendor |
-| Entitlement | Atur hak barang |
+| Entitlement | Atur hak barang per student level |
 | Generate Akun | NIM + password random |
-| Buat Jadwal | Pilih stage, item, lokasi |
+| Buat Jadwal | Set level/fakultas/prodi/generasi, item, lokasi |
 | Notifikasi | Anti duplikat |
-| Report | Export Excel per stage |
+| Report | Export Excel |
 
 ### 6.4 Alur Super Admin
 
 | Langkah | Detail |
 |---------|--------|
-| Manage User | CRUD user, role & permission |
-| System Config | Setting global |
+| Manage User | CRUD user, role & status aktif |
+| System Config | Atur SMTP |
 | Audit Log | Pantau aktivitas |
-| Backup | Backup & restore database |
 | Monitoring | Pantau semua modul |

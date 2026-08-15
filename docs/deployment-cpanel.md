@@ -301,7 +301,7 @@ cd ~/Horizon-UniStock
 # --force : Jalan tanpa konfirmasi (dibutuhkan di production)
 php artisan migrate --force
 
-# Verifikasi jumlah tabel (harus 70+ termasuk tabel Spatie)
+# Verifikasi jumlah tabel (harus ±55 termasuk tabel Spatie)
 # Cek di cPanel → phpMyAdmin → pilih database → lihat daftar tabel
 ```
 

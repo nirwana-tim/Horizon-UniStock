@@ -1,7 +1,7 @@
 # Axios — HTTP Client untuk Request API
 
 **Sumber resmi:** https://axios-http.com/docs/intro  
-**Versi terinstall:** `^1.11` (lihat `package.json`)
+**Versi terinstall:** `^1.11.0` (lihat `package.json`)
 
 ## Apa Itu Axios?
 
@@ -26,7 +26,18 @@ window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 
 ### Setup CSRF Protection
 
-Laravel secara otomatis menyertakan CSRF token di meta tag layout. Axios sudah terkonfigurasi via `resources/js/bootstrap.js` yang di-generate Breeze.
+Laravel secara otomatis menyertakan CSRF token di meta tag layout (`<meta name="csrf-token">`). Axios sudah terkonfigurasi via `resources/js/bootstrap.js`.
+
+### Penggunaan aktual di proyek UniStock (`resources/js/app.js`)
+
+| Penggunaan | Lokasi | Fungsi |
+|------------|--------|--------|
+| `serverTable(url)` | Alpine data component | Memuat HTML tabel + pagination via AJAX (dengan `AbortController` + cancel) |
+| `salesDashboard` | Alpine data component (dashboard admin) | Fetch KPI + data chart dari `DASHBOARD_URL` dengan filter tanggal/kategori/item |
+| Verifikasi password ganti email | Global event delegation (profile) | `POST /profile/email/verify-password` untuk verifikasi password sebelum ganti email |
+| Ajax chart params | `GET window.DASHBOARD_URL` | `ajax=1`, `start_date`, `end_date`, `category_id`, `item_id` |
+
+Semua request axios dikirim dengan header `X-Requested-With: XMLHttpRequest` (dari `bootstrap.js`), sehingga Laravel mengembalikan response JSON.
 
 ## Penggunaan Dasar
 
@@ -80,33 +91,19 @@ async function fetchData() {
 
 ## Pattern untuk Server-Side Table (Alpine + Axios)
 
-```blade
-<div x-data="serverTable()">
-    <input type="text" x-model="search" @input.debounce.300ms="fetchData()">
-    <div x-html="tableHtml"></div>
-</div>
+Di UniStock, setiap tabel pakai component Alpine `serverTable(url)` yang sudah didefinisikan di `app.js`:
 
-<script>
-document.addEventListener('alpine:init', () => {
-    Alpine.data('serverTable', () => ({
-        search: '',
-        page: 1,
-        tableHtml: '',
-        fetchData() {
-            axios.get('/master/item/data', {
-                params: { page: this.page, q: this.search }
-            })
-            .then(res => {
-                this.tableHtml = res.data.html;
-            })
-            .catch(err => {
-                console.error(err);
-            });
-        }
-    }));
-});
-</script>
+```blade
+<div x-data="serverTable(@js(route('students.index', ['ajax' => 1])))">
+    <input type="search" x-model="search" @input.debounce.300ms="fetchData()">
+    <table>
+        <tbody x-html="tableHtml"></tbody>
+    </table>
+    <div x-html="paginationHtml"></div>
+</div>
 ```
+
+Komponen ini mengirim param `page`, `q` (pencarian), `per_page`, `faculty_id`, `study_program_id`, `generation_id`, `is_active` ke URL yang sama, lalu menampilkan `html` dan `pagination` dari response.
 
 ## Error Handling
 

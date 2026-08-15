@@ -56,18 +56,17 @@ Student Data → Size Management → QR Identity → Staff Distribution → Inve
 
 ### Student Level
 
-Tidak perlu membuat dua aplikasi. Gunakan field `student_level` yang nilainya dikelola lewat master data **Student Level** (`/master-data/student-level`).
+Tidak perlu membuat dua aplikasi. Gunakan field `student_level` (kode) yang nilainya dikelola lewat master data **Student Level** (`/master-data/student-level` — read-only, di-seed oleh `StudentLevelSeeder`).
 
-Nilai default yang tersedia:
-- `year_1_sem_1` — Year 1 Sem 1 (Freshman)
-- `year_1_sem_2` — Year 1 Sem 2 (Freshman)
-- `year_2_sem_3` — Year 2 Sem 3 (Continuing)
-- `year_2_sem_4` — Year 2 Sem 4 (Continuing)
-- `continuing` — Continuing
-- `year_3_sem_1` — Year 3 Sem 1 (Continuing)
-- `year_3_sem_2` — Year 3 Sem 2 (Continuing)
-- `year_4_sem_1` — Year 4 Sem 1 (Continuing)
-- `year_4_sem_2` — Year 4 Sem 2 (Continuing)
+Nilai default yang tersedia (kode = `deskripsi` = status):
+- `Y1S1` — Year 1 Sem 1 (Freshman)
+- `Y1S2` — Year 1 Sem 2 (Freshman)
+- `Y2S1` — Year 2 Sem 1 (Continuing)
+- `Y2S2` — Year 2 Sem 2 (Continuing)
+- `Y3S1` — Year 3 Sem 1 (Continuing)
+- `Y3S2` — Year 3 Sem 2 (Continuing)
+- `Y4S1` — Year 4 Sem 1 (Continuing)
+- `Y4S2` — Year 4 Sem 2 (Continuing)
 - `graduated` — Graduated / Lulus
 
 Perbedaan hanya pada onboarding, email, ukuran, eligible. Flow distribusi tetap sama.
@@ -89,52 +88,48 @@ Perbedaan hanya pada onboarding, email, ukuran, eligible. Flow distribusi tetap 
 
 | Fitur | Keterangan |
 |-------|-----------|
-| Kelola User & Role | CRUD user, atur role & permission (Spatie) |
-| System Config | Atur setting sistem global, maintenance mode |
+| Kelola User & Role | CRUD user, atur role & status aktif (`/admin/users`) |
+| System Config — SMTP | Atur & test koneksi SMTP dari database (`/system/smtp`) |
 | Audit Log | Lihat seluruh aktivitas pengguna |
-| Backup Database | Backup & restore data |
 | Monitoring | Pantau semua modul |
 
-### Admin (Admin)
+### Admin
 
 | Fitur | Keterangan |
 |-------|-----------|
-| Import Data Mahasiswa | Upload Excel → Validasi → Preview → Commit → Import Log |
-| Import Eligible Payment | Upload data pembayaran mahasiswa |
-| Kelola Master Data | Fakultas, Prodi, Level, Item, Size, Kategori |
-| Kelola Distribution Stages | Atur tahap distribusi |
-| Create Entitlement | Atur hak barang (Prodi + Level + Period + Student Type + Stage) |
-| Generate Akun Mahasiswa | Username=NIM, Password=random 12 char |
-| Input Email Kampus | Isi email kampus (@krw.horizon.ac.id) |
-| Stock Receive | Input barang masuk dari vendor |
-| Buat Jadwal Distribusi | Pilih stage, item, lokasi & jadwal |
-| Monitor Perubahan Ukuran | Lihat log perubahan ukuran |
-| Monitor & Report | Export Distribution Report & Stock Report (Excel) |
+| Import Data | Upload Excel → Validasi → Preview → Commit → Import log (`import_batches`) |
+| Kelola Master Data | Fakultas, Prodi, Generasi, Level, Item, Kategori, Type, Departemen, Size, Vendor |
+| Kelola Item & Varian | Item (base code 4 segmen), varian ukuran (SKU), harga per periode |
+| Create Entitlement | Atur hak barang per Student Level (code + deskripsi + item + qty) |
+| Kelola Jadwal Distribusi | Period, student level, fakultas/prodi/generasi (opsional), tanggal, lokasi, sesi |
+| Kelola Eligibility | Toggle status kelayakan per mahasiswa (`/student/eligibility`) |
+| Monitor Perubahan Ukuran | Lihat log perubahan ukuran (`size-events`) |
+| Generate Akun Mahasiswa | Username=NIM, password random, export kredensial, reset password |
+| Input Email Kampus | Isi email kampus via verifikasi OTP |
+| Stock Receive | Input barang masuk dari vendor, upload stock opname |
+| Monitor & Report | Distribution Report, Stock Report, GPM, Stock Card, Loss, Size Recap (Excel) |
 
 ### Staff
 
 | Fitur | Keterangan |
 |-------|-----------|
-| Scan QR (Identitas Permanen) | QR 1x seumur hidup |
-| Cari NIM Manual | Fallback jika QR gagal |
-| Lihat Tahap Distribusi Aktif | System otomatis deteksi tahap |
-| Lihat Data Mahasiswa | Profile, entitlement, ukuran |
-| Checklist Item Tahap Ini | Centang barang tahap yang aktif |
-| Edit Actual Size | Jika berbeda — dicatat log |
-| Validasi Stock | Cek ketersediaan stok per size |
-| Partial Pickup | Jika stok kurang, bisa kasih sebagian |
-| Submit Transaksi | Simpan → Stock OUT → Balance - |
+| Scan QR (Identitas Permanen) | QR berisi NIM, 1x seumur hidup |
+| Cari NIM Manual | Fallback jika QR gagal (`/distribution/student/{nim}`) |
+| Lihat Data Mahasiswa | Profile, entitlement, ukuran, stock per size |
+| Checklist Item Distribusi | Centang barang + isi actual size & qty |
+| Validasi Stock | Cek ketersediaan stok per size secara live |
+| Partial Pickup | Jika stok kurang, transaksi tersimpan sebagai `partial` |
+| Submit Transaksi | Simpan → Stock OUT → Balance - (anti double submit) |
 
 ### Student / Mahasiswa
 
 | Fitur | Keterangan |
 |-------|-----------|
-| Login | Username=NIM, Password=random (dari Admin) |
-| Ganti Password (Wajib) | Wajib ganti password saat first login |
+| Login | Username=NIM, password (dari Admin / generate otomatis) |
+| Ganti Password (Wajib) | Wajib ganti password saat first login (`must_change_password`) |
 | Dashboard | Info akun & status |
-| Profile | Data diri |
-| Input Ukuran | Seragam & sepatu, lihat size chart vendor |
-| Update Ukuran | Maksimal 1 kali perubahan |
-| QR Identity (Permanen) | QR 1x generate, berlaku seumur hidup |
-| Lihat Jadwal Per Tahap | Jadwal pengambilan per stage |
+| Profile | Data diri, ganti email kampus (OTP) |
+| Input Ukuran | Seragam & sepatu via size event; update dibatasi change count |
+| QR Identity (Permanen) | QR berisi NIM, berlaku seumur hidup |
+| Lihat Jadwal | Jadwal pengambilan yang cocok dengan level/fakultas/prodi/generasi |
 | Lupa Password | Input NIM → OTP 6 digit → Ganti password |

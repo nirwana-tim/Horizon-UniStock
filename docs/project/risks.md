@@ -47,11 +47,13 @@ Simpan Import Log (siapa, kapan, hasil)
 
 | Import | Target | Keterangan |
 |--------|--------|-----------|
-| Data Mahasiswa | `students` | NIM, nama, prodi, level, email |
-| Eligible Payment | `eligibility_records` | Status bayar per mahasiswa |
-| Item & Stock | `items`, `stock_receives` | Data barang & stok awal |
-| Stock Opname | `stock_opnames` | Hasil opname fisik bulanan |
-| Item Master + Harga | `items`, `item_variants` | Data barang dengan harga jual |
+| `student` | `students` | NIM, nama, prodi, generasi, level, email |
+| `eligibility` | `eligibility_records` | Status kelayakan per mahasiswa |
+| `item` | `items`, `item_variants` | Master barang + varian ukuran (4-segmen code) |
+| `item_price` | `item_prices` | Harga jual per item per periode |
+| `entitlement` | `entitlements`, `entitlement_items` | Hak barang per student level |
+| `stock_receive` | `stock_receives`, `stock_receive_items` | Barang masuk dari vendor |
+| `stock_opname` | `stock_opname_items` | Hasil opname fisik bulanan |
 
 ### Report MVP
 

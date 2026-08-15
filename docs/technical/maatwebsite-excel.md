@@ -82,82 +82,42 @@ public function exportAndSave()
 }
 ```
 
-## 2. Import Basic
+## 2. Import Basic (pola proyek: `ToCollection` + `WithHeadingRow`)
 
-**`app/Imports/StudentsImport.php`:**
+> Proyek UniStock memakai **`ToCollection` + `WithHeadingRow`** — bukan `ToModel`. Setiap import class membaca seluruh baris sebagai Collection, lalu `ImportService` yang memproses baris per baris (resolve relasi, validasi, insert) dan mencatat log.
+
+**`app/Imports/ItemImport.php` (contoh):**
 ```php
 <?php
 
 namespace App\Imports;
 
-use App\Models\Student;
-use App\Models\User;
-use Maatwebsite\Excel\Concerns\ToModel;
+use App\Models\ItemCategory;
+use App\Models\ItemDepartment;
+use App\Models\ItemType;
+use App\Services\Master\ItemService;
+use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
-use Maatwebsite\Excel\Concerns\WithValidation;
-use Illuminate\Support\Facades\Hash;
+use Maatwebsite\Excel\Concerns\WithChunkReading;
 
-class StudentsImport implements ToModel, WithHeadingRow, WithValidation
+class ItemImport implements ToCollection, WithHeadingRow, WithChunkReading
 {
-    public function model(array $row)
-    {
-        $user = User::create([
-            'name' => $row['nama'],
-            'email' => $row['email'],
-            'password' => Hash::make($row['nim']), // password default = NIM
-        ]);
+    public function __construct(private readonly ItemService $itemService) {}
 
-        return new Student([
-            'user_id' => $user->id,
-            'student_id' => $row['nim'],
-            'major_id' => $row['jurusan_id'],
-            'batch_year' => $row['angkatan'],
-        ]);
+    public function collection(Collection $rows): void
+    {
+        // resolve kategori/tipe/departemen sekali, generate base code 4 segmen,
+        // lalu buat item + varian (sku = code-SIZE)
     }
 
-    public function rules(): array
+    public function chunkSize(): int
     {
-        return [
-            'nim' => 'required|unique:students,student_id',
-            'nama' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
-            'angkatan' => 'required|numeric',
-        ];
+        return 500;
     }
 }
 ```
 
-**Di controller:**
-```php
-use App\Imports\StudentsImport;
-use Maatwebsite\Excel\Facades\Excel;
-
-public function import(Request $request)
-{
-    $request->validate(['file' => 'required|mimes:xlsx,csv']);
-
-    Excel::import(new StudentsImport, $request->file('file'));
-
-    return back()->with('success', 'Import berhasil');
-}
-```
-
-## 3. Import Queue (File Besar)
-
-```php
-use App\Imports\StudentsImport;
-use Maatwebsite\Excel\Facades\Excel;
-
-public function importLarge(Request $request)
-{
-    $import = new StudentsImport();
-    Excel::queueImport($import, $request->file('file'));
-
-    return back()->with('success', 'Import diproses di background');
-}
-```
-
-Butuh queue worker: `php artisan queue:work`
+**Di controller (`ImportController::store`):** file diproses via `ImportService::processImport()` yang meng-parse file, memanggil import class, dan menulis `import_batches` (status processing → completed/failed).
 
 ## 4. Export dengan Styling
 

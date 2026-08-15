@@ -1,7 +1,7 @@
 # Alpine.js — Interaktivitas Frontend Ringan
 
 **Sumber resmi:** https://alpinejs.dev/  
-**Versi terinstall:** `^3.4` (lihat `package.json`)
+**Versi terinstall:** `^3.14.0` (lihat `package.json`)
 
 ## Apa Itu Alpine.js?
 
@@ -14,15 +14,29 @@ Alpine.js adalah JavaScript framework ringan (~12 KB) untuk menambahkan interakt
 ```js
 import './bootstrap';
 import Alpine from 'alpinejs';
-import 'html5-qrcode';
+import collapse from '@alpinejs/collapse';
+import { Html5Qrcode } from 'html5-qrcode';
 
+window.Html5Qrcode = Html5Qrcode;
+
+Alpine.plugin(collapse);
 window.Alpine = Alpine;
+
+// Chart.js dimuat lazy via window.loadChart()
+window.loadChart = () => import('chart.js/auto').then(m => { ... });
+
+// Komponen global:
+//  - serverTable    (tabel server-side + pagination/filter via axios)
+//  - salesDashboard (dashboard chart, pakai window.DASHBOARD_URL)
+//  - store bottomSheet (bottom sheet global untuk staff/student)
+
+document.addEventListener('alpine:init', () => { ... });
 
 Alpine.start();
 ```
 
 Cara kerja:
-1. `npm install alpinejs` (atau `bun add alpinejs`) — `package.json` sudah include
+1. `package.json` sudah include `alpinejs` `^3.14.0` (+ plugin `@alpinejs/collapse`)
 2. Import `alpinejs` dan daftarkan ke `window.Alpine`
 3. Panggil `Alpine.start()` — cukup sekali per halaman
 4. File ini di-load via `@vite('resources/js/app.js')` di layout
@@ -234,12 +248,15 @@ Plugin bawaan Alpine. Dipakai di sidebar untuk menu dropdown.
 | Komponen | File | Fungsi |
 |----------|------|--------|
 | Sidebar | `components/sidebar.blade.php` | Collapse, menu accordion, user dropdown |
-| Navbar | `layouts/navigation.blade.php` | Toggle menu mobile |
+| Bottom Nav | `components/bottom-nav.blade.php` | Tab bar bawah (staff/student) |
 | Modal | `components/modal.blade.php` | Open/close via event, keyboard trap |
 | Dropdown | `components/dropdown.blade.php` | Toggle + click outside |
 | Delete Modal | `components/delete-modal.blade.php` | Konfirmasi hapus |
 | Alert | `components/alert.blade.php` | Dismiss alert |
 | Searchable Select | `components/searchable-select.blade.php` | Pencarian + pilih opsi |
+| `serverTable` (data) | `resources/js/app.js` | Tabel server-side + search + pagination (axios) |
+| `salesDashboard` (data) | `resources/js/app.js` | Dashboard dengan Chart.js (pakai `window.DASHBOARD_URL`) |
+| Bottom Sheet (store) | `resources/js/app.js` | Sheet bawah global (`bottomSheet.openSheet(html)`) |
 | Stock Receive | `inventory/stock-receive/create.blade.php` | Dynamic item rows |
 | Schedule | `distribution/distribution-schedule/create.blade.php` | Faculty → Prodi cascade |
 | Staff Dashboard | `dashboards/staff.blade.php` | Toggle section |

@@ -1,7 +1,7 @@
 # Vite — Build Tool & Dev Server
 
 **Sumber resmi:** https://vite.dev/guide/ | https://laravel.com/docs/13.x/vite  
-**Versi terinstall:** `^7.0` (Vite) + `^2.0` (laravel-vite-plugin) — lihat `package.json`
+**Versi terinstall:** `vite ^7.0.7` + `laravel-vite-plugin ^2.0.0` — lihat `package.json` (package manager: Bun 1.2.2, engines Node 18.x)
 
 ## Apa Itu Vite?
 
@@ -40,8 +40,8 @@ Ada 2 entry point yang di-load:
 
 | File | Isi |
 |------|-----|
-| `resources/css/app.css` | Tailwind CSS (`@tailwind` directives), custom utilities, font Inter |
-| `resources/js/app.js` | Alpine.js, Axios, html5-qrcode, Bootstrap |
+| `resources/css/app.css` | Tailwind CSS (`@tailwind` directives), custom utilities, import font Inter (`@fontsource/inter`) |
+| `resources/js/app.js` | Alpine.js (`^3.14.0`), Axios, html5-qrcode, Chart.js (lazy), Bootstrap |
 
 ## Cara Kerja di Blade
 
@@ -108,13 +108,19 @@ public/build/
 composer run dev
 ```
 
-Menjalankan 4 proses paralel via `concurrently`:
-| Proses | Command |
-|--------|---------|
-| Laravel server | `php artisan serve` |
-| Queue listener | `php artisan queue:listen` |
-| Log viewer | `php artisan pail` |
-| Vite | `npm run dev` / `bun run dev` |
+Menjalankan orchestrator `scripts/dev-pkg.php` (via composer script `dev`, dengan `disableProcessTimeout`). Script ini mengelola proses pengembangan (artisan serve + Vite + lainnya). Jalankan di terminal terpisah untuk Vite HMR:
+
+```bash
+npm run dev   # atau: bun run dev  (script: vite)
+```
+
+### Setup Awal
+
+```bash
+composer run setup
+```
+
+Menjalankan: `composer install` → salin `.env.example` → `key:generate` → `migrate --force` → `scripts/setup-pkg.php` (instalasi package frontend).
 
 ## Alur Development
 
@@ -138,10 +144,11 @@ Jika Blade berubah → browser full refresh
 
 | Plugin | Versi | File Konfigurasi | Fungsi |
 |--------|-------|-----------------|--------|
-| `laravel-vite-plugin` | `^2.0` | `vite.config.js` | Integrasi Laravel dengan Vite |
-| `@tailwindcss/vite` | `^4.0` | — | (Terinstall tapi tidak aktif — Tailwind via PostCSS) |
+| `laravel-vite-plugin` | `^2.0.0` | `vite.config.js` | Integrasi Laravel dengan Vite |
+| Tailwind CSS | `^3.1.0` | `tailwind.config.js` + `postcss.config.js` | Tailwind via PostCSS (bukan `@tailwindcss/vite`) |
+| `@tailwindcss/forms` | `^0.5.2` | `tailwind.config.js` | Reset style form bawaan Tailwind |
 
-**Catatan:** Project menggunakan PostCSS untuk Tailwind (via `@tailwindcss/forms` dan `tailwind.config.js`), bukan `@tailwindcss/vite`. Plugin Vite Tailwind mungkin tidak digunakan.
+**Catatan:** Project menggunakan **PostCSS** untuk Tailwind v3 (`tailwindcss`, `postcss`, `autoprefixer`, `@tailwindcss/forms`), bukan `@tailwindcss/vite`. Font Inter dipasang via `@fontsource/inter` (bukan Google Fonts CDN).
 
 ## Environment Variables
 

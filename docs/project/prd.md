@@ -34,19 +34,19 @@ Solusi yang dirancang adalah sistem terintegrasi yang mencakup: Student Data →
 
 | Stakeholder | Peran | Kebutuhan Utama |
 |-------------|-------|-----------------|
-| Admin Admin | Pengguna utama sistem | Import data, atur entitlement, buat jadwal, export report, stock opname, GPM |
+| Admin | Pengguna utama sistem | Import data, atur entitlement, buat jadwal, export report, stock opname, GPM |
 | Staff Distribusi | Operator lapangan | Scan QR, distribusi barang, validasi stok, partial pickup |
 | Mahasiswa | Penerima barang | Input ukuran, lihat jadwal, lihat QR, lupa password |
-| Super Admin | IT/Monitoring | Kelola user, monitoring, backup, audit log |
+| Super Admin | IT/Monitoring | Kelola user, monitoring, SMTP, audit log |
 
 ---
 
 ## 4. User Personas
 
-### 4.1 Admin Admin (Budi)
+### 4.1 Admin (Budi)
 
-- **Role**: Admin Admin
-- **Kebutuhan**: Import data ribuan mahasiswa dari Excel, atur hak barang per prodi, buat jadwal distribusi, monitor stok, lakukan stock opname bulanan, hitung GPM
+- **Role**: Admin
+- **Kebutuhan**: Import data ribuan mahasiswa dari Excel, atur hak barang per student level, buat jadwal distribusi, monitor stok, lakukan stock opname bulanan, hitung GPM
 - **Pain Point**: Proses manual di Excel memakan waktu berjam-jam, sulit tracking perubahan ukuran
 
 ### 4.2 Staff Distribusi (Sari)
@@ -71,20 +71,20 @@ Solusi yang dirancang adalah sistem terintegrasi yang mencakup: Student Data →
 
 ## 5. Functional Requirements
 
-### 5.1 Role: Admin Admin
+### 5.1 Role: Admin
 
 | ID | Fitur | Keterangan | Prioritas |
 |----|-------|-----------|-----------|
 | FR-01 | Import data mahasiswa | Upload Excel → Validasi → Preview → Commit → Import Log | High |
-| FR-02 | Import eligible payment | Upload data pembayaran mahasiswa | High |
-| FR-03 | Kelola master data | Fakultas, Prodi, Level, Item, Kategori, Size, Variant, Vendor | High |
-| FR-04 | Kelola Distribution Stages | Buat tahap distribusi (Tahap 1, 2, 3...) | High |
-| FR-05 | Create Entitlement | Atur hak barang: Prodi + Level + Period + Student Type + Item + Qty | High |
-| FR-06 | Generate akun mahasiswa | Username=NIM, Password=random 12 char | High |
-| FR-07 | Input email kampus | Isi email @krw.horizon.ac.id | High |
+| FR-02 | Import eligible | Upload data pembayaran mahasiswa | High |
+| FR-03 | Kelola master data | Fakultas, Prodi, Generasi, Level, Item, Kategori, Type, Departemen, Size, Variant, Vendor | High |
+| FR-04 | Kelola Item & Harga | Item (base code 4 segmen), varian ukuran (SKU), harga per periode | High |
+| FR-05 | Create Entitlement | Atur hak barang per Student Level: code + deskripsi + item + qty | High |
+| FR-06 | Generate akun mahasiswa | Username=NIM, Password=random, export kredensial | High |
+| FR-07 | Input email kampus | Verifikasi via OTP ke email kampus | High |
 | FR-08 | Stock Receive | Input barang masuk dari vendor | High |
-| FR-09 | Buat Jadwal Distribusi | Pilih stage, item, lokasi & jadwal, notifikasi | High |
-| FR-10 | Monitor perubahan ukuran | Log perubahan ukuran | Medium |
+| FR-09 | Buat Jadwal Distribusi | Period, level, fakultas/prodi/generasi, tanggal, lokasi, sesi, item | High |
+| FR-10 | Monitor perubahan ukuran | Log perubahan ukuran (size events) | Medium |
 | FR-11 | Stock Opname Bulanan | Upload hasil opname → Hitung variance → Adjustment | High |
 | FR-12 | GPM / Cost Analysis | Laba/rugi per item, HPP vs harga jual | Medium |
 | FR-13 | Export Distribution Report | Excel: sudah ambil, belum, partial | High |
@@ -99,7 +99,7 @@ Solusi yang dirancang adalah sistem terintegrasi yang mencakup: Student Data →
 | FR-17 | Scan QR mahasiswa | QR permanen, 1x seumur hidup | High |
 | FR-18 | Cari NIM manual | Fallback jika QR gagal | High |
 | FR-19 | Lihat data mahasiswa | Profile, entitlement, ukuran | High |
-| FR-20 | Checklist item | Centang barang tahap aktif | High |
+| FR-20 | Checklist item | Centang barang jadwal aktif | High |
 | FR-21 | Edit actual size | Jika berbeda — tercatat log | High |
 | FR-22 | Validasi stok | Cek stok per size | High |
 | FR-23 | Partial pickup | Jika stok kurang | High |
@@ -114,20 +114,19 @@ Solusi yang dirancang adalah sistem terintegrasi yang mencakup: Student Data →
 | FR-27 | Dashboard | Info, notifikasi, status, riwayat | High |
 | FR-28 | Input/update profil & ukuran | Seragam & sepatu | High |
 | FR-29 | Lihat size chart vendor | Referensi ukuran | Medium |
-| FR-30 | Update ukuran | Maksimal 1x | High |
-| FR-31 | Generate QR | 1x seumur hidup | High |
-| FR-32 | Lihat jadwal distribusi | Per tahap | High |
+| FR-30 | Update ukuran | Dibatasi change count per size event | High |
+| FR-31 | QR Identity (NIM) | QR berisi NIM, 1x seumur hidup | High |
+| FR-32 | Lihat jadwal distribusi | Jadwal yang cocok dengan level/fakultas/prodi/generasi | High |
 | FR-33 | Lupa password | OTP 6 digit ke email | High |
 
 ### 5.4 Role: Super Admin
 
 | ID | Fitur | Keterangan | Prioritas |
 |----|-------|-----------|-----------|
-| FR-34 | Kelola user, role, permission | CRUD + Spatie | High |
-| FR-35 | System config & maintenance | Setting global | Medium |
-| FR-36 | Audit log | Filter, export | Medium |
-| FR-37 | Backup & restore database | Download / restore | Medium |
-| FR-38 | Monitoring semua modul | Dashboard | Low |
+| FR-34 | Kelola user, role | CRUD + toggle aktif (Spatie) | High |
+| FR-35 | System config — SMTP | Atur & test SMTP dari database | Medium |
+| FR-36 | Audit log | Semua perubahan tercatat di `audit_logs` | Medium |
+| FR-37 | Monitoring semua modul | Dashboard | Low |
 
 ### 5.5 Stock Opname
 
@@ -173,26 +172,26 @@ Solusi yang dirancang adalah sistem terintegrasi yang mencakup: Student Data →
 ### 7.1 Entity List
 
 **Master Data:**
-- Users, Faculties, Study Programs, Program Levels
+- Users, Faculties, Study Programs, Student Levels, Student Generations
 - Students, Student Size Profiles, Student Size Items, Student Size Histories
-- Item Categories, Items, Item Variants, Vendors
+- Item Categories, Item Types, Item Departments, Item Sizes, Items, Item Variants, Item Prices, Vendors
 
 **Distribution:**
-- Distribution Periods, Distribution Stages
-- Eligibility Records
 - Entitlements, Entitlement Items
 - Distribution Schedules, Dist Schedule Items
 - Distribution Transactions, Distribution Items
+- Size Change Events, Size Event Submissions
+- Eligibility Records
 
 **Inventory:**
-- Stock Receives, Stock Receive Items
+- Stock Receives, Stock Receive Items, Stock Batches
 - Stock Movements, Stock Balances
 - Stock Opnames, Stock Opname Items, Stock Opname Adjustments
 
 **Supporting:**
-- Import Batches
-- Email Notifications
-- Audit Logs
+- Import Batches, Document Sequences
+- Email Notifications, SMTP Settings, OTP Codes
+- Audit Logs, Student Summaries
 
 ---
 
@@ -206,8 +205,8 @@ Solusi yang dirancang adalah sistem terintegrasi yang mencakup: Student Data →
 | Auth | Laravel Breeze |
 | Permission | Spatie Laravel Permission |
 | Excel | Maatwebsite Laravel Excel |
-| QR Code | Simple QR Code (SVG/PNG) |
-| QR Scanner | HTML5 QR Scanner |
+| QR Code | bacon/bacon-qr-code (PNG berisi NIM) |
+| QR Scanner | HTML5 QR Scanner (html5-qrcode) |
 | Email | Laravel Mail + SMTP |
 
 ---
@@ -215,12 +214,12 @@ Solusi yang dirancang adalah sistem terintegrasi yang mencakup: Student Data →
 ## 9. Assumptions & Constraints
 
 1. Data mahasiswa sudah ada di Excel
-2. Setiap mahasiswa memiliki email kampus @krw.horizon.ac.id
-3. Distribusi dilakukan dalam tahapan (stage)
+2. Setiap mahasiswa memiliki email kampus
+3. Distribusi dilakukan melalui jadwal (schedule) per student level/fakultas/prodi/generasi
 4. Stock opname dilakukan bulanan
 5. HPP dihitung per batch penerimaan (rata-rata)
-6. QR code bersifat permanen
-7. Update ukuran maksimal 1x
+6. QR code bersifat permanen (berisi NIM)
+7. Update ukuran dibatasi (change count)
 
 ---
 
@@ -294,7 +293,7 @@ Solusi yang dirancang adalah sistem terintegrasi yang mencakup: Student Data →
 | 8 | Export report | File Excel |
 | 9 | Lupa password | OTP terkirim, reset berhasil |
 | 10 | Import format salah | Error handling |
-| 11 | Update ukuran kedua | Tolak, maks 1x |
+| 11 | Update ukuran melebihi batas | Tolak, sesuai change count |
 | 12 | Email duplikat | Hanya 1x per mahasiswa |
 | 13 | Variance positif | Surplus, adjustment |
 | 14 | Variance negatif | Shortage, adjustment |

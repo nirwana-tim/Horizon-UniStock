@@ -1,6 +1,6 @@
-# Alur Admin (Finance) — Via GUI Web
+# Alur Admin — Via GUI Web
 
-Flowchart ini menggambarkan alur lengkap **Admin/Finance** saat menggunakan aplikasi melalui **GUI Web** (bukan import Excel).
+Flowchart ini menggambarkan alur lengkap **Admin** saat menggunakan aplikasi melalui **GUI Web** (bukan import Excel).
 
 ---
 
@@ -13,7 +13,7 @@ flowchart TD
     classDef operation fill:#10b981,color:#fff,stroke:#059669
     classDef report fill:#ef4444,color:#fff,stroke:#dc2626
 
-    A([Login Admin Finance]) --> DASH[Dashboard Admin]
+    A([Login Admin]) --> DASH[Dashboard Admin]
     class A login
     class DASH login
 
@@ -28,7 +28,8 @@ flowchart TD
     M_ACA --> M_FAC[1. Faculty]
     M_FAC --> M_SP[2. Study Program]
     M_SP --> M_SP2(pilih Faculty)
-    M_FAC --> M_PL[3. Program Level]
+    M_FAC --> M_GEN[3. Student Generation]
+    M_ACA --> M_LVL[Student Level - read only]
 
     M_IT --> M_CAT[4. Item Category]
     M_CAT --> M_TYPE[5. Item Type]
@@ -36,7 +37,7 @@ flowchart TD
     M_CAT --> M_DEPT[7. Item Department]
 
     M_TYPE & M_SIZE & M_DEPT --> M_ITEM[8. Item - isi form]
-    M_ITEM --> M_CODE[Auto-generate code]
+    M_ITEM --> M_CODE[Auto-generate code 4 segmen]
     M_CODE --> M_VAR[9. Variant size lain]
 
     %% ===== 2. STUDENT =====
@@ -44,9 +45,9 @@ flowchart TD
     class S student
 
     S --> S_CREATE[10. Buat Student]
-    S_CREATE --> S_FORM[Form: NIM, Nama, Prodi, Level]
-    S_FORM --> S_CODE[Auto-set entitlement_code]
-    S_CODE --> S_GEN[11. Generate Akun]
+    S_CREATE --> S_FORM[Form: NIM, Nama, Email, Prodi, Generasi, Student Level]
+    S_FORM --> S_ENT[Set Entitlement via halaman student]
+    S_ENT --> S_GEN[11. Generate Akun]
     S_GEN --> S_PROC[System buat User + password random]
     S_PROC --> S_PASS[Password tampil 1x]
 
@@ -54,21 +55,20 @@ flowchart TD
     DASH --> D[Distribution Setup]
     class D distribution
 
-    D --> D_STAGE[12. Distribution Stage]
-    D --> D_ENT[13. Entitlement]
-    D_ENT --> D_ENT_F[Pilih Prodi + Level]
-    D_ENT_F --> D_ENT_C[Auto-generate code]
+    D --> D_ENT[12. Entitlement]
+    D_ENT --> D_ENT_F[Pilih Student Level]
+    D_ENT_F --> D_ENT_C[Isi code + deskripsi]
     D_ENT_C --> D_ENT_I[Centang item + qty]
     D_ENT_I --> D_ENT_OK[Entitlement siap]
 
-    D --> D_ELIG[14. Eligibility]
+    D --> D_ELIG[13. Eligibility]
     D_ELIG --> D_TOGGLE[Toggle per student]
 
     %% ===== 4. STOCK =====
     DASH --> O[Stock & Inventory]
     class O operation
 
-    O --> O_SR[15. Stock Receive]
+    O --> O_SR[14. Stock Receive]
     O_SR --> O_VEN[Pilih Vendor]
     O_VEN --> O_ITEM[Tambah Item]
     O_ITEM --> O_SIZE[Pilih Size]
@@ -81,16 +81,15 @@ flowchart TD
     DASH --> J[Distribution Schedule]
     class J operation
 
-    J --> J_NEW[16. Buat Jadwal]
-    J_NEW --> J_STG[Pilih Stage]
-    J_STG --> J_PAR[Pilih Prodi + Level]
+    J --> J_NEW[15. Buat Jadwal]
+    J_NEW --> J_PAR[Pilih Student Level + Prodi/Generasi]
     J_PAR --> J_ENT[System load items dari Entitlement]
     J_ENT --> J_ITEM[Centang item]
-    J_ITEM --> J_DET[Isi Tanggal, Lokasi, Jam]
+    J_ITEM --> J_DET[Isi Tanggal, Lokasi, Sesi]
     J_DET --> J_ACT[Aktifkan]
 
     %% ===== 6. STAFF EXECUTES =====
-    J_ACT --> ST[Staff: Scan QR / Cari NIM]
+    J_ACT --> ST[Staff: Scan QR NIM / Cari NIM]
     class ST operation
 
     ST --> ST_DATA[Lihat data + ukuran]
@@ -127,12 +126,12 @@ flowchart TD
 
 | Level | Yang Dikerjakan | Routes |
 |-------|----------------|--------|
-| **0** | Faculty, Program Level, Item Category, Vendor | `master-data/*` |
-| **1** | Study Program (butuh Faculty), Item Type (butuh Category), Item Size (butuh Category), Item Department (butuh Faculty) | `master-data/*` |
+| **0** | Faculty, Student Generation, Student Level (read-only), Item Category, Vendor | `master-data/*` |
+| **1** | Study Program (butuh Faculty), Item Type (butuh Category), Item Size (butuh Category), Item Department | `master-data/*` |
 | **2** | Item (butuh Category+Type+Dept+Size), Item Variant (butuh Item) | `master-data/item/*` |
-| **3** | Student (butuh Prodi+Level), Distribution Stage, Entitlement (butuh Item+Prodi+Level) | `admin/students/*`, `distribution/*` |
+| **3** | Student (butuh Prodi+Level+Generasi), Entitlement (butuh Item+Student Level) | `student/students-data/*`, `distribution/entitlement/*` |
 | **4** | Stock Receive (butuh Vendor+Item+Variant), Eligibility (butuh Student) | `inventory/stock-receive/*`, `finance/eligibility` |
-| **5** | Distribution Schedule (butuh Stage+Entitlement+Items) | `distribution/distribution-schedule/*` |
+| **5** | Distribution Schedule (butuh Entitlement+Items) | `distribution/distribution-schedule/*` |
 | **6** | **Staff** melakukan distribusi (scan/cari NIM) | `distribution/scan` |
 | **7** | **Admin** monitor via Reports | `report/*` |
 
@@ -140,9 +139,10 @@ flowchart TD
 
 ## Catatan Penting
 
-1. **Item Code** auto-generate dari kombinasi: `CATEGORY-GENDER-TYPE-DEPT-SIZE`
-2. **Entitlement Code** auto-generate dari: `LEVEL_CODE + FACULTY_CODE + PRODI_CODE`
-3. **Student entitlement_code** auto-set saat create student berdasarkan Prodi + Level
-4. **Stock Balance** bertambah saat Stock Receive, berkurang saat Staff submit distribusi
-5. **Distribution Schedule** mengambil items dari Entitlement yang cocok (dicocokkan via code)
-6. **Password student** random 12 karakter, muncul 1x di flash message, student wajib ganti saat first login
+1. **Item Code** diisi manual 4 segmen: `KATEGORI-GENDER-TIPE-VARIANT` (contoh: `UNF-L-SCB-02`). SKU varian = `code-SIZE` (5 segmen). Lihat `docs/project/item-code.md`.
+2. **Entitlement Code** diisi manual (unique, max 50). Entitlement di-*match* ke student via `student.entitlement_code = entitlement.code` + `entitlement.student_level` (atau `student_level` null = berlaku semua level).
+3. **Entitlement** dikelola di `distribution/entitlement/*` (bukan master-data) dan hanya bisa dibuat oleh `super_admin`/`admin`.
+4. **Stock Balance** bertambah saat Stock Receive, berkurang saat Staff submit distribusi.
+5. **Distribution Schedule** mengambil items dari Entitlement yang cocok (per student level + prodi/generasi).
+6. **Password student** random 12 karakter, muncul 1x di flash message, student wajib ganti saat first login (`must_change_password`).
+7. Semua route master/inventory/report berada di middleware `role:super_admin|admin`; route scan juga mengizinkan `staff`.

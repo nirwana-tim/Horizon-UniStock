@@ -1,7 +1,7 @@
 # Tailwind CSS — Utility-First CSS Framework
 
 **Sumber resmi:** https://tailwindcss.com/docs/  
-**Versi terinstall:** `^3.1` (lihat `package.json`)
+**Versi terinstall:** `^3.1.0` (lihat `package.json`)
 
 ## Apa Itu Tailwind CSS?
 
@@ -56,7 +56,10 @@ export default {
 **File:** `resources/css/app.css`
 
 ```css
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+@import "@fontsource/inter/400.css";
+@import "@fontsource/inter/500.css";
+@import "@fontsource/inter/600.css";
+@import "@fontsource/inter/700.css";
 
 @tailwind base;
 @tailwind components;
@@ -74,6 +77,8 @@ export default {
     }
 }
 ```
+
+> Font Inter **self-hosted** via `@fontsource/inter` (diproses Vite), bukan CDN Google Fonts.
 
 ### Integrasi Vite
 
@@ -120,8 +125,8 @@ Framework ini tidak pakai warna Indigo/Blue default Tailwind. Ganti dengan `prim
 
 ## Font
 
-- **Font utama:** Inter (Google Fonts)
-- **Weight:** 400 (regular), 500 (medium), 600 (semibold), 700 (bold)
+- **Font utama:** Inter — self-hosted via `@fontsource/inter` (bundled Vite, bukan CDN)
+- **Weight:** 400 (regular), 500 (medium), 600 (semibold), 700 (bold) — di-import di `app.css`
 - **Penggunaan:**
   - Body: `font-sans text-sm text-gray-900`
   - Heading: `font-semibold text-lg text-gray-900`
@@ -243,6 +248,19 @@ Beberapa utility custom didefinisikan di `app.css`:
     @apply text-gray-600 border-l-4 border-transparent hover:bg-gray-50 hover:text-gray-800;
 }
 ```
+
+Utilities lain yang tersedia (untuk UI mobile / bottom sheet):
+
+| Utility | Fungsi |
+|---------|--------|
+| `.glass-card`, `.glass-top-bar` | Efek glassmorphism (blur + transparan) |
+| `.shadow-card`, `.shadow-soft`, `.shadow-button` | Shadow berjenjang (button memakai maroon glow) |
+| `.active-pill` / `.inactive-pill` | Tombol pill aktif (maroon) / nonaktif |
+| `.qr-gradient` | Background gradasi untuk area QR |
+| `.animate-pop` | Animasi pop-up (bottom sheet) |
+| `.scrollbar-hide` | Sembunyikan scrollbar |
+| `.safe-area-bottom` | Padding aman untuk perangkat notch (bottom nav) |
+| `#sheet-overlay`, `#sheet-panel` | Transisi bottom sheet (Alpine store `bottomSheet`) |
 
 ## Sumber
 

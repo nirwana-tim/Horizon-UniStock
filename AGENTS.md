@@ -39,7 +39,7 @@ Sebelum mengerjakan **task apa pun**, AI WAJIB mengikuti urutan ini:
 - Setiap perubahan data tercatat di **Audit Log**
 - Migration **idempotent**, Seeder pake `firstOrCreate`
 - **Spatie Permission** untuk RBAC
-- Format kode barang: `KATEGORI-GENDER-TIPE-VARIANT-SIZE` (contoh: `UNF-L-SCB-02-03`)
+- Format kode barang: `KATEGORI-GENDER-TIPE-VARIANT` (contoh: `UNF-L-SCB-02`); SKU varian = `code-SIZE`
 - Password **bcrypt**, validasi pake **Form Request**
 - JSON response pake **Resource**
 - **Route Model Binding** jika memungkinkan
@@ -49,7 +49,7 @@ Sebelum mengerjakan **task apa pun**, AI WAJIB mengikuti urutan ini:
 > Referensi desain lengkap: [`docs/guides/desain.md`](docs/guides/desain.md)
 
 - **Warna brand: `primary-700` = `#980416` (Maroon)** — jangan gunakan Indigo/Blue sebagai warna utama
-- **Font: Inter** (Google Fonts) — sudah di-load di `app.css`
+- **Font: Inter** (self-hosted via `@fontsource/inter`) — sudah di-load di `app.css`
 - **Layout Admin & Super Admin**: Sidebar (`components/sidebar.blade.php`) — desktop only
 - **Layout Staff & Student**: Bottom Tab Bar (`components/bottom-nav.blade.php`) — mobile-first
 - Flash message: gunakan `<x-alert type="success|error|warning|info">` bukan inline HTML
@@ -78,23 +78,29 @@ Sebelum mengerjakan **task apa pun**, AI WAJIB mengikuti urutan ini:
 - `faculties` — Fakultas
 - `study_programs` — Program Studi
 - `student_generations` — Generasi
+- `student_levels` — Level mahasiswa (`Y1S1` … `graduated`, read-only)
 - `students` — Mahasiswa
 - `item_categories` — Kategori Barang
-- `items` — Barang
-- `item_variants` — Varian Ukuran Barang
+- `item_types` — Tipe Barang
+- `item_departments` — Departemen Barang
+- `item_sizes` — Ukuran Barang
+- `category_item_size` — Pivot kategori–ukuran
+- `items` — Barang (code = base_code 4 segmen)
+- `item_variants` — Varian Ukuran Barang (sku = code-SIZE)
 - `item_prices` — Harga Barang Per Periode
 - `vendors` — Vendor/Supplier
 
 ### Student Process
-- `distribution_periods` — Periode Distribusi
 - `eligibility_records` — Status Kelayakan
 - `student_size_profiles` — Profil Ukuran Mahasiswa
 - `student_size_items` — Ukuran Per Item
 - `student_size_histories` — Riwayat Perubahan Ukuran
+- `size_change_events` — Event Perubahan Ukuran
+- `size_event_submissions` — Submit Mahasiswa ke Event
+- `student_summaries` — Ringkasan statistik mahasiswa (harian)
 
 ### Distribution
-- `distribution_stages` — Tahap Distribusi
-- `entitlements` — Hak Barang
+- `entitlements` — Hak Barang (per student level)
 - `entitlement_items` — Detail Hak Barang
 - `distribution_schedules` — Jadwal Distribusi
 - `dist_schedule_items` — Item Jadwal
@@ -106,6 +112,7 @@ Sebelum mengerjakan **task apa pun**, AI WAJIB mengikuti urutan ini:
 - `stock_receive_items` — Detail Penerimaan
 - `stock_movements` — Pergerakan Stok (IN/OUT)
 - `stock_balances` — Saldo Stok
+- `stock_batches` — Batch stok FIFO
 - `stock_opnames` — Batch Stock Opname
 - `stock_opname_items` — Detail Stock Opname
 - `stock_opname_adjustments` — Adjustment Journal
@@ -113,6 +120,9 @@ Sebelum mengerjakan **task apa pun**, AI WAJIB mengikuti urutan ini:
 ### Supporting
 - `import_batches` — Log Import
 - `email_notifications` — Notifikasi Email
+- `otp_codes` — Kode OTP (hash)
+- `smtp_settings` — Setting SMTP (dinamis, dari UI)
+- `document_sequences` — Sequence nomor dokumen
 - `audit_logs` — Audit Log
 
 ## Prioritas Pengerjaan

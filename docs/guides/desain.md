@@ -535,27 +535,18 @@ Gunakan spacing bawaan Tailwind (4px base):
 ### 7.7 QR Display
 
 ```blade
-{{-- QR Card untuk mahasiswa --}}
+{{-- QR Card untuk mahasiswa (student/qr-show.blade.php) --}}
 <div class="bg-white rounded-xl border border-gray-200 p-6 text-center">
   <div class="inline-block p-3 bg-white rounded-lg shadow-sm mb-3">
-    {!! $qrSvg !!}
+    <img src="{{ $qrDataUrl }}" alt="QR {{ $student->nim }}" class="w-40 h-40 object-contain p-2">
   </div>
   <p class="text-sm font-medium text-gray-800">{{ $student->name }}</p>
   <p class="text-xs text-gray-500">{{ $student->nim }}</p>
   <p class="text-xs text-gray-400 mt-2">QR ini berlaku seumur hidup</p>
 </div>
-
-{{-- QR dalam list (mobile) --}}
-<div class="flex items-center gap-3 p-3 bg-white rounded-xl border border-gray-200">
-  <div class="w-16 h-16 flex-shrink-0">
-    {!! QrCode::size(64)->generate($student->qr_token) !!}
-  </div>
-  <div class="flex-1 min-w-0">
-    <p class="text-sm font-medium text-gray-800 truncate">{{ $student->name }}</p>
-    <p class="text-xs text-gray-500">{{ $student->nim }}</p>
-  </div>
-</div>
 ```
+
+> QR di-generate via `QrCodeService::getQrPngDataUrl($student->nim)` (package `bacon/bacon-qr-code`, renderer GD, PNG data URL). Isi QR = **NIM** (bukan token), bersifat permanen. Detail: `docs/technical/qr-code.md`.
 
 ---
 
@@ -1233,7 +1224,7 @@ module.exports = {
 ### Checklist Penerapan
 
 - [ ] Tailwind config sudah include custom colors
-- [ ] Inter font sudah di-load (via Google Fonts atau download)
+- [ ] Inter font sudah di-load (via `@fontsource/inter` self-hosted, bukan CDN)
 - [ ] Bottom navigation untuk mobile (Staff & Student)
 - [ ] Sidebar untuk desktop (Admin & Super Admin)
 - [ ] Form validation states (default, focus, valid, error, disabled)

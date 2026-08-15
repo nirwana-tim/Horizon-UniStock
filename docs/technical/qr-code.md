@@ -1,145 +1,83 @@
-# QR Code Generator (f9webltd/simple-qrcode)
+# QR Code Generator (bacon/bacon-qr-code)
 
 ## Apa Itu?
 
-Package untuk generate QR Code di Laravel. Fork dari `simplesoftwareio/simple-qrcode` v5 yang kompatibel dengan Laravel 12 (menggunakan bacon/bacon-qr-code v3).
+Package untuk generate QR Code di Laravel. Di proyek ini QR berisi **NIM mahasiswa** (identitas permanen, 1x seumur hidup) — bukan token random. QR di-render sebagai **PNG data URL** lalu ditampilkan di Blade `<img>`.
 
 ## Fitur yg Terinstall
 
 | Fitur | Untuk Apa |
 |-------|-----------|
-| Generate QR | Bikin QR Code dari teks / URL / data |
-| Output SVG | QR dalam format vector (scalable) |
-| Output PNG | QR dalam format gambar raster |
-| Custom Size | Atur ukuran pixel QR (default 100-500) |
-| Custom Color | Ubah warna foreground & background |
-| Custom Format | Format data (email, phone, SMS, Geo, dll) |
-| Merge Image | Gabung logo/gambar di tengah QR |
+| Generate QR | Bikin QR Code dari teks (NIM) |
+| Output PNG | QR dalam format gambar raster (data URL base64) |
+| Custom Size | Atur ukuran pixel QR |
 | Error Correction | Level koreksi error (L, M, Q, H) |
-| Save to Storage | Simpan QR Code ke file (storage, public) |
-| Output Inline | Langsung render di Blade (`{!! !!}`) |
+| Data URL | Langsung dirender di Blade via `<img src="data:image/png;base64,...">` |
 
-## 1. Generate QR di Blade (SVG)
+## 1. Service: `QrCodeService`
 
-```blade
-{{-- QR dari teks --}}
-{!! QrCode::size(200)->generate('https://horizon-unistock.test') !!}
-
-{{-- QR dari NIM mahasiswa --}}
-{!! QrCode::size(250)->generate($student->student_id) !!}
-
-{{-- QR dengan warna custom --}}
-{!! QrCode::size(200)
-    ->color(38, 38, 38)
-    ->backgroundColor(255, 255, 255)
-    ->generate($student->student_id)
-!!}
-```
-
-> **Note:** `QrCode::generate()` return HTML/SVG — harus pake `{!! !!}` (raw), bukan `{{ }}` (escaped).
-
-## 2. Generate QR Token (Identity)
+**`app/Services/QrCodeService.php`**
 
 ```php
-use Illuminate\Support\Str;
-use SimpleSoftwareIO\QrCode\Facades\QrCode;
+<?php
 
-// Generate token unik untuk mahasiswa (1x seumur hidup)
-$student->update([
-    'qr_token' => Str::uuid(),
-    'qr_generated_at' => now(),
-]);
+namespace App\Services;
 
-// Generate SVG dari token
-$qrSvg = QrCode::size(200)->generate($student->qr_token);
-```
+use App\Models\Student;
+use BaconQrCode\Common\ErrorCorrectionLevel;
+use BaconQrCode\Encoder\Encoder;
+use BaconQrCode\Renderer\GDLibRenderer;
+use BaconQrCode\Writer;
 
-## 3. Generate dengan Logo di Tengah
-
-```php
-use SimpleSoftwareIO\QrCode\Facades\QrCode;
-
-QrCode::format('png')
-    ->size(400)
-    ->merge('/storage/logos/unistock-logo.png', 0.3, true) // 30% ukuran QR
-    ->errorCorrection('H') // H = highest error correction, perlu buat logo
-    ->generate('Student-2024-001', storage_path("app/public/qrcodes/with-logo.png"));
-```
-
-## 4. Format Data Spesifik
-
-```php
-{!! QrCode::email('student@example.com', 'Subject', 'Body message') !!}
-
-{!! QrCode::phone('08123456789') !!}
-
-{!! QrCode::SMS('08123456789', 'Pesan') !!}
-
-{!! QrCode::geo(-6.9175, 107.6191) !!}
-```
-
-## 5. Error Correction Level
-
-```php
-QrCode::errorCorrection('L') // 7% data bisa rusak -> ukuran paling kecil
-QrCode::errorCorrection('M') // 15% (default)
-QrCode::errorCorrection('Q') // 25%
-QrCode::errorCorrection('H') // 30% -> ukuran paling besar, perlu buat logo
-```
-
-## 6. Contoh Implementasi: QR Identity Mahasiswa
-
-**Di Service:**
-```php
-use Illuminate\Support\Str;
-use SimpleSoftwareIO\QrCode\Facades\QrCode;
-
-public function generateQrToken(Student $student): void
+class QrCodeService
 {
-    if ($student->qr_token) {
-        return; // QR sudah ada, tidak regenerate
+    public function getQrPngDataUrl(Student $student, int $size = 300): string
+    {
+        $renderer = new GDLibRenderer($size, 4, 'png');
+        $writer = new Writer($renderer);
+        $png = $writer->writeString($student->nim, Encoder::DEFAULT_BYTE_MODE_ENCODING, ErrorCorrectionLevel::H());
+
+        return 'data:image/png;base64,' . base64_encode($png);
     }
-
-    $student->update([
-        'qr_token' => Str::uuid()->toString(),
-        'qr_generated_at' => now(),
-    ]);
-}
-
-public function getQrSvg(Student $student): string
-{
-    return QrCode::size(200)->generate($student->qr_token);
 }
 ```
 
-**Di Blade:**
-```blade
-@if ($student->qr_token)
-    {!! QrCode::size(200)->generate($student->qr_token) !!}
-@else
-    <form action="{{ route('students.generate-qr', $student) }}" method="POST">
-        @csrf
-        <button type="submit">Generate QR</button>
-    </form>
-@endif
-```
+> ⚠️ Membutuhkan ekstensi PHP **GD** (untuk `GDLibRenderer`).
 
-## 7. Cache QR (Opsional)
+## 2. Pemakaian di Controller / Service
 
-Untuk QR yg sering dipakai, cache hasil generate-nya:
+Inject service via constructor (dependency injection):
 
 ```php
-use Illuminate\Support\Facades\Cache;
-use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use App\Services\QrCodeService;
 
-$qrSvg = Cache::remember("qr_{$student->id}", 86400, function () use ($student) {
-    return QrCode::size(200)->generate($student->qr_token);
-});
+public function __construct(private readonly QrCodeService $qrCodeService) {}
+
+public function qr(): View
+{
+    $student = auth()->user()->student;
+    $qrDataUrl = $this->qrCodeService->getQrPngDataUrl($student, 300);
+
+    return view('student.qr', compact('qrDataUrl'));
+}
 ```
+
+## 3. Tampilkan di Blade
+
+```blade
+{{-- QR berisi NIM mahasiswa --}}
+<img src="{{ $qrDataUrl }}" alt="QR Identity {{ $student->nim }}" class="w-64 h-64">
+```
+
+## 4. Scan
+
+QR di-scan via **HTML5 QR Scanner** (`html5-qrcode`) di halaman `distribution.scan`. Hasil scan adalah NIM → redirect ke `distribution.scan.student/{nim}`. Manual search NIM tetap tersedia sebagai fallback.
+
+> Tidak ada kolom `qr_token` / `qr_generated_at` di tabel `students` (legacy dihapus). Identitas QR sepenuhnya dari NIM.
 
 ## Sumber
-- https://github.com/f9webltd/simple-qrcode
-- https://github.com/SimpleSoftwareIO/simple-qrcode
+- https://github.com/Bacon/BaconQrCode
+- https://github.com/mebjas/html5-qrcode
 
 ## Analogi
-QR Code itu seperti stiker barcode di box barang — setiap mahasiswa punya satu kode unik seumur hidup. Tinggal scan buat lihat identitasnya, tanpa perlu ngetik manual.
+QR Code itu seperti stiker barcode di box barang — setiap mahasiswa punya satu identitas (NIM) seumur hidup. Tinggal scan buat lihat identitasnya, tanpa perlu ngetik manual.

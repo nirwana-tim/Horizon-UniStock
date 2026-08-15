@@ -8,29 +8,46 @@ Laravel 12 adalah framework PHP untuk membangun web app. Blade adalah template e
 
 | Fitur | Untuk Apa |
 |-------|-----------|
-| Blade Component | Layout via `<x-app-layout>`, reusable UI (`<x-input-label>`, `<x-primary-button>`) |
-| Blade Directive | `@auth`, `@guest`, `@if`, `@foreach`, `@section`, `@yield` |
-| Slots | Kirim konten ke component (`{{ $slot }}`, `<x-slot name="header">`) |
+| Blade Component | Layout via `<x-app-layout>`, reusable UI (`<x-input-label>`, `<x-primary-button>`, `<x-alert>`, `<x-badge>`, `<x-page-header>`, `<x-stat-card>`, `<x-empty-state>`, `<x-delete-modal>`) |
+| Blade Directive | `@auth`, `@guest`, `@if`, `@foreach`, `@role`, `@hasrole`, `@vite` |
+| Slots | Kirim konten ke component (`{{ $slot }}`, `{{ $header }}`) |
 | Vite Integration | `@vite()` directive buat load CSS/JS build |
+| Alpine.js | Komponen interaktif via `x-data`, `x-show`, `@click`, dst. |
 
-## 1. Component-Based Layout (Breeze Pattern)
+## 1. Component-Based Layout (multi-role)
 
-Breeze Blade Stack pake **component pattern**, bukan `@extends`:
+Proyek memakai **component pattern** dengan 3 layout yang dipilih otomatis berdasarkan role user:
+
+| Role | Layout | Navigasi |
+|------|--------|----------|
+| `super_admin` / `admin` / `staff` | **Sidebar** (`x-sidebar` + `x-topbar`), desktop-first | `components/sidebar.blade.php` (staff juga dapat `x-bottom-nav` di layar kecil) |
+| `student` | **Bottom Tab Bar** (mobile-first) | `components/bottom-nav.blade.php` |
 
 **`resources/views/layouts/app.blade.php`** (layout utama):
 ```blade
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>{{ config('app.name', 'UniStock') }}</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>{{ isset($title) ? $title . ' — ' : '' }}{{ config('app.name') }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <script>window.DASHBOARD_URL = @json(route('dashboard'));</script>
 </head>
 <body>
-    @include('layouts.navigation')
+    @php
+        $isSidebarLayout = auth()->user()->hasAnyRole(['super_admin', 'admin', 'staff']);
+        $isBottomNavLayout = auth()->user()->hasRole('student');
+    @endphp
 
-    <main>
-        {{ $slot }}
-    </main>
+    @if($isSidebarLayout)
+        <x-sidebar />
+        <x-topbar />
+        <main>{{ $header ?? '' }}{{ $slot }}</main>
+    @elseif($isBottomNavLayout)
+        <x-topbar :simple="true" />
+        <main>{{ $header ?? '' }}{{ $slot }}</main>
+        <x-bottom-nav />
+    @endif
 </body>
 </html>
 ```
@@ -38,17 +55,15 @@ Breeze Blade Stack pake **component pattern**, bukan `@extends`:
 **Halaman yg pake layout:**
 ```blade
 <x-app-layout>
-    <x-slot name="header">
-        <h2>Dashboard</h2>
-    </x-slot>
+    <x-page-header title="Dashboard" />
 
-    <div class="py-12">
-        <h1>Selamat Datang</h1>
+    <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+        ...
     </div>
 </x-app-layout>
 ```
 
-> Atau pake `<x-guest-layout>` untuk halaman tanpa navbar (login, register).
+> Untuk halaman tanpa login (auth): pakai layout tersendiri (`layouts/auth` atau guest layout). Register **tidak aktif** di proyek ini — akun dibuat via Generate Akun (Admin) / seeder.
 
 ## 2. Blade Component
 
@@ -103,18 +118,21 @@ Breeze Blade Stack pake **component pattern**, bukan `@extends`:
 
 ```
 resources/views/
-├── layouts/          # Layout utama (app, guest)
-├── components/       # Blade component reusable
-├── auth/             # Login, register, forgot-password
+├── layouts/          # Layout utama (app.blade.php multi-role)
+├── components/       # Blade component reusable (28: sidebar, topbar, bottom-nav, alert, badge, page-header, stat-card, empty-state, delete-modal, dll.)
+├── auth/             # Login, forgot-password, reset-password, verify-email-otp, confirm-password, change-password
 ├── profile/          # Edit profile
-├── dashboards/       # Dashboard per role (super-admin, finance, staff, student)
-├── master/           # Master data CRUD (faculty, study-program, item, vendor, etc.)
-├── distribution/     # Entitlement, jadwal, size-monitor, scan
-├── inventory/        # Stock receive, stock opname
+├── dashboards/       # Dashboard per role (super-admin, admin, staff, student)
+├── master/           # Master data CRUD (faculty, study-program, student, item, vendor, dll.)
+├── distribution/     # Entitlement, distribution-schedule, size-events, size-monitor, scan
+├── inventory/        # Stock receive, stock balance, stock movement, stock opname
+├── finance/          # Eligibility, GPM, size change event
 ├── report/           # Laporan & GPM
 ├── student/          # Student self-service (size input, QR)
-├── import/           # Import data
-└── welcome.blade.php
+├── import/           # Import data + hasil
+├── emails/           # Template email (OTP, distribusi)
+├── errors/           # Halaman error (404, 403, 500)
+└── system/           # SMTP settings, user management (super admin)
 ```
 
 ## 6. Blade Best Practices

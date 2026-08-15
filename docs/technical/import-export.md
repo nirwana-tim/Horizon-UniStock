@@ -2,174 +2,127 @@
 
 ## Pendahuluan
 
-Fitur import/export adalah tulang punggung Admin (sebelumnya Finance). Admin menerima data dari kampus (mahasiswa, DP lunas) dan dari gudang (katalog, stok) dalam format Excel. Sistem harus bisa membaca data tersebut (import) dan menyajikan laporan (export) dengan format yang rapi, konsisten, dan mudah dibaca manusia.
+Fitur import/export adalah tulang punggung Admin. Admin menerima data dari kampus (mahasiswa, DP lunas) dan dari gudang (katalog, stok) dalam format Excel. Sistem harus bisa membaca data tersebut (import) dan menyajikan laporan (export) dengan format yang rapi, konsisten, dan mudah dibaca manusia.
 
 **Alur Umum:**
 
 ```
-Import: Download Template → Isi Data → Upload → Preview → Konfirmasi → Queue → Log
+Import: Download Template → Isi Data → Upload → Preview → Commit → Log
 Export: Pilih Filter → Generate → Download (styled .xlsx)
 ```
+
+Import diproses **sinkron** (bukan queue) menggunakan Maatwebsite Excel `ToCollection`.
 
 ---
 
 ## 1. Template Import (Admin Upload)
 
-Template adalah file Excel kosong yang didownload Admin, diisi, lalu diupload kembali. Setiap template memiliki **2 sheet**:
+Template adalah file Excel yang didownload Admin, diisi, lalu diupload kembali. Setiap template memiliki **1 sheet** bernama `Data` dengan struktur:
 
-| Sheet | Fungsi |
+| Baris | Fungsi |
 |-------|--------|
-| **Petunjuk** | Panduan pengisian, kode referensi (prodi, ukuran), contoh baris |
-| **Data** | Form isian dengan header rapi, validasi dropdown, freeze pane |
+| 1 | Judul template (bold maroon `#980416`) |
+| 2 | Subtitle (panduan singkat, kode referensi) |
+| 3 | Contoh format (italic abu-abu) — khusus template yang pakai `WithCustomStartCell` |
+| 4+ | Header kolom + area isian |
 
-### Styling Template
+### Styling Template (`BaseExport`)
 
 | Elemen | Format |
 |--------|--------|
+| Judul | Bold 14pt, font `#980416`, merge cells |
+| Subtitle | Text 10pt, warna `#666666` |
 | Header baris | Bold, background `#980416`, font putih (#FFFFFF), border semua sisi |
 | Baris data | Font #333333, border bottom #CCCCCC tipis |
-| Baris contoh (Petunjuk) | Font italic abu-abu #999999, background #F5F5F5 |
-| Kolom required | Header dengan tanda `*` merah |
+| Kolom required | Header dengan tanda `*` |
 | Freeze pane | Baris header di-freeze |
 | Auto filter | Diaktifkan di header |
-| Validasi data | Dropdown untuk pilihan terbatas (prodi, gender, ukuran) |
+| Angka rupiah | Format `#,##0` |
 
 ### 1.1 Template Import Mahasiswa
 
-**File:** `storage/app/templates/import_mahasiswa.xlsx`
 **Class Generate:** `App\Exports\Templates\MahasiswaTemplateExport`
-**Tujuan:** Import data mahasiswa dari kampus. Nilai `student_level` diisi otomatis berdasarkan mapping semester (lihat `StudentImport` kelas).
+**Type:** `mahasiswa`
+**Tujuan:** Import data mahasiswa. Nilai `student_level` diisi otomatis berdasarkan mapping semester.
 
-**Sumber Data Excel:**
-- `Student Data Template` — CAMPUS, COLLEGE, COURSE, YEAR, SEMESTER, STUDENT_ID
-- `MASTER DATA FRESHMAN` — NIM, NAMA, PRODI, SERAGAM, SEPATU, Jenis Kelamin, Email
+**Struktur Kolom:**
 
-**Struktur Kolom (Sheet Data):**
-
-| Kolom | Tipe | Required | Validasi | Contoh |
-|-------|------|----------|----------|--------|
-| NIM* | String (20) | Ya | unique, numeric 16 digit | 4112714401250002 |
-| Nama Lengkap* | String (255) | Ya | - | NABILA LUTHFIYYAH SETIAWAN |
-| Prodi* | String | Ya | Dropdown dari study_programs | D3 KEPERAWATAN 1 |
-| Jenis Kelamin* | String | Ya | Dropdown: Laki-laki / Perempuan | Perempuan |
-| Ukuran Baju* | String | Ya | Dropdown: S / M / L / XL / 2XL / 3XL / 4XL / 5XL | M |
-| Ukuran Sepatu* | String | Ya | Dropdown: 36 / 37 / 38 / 39 / 40 / 41 / 42 / 43 / 44 / 45 | 38 |
-| Email Kampus | String | No | Format email | nabila@krw.horizon.ac.id |
-| Email Pribadi | String | No | Format email | nabila@gmail.com |
-| Tipe* | String | Ya | Dropdown: Freshman / Continuing | Freshman |
-
-**Contoh Tampilan:**
-
-```
-| NIM*             | Nama Lengkap*               | Prodi*           | Jenis Kelamin* | Ukuran Baju* | Ukuran Sepatu* | Tipe*       |
-|------------------|------------------------------|------------------|----------------|--------------|----------------|-------------|
-| 4112714401250002 | NABILA LUTHFIYYAH SETIAWAN   | D3 KEPERAWATAN 1 | Perempuan      | M            | 38             | Freshman    |
-| 4112715401240002 | BUNGA CITRA ANDINI           | D3 KEBIDANAN 2   | Perempuan      | M            | 36             | Continuing  |
-| 4112714401250003 | RIZVAL                       | D3 KEPERAWATAN 1 | Laki-laki      | L            | 42             | Freshman    |
-```
+| Kolom | Tipe | Required | Keterangan |
+|-------|------|----------|-----------|
+| NIM * | String (20) | Ya | Unique, numeric |
+| Nama Lengkap * | String (255) | Ya | - |
+| Prodi * | String | Ya | Nama program studi |
+| Jenis Kelamin * | String | Ya | Laki-laki / Perempuan |
+| Ukuran Baju * | String | Ya | S / M / L / XL / dll |
+| Ukuran Sepatu * | String | Ya | 36 / 37 / 38 / ... |
+| Email Kampus | String | No | Format email |
+| Email Pribadi | String | No | Format email |
+| Tipe | String | No | Freshman / Continuing |
 
 ### 1.2 Template Import DP Lunas
 
-**File:** `storage/app/templates/import_dp_lunas.xlsx`
 **Class Generate:** `App\Exports\Templates\DpLunasTemplateExport`
-**Tujuan:** Import data mahasiswa yang sudah membayar DP (Down Payment) dari sistem keuangan kampus.
+**Type:** `dp_lunas`
+**Tujuan:** Import data mahasiswa yang sudah membayar DP dari sistem keuangan kampus.
 
-**Sumber Data Excel:** `ALL DATA DP PAID` — Student ID, Student Name, Course, Level, Learning Modality
-
-**Struktur Kolom:**
-
-| Kolom | Tipe | Required | Validasi | Contoh |
-|-------|------|----------|----------|--------|
-| NIM* | String (20) | Ya | Harus ada di tabel students | 4112714201240001 |
-| Nama Mahasiswa* | String | Ya | - | WULAN SARI NURFIANI |
-| Prodi* | String | Ya | Dropdown dari study_programs | S1 KEPERAWATAN |
-| Level* | String | Ya | Dropdown dari student_levels | Y1S1 |
-| Status Bayar* | String | Ya | Dropdown: Lunas / Belum Lunas | Lunas |
+**Struktur Kolom:** `NIM *`, `Nama Mahasiswa *`, `Prodi *`, `Level *` (contoh `Y1S1`), `Status Bayar *` (Lunas / Belum Lunas).
 
 ### 1.3 Template Import Katalog Barang
 
-**File:** `storage/app/templates/import_katalog.xlsx`
 **Class Generate:** `App\Exports\Templates\KatalogTemplateExport`
-**Tujuan:** Import daftar barang/uniform beserta kode, kategori, varian ukuran.
+**Type:** `katalog`
+**Tujuan:** Import master barang beserta qty stok per ukuran (varian).
 
-**Sumber Data Excel:** `ID` sheet (Dummy Inventory Management) — ID, Category, Gender, Item, Department, Size
+**Struktur Kolom:** `Kategori *` (UNF / SHO / KTM / KIT / MRC), `Gender *` (L / P / U), `Nama Item *`, `Type *` (SCB / CLG / COM / LAB / CLN / ALM), `Departemen`, `Satuan *`, `Harga Jual (Rp)`, `HPP (Rp)`, lalu **kolom dinamis per ukuran** (dari `item_sizes`).
 
-**Struktur Kolom:**
-
-| Kolom | Tipe | Required | Validasi | Contoh |
-|-------|------|----------|----------|--------|
-| Kode Barang | String (Auto) | Auto | Format: KATEGORI-GENDER-TIPE-VARIANT-SIZE | UNF-L-SCB-02-03 |
-| Kategori* | String | Ya | Dropdown: UNF / SHO / KTM / KIT / MRC | UNF |
-| Gender* | String | Ya | Dropdown: L / P / U | L |
-| Nama Item* | String (255) | Ya | - | Uniform Scrub Laki-Laki STIKES |
-| Departemen* | String | Ya | Dropdown dari prodi/fakultas | 02 (STIKES) |
-| Ukuran* | String | Ya | Dropdown: S / M / L / XL / 2XL / ... / All Size | S |
-| Satuan* | String | Ya | Dropdown: Pcs / Pasang / Set / Pack | Pcs |
-
-**Kode Barang Otomatis:** Format `KATEGORI-GENDER-TIPE-VARIANT-SIZE`
+**Format Kode Barang (4 segmen):** `KATEGORI-GENDER-TIPE-VARIANT` — contoh `UNF-L-SCB-02`.
 - Kategori: UNF (Uniform), SHO (Shoes), KTM (Kartu), KIT (Kit), MRC (Merchandise)
 - Gender: L (Laki-laki), P (Perempuan), U (Unisex)
-- TIPE: CLG (College), SCB (Scrub), COM (Community), LAB (Lab), CLN (Clinical), ALM (Almamater)
-- Dept: 2 digit kode departemen
-- Ukuran: 2 digit (01=S, 02=M, dst)
+- TIPE: SCB (Scrub), CLG (College), COM (Community), LAB (Lab), CLN (Clinical), ALM (Almamater)
+- VARIANT: 2 digit urutan (contoh `02`)
+
+> Kode dihasilkan otomatis oleh `ItemService` / `ItemImport::generateBaseCode()` berdasarkan kategori/gender/tipe/departemen.
 
 ### 1.4 Template Import Harga Barang
 
-**File:** `storage/app/templates/import_harga.xlsx`
 **Class Generate:** `App\Exports\Templates\HargaTemplateExport`
+**Type:** `harga`
 **Tujuan:** Import harga jual dan HPP per tahun akademik.
 
-**Sumber Data Excel:** `Items` sheet — ID, Description, PRICE 22/23, PRICE 23/24, PRICE 24/25
-
-**Struktur Kolom:**
-
-| Kolom | Tipe | Required | Validasi | Contoh |
-|-------|------|----------|----------|--------|
-| Kode Barang* | String | Ya | Harus ada di tabel items | UNF-L-SCB-02-03 |
-| Nama Barang | String (Auto) | Auto | Muncul otomatis | Uniform Scrub Laki-Laki STIKES, Size S |
-| Tahun Akademik* | String | Ya | Dropdown: 22/23 / 23/24 / 24/25 / 25/26 | 24/25 |
-| Harga Jual (Rp)* | Number | Ya | Min: 0, format Rp | 190000 |
-| HPP (Rp)* | Number | Ya | Min: 0, format Rp | 150000 |
+**Struktur Kolom:** `Kode Barang *` (4 segmen, contoh `UNF-L-SCB-02`), `Nama Barang` (otomatis), `Tahun Akademik *` (22/23 / 23/24 / 24/25 / 25/26), `Harga Jual (Rp) *`, `HPP (Rp) *`.
 
 ### 1.5 Template Import Hak Barang (Entitlement)
 
-**File:** `storage/app/templates/import_hak_barang.xlsx`
 **Class Generate:** `App\Exports\Templates\HakBarangTemplateExport`
-**Tujuan:** Menentukan barang apa saja yang berhak diterima oleh setiap program studi.
+**Type:** `hak_barang`
+**Tujuan:** Menentukan barang berhak per Prodi Level (kode entitlement).
 
-**Sumber Data Excel:** `2526 Ganjil/Genap - List Item` — mapping Prodi Level ke jenis barang
+**Struktur Kolom:** `Prodi Level *`, `Tipe *` (Freshman / Continuing), lalu **kolom dinamis per item aktif** (qty barang berhak, 0 jika tidak).
 
-**Struktur Kolom:**
+### 1.6 Template Import Penerimaan Barang (Stock Receive)
 
-| Kolom | Tipe | Required | Validasi | Contoh |
-|-------|------|----------|----------|--------|
-| Prodi Level* | String | Ya | Dropdown dari student_generations | D3 KEPERAWATAN 1 |
-| Tipe* | String | Ya | Dropdown: Freshman / Continuing | Freshman |
-| Almamater | Number | No | 0 / 1 | 1 |
-| Seragam Kuliah | Number | No | 0 / 1 | 1 |
-| Seragam Praktek | Number | No | 0 / 1 | 1 |
-| Scrub Suit | Number | No | 0 / 1 | 0 |
-| Jas Lab | Number | No | 0 / 1 | 0 |
-| Seragam Komunitas | Number | No | 0 / 1 | 1 |
-| Sepatu Kuliah | Number | No | 0 / 1 | 1 |
-| Sepatu Praktek | Number | No | 0 / 1 | 0 |
-| Lanyard & Holder | Number | No | 0 / 1 | 1 |
-| Name Tag | Number | No | 0 / 1 | 1 |
-| Nursing Kit | Number | No | 0 / 1 | 0 |
-| Midwifery Kit | Number | No | 0 / 1 | 0 |
+**Class Generate:** `App\Exports\Templates\StockReceiveTemplateExport`
+**Type:** `penerimaan`
+**Tujuan:** Import barang masuk dari vendor.
 
-Kolom barang bersifat dinamis — hanya barang yang aktif di sistem yang tampil.
+**Struktur Kolom:** `Kode Barang *` (4 segmen, `UNF-L-SCB-02`), `SKU Varian` (`UNF-L-SCB-02-03`; kosongkan jika all size), `QTY *`, `Harga Satuan (Rp)`, `HPP (Rp)`, `Nama Vendor *`, `Tanggal Terima *` (YYYY-MM-DD), `Nomor Ref`, `Keterangan`.
+
+### 1.7 Template Import Stock Opname
+
+**Class Generate:** `App\Exports\Templates\StockOpnameTemplateExport`
+**Type:** `stock_opname`
+**Tujuan:** Import hasil hitung fisik bulanan.
+
+**Struktur Kolom:** `Kode Barang *`, `Varian Ukuran *` (S/M/L/XL atau All Size), `Quantity Fisik *`.
 
 ---
 
 ## 2. Download Template
 
-Admin mendownload template kosong sebelum mengisi data.
-
 **Route:**
 
 ```
-GET /admin/templates/{type}/download
+GET /templates/{type}/download          # name: templates.download (role: super_admin|admin)
 ```
 
 | Parameter type | Template |
@@ -179,17 +132,10 @@ GET /admin/templates/{type}/download
 | `katalog` | Import Katalog Barang |
 | `harga` | Import Harga Barang |
 | `hak_barang` | Import Hak Barang |
+| `penerimaan` | Import Penerimaan Barang |
+| `stock_opname` | Import Stock Opname |
 
-**Cara Kerja:**
-1. Cek apakah file statis ada di `storage/app/templates/import_{type}.xlsx`
-2. Jika ada → `Storage::download()`
-3. Jika tidak → `Excel::download(new TemplateExportClass)`
-
-**Seeding File Statis:**
-```bash
-php artisan db:seed --class=TemplateSeeder
-```
-File template disimpan di `resources/templates/` lalu dicopy ke `storage/app/templates/`.
+**Cara Kerja:** `TemplateController::download()` memetakan `type` → class export, lalu `Excel::download(new TemplateExportClass, "Template_Import_{type}.xlsx")`. Type tidak dikenal → `abort(404)`. Tidak ada file statis/seeder — semua template di-generate dinamis.
 
 ---
 
@@ -198,101 +144,75 @@ File template disimpan di `resources/templates/` lalu dicopy ke `storage/app/tem
 **Route:**
 
 ```
-POST /admin/import
+GET  /import              # name: import.index   (daftar + log import_batches)
+POST /import              # name: import.store    (commit)
+POST /import/preview      # name: import.preview  (validasi & preview)
+GET  /import/{importBatch} # name: import.result
 ```
+
+Semua dilindungi `auth` + `password.changed` + `role:super_admin|admin`; `store` diberi `throttle:5,1`, `preview` diberi `throttle:10,1`.
 
 **Alur:**
 
 ```
-Upload File → Validasi → Preview 10 baris → Konfirmasi → Queue Import → Log ke import_batches
+Upload File → Validasi (import_type + file) → Preview → Commit → Simpan log import_batches
 ```
 
-### 3.1 Import Flow Detail
+**Validasi `import_type`:** `in:student,eligibility,item,stock_opname,item_price,entitlement,stock_receive`
 
-```
-Request: POST /admin/import
-Body: { import_type: "mahasiswa", file: file.xlsx }
-
-1. Validasi file (mimes:xlsx,csv, max:10MB)
-2. Parse Excel → Collection
-3. Validasi setiap baris (rules dari Import class)
-4. Jika ada error → return error dengan baris mana yang salah
-5. Jika OK → simpan ke DB via Import class
-6. Catat log di tabel import_batches
-   → status: processing → completed / failed
-   → total_rows, success_rows, failed_rows, error_log
-7. Return redirect dengan pesan sukses/gagal
-```
-
-### 3.2 Import Types
+### 3.1 Import Types
 
 | Type | Import Class | Target Table |
 |------|-------------|-------------|
-| `mahasiswa` | `App\Imports\StudentImport` | `students`, `users`, `student_size_profiles`, `student_size_items` |
-| `dp_lunas` | `App\Imports\EligibilityImport` | `eligibility_records` |
-| `katalog` | `App\Imports\ItemImport` | `items`, `item_variants` |
-| `harga` | `App\Imports\ItemPriceImport` | `item_prices` |
-| `hak_barang` | `App\Imports\EntitlementImport` | `entitlements`, `entitlement_items` |
+| `student` | `App\Imports\StudentImport` | `students`, `users`, `student_size_profiles`, `student_size_items` |
+| `eligibility` | `App\Imports\EligibilityImport` | `eligibility_records` |
+| `item` | `App\Imports\ItemImport` | `items`, `item_variants` (code 4 segmen, sku = code-SIZE) |
+| `item_price` | `App\Imports\ItemPriceImport` | `item_prices` |
+| `entitlement` | `App\Imports\EntitlementImport` | `entitlements`, `entitlement_items` |
+| `stock_receive` | `App\Imports\StockReceiveImport` | `stock_receives`, `stock_receive_items`, `stock_batches`, `stock_movements` |
+| `stock_opname` | `App\Imports\StockOpnameImport` | `stock_opname_items` |
+
+### 3.2 Import Flow Detail
+
+```
+POST /import (store)
+Body: { import_type: "student", file: file.xlsx }
+
+1. Validasi file (mimes:xlsx,csv, max:10MB)
+2. Parse Excel → Collection (ToCollection + WithHeadingRow)
+3. Proses setiap baris via Import class (sinkron)
+4. Simpan log di tabel import_batches
+   → status: processing → completed / failed
+   → total_rows, success_rows, failed_rows, error_log (JSON)
+5. Redirect dengan pesan sukses/gagal
+```
 
 ### 3.3 Error Handling
 
 | Skenario | Penanganan |
 |----------|-----------|
 | Baris duplikat NIM | Skip baris, catat di error_log |
-| Cell kosong di kolom required | Kembalikan error dengan nomor baris |
-| Format tanggal salah | Default ke null, catat warning |
-| Prodi tidak ditemukan | Skip, catat "Prodi X tidak ditemukan" |
+| Cell kosong di kolom required | Catat error dengan nomor baris |
+| Prodi / kategori / ukuran tidak ditemukan | Skip, catat pesan |
 | File >10MB | Tolak dengan pesan "File terlalu besar" |
-| Ekstensi salah | Tolak dengan pesan "Format file harus .xlsx atau .csv" |
-
-### 3.4 Implementasi Import
-
-```php
-// app/Http/Controllers/ImportController.php
-public function store(Request $request): RedirectResponse
-{
-    $validated = $request->validate([
-        'import_type' => ['required', 'in:mahasiswa,dp_lunas,katalog,harga,hak_barang'],
-        'file' => ['required', 'file', 'mimes:xlsx,csv', 'max:10240'],
-    ]);
-
-    $file = $request->file('file');
-    $filePath = $file->storeAs('imports', time() . '_' . $file->getClientOriginalName(), 'local');
-
-    $batch = $this->importService->processImport(
-        $validated['import_type'],
-        storage_path("app/{$filePath}"),
-        $request->user()->id
-    );
-
-    if ($batch->status === 'completed') {
-        return redirect()->route('import.index')
-            ->with('success', "Import berhasil. {$batch->success_rows}/{$batch->total_rows} baris.");
-    }
-
-    return redirect()->route('import.index')
-        ->with('error', "Import gagal. {$batch->failed_rows} baris error. Cek log.");
-}
-```
+| Ekstensi salah | Tolak dengan pesan format harus .xlsx/.csv |
 
 ---
 
 ## 4. Export Laporan (Admin Download)
 
-Laporan dihasilkan sistem dengan styling profesional. Admin memilih filter lalu mendownload file .xlsx.
+Laporan dihasilkan sistem dengan styling profesional via `BaseExport`.
 
-### Styling Export
-
-Semua laporan menggunakan `BaseExport` yang menyediakan styling konsisten:
+### Styling Export (`BaseExport`)
 
 | Elemen | Format |
 |--------|--------|
-| Judul laporan | Bold 14pt, font #980416, merge cells, row height 30 |
-| Periode filter | Text 10pt, warna #666666, row height 20 |
-| Header tabel | Background #980416, font putih bold 11pt, border #980416 |
+| Judul laporan | Bold 14pt, font `#980416`, merge cells, row height 30 |
+| Periode filter | Text 10pt, warna `#666666`, row height 20 |
+| Header tabel | Background `#980416`, font putih bold 11pt, border `#980416` |
 | Baris data ganjil | Background putih (#FFFFFF) |
-| Baris data genap | Background #F9F0F0 (stripe) |
-| Total / summary | Background #E8D5D5, font bold 11pt, border double top |
+| Baris data genap | Background `#F9F0F0` (stripe) |
+| Total / summary | Background `#E8D5D5`, font bold 11pt, border double top |
 | Angka rupiah | Format `#,##0` (tanpa "Rp" agar bisa diolah Excel) |
 | Quantity | Format `#,##0` |
 | Tanggal | Format `dd/mm/yyyy` |
@@ -300,184 +220,24 @@ Semua laporan menggunakan `BaseExport` yang menyediakan styling konsisten:
 | Auto filter | Di header tabel |
 | Column width | Auto-fit berdasarkan konten |
 
-### 4.1 Laporan Stok Inventaris
+### Route Export (semua `role:super_admin|admin`, prefix `/report` name `report.*`)
 
-**Class:** `App\Exports\Reports\StockReport`
-**File:** `Laporan_Stok_Inventaris_{periode}.xlsx`
-**Analogi Sheet:** `List Stock` (Dummy Inventory Management)
+Laporan diakses lewat halaman `GET /report` (`report.index`) dengan tombol download per laporan.
 
-**Filter:**
-- Kategori Barang (semua / UNF / SHO / KTM / KIT)
-- Gender (semua / L / P / U)
+| Laporan | Class Export | Route Name |
+|---------|--------------|-----------|
+| Rekap Distribusi | `App\Exports\DistributionReportExport` | `report.distribution` |
+| Stok Inventaris | `App\Exports\Reports\StockReport` | `report.stock` |
+| Stok Opname | `App\Exports\Reports\StockOpnameReport` | `report.stock-opname` |
+| Kartu Stok | `App\Exports\Reports\StockCardReport` | `report.stock-card` |
+| GPM | `App\Exports\GpmReportExport` | `report.gpm` |
+| GPM Cost | (via `Finance\GpmController`) | `report.gpm-cost` |
+| Loss / Susut | `App\Exports\Reports\LossReport` | `report.loss` |
+| Rekap Ukuran | `App\Exports\Reports\SizeRecapReport` | `report.size-recap` |
+| Inventory | `App\Exports\InventoryReportExport` | `report.inventory` |
+| Rekap Distribusi per Period | `App\Exports\DistributionReportExport` | `report.distribution-recap` |
 
-**Kolom:**
-
-| Kolom | Format | Keterangan |
-|-------|--------|-----------|
-| No | Number | Urutan |
-| Kode Barang | String | UNF-L-SCB-02-03 |
-| Nama Barang | String | Uniform Scrub Laki-Laki STIKES, Size S |
-| Kategori | String | UNF |
-| Gender | String | L |
-| Ukuran | String | S |
-| Stok Awal | Number #,##0 | Saldo awal periode |
-| Stok Masuk | Number #,##0 | Total penerimaan |
-| Stok Keluar | Number #,##0 | Total distribusi/penjualan |
-| **Stok Akhir** | Number #,##0 (bold) | Saldo saat ini |
-| Nilai Stok (Rp) | Number #,##0 | Stok Akhir × HPP terakhir |
-
-**Styling Khusus:**
-- Baris dengan stok ≤ 0 → font merah (#CC0000)
-- Subtotal per kategori → background #E8D5D5
-
-### 4.2 Laporan Stok Opname
-
-**Class:** `App\Exports\Reports\StockOpnameReport`
-**File:** `Laporan_Stok_Opname_{tanggal}.xlsx`
-**Analogi Sheet:** `Stock Opname` (Dummy Inventory Management)
-
-**Filter:**
-- Periode opname (dropdown dari stock_opnames)
-
-**Kolom:**
-
-| Kolom | Format | Keterangan |
-|-------|--------|-----------|
-| No | Number | - |
-| Tanggal | dd/mm/yyyy | Tanggal opname |
-| Kode Barang | String | - |
-| Nama Barang | String | - |
-| Ukuran | String | - |
-| Stok Sistem | Number #,##0 | Data dari stock_balances |
-| Stok Fisik | Number #,##0 | Input fisik |
-| **Selisih** | Number #,##0 (bold) | Fisik - Sistem |
-| Keterangan | String | Catatan |
-
-**Styling Khusus:**
-- Selisih positif → font hijau (#006600)
-- Selisih negatif → font merah (#CC0000)
-- Total baris: jumlah stok sistem, fisik, selisih
-
-### 4.3 Laporan Rekap Pembagian
-
-**Class:** `App\Exports\Reports\DistributionReport`
-**File:** `Laporan_Rekap_Pembagian_{periode}.xlsx`
-**Analogi Sheet:** `Summary Pembagian` (Dummy Freshman Seragam)
-
-**Filter:**
-- Periode distribusi
-- Prodi (semua / spesifik)
-
-**Kolom:**
-
-| Kolom | Format | Keterangan |
-|-------|--------|-----------|
-| No | Number | - |
-| Prodi | String | D3 KEPERAWATAN 1 |
-| Eligible | Number #,##0 | Mahasiswa eligible |
-| Sudah Ambil | Number #,##0 | Sudah melakukan transaksi |
-| Belum Ambil | Number #,##0 | Eligible - Sudah Ambil |
-| S | Number | Jumlah ukuran S |
-| M | Number | Jumlah ukuran M |
-| L | Number | Jumlah ukuran L |
-| XL | Number | Jumlah ukuran XL |
-| 2XL | Number | Jumlah ukuran 2XL |
-| 3XL | Number | Jumlah ukuran 3XL |
-| 4XL | Number | Jumlah ukuran 4XL |
-| 5XL | Number | Jumlah ukuran 5XL |
-
-**Styling Khusus:**
-- Belum Ambil → font merah jika > 0
-- Total row di akhir
-
-### 4.4 Laporan GPM / Laba Kotor
-
-**Class:** `App\Exports\Reports\GpmReport`
-**File:** `Laporan_GPM_{periode}.xlsx`
-**Analogi Sheet:** `CEK GPM` (Dummy Inventory Management)
-
-**Filter:**
-- Periode (tahun akademik)
-- Kategori Barang
-
-**Kolom:**
-
-| Kolom | Format | Keterangan |
-|-------|--------|-----------|
-| No | Number | - |
-| Kode Barang | String | UNF-L-SCB |
-| Nama Barang | String | Uniform Scrub Laki-Laki |
-| Harga Jual (Rp) | Number #,##0 | Rata-rata harga jual |
-| HPP (Rp) | Number #,##0 | Rata-rata HPP |
-| Qty Terjual | Number #,##0 | Total unit terjual |
-| **Revenue (Rp)** | Number #,##0 (bold) | Harga Jual × Qty |
-| **Cost (Rp)** | Number #,##0 (bold) | HPP × Qty |
-| **Laba Kotor (Rp)** | Number #,##0 (bold) | Revenue - Cost |
-| **Margin (%)** | Number #,##0.00% (bold) | (Laba / Revenue) × 100% |
-
-**Styling Khusus:**
-- Margin < 10% → background merah (#FFE0E0)
-- Margin 10-20% → background kuning (#FFF8E0)
-- Margin > 20% → background hijau (#E0FFE0)
-- Total keseluruhan di baris terakhir
-
-### 4.5 Laporan Kartu Stok
-
-**Class:** `App\Exports\Reports\StockCardReport`
-**File:** `Laporan_Kartu_Stok_{kode_barang}_{periode}.xlsx`
-**Analogi Sheet:** `Inventory Card` (Dummy Inventory Management)
-
-**Filter:**
-- Kode Barang (dropdown atau search)
-- Rentang tanggal (start_date, end_date)
-
-**Kolom:**
-
-| Kolom | Format | Keterangan |
-|-------|--------|-----------|
-| No | Number | - |
-| Tanggal | dd/mm/yyyy | Tanggal transaksi |
-| Referensi | String | No referensi (PO, SO, DJ) |
-| Deskripsi | String | Keterangan transaksi |
-| Masuk (IN) | Number #,##0 | Penerimaan stok |
-| Keluar (OUT) | Number #,##0 | Pengeluaran stok |
-| HPP Satuan (Rp) | Number #,##0 | Harga pokok per unit |
-| Total HPP (Rp) | Number #,##0 | QTY × HPP |
-| **Saldo Akhir** | Number #,##0 (bold) | Running balance |
-
-**Styling Khusus:**
-- Setiap item dipisah dengan separator (border thicker antar item)
-- Total Masuk, Total Keluar, Saldo Akhir di akhir
-
-### 4.6 Laporan Rekap Susut/Loss Stok
-
-**Class:** `App\Exports\Reports\LossReport`
-**File:** `Laporan_Susut_Stok_{periode}.xlsx`
-**Analogi Sheet:** `Loss STO` (Dummy Inventory Management)
-
-**Filter:**
-- Periode (bulan/tahun)
-- Kategori Barang
-
-**Kolom:**
-
-| Kolom | Format | Keterangan |
-|-------|--------|-----------|
-| No | Number | - |
-| Periode | String | November 2025 |
-| Item / Kategori | String | Uniform Scrub Laki-Laki |
-| QTY Susut (Loss) | Number #,##0 | Selisih negatif |
-| Harga Satuan (Rp) | Number #,##0 | HPP |
-| **Total Loss (Rp)** | Number #,##0 (bold merah) | QTY Loss × Harga |
-| QTY Surplus (Gain) | Number #,##0 | Selisih positif |
-| **Total Surplus (Rp)** | Number #,##0 (bold hijau) | QTY Surplus × Harga |
-| **Net Loss (Rp)** | Number #,##0 (bold) | Total Loss - Total Surplus |
-
-**Styling Khusus:**
-- Total Loss → font merah #CC0000
-- Total Surplus → font hijau #006600
-- Net Loss negatif → merah; positif → hijau
-- Ringkasan per bulan + grand total
+> Struktur/kolom detail laporan mengikuti business logic di masing-masing class (umumnya: No, Kode Barang, Nama Barang, Kategori, Gender, Ukuran, Qty, Harga, Total, Saldo). Kode barang pada laporan memakai **4 segmen** (contoh `UNF-L-SCB-02`).
 
 ---
 
@@ -485,7 +245,7 @@ Semua laporan menggunakan `BaseExport` yang menyediakan styling konsisten:
 
 ### 5.1 BaseExport
 
-Semua class export mewarisi `BaseExport` yang menyediakan helper styling:
+Semua class export mewarisi `BaseExport` yang menyediakan helper styling (maroon `#980416`, stripe `#F9F0F0`, total `#E8D5D5`):
 
 ```php
 namespace App\Exports;
@@ -502,78 +262,16 @@ abstract class BaseExport
     protected string $stripeColor = 'F9F0F0';
     protected string $totalColor = 'E8D5D5';
 
-    protected function applyHeaderStyle(Worksheet $sheet, int $row = 1, int $colCount = 10): void
-    {
-        $range = 'A' . $row . ':' . $this->columnLetter($colCount) . $row;
-        $sheet->getStyle($range)->applyFromArray([
-            'font' => [
-                'bold' => true,
-                'color' => ['rgb' => 'FFFFFF'],
-                'size' => 11,
-            ],
-            'fill' => [
-                'fillType' => Fill::FILL_SOLID,
-                'startColor' => ['rgb' => $this->primaryColor],
-            ],
-            'borders' => [
-                'allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => $this->primaryColor]],
-            ],
-            'alignment' => [
-                'horizontal' => Alignment::HORIZONTAL_CENTER,
-                'vertical' => Alignment::VERTICAL_CENTER,
-            ],
-        ]);
-    }
-
-    protected function applyDataStyle(Worksheet $sheet, int $startRow, int $endRow, int $colCount): void
-    {
-        for ($i = $startRow; $i <= $endRow; $i++) {
-            $range = 'A' . $i . ':' . $this->columnLetter($colCount) . $i;
-            $bgColor = ($i % 2 === 0) ? $this->stripeColor : 'FFFFFF';
-            $sheet->getStyle($range)->applyFromArray([
-                'fill' => [
-                    'fillType' => Fill::FILL_SOLID,
-                    'startColor' => ['rgb' => $bgColor],
-                ],
-                'borders' => [
-                    'bottom' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => 'CCCCCC']],
-                ],
-            ]);
-        }
-    }
-
-    protected function applyTotalStyle(Worksheet $sheet, int $row, int $colCount): void
-    {
-        $range = 'A' . $row . ':' . $this->columnLetter($colCount) . $row;
-        $sheet->getStyle($range)->applyFromArray([
-            'font' => ['bold' => true, 'size' => 11],
-            'fill' => [
-                'fillType' => Fill::FILL_SOLID,
-                'startColor' => ['rgb' => $this->totalColor],
-            ],
-            'borders' => [
-                'top' => ['borderStyle' => Border::BORDER_DOUBLE, 'color' => ['rgb' => '980416']],
-            ],
-        ]);
-    }
-
-    protected function setColumnWidths(Worksheet $sheet, array $widths): void
-    {
-        foreach ($widths as $col => $width) {
-            $sheet->getColumnDimension($col)->setWidth($width);
-        }
-    }
-
-    protected function setFormatRupiah(Worksheet $sheet, string $column, int $startRow, int $endRow): void
-    {
-        $range = $column . $startRow . ':' . $column . $endRow;
-        $sheet->getStyle($range)->getNumberFormat()->setFormatCode('#,##0');
-    }
-
-    private function columnLetter(int $index): string
-    {
-        return \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($index);
-    }
+    protected function applyHeaderStyle(Worksheet $sheet, int $row = 1, int $colCount = 10): void;
+    protected function applyDataStyle(Worksheet $sheet, int $startRow, int $endRow, int $colCount): void;
+    protected function applyTotalStyle(Worksheet $sheet, int $row, int $colCount): void;
+    protected function setTitle(Worksheet $sheet, string $title, int $colCount): void;
+    protected function setSubtitle(Worksheet $sheet, string $subtitle, int $colCount): void;
+    protected function setColumnWidths(Worksheet $sheet, array $widths): void;
+    protected function setFormatRupiah(Worksheet $sheet, string $column, int $startRow, int $endRow): void;
+    protected function setFormatNumber(Worksheet $sheet, string $column, int $startRow, int $endRow): void;
+    protected function headerRow(): int;
+    protected function dataStartRow(): int;
 }
 ```
 
@@ -583,12 +281,10 @@ abstract class BaseExport
 namespace App\Exports\Reports;
 
 use App\Exports\BaseExport;
-use App\Models\StockBalance;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStyles;
-use Maatwebsite\Excel\Concerns\WithTitle;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class StockReport extends BaseExport implements
@@ -606,28 +302,34 @@ class StockReport extends BaseExport implements
 ## 6. Implementasi Routes
 
 ```php
-// routes/web.php
+// routes/web.php (aktual)
 
 // Download template import
 Route::get('/templates/{type}/download', [TemplateController::class, 'download'])
+    ->middleware(['auth', 'password.changed', 'role:super_admin|admin'])
     ->name('templates.download');
 
 // Import data
-Route::prefix('import')->name('import.')->group(function () {
+Route::middleware(['auth', 'password.changed', 'role:super_admin|admin'])->prefix('import')->name('import.')->group(function () {
     Route::get('/', [ImportController::class, 'index'])->name('index');
-    Route::post('/preview', [ImportController::class, 'preview'])->name('preview');
-    Route::post('/', [ImportController::class, 'store'])->name('store');
+    Route::get('/{importBatch}', [ImportController::class, 'result'])->name('result');
+    Route::post('/', [ImportController::class, 'store'])->middleware('throttle:5,1')->name('store');
+    Route::post('/preview', [ImportController::class, 'preview'])->middleware('throttle:10,1')->name('preview');
 });
 
-// Export laporan
-Route::prefix('reports')->name('reports.')->group(function () {
+// Export laporan (prefix report, bukan reports)
+Route::middleware(['auth', 'password.changed', 'role:super_admin|admin', 'throttle:10,1'])->prefix('report')->name('report.')->group(function () {
     Route::get('/', [ReportController::class, 'index'])->name('index');
-    Route::get('/stock', [ReportController::class, 'stock'])->name('stock');
-    Route::get('/stock-opname/{stockOpname}', [ReportController::class, 'stockOpname'])->name('stock-opname');
-    Route::get('/distribution', [ReportController::class, 'distribution'])->name('distribution');
-    Route::get('/gpm', [ReportController::class, 'gpm'])->name('gpm');
-    Route::get('/stock-card', [ReportController::class, 'stockCard'])->name('stock-card');
-    Route::get('/loss', [ReportController::class, 'loss'])->name('loss');
+    Route::get('distribution', [ReportController::class, 'distribution'])->name('distribution');
+    Route::get('distribution-recap', [ReportController::class, 'distributionRecap'])->name('distribution-recap');
+    Route::get('inventory', [ReportController::class, 'inventory'])->name('inventory');
+    Route::get('gpm', [ReportController::class, 'gpm'])->name('gpm');
+    Route::get('stock', [ReportController::class, 'stock'])->name('stock');
+    Route::get('stock-opname', [ReportController::class, 'stockOpname'])->name('stock-opname');
+    Route::get('stock-card', [ReportController::class, 'stockCard'])->name('stock-card');
+    Route::get('loss', [ReportController::class, 'loss'])->name('loss');
+    Route::get('gpm-cost', [GpmController::class, 'index'])->name('gpm-cost');
+    Route::get('size-recap', [ReportController::class, 'sizeRecap'])->name('size-recap');
 });
 ```
 
@@ -640,43 +342,38 @@ app/
   Exports/
     BaseExport.php                          # Base class styling
     Templates/
-      MahasiswaTemplateExport.php           # Download template mahasiswa
-      DpLunasTemplateExport.php            # Download template DP lunas
-      KatalogTemplateExport.php             # Download template katalog barang
-      HargaTemplateExport.php              # Download template harga barang
-      HakBarangTemplateExport.php           # Download template hak barang
+      MahasiswaTemplateExport.php           # Template mahasiswa
+      DpLunasTemplateExport.php             # Template DP lunas
+      KatalogTemplateExport.php             # Template katalog barang
+      HargaTemplateExport.php               # Template harga barang
+      HakBarangTemplateExport.php           # Template hak barang
+      StockReceiveTemplateExport.php        # Template penerimaan barang
+      StockOpnameTemplateExport.php         # Template stock opname
     Reports/
       StockReport.php                       # Laporan stok inventaris
-      StockOpnameReport.php                # Laporan stok opname
-      DistributionReport.php               # Laporan rekap pembagian
-      GpmReport.php                        # Laporan GPM
-      StockCardReport.php                  # Laporan kartu stok
-      LossReport.php                       # Laporan susut stok
+      StockOpnameReport.php                 # Laporan stok opname
+      StockCardReport.php                   # Laporan kartu stok
+      LossReport.php                        # Laporan susut stok
+      SizeRecapReport.php                   # Laporan rekap ukuran
+    DistributionReportExport.php            # Laporan rekap distribusi
+    GpmReportExport.php                     # Laporan GPM
+    InventoryReportExport.php               # Laporan inventory
+    StudentExport.php                       # Export data mahasiswa
+    CredentialsExport.php                   # Export kredensial akun
   Imports/
     StudentImport.php                       # Import mahasiswa
-    EligibilityImport.php                  # Import DP lunas
-    ItemImport.php                         # Import katalog barang
-    ItemPriceImport.php                    # Import harga barang
-    EntitlementImport.php                  # Import hak barang
+    EligibilityImport.php                   # Import DP lunas
+    ItemImport.php                          # Import katalog barang
+    ItemPriceImport.php                     # Import harga barang
+    EntitlementImport.php                   # Import hak barang
+    StockReceiveImport.php                  # Import penerimaan barang
+    StockOpnameImport.php                   # Import stock opname
   Http/Controllers/
-    ImportController.php                   # Upload + preview import
-    TemplateController.php                 # Download template
-    ReportController.php                   # Download laporan
+    ImportController.php                    # Upload + preview + commit import
+    TemplateController.php                  # Download template
+    ReportController.php                    # Halaman & download laporan
   Services/
-    ImportService.php                      # Logika proses import
-
-resources/
-  templates/                                # File statis template (.xlsx)
-    import_mahasiswa.xlsx
-    import_dp_lunas.xlsx
-    import_katalog.xlsx
-    import_harga.xlsx
-    import_hak_barang.xlsx
-
-storage/
-  app/
-    templates/                              # Copy dari resources/templates (via seeder)
-    imports/                                # File upload sementara
+    ImportService.php                       # Logika proses import
 ```
 
 ---
@@ -686,10 +383,9 @@ storage/
 | Aspek | Ketentuan |
 |-------|-----------|
 | Validasi file | Ekstensi .xlsx / .csv, max 10MB |
-| Role akses import | `super_admin` dan `admin` via middleware `role:super_admin,finance` |
+| Role akses import | `super_admin` dan `admin` via middleware `role:super_admin|admin` |
 | Role akses export | `super_admin` dan `admin` |
-| Logging | Semua import tercatat di `import_batches` dengan user_id |
-| Temporary file | File upload dihapus setelah 24 jam (schedule command) |
+| Logging | Semua import tercatat di `import_batches` dengan `imported_by` |
 | Error log | Disimpan sebagai JSON di `import_batches.error_log` |
 
 ---
@@ -703,19 +399,23 @@ storage/
 | Template Import Katalog Barang | `Templates/KatalogTemplateExport.php` | ✅ |
 | Template Import Harga Barang | `Templates/HargaTemplateExport.php` | ✅ |
 | Template Import Hak Barang | `Templates/HakBarangTemplateExport.php` | ✅ |
+| Template Import Penerimaan | `Templates/StockReceiveTemplateExport.php` | ✅ |
+| Template Import Stock Opname | `Templates/StockOpnameTemplateExport.php` | ✅ |
 | Import Mahasiswa | `Imports/StudentImport.php` | ✅ |
 | Import DP Lunas | `Imports/EligibilityImport.php` | ✅ |
 | Import Katalog Barang | `Imports/ItemImport.php` | ✅ |
-| Import Harga Barang | `Imports/ItemPriceImport.php` | 🔧 Perlu dibuat |
-| Import Hak Barang | `Imports/EntitlementImport.php` | 🔧 Perlu dibuat |
-| Laporan Stok Inventaris | `Reports/StockReport.php` | 🔧 Perlu dibuat |
-| Laporan Stok Opname | `Reports/StockOpnameReport.php` | 🔧 Perlu dibuat |
-| Laporan Rekap Pembagian | `Reports/DistributionReport.php` | ✅ (update styling) |
-| Laporan GPM | `Reports/GpmReport.php` | ✅ (update styling) |
-| Laporan Kartu Stok | `Reports/StockCardReport.php` | 🔧 Perlu dibuat |
-| Laporan Susut Stok | `Reports/LossReport.php` | 🔧 Perlu dibuat |
-| Base Styling | `Exports/BaseExport.php` | 🔧 Perlu dibuat |
-| Download Template | `Controllers/TemplateController.php` | 🔧 Perlu dibuat |
+| Import Harga Barang | `Imports/ItemPriceImport.php` | ✅ |
+| Import Hak Barang | `Imports/EntitlementImport.php` | ✅ |
+| Import Penerimaan | `Imports/StockReceiveImport.php` | ✅ |
+| Import Stock Opname | `Imports/StockOpnameImport.php` | ✅ |
+| Laporan Stok Inventaris | `Reports/StockReport.php` | ✅ |
+| Laporan Stok Opname | `Reports/StockOpnameReport.php` | ✅ |
+| Laporan Rekap Distribusi | `DistributionReportExport.php` | ✅ |
+| Laporan GPM | `GpmReportExport.php` | ✅ |
+| Laporan Kartu Stok | `Reports/StockCardReport.php` | ✅ |
+| Laporan Susut Stok | `Reports/LossReport.php` | ✅ |
+| Laporan Rekap Ukuran | `Reports/SizeRecapReport.php` | ✅ |
+| Base Styling | `Exports/BaseExport.php` | ✅ |
+| Download Template | `Controllers/TemplateController.php` | ✅ |
 
-✅ = Sudah ada (perlu update styling)
-🔧 = Perlu dibuat baru
+✅ = Sudah diimplementasikan.

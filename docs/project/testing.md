@@ -12,7 +12,7 @@
 | 8 | Export report distribusi | File Excel berisi semua data distribusi |
 | 9 | Lupa password | OTP terkirim, validasi, reset berhasil |
 | 10 | Import Excel format salah | Error handling, tampilkan pesan jelas |
-| 11 | Update ukuran kedua kalinya | Tolak, maksimal 1 kali |
+| 11 | Update ukuran melebihi batas | Tolak, sesuai change count |
 | 12 | Jadwal distribusi - email duplikat | Hanya dikirim 1x per mahasiswa per jadwal |
 | 13 | Stock opname - variance positif | Surplus tercatat, adjustment journal dibuat |
 | 14 | Stock opname - variance negatif | Shortage tercatat, adjustment journal dibuat |

@@ -21,13 +21,10 @@ Library JavaScript untuk scan QR Code langsung dari kamera browser — tanpa per
 
 ## 1. Install
 
+Terdapat di `package.json` dengan versi `^2.3.8`.
+
 ```bash
 npm install html5-qrcode
-```
-
-Atau dengan bun:
-```bash
-bun add html5-qrcode
 ```
 
 ## 2. Setup di resources/js/app.js
@@ -35,59 +32,46 @@ bun add html5-qrcode
 ```js
 import './bootstrap';
 import Alpine from 'alpinejs';
-import 'html5-qrcode';
+import { Html5Qrcode } from 'html5-qrcode';
+
+window.Html5Qrcode = Html5Qrcode;
 ```
 
-Lalu `npm run build` (atau `bun run build`).
+Lalu `npm run build` (Vite). Di Blade, `window.Html5Qrcode` dipakai langsung untuk membuat scanner.
 
-## 3. Contoh Halaman Scan Sederhana
+## 3. Contoh Halaman Scan (Staff — `distribution/scan.blade.php`)
 
-**`resources/views/scan.blade.php`**
-```blade
-<x-app-layout>
-    <div class="p-6">
-        <h1>Scan QR Mahasiswa</h1>
+Route aktual (name `distribution.*`, role `super_admin|admin|staff`):
 
-        <div id="reader" style="width: 400px"></div>
+| Method | URI | Name | Middleware |
+|--------|-----|------|-----------|
+| GET | `/distribution/scan` | `distribution.scan.index` | auth, password.changed, role:super_admin\|admin\|staff |
+| GET | `/distribution/student/{nim}` | `distribution.scan.student` | auth, password.changed, role:super_admin\|admin\|staff |
+| POST | `/distribution/search` | `distribution.search` | + `throttle:30,1` |
+| GET | `/distribution/search` | `distribution.search.get` | - |
+| POST | `/distribution/process` | `distribution.process` | + `throttle:10,1` |
 
-        <div id="result" class="mt-4 p-4 bg-gray-100 rounded"></div>
+Skema scan (ringkas): hasil decode = NIM → redirect ke `route('distribution.scan.student', nim)` → halaman detail distribusi.
 
-        <form id="manual-form" class="mt-4" method="POST" action="{{ route('scan.manual') }}">
-            @csrf
-            <label>Atau input manual NIM:</label>
-            <input type="text" name="student_id" class="border rounded p-2" placeholder="Ketik NIM">
-            <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Cari</button>
-        </form>
-    </div>
-</x-app-layout>
+```js
+// resources/views/distribution/scan.blade.php (@push('scripts'))
+const html5QrCode = new Html5Qrcode("reader");
 
-@push('scripts')
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const html5QrCode = new Html5Qrcode("reader");
-
-        html5QrCode.start(
-            { facingMode: "environment" }, // kamera belakang
-            { fps: 10, qrbox: { width: 250, height: 250 } },
-            function (decodedText) {
-                // Sukses scan
-                document.getElementById('result').innerHTML =
-                    `<p class="text-green-600">NIM terdeteksi: <strong>${decodedText}</strong></p>
-                     <p class="mt-2">Mengarahkan...</p>`;
-
-                html5QrCode.stop();
-
-                // Redirect ke halaman detail mahasiswa
-                window.location.href = `/students/${decodedText}`;
-            },
-            function (errorMessage) {
-                // ignore scan error (terus scanning)
-            }
-        );
-    });
-</script>
-@endpush
+html5QrCode.start(
+    { facingMode: "environment" },
+    { fps: 10, qrbox: { width: 250, height: 250 } },
+    function (decodedText) {
+        // decodedText = NIM mahasiswa
+        html5QrCode.stop();
+        window.location.href = `/distribution/student/${decodedText}`;
+    },
+    function (errorMessage) {
+        // ignore scan error (terus scanning)
+    }
+);
 ```
+
+**Fallback manual:** input NIM di form → POST `/distribution/search` (`distribution.search`).
 
 ## 4. Variasi Kamera
 
@@ -161,9 +145,10 @@ html5QrCode.start(
 ## 8. Struktur File yg Diubah
 
 ```
-resources/js/app.js    ← import 'html5-qrcode'
-resources/views/       ← halaman scan blade
-routes/web.php         ← route untuk scan & redirect
+resources/js/app.js                   ← import { Html5Qrcode } + window.Html5Qrcode
+resources/views/distribution/scan.blade.php    ← halaman scan (role staff)
+resources/views/distribution/distribution.blade.php ← detail mahasiswa setelah scan
+routes/web.php                        ← route distribution.scan.* & distribution.search
 ```
 
 ## Sumber

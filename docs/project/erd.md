@@ -137,10 +137,8 @@ erDiagram
     }
 
     CATEGORY_ITEM_SIZE {
-        bigint id PK
-        bigint category_id FK
-        bigint item_id FK
-        bigint size_id FK
+        bigint item_category_id PK, FK
+        bigint item_size_id PK, FK
     }
 
     ITEM_PRICES {
@@ -445,9 +443,8 @@ erDiagram
     ITEM_DEPARTMENTS ||--o{ ITEMS : "fk.department_id -> id"
     ITEMS ||--o{ ITEM_VARIANTS : "fk.item_id -> id"
     ITEM_SIZES ||--o{ ITEM_VARIANTS : "fk.size_id -> id"
-    ITEM_CATEGORIES ||--o{ CATEGORY_ITEM_SIZE : "fk.category_id -> id"
-    ITEMS ||--o{ CATEGORY_ITEM_SIZE : "fk.item_id -> id"
-    ITEM_SIZES ||--o{ CATEGORY_ITEM_SIZE : "fk.size_id -> id"
+    ITEM_CATEGORIES ||--o{ CATEGORY_ITEM_SIZE : "fk.item_category_id -> id"
+    ITEM_SIZES ||--o{ CATEGORY_ITEM_SIZE : "fk.item_size_id -> id"
     ITEMS ||--o{ ITEM_PRICES : "fk.item_id -> id"
     VENDORS ||--o{ STOCK_RECEIVES : "fk.vendor_id -> id"
 
@@ -622,8 +619,8 @@ erDiagram
 |-------|------|-----------|
 | `id` | bigint (PK) | Identifier unik |
 | `name` | string | Nama item |
-| `code` | string (UK) | Kode item penuh (`KATEGORI-GENDER-TIPE-VARIANT-SIZE`) |
-| `base_code` | string | Kode dasar (`KATEGORI-GENDER-TIPE`) |
+| `code` | string (UK) | Kode item = `base_code` (4 segmen: `KATEGORI-GENDER-TIPE-VARIANT`, contoh `UNF-U-ALM-10`) |
+| `base_code` | string (index) | Kode dasar, sama dengan `code` (4 segmen) |
 | `gender` | char | L / P / U |
 | `category_id` | bigint (FK) | Kategori item |
 | `type_id` | bigint (FK, nullable) | Tipe item |
@@ -634,6 +631,8 @@ erDiagram
 | `is_active` | boolean | Status aktif |
 | `deleted_at` | datetime | Soft delete |
 
+> Format kode barang: `KATEGORI-GENDER-TIPE-VARIANT` (4 segmen). SKU varian = `code` + `-SIZE` (5 segmen) di tabel `item_variants`. Detail lengkap: [item-code.md](item-code.md).
+
 ### `item_variants`
 
 | Kolom | Tipe | Keterangan |
@@ -643,20 +642,20 @@ erDiagram
 | `size_id` | bigint (FK, nullable) | Ref `item_sizes` |
 | `size` | string | Ukuran (S, M, L, XL, 40, 42) |
 | `size_label` | string | Label ukuran |
-| `sku` | string (UK) | Stock Keeping Unit |
+| `sku` | string (UK) | Stock Keeping Unit (`code-SIZE`, contoh `UNF-U-ALM-10-M`) |
 | `weight` | decimal(8,2) | Berat item (opsional) |
 | `deleted_at` | datetime | Soft delete |
 
 ### `category_item_size`
 
-Pivot (M : M) antara kategori, item, dan ukuran.
+Pivot (M : M) antara `item_categories` dan `item_sizes` — ukuran yang tersedia per kategori.
 
 | Kolom | Tipe | Keterangan |
 |-------|------|-----------|
-| `id` | bigint (PK) | Identifier unik |
-| `category_id` | bigint (FK) | Kategori |
-| `item_id` | bigint (FK) | Item |
-| `size_id` | bigint (FK) | Ukuran |
+| `item_category_id` | bigint (PK, FK) | Kategori (ref `item_categories.id`) |
+| `item_size_id` | bigint (PK, FK) | Ukuran (ref `item_sizes.id`) |
+
+> Primary key gabungan `(item_category_id, item_size_id)`.
 
 ### `item_prices`
 

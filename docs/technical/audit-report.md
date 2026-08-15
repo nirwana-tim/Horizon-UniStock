@@ -126,9 +126,9 @@
 
 | # | Lokasi | Temuan | Perbaikan |
 |---|--------|--------|-----------|
-| M28 | `ItemService.php:24,52` vs `ItemImport.php:241-252,98,110` | Dua generator item code berbeda: manual 4 segmen (`UNF-L-SCB-02`), import 5-6 segmen (`UNF-L-SCB-01-01-04`). Keduanya menyimpang dari `docs/project/item-code.md` | Pilih satu skema kanonik dan seragamkan |
-| M29 | `docs/project/security.md:28` | Dokumen menyebut role `finance`, kode memakai `admin` | Sinkronkan dokumen |
-| M30 | `.env.example` | `SUPERADMIN_EMAIL`/`SUPERADMIN_PASSWORD` tidak terdokumentasi | Tambahkan ke `.env.example` |
+| M28 | `ItemService.php:24,52` vs `ItemImport.php:241-252,98,110` | Dua generator item code berbeda: manual 4 segmen (`UNF-L-SCB-02`), import 5-6 segmen (`UNF-L-SCB-01-01-04`). Keduanya menyimpang dari `docs/project/item-code.md` | ✅ **DIPERBAIKI** (commit `1d063e7`): semua generator diseragamkan ke skema manual 4 segmen `KATEGORI-GENDER-TIPE-VARIANT` (contoh `UNF-L-SCB-02`); `items.code` = `base_code`; `item_variants.sku` = `code-SIZE`. Import memakai base_code yang sama, tidak lagi membuat kode 5-6 segmen |
+| M29 | `docs/project/security.md:28` | Dokumen menyebut role `finance`, kode memakai `admin` | ✅ Sinkronkan dokumen (role `admin`, bukan `finance`) |
+| M30 | `.env.example` | `SUPERADMIN_EMAIL`/`SUPERADMIN_PASSWORD` tidak terdokumentasi | ✅ Ditambahkan ke `.env.example` (password kosong default, diisi manual) |
 
 ---
 
@@ -261,3 +261,4 @@
 - Dokumen ini adalah **baseline audit**. Setelah setiap perbaikan dieksekusi, laporan ini harus diperbarui (centang item yang sudah selesai).
 - Banyak temuan MAJOR bersumber dari **ERD yang tidak sinkron dengan implementasi** (fitur diimplementasikan ulang tanpa memperbarui dokumen). Disarankan audit dokumen `erd.md`, `item-code.md`, `security.md` setelah perbaikan kode.
 - Temuan **Fase 2 MAJOR** (M2-M26 asli) tercatat diperbaiki di commit audit sebelumnya; verifikasi menyeluruh menyusul bila data produksi tersedia.
+- **Item-code unification (M28)** selesai di commit `1d063e7` (15 Agustus 2026): seluruh generator memakai skema 4 segmen; `base_code` = `items.code`; SKU = `code-SIZE`. Seluruh dokumentasi `docs/` ikut disinkronkan terhadap implementasi aktual (role `admin` bukan `finance`, 55 tabel final tanpa `distribution_periods`/`distribution_stages`, QR = NIM via `bacon/bacon-qr-code`, 7 jenis template & 7 jenis import aktual, dependency frontend/backend aktual).

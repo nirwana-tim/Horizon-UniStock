@@ -18,7 +18,7 @@
 ## Minggu 3 — Core
 
 - Input ukuran mahasiswa
-- Generate QR token
+- QR Identity (berisi NIM)
 - Entitlement system
 - Staff scan & distribusi
 - Stock movement (IN/OUT)

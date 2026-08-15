@@ -17,6 +17,7 @@ Laravel Mail adalah fitur untuk kirim email via SMTP server. Bisa pake Gmail, Ma
 | Multiple Mailers | Pilih driver per pengiriman (Gmail, SMTP, log) |
 | Local Testing | Testing kirim email via "log" driver (simpan di file) |
 | Mailtrap Support | Testing email di lingkungan staging |
+| **Dynamic SMTP (UI)** | Super Admin atur SMTP via **Settings → SMTP** — tersimpan di tabel `smtp_settings`, diterapkan otomatis via `SmtpSettingsServiceProvider` tanpa ubah `.env` |
 
 ## 1. Konfigurasi di .env
 

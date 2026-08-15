@@ -8,7 +8,7 @@ Package manajemen role & permission untuk Laravel. Setiap user bisa punya banyak
 
 | Fitur | Untuk Apa |
 |-------|-----------|
-| Role | Grup permission (super_admin, finance, staff, student) |
+| Role | Grup permission (super_admin, admin, staff, student) |
 | Permission | Izin spesifik (manage-students, manage-distributions, manage-finance) |
 | Direct Permission | Beri izin langsung ke user tanpa role |
 | Blade Directives | `@role`, `@hasrole`, `@can`, `@cannot` di view |
@@ -53,23 +53,39 @@ $user = User::find(1);
 $user->assignRole('admin');
 ```
 
-> **Untuk implementasi project ini**, lihat `database/seeders/RolePermissionSeeder.php` yang berisi role & permission spesifik UniStock (super_admin, finance, staff, student).
+> **Untuk implementasi project ini**, lihat `database/seeders/RolePermissionSeeder.php`:
+
+```php
+// Role & permission aktual UniStock
+Permission::firstOrCreate(['name' => 'manage-students']);
+Permission::firstOrCreate(['name' => 'manage-distributions']);
+Permission::firstOrCreate(['name' => 'manage-finance']);
+
+$superAdmin = Role::firstOrCreate(['name' => 'super_admin']);
+$superAdmin->givePermissionTo(Permission::all());
+
+$admin = Role::firstOrCreate(['name' => 'admin']);
+$admin->givePermissionTo(['manage-finance', 'manage-distributions']);
+
+$staff = Role::firstOrCreate(['name' => 'staff']);
+$staff->givePermissionTo('manage-students');
+
+Role::firstOrCreate(['name' => 'student']);
+```
 
 ## 3. Middleware di Route
 
+Proyek ini memakai middleware **`role:`** di semua route terproteksi. Middleware `permission:` **tidak digunakan** di route — permission Spatie hanya untuk role assignment & blade directives.
+
 ```php
-use Illuminate\Support\Facades\Route;
-
-Route::middleware(['auth', 'role:super_admin|finance'])->group(function () {
-    Route::get('/finance/reports', [AdminController::class, 'index']);
+Route::middleware(['auth', 'password.changed', 'role:super_admin|admin'])->prefix('master-data')->name('master-data.')->group(function () {
+    Route::resource('faculty', FacultyController::class);
+    // ...
 });
 
-Route::middleware(['auth', 'permission:manage-students'])->group(function () {
-    Route::resource('/students', StudentController::class);
-});
-
-Route::middleware(['auth', 'role:student'])->group(function () {
-    Route::get('/my-schedule', [ScheduleController::class, 'mySchedule']);
+// Role campuran: staff juga boleh akses scan
+Route::middleware('role:super_admin|admin|staff')->group(function () {
+    Route::get('/scan', [ScanController::class, 'index'])->name('scan.index');
 });
 ```
 
@@ -90,8 +106,8 @@ Registrasi middleware di `bootstrap/app.php`:
     <a href="/admin">Panel Admin</a>
 @endrole
 
-@hasrole('finance')
-    <a href="/reports">Laporan</a>
+@hasrole('admin')
+    <a href="/report">Laporan</a>
 @endhasrole
 
 @can('manage-students')
@@ -108,7 +124,7 @@ Registrasi middleware di `bootstrap/app.php`:
 ```php
 // Cek role
 $user->hasRole('student');
-$user->hasAnyRole(['staff', 'finance']);
+$user->hasAnyRole(['staff', 'admin']);
 
 // Cek permission
 $user->hasPermissionTo('manage-students');
