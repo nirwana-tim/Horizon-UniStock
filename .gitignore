@@ -39,3 +39,8 @@ ward-report.sarif
 
 # deepwork local state
 .slim/deepwork/
+
+# laravel boost
+.mcp.json
+/boost.json
+AGENTS.md.bak
