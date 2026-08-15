@@ -36,3 +36,6 @@ ward-report.html
 ward-report.json
 ward-report.md
 ward-report.sarif
+
+# deepwork local state
+.slim/deepwork/

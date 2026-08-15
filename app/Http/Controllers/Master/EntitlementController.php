@@ -36,7 +36,7 @@ class EntitlementController extends Controller
                 });
             })
             ->when($facultyCode, fn ($q) => $q->where('code', 'like', "%{$facultyCode}%"))
-            ->when($request->input('is_active'), fn ($q, $v) => $q->where('is_active', $v === '1'))
+            ->when($request->filled('is_active'), fn ($q, $v) => $q->where('is_active', $v === '1'))
             ->latest()
             ->paginate(20);
 

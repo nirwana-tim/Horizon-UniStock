@@ -39,7 +39,7 @@
                          data-item-id="{{ $item->id }}"
                          data-item-name="{{ $item->name }}"
                          data-item-size="{{ is_array($selectedSizes[$item->id] ?? null) ? ($selectedSizes[$item->id]['size'] ?? '') : ($selectedSizes[$item->id] ?? '') }}"
-                         data-item-status="received">
+                         data-item-status="pending">
                     <div class="flex items-center gap-4">
                         <div class="w-14 h-14 rounded-xl bg-primary/5 flex items-center justify-center">
                             <span class="material-symbols-outlined text-primary text-2xl" style="font-variation-settings: 'FILL' 1;">checkroom</span>
@@ -77,9 +77,9 @@
                 <div class="bg-white rounded-2xl p-5 shadow-card flex items-center justify-between active:scale-[0.99] transition-transform duration-200 cursor-pointer"
                      data-modal="barang:{{ $item->id }}"
                      data-item-id="{{ $item->id }}"
-                     data-item-name="{{ $item->name }}"
+                     data-item-name="{{ $item->item?->name ?? 'Item' }}"
                      data-item-size="{{ is_array($selectedSizes[$item->id] ?? null) ? ($selectedSizes[$item->id]['size'] ?? '') : ($selectedSizes[$item->id] ?? '') }}"
-                     data-item-status="pending">
+                     data-item-status="received">
                         <div class="flex items-center gap-4">
                             <div class="w-14 h-14 rounded-xl bg-emerald-50 flex items-center justify-center">
                                 <span class="material-symbols-outlined text-emerald-600 text-2xl" style="font-variation-settings: 'FILL' 1;">checkroom</span>

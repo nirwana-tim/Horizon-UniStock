@@ -1,7 +1,7 @@
 # Laporan Audit Horizon-UniStock
 
 - **Tanggal audit:** 14 Agustus 2026
-- **Ruang lingkup:** Seluruh aplikasi — models (41), migrations (85), services (30), controllers, imports/exports, seeders, routes, 168 blade views, assets JS/CSS
+- **Ruang lingkup:** Seluruh aplikasi — models (41), migrations (2 aktif + 84 arsip + 1 schema dump), services (30), controllers, imports/exports, seeders, routes, 168 blade views, assets JS/CSS
 - **Metode:** Pemeriksaan kode langsung (manual) + pengecekan silang terhadap `docs/project/erd.md`, `docs/project/architecture.md`, `docs/guides/desain.md`, `AGENTS.md`, dan best practices Laravel
 - **Status:** Semua temuan CRITICAL (C1-C7), HIGH (H1-H8) dan MEDIUM (M1-M14, audit lanjutan) sudah diperbaiki. Dokumen ini diperbarui setelah setiap perbaikan.
 
@@ -55,7 +55,7 @@
 - **Perbaikan:** ✅ `saveSizes()` kini memanggil `$event->isApplicableToStudent($student)` dan throw `RuntimeException` bila tidak berlaku.
 
 ### C6. Konflik unique constraint vs alur cancel/retry distribusi ✅ DIPERBAIKI
-- **Lokasi:** `database/migrations/2026_08_06_000001_fix_logic_integrity.php:18` (unique `(student_id, schedule_id)`); `app/Services/DistributionService.php:107-115`
+- **Lokasi:** `database/migrations_archive/2026_08_06_000001_fix_logic_integrity.php:18` (unique `(student_id, schedule_id)`); `app/Services/DistributionService.php:107-115`
 - **Masalah:** Unique index berlaku untuk semua status. Guard di service memblokir transaksi non-`cancelled`, namun status `cancelled` tidak pernah dihasilkan oleh kode mana pun (tidak ada alur cancel/void). Jika sebuah baris `cancelled` pernah ada, transaksi baru untuk `(student, schedule)` yang sama akan melanggar unique key — pengambilan ulang tidak mungkin.
 - **Dampak:** Desain bertentangan; salah-scan/double-submit mengunci mahasiswa selamanya dari jadwal tersebut; status `cancelled` = dead code.
 - **Perbaikan:** ✅ Unique `(student_id, schedule_id)` di-drop (migration `2026_08_14_100004`); proteksi anti-duplikat diandalkan pada guard + index `(student_id, schedule_id, status)` yang sudah ada.
@@ -222,7 +222,7 @@
 ### ✅ Validasi pasca-perbaikan
 - `php -l` bersih semua file yang diubah.
 - `route:list --name=distribution.size-events` → 6 route (show hilang); `--name=students.credentials` → 7 route (termasuk `password` baru).
-- `migrate:status` semua `[Ran]`; `migrate:fresh` di DB test sukses penuh (65 migration, tanpa error).
+- `migrate:status` semua `[Ran]`; `migrate:fresh` di DB test sukses penuh (schema dump + 2 migrasi, tanpa error).
 - Tinker: 8 relasi baru `method_exists` = EXISTS; `programLevel` REMOVED; `Hash::check(password, db)` = yes (confirmasi `hashed` cast).
 - Test: 36 passed / 6 failed (Breeze default: captcha di LoginRequest, redirect logout, OTP email — di luar scope audit; `/tests` di-`.gitignore`).
 - `config:cache`, `route:cache`, `view:cache`, `storage:link` semua sukses (kondisi produksi).
@@ -249,10 +249,17 @@
 - M19/M20/M21 — Path traversal, accounting import, heading row importer
 - M23/M26 — Auto-promote & `COUNT(DISTINCT)`
 
-**Fase 3 — MINOR & housekeeping**
-- Perbaiki syntax error `bottom-sheet`, tombol edit item-price, filter period
-- Bersihkan dead code & relasi model, singkronkan ERD
-- Konsistensi item code, design-system, pagination
+**Fase 3 — MINOR & housekeeping ✅ SELESAI (15 Agustus 2026)**
+- Diverifikasi sudah benar: `bottom-sheet`, tombol edit item-price, `x-slot name="header"`, N+1 stock-balance
+- Diperbaiki: filter `period` distribution-schedule, `parseDecimal` ribuan Indonesia + duplikat ref di StockReceiveImport, `unit_price` distribusi, `sizeProfile` hasOne, regex generasi + auto-create generasi, seeder `syncWithoutDetaching`, focus ring maroon, banner Google eksternal → gradient maroon lokal
+- Verifikasi: `php -l` bersih, `view:cache` OK, `npm run build` OK, **test 36/6 tanpa regresi**
+
+**Fase 4 — Squash Migrasi ✅ SELESAI (15 Agustus 2026)**
+- 84 file migrasi lama di-arsip ke `database/migrations_archive/` (histori utuh di repo)
+- `php artisan schema:dump` menghasilkan `database/schema/mysql-schema.sql` (55 tabel, commit ke source control)
+- Migrasi aktif tersisa 2: `2026_08_16_000001_fix_unique_indexes_eligibility_and_size_profiles` (perbaiki drift unik `student_id` di `eligibility_records` & `student_size_profiles`) + `2026_08_16_000002_backfill_stock_batches_from_receive_items` (data migration, tidak di-squash)
+- Verifikasi: `migrate:fresh` di DB test = 54 tabel identik dengan skema aktual + 2 tabel hanya berbeda pada unique index (drift yang diperbaiki); **test 36/6 tanpa regresi**
+- Catatan: `--env=testing` tidak memakai `.env.testing` (file tidak ada), pastikan pakai override `DB_DATABASE=horizon_unistock_test` untuk fresh di DB test; `mysqldump`/`mysql` CLI harus ada di PATH untuk memuat schema dump
 
 ---
 

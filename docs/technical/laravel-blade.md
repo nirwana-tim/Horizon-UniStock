@@ -1,8 +1,8 @@
-# Laravel 12 + Blade
+# Laravel 13 + Blade
 
-## Apa Itu Laravel 12?
+## Apa Itu Laravel 13?
 
-Laravel 12 adalah framework PHP untuk membangun web app. Blade adalah template engine bawaan Laravel yang memungkinkan Anda menulis HTML dengan logika PHP sederhana.
+Laravel 13 adalah framework PHP untuk membangun web app. Blade adalah template engine bawaan Laravel yang memungkinkan Anda menulis HTML dengan logika PHP sederhana.
 
 ## Fitur Blade yg Terinstall di UniStock
 

@@ -28,6 +28,11 @@ class Student extends Authenticatable
         'email_verified_at',
     ];
 
+    public function getRouteKeyName(): string
+    {
+        return 'nim';
+    }
+
     public function getStatusLabelAttribute(): string
     {
         return match ($this->status) {
@@ -104,9 +109,9 @@ class Student extends Authenticatable
         return $this->hasOne(EligibilityRecord::class);
     }
 
-    public function sizeProfiles(): HasMany
+    public function sizeProfile(): HasOne
     {
-        return $this->hasMany(StudentSizeProfile::class);
+        return $this->hasOne(StudentSizeProfile::class);
     }
 
     public function distributionTransactions(): HasMany

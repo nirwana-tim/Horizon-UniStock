@@ -28,9 +28,7 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        if (! $request->user()->last_login_at) {
-            $request->user()->forceFill(['last_login_at' => now()])->save();
-        }
+        $request->user()->forceFill(['last_login_at' => now()])->save();
 
         if ($request->user()->must_change_password) {
             return redirect()->route('password.change');

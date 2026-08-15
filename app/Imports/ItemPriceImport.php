@@ -103,8 +103,8 @@ class ItemPriceImport implements ToCollection, WithHeadingRow
             $values = $row instanceof Collection ? $row->toArray() : (array) $row;
 
             $kodeBarang = $this->clean($values['kode_barang'] ?? null);
-            $hargaJual = $this->parseDecimal($values['harga_jual'] ?? null);
-            $hpp = $this->parseDecimal($values['hpp'] ?? null);
+            $hargaJual = $this->parseDecimal($values['harga_jual'] ?? $values['harga_jual_rp'] ?? null);
+            $hpp = $this->parseDecimal($values['hpp'] ?? $values['hpp_rp'] ?? null);
 
             if ($kodeBarang === null && $hargaJual === null && $hpp === null) {
                 continue;

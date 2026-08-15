@@ -15,7 +15,9 @@ app
 ├── Console/Commands        # AutoPromoteStudents, CalculateStudentSummaries, CleanupOldLogs
 
 database
-├── migrations              # 55 tabel (idempotent)
+├── schema/                 # mysql-schema.sql — dump skema 55 tabel (dimuat saat migrate:fresh)
+├── migrations/             # 2 migrasi aktif (fix unique index + backfill data)
+├── migrations_archive/     # 84 migrasi historis (referensi, tidak dijalankan)
 ├── seeders                 # DatabaseSeeder, RolePermissionSeeder, StudentLevelSeeder,
 │                           # SuperadminSeeder, FakeDataSeeder, TestDistributionSeeder, UserTestSeeder
 
@@ -67,7 +69,7 @@ routes
 
 | Komponen | Teknologi |
 |----------|-----------|
-| Framework | Laravel 12 |
+| Framework | Laravel 13 |
 | Database | MySQL 8 |
 | Frontend | Blade + Tailwind CSS + Alpine.js + Vite |
 | Auth | Laravel Breeze (login/password, register & 2FA nonaktif) |
@@ -125,7 +127,7 @@ resources/views
 
 ## Aturan Kode
 
-- Gunakan **Laravel 12** style (PHP 8 attributes, Enums, typed properties)
+- Gunakan **Laravel 13** style (PHP 8 attributes, Enums, typed properties)
 - Blade views menggunakan **Tailwind CSS**
 - Semua logic bisnis di **Service Layer** (bukan di Controller)
 - Setiap perubahan data tercatat di **Audit Log**

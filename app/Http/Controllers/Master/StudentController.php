@@ -17,6 +17,7 @@ use App\Services\NotificationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
@@ -210,11 +211,10 @@ class StudentController extends Controller
             ->get();
 
         $generated = [];
-        $passwords = session('credentials.passwords', []);
 
         foreach ($students as $student) {
             [$user, $password] = $this->studentService->generateAccount($student);
-            $passwords[$student->nim] = $password;
+            $this->setCredentialPassword($student->nim, $password);
             $generated[] = [
                 'name' => $student->name,
                 'nim' => $student->nim,
@@ -227,7 +227,7 @@ class StudentController extends Controller
                 ->with('info', 'Tidak ada akun baru yang digenerate.');
         }
 
-        session(['credentials.passwords' => $passwords]);
+        AuditService::log('generate_accounts', Student::class, implode(',', collect($students)->pluck('id')->all()), null, ['count' => count($generated)]);
 
         $message = 'Berhasil membuat '.count($generated).' akun mahasiswa. Distributed kredensial di halaman berikut.';
 
@@ -291,11 +291,10 @@ class StudentController extends Controller
         }
 
         $generated = [];
-        $passwords = session('credentials.passwords', []);
 
         foreach ($students as $student) {
             [$user, $password] = $this->studentService->generateAccount($student);
-            $passwords[$student->nim] = $password;
+            $this->setCredentialPassword($student->nim, $password);
             $generated[] = [
                 'name' => $student->name,
                 'nim' => $student->nim,
@@ -303,9 +302,9 @@ class StudentController extends Controller
             ];
         }
 
-        $message = 'Berhasil membuat '.count($generated).' akun mahasiswa. Distributed kredensial di halaman berikut.';
+        AuditService::log('generate_all_accounts', Student::class, implode(',', collect($students)->pluck('id')->all()), null, ['count' => count($generated)]);
 
-        session(['credentials.passwords' => $passwords]);
+        $message = 'Berhasil membuat '.count($generated).' akun mahasiswa. Distributed kredensial di halaman berikut.';
 
         return redirect()->route('students.credentials')
             ->with('success', $message);
@@ -319,12 +318,11 @@ class StudentController extends Controller
             ->orderBy('nim')
             ->get();
 
-        $passwords = session('credentials.passwords', []);
         $notificationService = app(NotificationService::class);
         $latestEmails = $notificationService->latestAccountNotificationsForStudents($students);
 
-        $students = $students->map(function (Student $student) use ($passwords, $latestEmails) {
-            $student->temp_password = $passwords[$student->nim] ?? null;
+        $students = $students->map(function (Student $student) use ($latestEmails) {
+            $student->temp_password = $this->credentialPassword($student->nim);
             $student->latest_email = $latestEmails[$student->id] ?? null;
 
             return $student;
@@ -336,7 +334,6 @@ class StudentController extends Controller
 
         return view('master.student.credentials', compact(
             'students',
-            'passwords',
             'totalStudents',
             'totalWithAccount',
             'totalWithoutAccount',
@@ -345,12 +342,20 @@ class StudentController extends Controller
 
     public function getPassword(Student $student): JsonResponse
     {
-        $passwords = session('credentials.passwords', []);
+        abort_unless($this->canViewCredentials(), 403);
 
-        AuditService::log('get_password', Student::class, $student->id);
+        $password = $this->credentialPassword($student->nim);
+
+        AuditService::log(
+            'get_password',
+            Student::class,
+            $student->id,
+            null,
+            ['nim' => $student->nim, 'revealed' => $password !== null],
+        );
 
         return response()->json([
-            'password' => $passwords[$student->nim] ?? null,
+            'password' => $password,
         ]);
     }
 
@@ -362,7 +367,13 @@ class StudentController extends Controller
             ->orderBy('nim')
             ->get();
 
-        $passwords = session('credentials.passwords', []);
+        $passwords = [];
+        foreach ($students as $student) {
+            $password = $this->credentialPassword($student->nim);
+            if ($password !== null) {
+                $passwords[$student->nim] = $password;
+            }
+        }
 
         return (new CredentialsExport($students->all(), $passwords))
             ->download('kredensial-'.now()->format('Ymdhis').'.xlsx');
@@ -377,9 +388,9 @@ class StudentController extends Controller
 
         [$user, $password] = $this->studentService->resetPassword($student);
 
-        $passwords = session('credentials.passwords', []);
-        $passwords[$student->nim] = $password;
-        session(['credentials.passwords' => $passwords]);
+        $this->setCredentialPassword($student->nim, $password);
+
+        AuditService::log('reset_password', Student::class, $student->id, null, ['nim' => $student->nim]);
 
         return redirect()->route('students.credentials')
             ->with('success', "Password untuk {$student->name} ({$student->nim}) berhasil di-reset.");
@@ -392,8 +403,7 @@ class StudentController extends Controller
                 ->with('error', 'Mahasiswa belum memiliki akun.');
         }
 
-        $passwords = session('credentials.passwords', []);
-        $password = $passwords[$student->nim] ?? null;
+        $password = $this->credentialPassword($student->nim);
 
         if (! $password) {
             return redirect()->route('students.credentials')
@@ -410,12 +420,10 @@ class StudentController extends Controller
 
     public function resendAllFailed(): RedirectResponse
     {
-        $passwords = session('credentials.passwords', []);
-
         $students = Student::whereNotNull('user_id')
             ->whereHas('user', fn ($q) => $q->where('must_change_password', true))
             ->get()
-            ->filter(fn (Student $student) => array_key_exists($student->nim, $passwords));
+            ->filter(fn (Student $student) => $this->credentialPassword($student->nim) !== null);
 
         if ($students->isEmpty()) {
             return redirect()->route('students.credentials')
@@ -426,7 +434,7 @@ class StudentController extends Controller
         $failed = 0;
 
         foreach ($students as $student) {
-            $ok = app(NotificationService::class)->resendStudentAccount($student, $passwords[$student->nim]);
+            $ok = app(NotificationService::class)->resendStudentAccount($student, $this->credentialPassword($student->nim));
             $ok ? $sent++ : $failed++;
         }
 
@@ -440,6 +448,38 @@ class StudentController extends Controller
 
         return redirect()->route('students.credentials')
             ->with('success', 'Data kredensial sementara berhasil dibersihkan.');
+    }
+
+    private function canViewCredentials(): bool
+    {
+        $user = auth()->user();
+
+        return $user && $user->hasAnyRole(['super_admin', 'admin']);
+    }
+
+    private function credentialPassword(string $nim): ?string
+    {
+        $encrypted = session('credentials.passwords.'.$nim);
+
+        if (! $encrypted) {
+            return null;
+        }
+
+        try {
+            return Crypt::decryptString($encrypted);
+        } catch (\Throwable) {
+            return null;
+        }
+    }
+
+    private function setCredentialPassword(string $nim, string $password): void
+    {
+        session(['credentials.passwords.'.$nim => Crypt::encryptString($password)]);
+    }
+
+    private function forgetCredentialPassword(string $nim): void
+    {
+        session()->forget('credentials.passwords.'.$nim);
     }
 
     public function toggleStatus(Student $student): RedirectResponse

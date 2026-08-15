@@ -14,12 +14,10 @@ Alpine.js adalah JavaScript framework ringan (~12 KB) untuk menambahkan interakt
 ```js
 import './bootstrap';
 import Alpine from 'alpinejs';
-import collapse from '@alpinejs/collapse';
 import { Html5Qrcode } from 'html5-qrcode';
 
 window.Html5Qrcode = Html5Qrcode;
 
-Alpine.plugin(collapse);
 window.Alpine = Alpine;
 
 // Chart.js dimuat lazy via window.loadChart()
@@ -36,7 +34,7 @@ Alpine.start();
 ```
 
 Cara kerja:
-1. `package.json` sudah include `alpinejs` `^3.14.0` (+ plugin `@alpinejs/collapse`)
+1. `package.json` sudah include `alpinejs` `^3.14.0`
 2. Import `alpinejs` dan daftarkan ke `window.Alpine`
 3. Panggil `Alpine.start()` — cukup sekali per halaman
 4. File ini di-load via `@vite('resources/js/app.js')` di layout
@@ -221,16 +219,6 @@ Digunakan untuk render HTML partial dari server-side table di masa depan.
 CSS sudah di `app.css`:
 ```css
 [x-cloak] { display: none !important; }
-```
-
-### `x-collapse` — Animasi collapse/expand
-
-Plugin bawaan Alpine. Dipakai di sidebar untuk menu dropdown.
-
-```blade
-<div x-show="masterOpen && !collapsed" x-collapse>
-    {{-- submenu items --}}
-</div>
 ```
 
 ## Magic Properties

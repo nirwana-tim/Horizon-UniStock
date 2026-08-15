@@ -91,7 +91,7 @@
         </a>
 
         {{-- ===== ADMIN / FINANCE MENU ===== --}}
-        @hasanyrole(['admin', 'staff', 'super_admin'])
+        @hasanyrole(['admin', 'super_admin'])
             {{-- Master Data (Collapsible) --}}
             <div>
                 <button @click="collapsed ? (collapsed=false, masterOpen=true) : masterOpen = !masterOpen"
@@ -324,6 +324,18 @@
             @endrole
         @endhasanyrole
 
+        {{-- ===== STAFF ONLY ===== --}}
+        @role('staff')
+            <a href="{{ route('distribution.scan.index') }}" title="Scan & Distribution"
+                class="flex items-center gap-3 px-2 py-2 rounded-lg text-sm {{ request()->routeIs('distribution.scan.*') ? 'sidebar-item-active' : 'sidebar-item' }}">
+                <svg aria-hidden="true" class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 4a4 4 0 014 4v2h2a2 2 0 012 2v7a2 2 0 01-2 2H6a2 2 0 01-2-2v-7a2 2 0 012-2h2V8a4 4 0 014-4zm0 2a2 2 0 00-2 2v2h4V8a2 2 0 00-2-2z" />
+                </svg>
+                <span x-show="!collapsed" class="truncate">Scan & Distribution</span>
+            </a>
+        @endrole
+
         {{-- ===== SUPER ADMIN ONLY ===== --}}
         @role('super_admin')
             <div class="my-2 border-t border-gray-100"></div>
@@ -355,14 +367,6 @@
                                 d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                         </svg>
                         Users & Roles
-                    </a>
-                    <a href="#"
-                        class="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-50 transition-colors">
-                        <svg aria-hidden="true" class="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                        </svg>
-                        Audit Log
                     </a>
                     <a href="{{ route('system.smtp.show') }}"
                         class="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm {{ request()->routeIs('system.smtp*') ? 'bg-primary-50 text-primary-700 font-medium' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50' }} transition-colors">

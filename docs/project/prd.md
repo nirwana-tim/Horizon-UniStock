@@ -199,7 +199,7 @@ Solusi yang dirancang adalah sistem terintegrasi yang mencakup: Student Data →
 
 | Komponen | Teknologi |
 |----------|-----------|
-| Framework | Laravel 12 |
+| Framework | Laravel 13 |
 | Database | MySQL |
 | Frontend | Blade + Tailwind CSS + Vite |
 | Auth | Laravel Breeze |

@@ -13,8 +13,8 @@
     <main class="flex-1 flex flex-col">
         <div class="max-w-md mx-auto">
             {{-- Hero Banner --}}
-            <div class="mb-6 overflow-hidden rounded-2xl h-48 relative shadow-card">
-                <div class="w-full h-full bg-cover bg-center" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCBt5P2HmtLID51h-uo7bahZP2QGNPaNUd_2L7Ek7GZEMKx0zkZ4TqbRU27lvZ2qQ4VITeTqkB_6VSZwUcm8rZUmO_OpP4Qxum37jkyH0-Kc5qWpdjnVTk5kEo6xr1pPYbpets4QQgDe8nKAMzKb10WM8zZWhZdx0O4o7z--UKhF2R2YUVm2nk25DjqqDuj4UjRB-2GUDAUZqv6tB3wppXKaQ-0EmOZ570do3Caux7jcLZH1IZqaROL')"></div>
+            <div class="mb-6 overflow-hidden rounded-2xl h-48 relative shadow-card bg-gradient-to-br from-primary-700 to-primary-900">
+                <div class="absolute inset-0 opacity-20" style="background-image: radial-gradient(circle at 20% 20%, rgba(255,255,255,0.3) 0, transparent 40%), radial-gradient(circle at 80% 70%, rgba(255,255,255,0.2) 0, transparent 35%);"></div>
                 <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent flex items-end p-5">
                     <p class="text-white font-headline-sm text-headline-sm">Lengkapi Profil Distribusi</p>
                 </div>

@@ -56,6 +56,8 @@ class ProfileController extends Controller
 
         $user = $request->user();
 
+        Student::where('user_id', $user->id)->update(['user_id' => null]);
+
         Auth::logout();
 
         $user->delete();

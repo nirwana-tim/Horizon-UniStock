@@ -21,7 +21,7 @@ class EmailVerificationOtpController extends Controller
     public function sendOtp(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'email_kampus' => ['required', 'email', 'max:255'],
+            'email_kampus' => ['required', 'email', 'max:255', 'ends_with:@krw.horizon.ac.id'],
         ]);
 
         $student = Student::where('user_id', Auth::id())->firstOrFail();
@@ -81,7 +81,14 @@ class EmailVerificationOtpController extends Controller
         }
 
         $attempts = (int) session('otp_attempts', 0);
-        if ($attempts >= 5) {
+        $recentOtp = OtpCode::where('user_id', Auth::id())
+            ->where('email', $pendingEmail)
+            ->where('type', 'email_verification')
+            ->whereNull('used_at')
+            ->latest()
+            ->first();
+
+        if ($recentOtp && $recentOtp->attempts >= 5) {
             session()->forget(['pending_email', 'otp_attempts']);
             OtpCode::where('user_id', Auth::id())->whereNull('used_at')->update(['used_at' => now()]);
             return redirect()->route('student.email.send-otp')
@@ -98,6 +105,9 @@ class EmailVerificationOtpController extends Controller
             ->first();
 
         if (!$otp) {
+            if ($recentOtp) {
+                $recentOtp->increment('attempts');
+            }
             session(['otp_attempts' => $attempts + 1]);
             return back()->withErrors(['code' => 'Kode OTP tidak valid atau sudah kedaluwarsa.']);
         }

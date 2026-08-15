@@ -299,6 +299,16 @@ class StudentSizeService
             throw new \RuntimeException('Pilih minimal satu ukuran (Baju atau Sepatu).');
         }
 
+        $options = $this->getSizeOptions($event);
+
+        if (! empty($baju) && ! in_array($baju, $options['baju'], true)) {
+            throw new \RuntimeException('Ukuran Baju tidak tersedia pada event ini.');
+        }
+
+        if (! empty($sepatu) && ! in_array($sepatu, $options['sepatu'], true)) {
+            throw new \RuntimeException('Ukuran Sepatu tidak tersedia pada event ini.');
+        }
+
         DB::transaction(function () use ($student, $baju, $sepatu, $event) {
             $profile = StudentSizeProfile::where('student_id', $student->id)
                 ->lockForUpdate()

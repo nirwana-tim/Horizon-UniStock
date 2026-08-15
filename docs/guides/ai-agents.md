@@ -40,12 +40,12 @@ Sebelum mengerjakan **task apa pun**, AI WAJIB mengikuti urutan ini:
 1. **Baca docs/** — Semua file relevan di `docs/project/*`, `docs/technical/*`, `docs/guides/*`
 2. **Cek kode existing** — Model, Controller, Service, Routes yang sudah ada
 3. **Cek dokumentasi online** — Framework/package terkait (laravel.com, docs.laravel-excel.com, spatie.be, dll)
-4. **Kerjakan** — Jika sudah jelas dari langkah 1-3, kerjakan dengan Laravel 12 + Blade best practices
+4. **Kerjakan** — Jika sudah jelas dari langkah 1-3, kerjakan dengan Laravel 13 + Blade best practices
 5. **Buat baru** — Jika tidak ditemukan di dokumentasi manapun, buat solusi sendiri dengan best practices
 
 ## Aturan Kode
 
-- Gunakan **Laravel 12** style (PHP 8 attributes, Enums, typed properties)
+- Gunakan **Laravel 13** style (PHP 8 attributes, Enums, typed properties)
 - Blade views menggunakan **Tailwind CSS** (warna brand: `primary-700` = `#980416` maroon)
 - Semua logic bisnis di **Service Layer** (bukan di Controller)
 - Setiap perubahan data tercatat di **Audit Log**

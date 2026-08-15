@@ -52,7 +52,7 @@ class AutoPromoteStudents extends Command
             ->chunk(100, function ($chunk) use ($targetLevelId, $dryRun, &$studentIds, &$previewRows) {
                 foreach ($chunk as $student) {
                     $next = $this->resolveNextSemester($student);
-                    $genId = $this->resolveGenerationId($student, $targetLevelId);
+                    $genId = $this->resolveGenerationId($student, $targetLevelId, !$dryRun);
 
                     if ($dryRun) {
                         $previewRows[] = sprintf(
@@ -102,7 +102,7 @@ class AutoPromoteStudents extends Command
         return $this->semesterMap[$sem] ?? 'Y1S1';
     }
 
-    private function resolveGenerationId(Student $student, ?int $overrideId): ?int
+    private function resolveGenerationId(Student $student, ?int $overrideId, bool $createIfMissing = false): ?int
     {
         if ($overrideId) {
             return $overrideId;
@@ -116,6 +116,16 @@ class AutoPromoteStudents extends Command
         $nextYear = ((int) substr($code, 0, 2)) + 1;
         $nextCode = sprintf('%02d%02d', $nextYear, $nextYear + 1);
 
-        return StudentGeneration::where('code', $nextCode)->value('id');
+        $generation = StudentGeneration::where('code', $nextCode)->first();
+
+        if (!$generation && $createIfMissing) {
+            $generation = StudentGeneration::create([
+                'code' => $nextCode,
+                'name' => '20' . $nextYear . '/' . '20' . ($nextYear + 1),
+            ]);
+            $this->line("  • Generasi {$nextCode} dibuat otomatis.");
+        }
+
+        return $generation?->id;
     }
 }

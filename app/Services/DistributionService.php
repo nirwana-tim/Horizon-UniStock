@@ -126,6 +126,17 @@ class DistributionService
                 'notes' => $manualNote,
             ]);
 
+            $entitlement = $this->getEntitlementForStudent($student);
+            $entitlementMap = $entitlement ? $entitlement->items->keyBy('item_id') : collect();
+
+            $distributedByItem = DistributionItem::query()
+                ->join('distribution_transactions', 'distribution_items.transaction_id', '=', 'distribution_transactions.id')
+                ->where('distribution_transactions.student_id', $student->id)
+                ->where('distribution_transactions.status', '!=', 'cancelled')
+                ->groupBy('distribution_items.item_id')
+                ->selectRaw('distribution_items.item_id, SUM(distribution_items.quantity) as total')
+                ->pluck('total', 'item_id');
+
             $allFullyStocked = true;
             $autoNotes = [];
 
@@ -139,6 +150,25 @@ class DistributionService
                 }
                 if (! $item) {
                     continue;
+                }
+
+                $entitlementItem = $entitlementMap->get($item->id);
+                if ($entitlementItem) {
+                    $requestedQty = (int) ($itemData['quantity'] ?? 1);
+                    $alreadyDistributed = (int) ($distributedByItem[$item->id] ?? 0);
+                    $remaining = (int) $entitlementItem->quantity - $alreadyDistributed;
+
+                    if ($remaining <= 0) {
+                        throw new \Exception(
+                            "Hak barang {$item->name} untuk mahasiswa ini sudah terpenuhi."
+                        );
+                    }
+
+                    if ($requestedQty > $remaining) {
+                        throw new \Exception(
+                            "Jumlah {$item->name} melebihi hak distribusi ({$requestedQty} diminta, sisa hak {$remaining})."
+                        );
+                    }
                 }
 
                 $variant = ItemVariant::where('item_id', $item->id)
@@ -191,6 +221,7 @@ class DistributionService
                     'actual_size' => $itemData['actual_size'],
                     'quantity' => $effectiveQty,
                     'hpp' => $hppAtDistribution,
+                    'unit_price' => $sellingPrice,
                     'selling_price_at_distribution' => $sellingPrice,
                 ]);
 

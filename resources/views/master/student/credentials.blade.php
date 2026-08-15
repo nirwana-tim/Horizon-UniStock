@@ -76,7 +76,7 @@
                             </form>
                         @endif
 
-                        @if (! empty($passwords))
+                        @if (session()->has('credentials.passwords'))
                             <form action="{{ route('students.credentials.destroy') }}" method="POST"
                                   onsubmit="return confirm('Hapus semua password sementara dari sesi ini?')">
                                 @csrf

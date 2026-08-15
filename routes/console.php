@@ -2,6 +2,7 @@
 
 use App\Console\Commands\AutoPromoteStudents;
 use App\Console\Commands\CalculateStudentSummaries;
+use App\Console\Commands\CleanupImportFiles;
 use App\Console\Commands\CleanupOldLogs;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
@@ -12,6 +13,8 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::command(CleanupOldLogs::class, ['--days=30'])->dailyAt('02:00');
+
+Schedule::command(CleanupImportFiles::class, ['--days=30'])->dailyAt('02:05');
 
 Schedule::command('queue:prune-failed', ['--hours=168'])->dailyAt('02:10');
 

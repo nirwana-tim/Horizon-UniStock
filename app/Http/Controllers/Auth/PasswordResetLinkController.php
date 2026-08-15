@@ -7,7 +7,6 @@ use App\Models\Student;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Password;
-use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class PasswordResetLinkController extends Controller
@@ -37,9 +36,7 @@ class PasswordResetLinkController extends Controller
             $student = Student::where('nim', $email)->first();
 
             if (! $student || ! $student->user) {
-                throw ValidationException::withMessages([
-                    'login' => trans('auth.failed'),
-                ]);
+                return back()->with('status', __(Password::RESET_LINK_SENT));
             }
 
             $email = $student->user->email;

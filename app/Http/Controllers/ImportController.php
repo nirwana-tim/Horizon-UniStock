@@ -45,8 +45,6 @@ class ImportController extends Controller
             if (!Storage::disk('local')->exists($filePath)) {
                 return back()->with('error', 'File not found. Please upload again.');
             }
-
-            $filePath = Storage::disk('local')->path($filePath);
         } else {
             $rules['file'] = ['required', 'file', 'mimes:xlsx,xls,csv', 'max:10240'];
             $validated = $request->validate($rules);

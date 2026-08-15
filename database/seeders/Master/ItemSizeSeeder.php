@@ -105,7 +105,7 @@ class ItemSizeSeeder extends Seeder
 
             $catCodes = $sizeCategories[$size['code']];
             $catIds = array_map(fn ($code) => $categoryIds[$code], $catCodes);
-            $itemSize->categories()->sync($catIds);
+            $itemSize->categories()->syncWithoutDetaching($catIds);
         }
     }
 }

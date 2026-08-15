@@ -102,16 +102,18 @@ public/build/
     └── app-xyz789.js    # JS bundled + versioned
 ```
 
-### Fullstack Dev
+### Fullstack Dev (Laravel 13)
 
 ```bash
-composer run dev
+php artisan dev
 ```
 
-Menjalankan orchestrator `scripts/dev-pkg.php` (via composer script `dev`, dengan `disableProcessTimeout`). Script ini mengelola proses pengembangan (artisan serve + Vite + lainnya). Jalankan di terminal terpisah untuk Vite HMR:
+Menjalankan semua proses development sekaligus dalam satu terminal: **PHP development server**, **queue worker**, **Pail** (log tailing), dan **Vite** (HMR). Di-manage oleh package `concurrently`; jika salah satu proses gagal, semua otomatis berhenti.
+
+Bila ingin hanya Vite HMR (misal server sudah jalan via Laragon):
 
 ```bash
-npm run dev   # atau: bun run dev  (script: vite)
+bun run dev   # script: vite
 ```
 
 ### Setup Awal
@@ -120,7 +122,7 @@ npm run dev   # atau: bun run dev  (script: vite)
 composer run setup
 ```
 
-Menjalankan: `composer install` → salin `.env.example` → `key:generate` → `migrate --force` → `scripts/setup-pkg.php` (instalasi package frontend).
+Menjalankan: `composer install` → salin `.env.example` → `key:generate` → `migrate --force`.
 
 ## Alur Development
 

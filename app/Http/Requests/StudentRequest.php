@@ -19,7 +19,7 @@ class StudentRequest extends FormRequest
         return [
             'nim' => ['required', 'string', 'max:20', Rule::unique('students', 'nim')->ignore($studentId)],
             'name' => ['required', 'string', 'max:255'],
-            'email_kampus' => ['nullable', 'email', 'max:255', Rule::unique('students', 'email_kampus')->ignore($studentId)],
+            'email_kampus' => ['nullable', 'email', 'max:255', 'ends_with:@krw.horizon.ac.id', Rule::unique('students', 'email_kampus')->ignore($studentId)],
             'email_pribadi' => ['nullable', 'email', 'max:255'],
             'study_program_id' => ['required', 'integer', 'exists:study_programs,id'],
             'generation_id' => ['nullable', 'integer', 'exists:student_generations,id'],

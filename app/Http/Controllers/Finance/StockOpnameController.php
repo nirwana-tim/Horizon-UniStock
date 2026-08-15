@@ -68,12 +68,19 @@ class StockOpnameController extends Controller
 
     public function upload(Request $request, StockOpname $stockOpname): RedirectResponse
     {
+        if ($stockOpname->status === 'approved') {
+            return redirect()->route('inventory.stock-opname.show', $stockOpname)
+                ->with('error', 'Batch stock opname sudah di-approve. Tidak dapat upload ulang.');
+        }
+
         $request->validate([
             'opname_file' => 'required|file|mimes:xlsx,xls,csv|max:10240',
         ]);
 
         $file = $request->file('opname_file');
         $import = new StockOpnameImport($stockOpname->id);
+
+        $stockOpname->items()->delete();
         Excel::import($import, $file);
 
         $stockOpname->update(['status' => 'counted']);

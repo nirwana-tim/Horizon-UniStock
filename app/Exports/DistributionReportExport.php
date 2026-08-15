@@ -5,12 +5,13 @@ namespace App\Exports;
 use App\Models\DistributionItem;
 use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\WithChunkReading;
+use Maatwebsite\Excel\Concerns\WithCustomStartCell;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class DistributionReportExport extends BaseExport implements FromQuery, WithHeadings, WithMapping, WithStyles, WithChunkReading
+class DistributionReportExport extends BaseExport implements FromQuery, WithHeadings, WithMapping, WithStyles, WithChunkReading, WithCustomStartCell
 {
     use \Maatwebsite\Excel\Concerns\Exportable;
 
@@ -19,6 +20,11 @@ class DistributionReportExport extends BaseExport implements FromQuery, WithHead
     public function __construct(
         private ?string $period = null
     ) {}
+
+    public function startCell(): string
+    {
+        return 'A4';
+    }
 
     public function query(): \Illuminate\Database\Eloquent\Builder
     {
@@ -74,7 +80,7 @@ class DistributionReportExport extends BaseExport implements FromQuery, WithHead
             $item->actual_size ?? '-',
             $item->quantity,
             $item->transaction_status,
-            $item->pickup_time ? $item->pickup_time->format('d/m/Y H:i') : '-',
+            $item->pickup_time ? \Carbon\Carbon::parse($item->pickup_time)->format('d/m/Y H:i') : '-',
         ];
     }
 

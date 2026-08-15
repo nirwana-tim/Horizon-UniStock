@@ -305,6 +305,24 @@ php artisan migrate --force
 # Cek di cPanel → phpMyAdmin → pilih database → lihat daftar tabel
 ```
 
+> ⚠️ **Catatan schema dump:** Project ini memakai `database/schema/mysql-schema.sql`
+> (skema 55 tabel hasil `schema:dump`). Saat database masih kosong, `php artisan migrate`
+> **memuat dump tersebut lewat binary `mysql` CLI** — bukan lewat koneksi PHP PDO.
+> **Pastikan binary `mysql` tersedia di PATH** SSH cPanel:
+>
+> ```bash
+> which mysql   # jika kosong, cari lokasinya, contoh:
+> ls /opt/alt/mysql*/bin/mysql   # lalu tambahkan ke PATH sesi:
+> export PATH="/opt/alt/mysql80/bin:$PATH"
+> ```
+>
+> **Fallback (bila `mysql` CLI tidak tersedia):** import `database/schema/mysql-schema.sql`
+> manual via **phpMyAdmin → Import**, lalu jalankan `php artisan migrate --force` —
+> perintah itu hanya menjalankan 2 migrasi tersisa (fix unique index + backfill data).
+>
+> Setelah DB terbentuk, `migrate --force` selanjutnya tidak lagi memuat dump
+> (hanya migrasi baru yang belum di-[Ran]).
+
 ```bash
 # ============================================================
 # STEP 6B: Seed data awal (roles, permissions & super admin)
@@ -565,6 +583,7 @@ tail -f storage/logs/laravel.log
 | **CSS/JS hilang** | `public/build/manifest.json` tidak ada | Jalankan `bun run build` & upload folder `public/build/` |
 | **Class not found** | Vendor belum diinstall | `composer install --no-dev` |
 | **SQLSTATE connection refused** | `DB_HOST` / kredensial salah | Cek `.env`, pastikan DB dibuat di Step 5 |
+| **`mysql`/`mysqldump` not found saat migrate** | Binary CLI MySQL tak ada di PATH | Tambahkan PATH (lihat catatan Step 6A) atau import `database/schema/mysql-schema.sql` manual via phpMyAdmin |
 | **Permission denied** | `storage/` tidak writable | `chmod -R 775 storage/ bootstrap/cache/` |
 | **Session hilang saat login** | `storage/` tidak writable / tabel `sessions` tidak ada | `chmod -R 775 storage/ bootstrap/cache/` lalu `php artisan migrate --force` |
 | **Email tidak terkirim** | Queue worker mati / SMTP salah | Jalankan worker (Step 9), cek SMTP di Settings |
@@ -577,7 +596,7 @@ tail -f storage/logs/laravel.log
 
 | Perintah | Kegunaan |
 |----------|----------|
-| `php artisan migrate --force` | Buat tabel database |
+| `php artisan migrate --force` | Buat tabel database (DB kosong dimuat dari `database/schema/mysql-schema.sql` via `mysql` CLI) |
 | `php artisan db:seed --force` | Seed roles & data awal |
 | `php artisan optimize` | Cache config/route/view/event |
 | `php artisan schedule:run` | Jalankan scheduler (dipanggil cron) |

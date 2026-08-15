@@ -41,6 +41,31 @@ class StockReceiveImport implements ToCollection, WithHeadingRow, WithMultipleSh
         $groups = $this->groupRecords($records);
         $stockService = app(StockService::class);
 
+        $existingRefs = \App\Models\StockReceive::whereIn('reference_number', array_keys($groups))
+            ->pluck('reference_number')
+            ->flip();
+
+        if ($existingRefs->isNotEmpty()) {
+            $failures = [];
+            foreach ($records as $record) {
+                if ($record['nomor_ref'] && $existingRefs->has($record['nomor_ref'])) {
+                    $failures[] = new Failure(
+                        $record['row'],
+                        'nomor_ref',
+                        ['reference_number sudah terdaftar.'],
+                        $record
+                    );
+                }
+            }
+
+            if ($failures !== []) {
+                throw new ValidationException(
+                    IlluminateValidationException::withMessages([]),
+                    $failures
+                );
+            }
+        }
+
         foreach ($groups as $key => $group) {
             $vendor = Vendor::firstOrCreate(
                 ['name' => $group['vendor_name']]
@@ -80,14 +105,33 @@ class StockReceiveImport implements ToCollection, WithHeadingRow, WithMultipleSh
 
             if (!empty($data['items'])) {
                 $stockService->receiveStock($data);
-                $this->importedCount += count($group['items']);
+                $this->importedCount += count($data['items']);
             }
         }
     }
 
     public function sheets(): array
     {
-        return ['Data' => $this];
+        $parent = $this;
+
+        return ['Data' => new class($parent) implements ToCollection, WithHeadingRow {
+            private StockReceiveImport $parent;
+
+            public function __construct(StockReceiveImport $parent)
+            {
+                $this->parent = $parent;
+            }
+
+            public function headingRow(): int
+            {
+                return 4;
+            }
+
+            public function collection(Collection $rows): void
+            {
+                $this->parent->collection($rows);
+            }
+        }];
     }
 
     public function getTotalRows(): int
@@ -117,12 +161,12 @@ class StockReceiveImport implements ToCollection, WithHeadingRow, WithMultipleSh
             $records[] = [
                 'row' => $index + 1,
                 'kode_barang' => $this->clean($values['kode_barang'] ?? null),
-                'sku' => $this->clean($values['sku'] ?? $values['varian_sku'] ?? null),
+                'sku' => $this->clean($values['sku'] ?? $values['sku_varian'] ?? $values['varian_sku'] ?? null),
                 'quantity' => $this->parseNumeric($values['quantity'] ?? $values['qty'] ?? null),
-                'unit_price' => $this->parseDecimal($values['unit_price'] ?? $values['harga_satuan'] ?? null),
-                'hpp' => $this->parseDecimal($values['hpp'] ?? null),
+                'unit_price' => $this->parseDecimal($values['unit_price'] ?? $values['harga_satuan'] ?? $values['harga_satuan_rp'] ?? null),
+                'hpp' => $this->parseDecimal($values['hpp'] ?? $values['hpp_rp'] ?? null),
                 'vendor' => $this->clean($values['vendor'] ?? $values['vendor_name'] ?? $values['nama_vendor'] ?? null),
-                'tanggal' => $this->clean($values['tanggal'] ?? $values['receive_date'] ?? $values['tgl_terima'] ?? date('Y-m-d')),
+                'tanggal' => $this->clean($values['tanggal'] ?? $values['receive_date'] ?? $values['tanggal_terima'] ?? $values['tgl_terima'] ?? date('Y-m-d')),
                 'nomor_ref' => $this->clean($values['nomor_ref'] ?? $values['reference_number'] ?? null),
                 'notes' => $this->clean($values['notes'] ?? $values['keterangan'] ?? null),
             ];
@@ -225,6 +269,8 @@ class StockReceiveImport implements ToCollection, WithHeadingRow, WithMultipleSh
             } else {
                 $text = str_replace(',', '', $text);
             }
+        } elseif (preg_match('/^\d{1,3}(\.\d{3})+$/', $text)) {
+            $text = str_replace('.', '', $text);
         }
 
         $cleaned = preg_replace('/[^0-9.]/', '', $text);

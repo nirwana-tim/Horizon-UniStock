@@ -1,11 +1,9 @@
 import './bootstrap';
 import Alpine from 'alpinejs';
-import collapse from '@alpinejs/collapse';
 import { Html5Qrcode } from 'html5-qrcode';
 
 window.Html5Qrcode = Html5Qrcode;
 
-Alpine.plugin(collapse);
 window.Alpine = Alpine;
 
 let chartLoadError = false;
@@ -29,6 +27,7 @@ Alpine.data('serverTable', (url) => ({
     studyProgramId: '',
     generationId: '',
     isActive: '',
+    period: '',
     tableHtml: '',
     paginationHtml: '',
     loading: false,
@@ -60,7 +59,8 @@ Alpine.data('serverTable', (url) => ({
         if (this.facultyId) params.faculty_id = this.facultyId;
         if (this.studyProgramId) params.study_program_id = this.studyProgramId;
         if (this.generationId) params.generation_id = this.generationId;
-        if (this.isActive) params.is_active = this.isActive;
+        if (this.isActive !== '') params.is_active = this.isActive;
+        if (this.period !== '') params.period = this.period;
         axios.get(url, { params, signal: this._abortController.signal })
         .then(res => {
             this.tableHtml = res.data.html || res.data.tableHtml || '';

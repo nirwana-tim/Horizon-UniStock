@@ -42,6 +42,7 @@ class DashboardController extends Controller
         $todayCount = DistributionTransaction::whereDate('created_at', today())->count();
 
         $recentTransactions = DistributionTransaction::with('student.user', 'schedule')
+            ->withCount('items')
             ->latest()
             ->take(5)
             ->get();

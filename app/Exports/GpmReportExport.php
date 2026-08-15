@@ -4,12 +4,13 @@ namespace App\Exports;
 
 use App\Services\GpmService;
 use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\WithCustomStartCell;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class GpmReportExport extends BaseExport implements FromCollection, WithHeadings, WithMapping, WithStyles
+class GpmReportExport extends BaseExport implements FromCollection, WithHeadings, WithMapping, WithStyles, WithCustomStartCell
 {
     use \Maatwebsite\Excel\Concerns\Exportable;
 
@@ -19,6 +20,11 @@ class GpmReportExport extends BaseExport implements FromCollection, WithHeadings
         private ?string $period = null,
         private ?string $category = null
     ) {}
+
+    public function startCell(): string
+    {
+        return 'A4';
+    }
 
     public function collection()
     {

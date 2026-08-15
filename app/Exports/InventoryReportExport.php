@@ -5,12 +5,13 @@ namespace App\Exports;
 use App\Models\StockBalance;
 use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\WithChunkReading;
+use Maatwebsite\Excel\Concerns\WithCustomStartCell;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class InventoryReportExport extends BaseExport implements FromQuery, WithHeadings, WithMapping, WithStyles, WithChunkReading
+class InventoryReportExport extends BaseExport implements FromQuery, WithHeadings, WithMapping, WithStyles, WithChunkReading, WithCustomStartCell
 {
     use \Maatwebsite\Excel\Concerns\Exportable;
 
@@ -21,6 +22,11 @@ class InventoryReportExport extends BaseExport implements FromQuery, WithHeading
         private ?string $category = null,
         private ?string $gender = null
     ) {}
+
+    public function startCell(): string
+    {
+        return 'A4';
+    }
 
     public function query(): \Illuminate\Database\Eloquent\Builder
     {

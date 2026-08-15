@@ -37,7 +37,7 @@ class GenerationResolverService
             return sprintf('%02d%02d', $year, $year + 1);
         }
 
-        if (preg_match('/(\d{2})\d{4}$/', $nim, $matches)) {
+        if (preg_match('/^(\d{2})\d+$/', $nim, $matches)) {
             $year = (int) $matches[1];
             return sprintf('%02d%02d', $year, $year + 1);
         }

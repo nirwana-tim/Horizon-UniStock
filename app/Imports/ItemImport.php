@@ -124,7 +124,26 @@ class ItemImport implements ToCollection, WithHeadingRow, WithMultipleSheets
 
     public function sheets(): array
     {
-        return ['Data' => $this];
+        $parent = $this;
+
+        return ['Data' => new class($parent) implements ToCollection, WithHeadingRow {
+            private ItemImport $parent;
+
+            public function __construct(ItemImport $parent)
+            {
+                $this->parent = $parent;
+            }
+
+            public function headingRow(): int
+            {
+                return 4;
+            }
+
+            public function collection(Collection $rows): void
+            {
+                $this->parent->collection($rows);
+            }
+        }];
     }
 
     public function getTotalRows(): int
@@ -163,16 +182,18 @@ class ItemImport implements ToCollection, WithHeadingRow, WithMultipleSheets
                 'type' => strtoupper($this->clean($values['type'] ?? null) ?? ''),
                 'departemen' => $this->clean($values['departemen'] ?? null),
                 'satuan' => $this->clean($values['satuan'] ?? null),
-                'harga_jual' => $this->parseNumeric($values['harga_jual'] ?? null),
-                'hpp' => $this->parseNumeric($values['hpp'] ?? null),
+                'harga_jual' => $this->parseNumeric($values['harga_jual'] ?? $values['harga_jual_rp'] ?? null),
+                'hpp' => $this->parseNumeric($values['hpp'] ?? $values['hpp_rp'] ?? null),
                 'sizes' => [],
             ];
 
             foreach ($allLabels as $label) {
                 $labelLower = strtolower($label);
+                $labelSlug = Str::slug($label, '_');
                 $found = false;
                 foreach ($values as $key => $val) {
-                    if (strtolower((string) $key) === $labelLower) {
+                    $keyLower = strtolower((string) $key);
+                    if ($keyLower === $labelLower || $keyLower === $labelSlug) {
                         $parsed = $this->parseNumeric($val);
                         if ($parsed !== null) {
                             $record['sizes'][$label] = $parsed;

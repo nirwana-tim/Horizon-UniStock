@@ -15,7 +15,7 @@
                         <div class="mb-4">
                             <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Study Program Name</label>
                             <input type="text" name="name" id="name" value="{{ old('name') }}"
-                                   class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 @error('name') border-red-500 @enderror"
+                                   class="w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 @error('name') border-red-500 @enderror"
                                    required>
                             @error('name')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -25,7 +25,7 @@
                         <div class="mb-4">
                             <label for="code" class="block text-sm font-medium text-gray-700 mb-1">Code</label>
                             <input type="text" name="code" id="code" value="{{ old('code') }}"
-                                   class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 @error('code') border-red-500 @enderror"
+                                   class="w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 @error('code') border-red-500 @enderror"
                                    required>
                             @error('code')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -35,7 +35,7 @@
                         <div class="mb-6">
                             <label for="faculty_id" class="block text-sm font-medium text-gray-700 mb-1">Faculty</label>
                             <select name="faculty_id" id="faculty_id"
-                                    class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 @error('faculty_id') border-red-500 @enderror"
+                                    class="w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 @error('faculty_id') border-red-500 @enderror"
                                     required>
                                 <option value="">-- Select Faculty --</option>
                                 @foreach($faculties as $faculty)
@@ -63,3 +63,4 @@
         </div>
     </div>
 </x-app-layout>
+

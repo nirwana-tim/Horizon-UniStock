@@ -176,8 +176,8 @@ class ReportController extends Controller
         );
 
         $stockService = app(\App\Services\StockService::class);
-        $shortageItems = $stockService->getDemandShortageItems();
-        $outOfStockItems = $stockService->getOutOfStockItems();
+        $shortageItems = cache()->remember('dashboard-shortage-items', 300, fn () => $stockService->getDemandShortageItems());
+        $outOfStockItems = cache()->remember('dashboard-out-of-stock-items', 300, fn () => $stockService->getOutOfStockItems());
 
         return view('report.sales-dashboard', compact(
             'defaultStart',

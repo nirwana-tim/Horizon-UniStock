@@ -76,6 +76,8 @@ class StockService
 
             AuditService::log('create', StockReceive::class, $receive->id, null, $receive->toArray());
 
+            $this->forgetDashboardStockCache();
+
             return $receive->fresh(['items.item', 'items.variant', 'vendor']);
         }, attempts: 5);
     }
@@ -157,6 +159,14 @@ class StockService
                 'last_hpp' => round($unitHpp, 2),
             ]);
         }
+
+        $this->forgetDashboardStockCache();
+    }
+
+    private function forgetDashboardStockCache(): void
+    {
+        cache()->forget('dashboard-shortage-items');
+        cache()->forget('dashboard-out-of-stock-items');
     }
 
     public function getBalance(int $itemId, ?int $variantId = null): ?StockBalance
@@ -290,6 +300,8 @@ class StockService
             $balance->decrement('quantity', $quantity);
 
             $blendedHpp = $quantity > 0 ? round($totalCost / $quantity, 2) : 0;
+
+            $this->forgetDashboardStockCache();
 
             return [
                 'blended_hpp' => $blendedHpp,
@@ -444,7 +456,11 @@ class StockService
     public function reverseStockReceive(StockReceive $receive): void
     {
         DB::transaction(function () use ($receive) {
-            $receive->load('items');
+            $receive = StockReceive::with('items')->whereKey($receive->id)->lockForUpdate()->first();
+
+            if (! $receive) {
+                throw new \Exception('Penerimaan tidak ditemukan.');
+            }
 
             foreach ($receive->items as $item) {
                 $batchRemaining = StockBatch::where('stock_receive_item_id', $item->id)
@@ -476,6 +492,8 @@ class StockService
             $old = $receive->toArray();
             $receive->delete();
             AuditService::log('delete', StockReceive::class, $receive->id, $old, null);
+
+            $this->forgetDashboardStockCache();
         }, attempts: 5);
     }
 

@@ -227,6 +227,13 @@ class StudentService
             'email_verified_at' => now(),
         ]);
 
+        if ($student->user_id) {
+            $user = User::find($student->user_id);
+            if ($user) {
+                $user->update(['email' => $email]);
+            }
+        }
+
         AuditService::log('email_kampus.verified', Student::class, $student->id, $old, $student->fresh()->toArray());
     }
 

@@ -56,7 +56,7 @@ class GpmService
                 'item_id' => $item->item_id,
                 'item_code' => $item->item_code ?? '',
                 'item_name' => $item->item_name_raw ?? '-',
-                'category_name' => $itemModel?->category?->name ?? '-',
+                'category_name' => $itemModel?->category?->label ?? '-',
                 'qty_sold' => $item->qty_sold,
                 'hpp' => $avgHpp,
                 'selling_price' => round((float) $item->selling_price, 2),
