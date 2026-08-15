@@ -3,14 +3,19 @@
 ## Format
 
 ```
-KATEGORI-GENDER-TIPE-VARIANT-SIZE
+KATEGORI-GENDER-TIPE-VARIANT
 ```
 
-Setiap item memiliki **full code** yang disimpan di `items.code` (unique) dan juga di `item_variants.sku` — nilai keduanya identik.
+Setiap item memiliki **base code** yang disimpan di `items.code` dan `items.base_code` (nilainya identik, unique). Varian ukuran menyimpan **SKU** lengkap di `item_variants.sku`:
+
+```
+SKU = ITEM_CODE + "-" + SIZE
+```
 
 | Tingkat | Format | Contoh | Tabel |
 |---------|--------|--------|-------|
-| Item code / SKU | `KATEGORI-GENDER-TIPE-VARIANT-SIZE` | `UNF-U-ALM-01-03` | `items.code` = `item_variants.sku` |
+| Item code / base code | `KATEGORI-GENDER-TIPE-VARIANT` | `UNF-U-ALM-10` | `items.code` = `items.base_code` |
+| SKU varian | `KATEGORI-GENDER-TIPE-VARIANT-SIZE` | `UNF-U-ALM-10-03` | `item_variants.sku` |
 
 ## Komponen
 
@@ -36,24 +41,31 @@ Setiap item memiliki **full code** yang disimpan di `items.code` (unique) dan ju
 | | NUR | Nursing Kit |
 | | MID | Midwifery Kit |
 | | TBR | Tumbler / Merchandise |
-| **VARIANT** | 01, 02, 03... | Model/angkatan/sekolah (lihat tabel Variant) |
+| **VARIANT** | 01, 02, 03... | Departemen (lihat tabel Variant) |
 | **SIZE** | 03, 04, 05... | Kode ukuran (lihat tabel Size Mapping) |
 
 ### Variant
 
-Kode variant merepresentasikan sekolah/departemen/program:
+Kode variant merepresentasikan departemen (`item_departments`):
 
-| Variant | Institusi |
+| Variant | Departemen |
 |---------|-----------|
 | 01 | Horizon (main campus) |
 | 02 | STIKES |
 | 03 | STMIK |
 | 04 | STIE |
-| 05 | S1 Keperawatan |
-| 06 | D3 Keperawatan |
-| 07 | D3 Kebidanan |
+| 05 | S1 KEP |
+| 06 | D3 KEP |
+| 07 | D3 KEB |
+| 08 | S1 KEP NR |
 | 09 | NERS |
-| 14 | S1 Pariwisata |
+| 10 | S1 SI |
+| 11 | S1 IF |
+| 12 | Management |
+| 13 | Akuntansi |
+| 14 | Pariwisata |
+
+Jika item tidak memiliki departemen, gunakan `00`.
 
 ### Size Mapping
 
@@ -88,19 +100,19 @@ Size `01` = `All Size` (satu ukuran).
 
 ## Contoh
 
-| Kode | Deskripsi |
-|------|-----------|
-| `UNF-L-SCB-02-03` | Uniform Scrub Laki-Laki STIKES ukuran S |
-| `UNF-P-SCB-02-05` | Uniform Scrub Perempuan STIKES ukuran L |
-| `SHO-P-CLC-02-41` | Shoes Clinical Perempuan STIKES ukuran 41 |
-| `UNF-U-ALM-01-03` | Almamater Unisex Horizon ukuran S |
-| `UNF-U-ALM-02-07` | Almamater Unisex STIKES ukuran 2XL |
-| `KTM-U-KTM-01-01` | KTM Kartu Mahasiswa Unisex (All Size) |
-| `KTM-U-YDH-01-01` | KTM Lanyard & Holder Unisex (All Size) |
-| `KTM-U-TAG-02-01` | Name Tag Unisex STIKES (All Size) |
-| `KIT-U-NUR-06-01` | Nursing Kit D3 Keperawatan (All Size) |
-| `KIT-U-MID-02-01` | Midwifery Kit STIKES (All Size) |
-| `SHO-L-CLG-02-37` | Shoes College Laki-Laki STIKES ukuran 37 |
+| Kode | SKU | Deskripsi |
+|------|-----|-----------|
+| `UNF-L-SCB-02` | `UNF-L-SCB-02-03` | Uniform Scrub Laki-Laki STIKES ukuran S |
+| `UNF-P-SCB-02` | `UNF-P-SCB-02-05` | Uniform Scrub Perempuan STIKES ukuran L |
+| `SHO-P-CLC-02` | `SHO-P-CLC-02-41` | Shoes Clinical Perempuan STIKES ukuran 41 |
+| `UNF-U-ALM-01` | `UNF-U-ALM-01-03` | Almamater Unisex Horizon ukuran S |
+| `UNF-U-ALM-02` | `UNF-U-ALM-02-07` | Almamater Unisex STIKES ukuran 2XL |
+| `KTM-U-KTM-01` | `KTM-U-KTM-01-01` | KTM Kartu Mahasiswa Unisex (All Size) |
+| `KTM-U-YDH-01` | `KTM-U-YDH-01-01` | KTM Lanyard & Holder Unisex (All Size) |
+| `KTM-U-TAG-02` | `KTM-U-TAG-02-01` | Name Tag Unisex STIKES (All Size) |
+| `KIT-U-NUR-06` | `KIT-U-NUR-06-01` | Nursing Kit D3 Keperawatan (All Size) |
+| `KIT-U-MID-02` | `KIT-U-MID-02-01` | Midwifery Kit STIKES (All Size) |
+| `SHO-L-CLG-02` | `SHO-L-CLG-02-37` | Shoes College Laki-Laki STIKES ukuran 37 |
 
 ## Aturan Penulisan
 
@@ -109,3 +121,13 @@ Size `01` = `All Size` (satu ukuran).
 3. Variant dan ukuran **2 digit** (01, 02, ... 09, 10, dst)
 4. Kode harus **konsisten** di seluruh sistem
 5. Kode yang sudah dibuat tidak boleh diubah (immutable)
+
+## Pembuatan Kode
+
+Kode dihasilkan otomatis dari relasi master data (`ItemService`):
+
+```php
+$code = $category->code . '-' . $gender . '-' . ($type?->code ?? 'XX') . '-' . ($department?->code ?? '00');
+```
+
+Alur yang sama berlaku saat import katalog (`ItemImport`) agar konsisten dengan input manual.

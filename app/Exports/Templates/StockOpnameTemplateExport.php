@@ -36,10 +36,10 @@ class StockOpnameTemplateExport extends BaseExport implements FromArray, WithHea
         $colCount = 3;
 
         $this->setTitle($sheet, 'TEMPLATE IMPORT STOCK OPNAME', $colCount);
-        $this->setSubtitle($sheet, 'Kode Barang: UNF-L-SCB-02-03. Varian Ukuran: S/M/L/XL (atau All Size). Quantity Fisik: jumlah stok nyata di lapangan.', $colCount);
+        $this->setSubtitle($sheet, 'Kode Barang: UNF-L-SCB-02. Varian Ukuran: S/M/L/XL (atau All Size). Quantity Fisik: jumlah stok nyata di lapangan.', $colCount);
 
         $sheet->mergeCells('A3:C3');
-        $sheet->setCellValue('A3', 'Contoh: UNF-L-SCB-02-03 | M | 50');
+        $sheet->setCellValue('A3', 'Contoh: UNF-L-SCB-02 | M | 50');
         $sheet->getStyle('A3')->applyFromArray([
             'font' => ['italic' => true, 'color' => ['rgb' => '888888'], 'size' => 10],
             'alignment' => [

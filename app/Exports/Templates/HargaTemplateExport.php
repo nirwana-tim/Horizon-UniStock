@@ -42,7 +42,7 @@ class HargaTemplateExport extends BaseExport implements FromArray, WithHeadings,
 
         // Write Contoh Format in Row 3
         $sheet->mergeCells('A3:E3');
-        $sheet->setCellValue('A3', 'Contoh Format: UNF-L-SCB-02-03 | (Nama Kosong) | 24/25 | 190000 | 150000');
+        $sheet->setCellValue('A3', 'Contoh Format: UNF-L-SCB-02 | (Nama Kosong) | 24/25 | 190000 | 150000');
         $sheet->getStyle('A3')->applyFromArray([
             'font' => ['italic' => true, 'color' => ['rgb' => '888888'], 'size' => 10],
             'alignment' => [

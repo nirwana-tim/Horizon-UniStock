@@ -42,10 +42,10 @@ class StockReceiveTemplateExport extends BaseExport implements FromArray, WithHe
         $colCount = 9;
 
         $this->setTitle($sheet, 'TEMPLATE IMPORT PENERIMAAN BARANG (STOCK RECEIVE)', $colCount);
-        $this->setSubtitle($sheet, 'Kode Barang: UNF-L-SCB-02-03. SKU Varian: UNF-L-SCB-02-03-03 (kosongkan jika all size). Tanggal: YYYY-MM-DD.', $colCount);
+        $this->setSubtitle($sheet, 'Kode Barang: UNF-L-SCB-02. SKU Varian: UNF-L-SCB-02-03 (kosongkan jika all size). Tanggal: YYYY-MM-DD.', $colCount);
 
         $sheet->mergeCells('A3:I3');
-        $sheet->setCellValue('A3', 'Contoh Format: UNF-L-SCB-02-03 | UNF-L-SCB-02-03-03 | 100 | 190000 | 150000 | CV Seragam Makmur | 2026-07-01 | PO-001 | (kosong)');
+        $sheet->setCellValue('A3', 'Contoh Format: UNF-L-SCB-02 | UNF-L-SCB-02-03 | 100 | 190000 | 150000 | CV Seragam Makmur | 2026-07-01 | PO-001 | (kosong)');
         $sheet->getStyle('A3')->applyFromArray([
             'font' => ['italic' => true, 'color' => ['rgb' => '888888'], 'size' => 10],
             'alignment' => [

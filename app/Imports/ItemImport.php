@@ -55,15 +55,14 @@ class ItemImport implements ToCollection, WithHeadingRow, WithMultipleSheets
             $department = $this->resolveDepartment($record['departemen']);
             $type = $this->resolveType($record['type']);
 
-            if (!$record['kode']) {
-                $record['kode'] = $this->generateCode($record);
-            }
+            $baseCode = $this->generateBaseCode($category, $record['gender'], $type, $department);
+            $record['kode'] = $record['kode'] ?: $baseCode;
 
             $item = Item::firstOrNew(['code' => $record['kode']]);
             if (!$item->exists) {
                 $item->fill([
                     'name' => $record['nama'],
-                    'base_code' => $this->generateBaseCode($record),
+                    'base_code' => $baseCode,
                     'gender' => $record['gender'],
                     'category_id' => $category?->id,
                     'type_id' => $type?->id,
@@ -229,9 +228,14 @@ class ItemImport implements ToCollection, WithHeadingRow, WithMultipleSheets
         return $failures;
     }
 
-    private function generateBaseCode(array $record): string
+    private function generateBaseCode(?ItemCategory $category, string $gender, ?ItemType $type, ?ItemDepartment $department): string
     {
-        return implode('-', array_filter([$record['kategori'], $record['gender'], $record['type'] ?: 'GEN']));
+        return implode('-', [
+            $category?->code ?? 'GEN',
+            $gender ?: 'U',
+            $type?->code ?? 'XX',
+            $department?->code ?? '00',
+        ]);
     }
 
     private function resolveType(?string $value): ?ItemType
@@ -241,19 +245,6 @@ class ItemImport implements ToCollection, WithHeadingRow, WithMultipleSheets
         return ItemType::where('code', strtoupper($value))
             ->orWhere('label', $value)
             ->first();
-    }
-
-    private function generateCode(array $record): string
-    {
-        $categoryCode = strtoupper(substr(preg_replace('/[^a-zA-Z0-9]/', '', $record['kategori']), 0, 3));
-        $gender = $record['gender'] ?: 'U';
-        $typeCode = $record['type'] ?: 'GEN';
-        $base = "{$categoryCode}-{$gender}-{$typeCode}";
-
-        $existing = Item::where('base_code', $base)->orWhere('code', 'like', "{$base}-%")->count();
-        $variant = str_pad($existing + 1, 2, '0', STR_PAD_LEFT);
-
-        return "{$base}-{$variant}-01";
     }
 
     private function resolveCategory(string $name): ?ItemCategory
