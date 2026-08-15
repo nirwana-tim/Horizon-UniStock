@@ -12,12 +12,12 @@ use App\Models\ItemVariant;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException as IlluminateValidationException;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 use Maatwebsite\Excel\Validators\Failure;
 use Maatwebsite\Excel\Validators\ValidationException;
-use Illuminate\Validation\ValidationException as IlluminateValidationException;
 
 class ItemImport implements ToCollection, WithHeadingRow, WithMultipleSheets
 {
@@ -59,7 +59,7 @@ class ItemImport implements ToCollection, WithHeadingRow, WithMultipleSheets
             $record['kode'] = $record['kode'] ?: $baseCode;
 
             $item = Item::firstOrNew(['code' => $record['kode']]);
-            if (!$item->exists) {
+            if (! $item->exists) {
                 $item->fill([
                     'name' => $record['nama'],
                     'base_code' => $baseCode,
@@ -73,7 +73,7 @@ class ItemImport implements ToCollection, WithHeadingRow, WithMultipleSheets
                 ])->save();
             }
 
-            if (!empty($record['harga_jual']) || !empty($record['hpp'])) {
+            if (! empty($record['harga_jual']) || ! empty($record['hpp'])) {
                 ItemPrice::updateOrCreate(
                     [
                         'item_id' => $item->id,
@@ -99,21 +99,19 @@ class ItemImport implements ToCollection, WithHeadingRow, WithMultipleSheets
                         'size' => $sizeCode,
                     ],
                     [
-                        'sku' => $item->code . '-' . $sizeCode,
+                        'sku' => $item->code.'-'.$sizeCode,
                         'size_label' => $sizeLabel,
-                        'price' => $record['harga_jual'] ?? 0,
                     ]
                 );
                 $variantCreated = true;
             }
 
-            if (!$variantCreated) {
+            if (! $variantCreated) {
                 ItemVariant::firstOrCreate(
                     ['item_id' => $item->id, 'size' => '01'],
                     [
-                        'sku' => $item->code . '-01',
+                        'sku' => $item->code.'-01',
                         'size_label' => 'All Size',
-                        'price' => $record['harga_jual'] ?? 0,
                     ]
                 );
             }
@@ -126,7 +124,8 @@ class ItemImport implements ToCollection, WithHeadingRow, WithMultipleSheets
     {
         $parent = $this;
 
-        return ['Data' => new class($parent) implements ToCollection, WithHeadingRow {
+        return ['Data' => new class($parent) implements ToCollection, WithHeadingRow
+        {
             private ItemImport $parent;
 
             public function __construct(ItemImport $parent)
@@ -202,7 +201,7 @@ class ItemImport implements ToCollection, WithHeadingRow, WithMultipleSheets
                         break;
                     }
                 }
-                if (!$found && isset($values[$label])) {
+                if (! $found && isset($values[$label])) {
                     $parsed = $this->parseNumeric($values[$label]);
                     if ($parsed !== null) {
                         $record['sizes'][$label] = $parsed;
@@ -261,7 +260,9 @@ class ItemImport implements ToCollection, WithHeadingRow, WithMultipleSheets
 
     private function resolveType(?string $value): ?ItemType
     {
-        if (!$value) return null;
+        if (! $value) {
+            return null;
+        }
 
         return ItemType::where('code', strtoupper($value))
             ->orWhere('label', $value)
@@ -273,22 +274,24 @@ class ItemImport implements ToCollection, WithHeadingRow, WithMultipleSheets
         $code = strtoupper(substr(preg_replace('/[^a-zA-Z0-9]/', '', $name), 0, 3));
 
         $category = ItemCategory::where('label', $name)->orWhere('code', $code)->first();
-        if (!$category) {
+        if (! $category) {
             $baseCode = $code;
             $suffix = 1;
             while (ItemCategory::where('code', $baseCode)->exists()) {
-                $baseCode = $code . $suffix++;
+                $baseCode = $code.$suffix++;
             }
             $category = ItemCategory::create(['label' => $name, 'code' => $baseCode]);
         }
+
         return $category;
     }
 
     private function resolveDepartment(string $name): ?ItemDepartment
     {
-        if (!$name) {
+        if (! $name) {
             return null;
         }
+
         return ItemDepartment::where('label', $name)->orWhere('code', $name)->first();
     }
 
@@ -312,10 +315,11 @@ class ItemImport implements ToCollection, WithHeadingRow, WithMultipleSheets
         if ($value === null) {
             return null;
         }
-        if (is_numeric($value) && (str_contains(strtolower((string)$value), 'e+') || is_float($value))) {
-            $value = number_format((float)$value, 0, '', '');
+        if (is_numeric($value) && (str_contains(strtolower((string) $value), 'e+') || is_float($value))) {
+            $value = number_format((float) $value, 0, '', '');
         }
         $value = ltrim(trim((string) $value), "'");
+
         return $value === '' ? null : $value;
     }
 
@@ -328,6 +332,7 @@ class ItemImport implements ToCollection, WithHeadingRow, WithMultipleSheets
             return (int) $value;
         }
         $cleaned = preg_replace('/[^0-9]/', '', (string) $value);
+
         return $cleaned !== '' ? (int) $cleaned : null;
     }
 }

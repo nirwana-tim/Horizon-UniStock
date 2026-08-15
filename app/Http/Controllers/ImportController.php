@@ -6,8 +6,10 @@ use App\Models\ImportBatch;
 use App\Services\ImportService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ImportController extends Controller
 {
@@ -38,18 +40,18 @@ class ImportController extends Controller
             $validated = $request->validate($rules);
             $filePath = $request->input('file_path');
 
-            if (!str_starts_with($filePath, 'imports/') || str_contains($filePath, '..') || str_contains($filePath, '\\')) {
+            if (! str_starts_with($filePath, 'imports/') || str_contains($filePath, '..') || str_contains($filePath, '\\')) {
                 return back()->with('error', 'Invalid file path.');
             }
 
-            if (!Storage::disk('local')->exists($filePath)) {
+            if (! Storage::disk('local')->exists($filePath)) {
                 return back()->with('error', 'File not found. Please upload again.');
             }
         } else {
             $rules['file'] = ['required', 'file', 'mimes:xlsx,xls,csv', 'max:10240'];
             $validated = $request->validate($rules);
             $file = $request->file('file');
-            $fileName = time() . '_' . preg_replace('/[^a-zA-Z0-9._-]/', '', $file->getClientOriginalName());
+            $fileName = time().'_'.preg_replace('/[^a-zA-Z0-9._-]/', '', $file->getClientOriginalName());
             $filePath = $file->storeAs('imports', $fileName, 'local');
         }
 
@@ -68,7 +70,7 @@ class ImportController extends Controller
 
         return redirect()
             ->route('import.result', $batch)
-            ->with('error', "Import gagal. Lihat log untuk detail.");
+            ->with('error', 'Import gagal. Lihat log untuk detail.');
     }
 
     public function preview(Request $request): View
@@ -79,16 +81,29 @@ class ImportController extends Controller
         ]);
 
         $file = $request->file('file');
-        $fileName = time() . '_' . preg_replace('/[^a-zA-Z0-9._-]/', '', $file->getClientOriginalName());
+        $fileName = time().'_'.preg_replace('/[^a-zA-Z0-9._-]/', '', $file->getClientOriginalName());
         $filePath = $file->storeAs('imports', $fileName, 'local');
 
-        $data = \Maatwebsite\Excel\Facades\Excel::toCollection(
+        $data = Excel::toCollection(
             null,
             Storage::disk('local')->path($filePath)
         )->first();
 
-        $headers = $data->isNotEmpty() ? $data->first()->keys()->toArray() : [];
-        $rows = $data->isNotEmpty() ? $data->skip(1)->values() : collect();
+        $headingRow = $this->headingRowFor($validated['import_type']);
+        $headers = $data->isNotEmpty() && $data->has($headingRow - 1)
+            ? $data->get($headingRow - 1)->values()->map(fn ($value) => (string) $value)->all()
+            : [];
+        $rawRows = $data->isNotEmpty() ? $data->skip($headingRow)->values() : collect();
+        $rows = $rawRows->map(function ($row) use ($headers) {
+            $values = $row instanceof Collection ? $row->values()->all() : array_values((array) $row);
+
+            $keyed = [];
+            foreach ($headers as $index => $header) {
+                $keyed[$header] = $values[$index] ?? null;
+            }
+
+            return $keyed;
+        });
         $totalDataRows = $rows->count();
 
         return view('import.preview', [
@@ -98,5 +113,10 @@ class ImportController extends Controller
             'filePath' => $filePath,
             'totalDataRows' => $totalDataRows,
         ]);
+    }
+
+    private function headingRowFor(string $importType): int
+    {
+        return $importType === 'student' ? 1 : 4;
     }
 }

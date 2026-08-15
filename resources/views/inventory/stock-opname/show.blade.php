@@ -10,14 +10,6 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            @if(session('success'))
-                <x-alert type="success">
-                    {{ session('success') }}
-                    @if(session('total_imported'))
-                        <span class="font-semibold">({{ session('total_imported') }} items successfully imported)</span>
-                    @endif
-                </x-alert>
-            @endif
 
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
                 <div class="p-6 text-gray-900">

@@ -3,9 +3,9 @@
 namespace App\Exports\Reports;
 
 use App\Exports\BaseExport;
-use App\Models\StockOpnameAdjustment;
 use App\Models\StockOpnameItem;
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
@@ -14,7 +14,7 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class LossReport extends BaseExport implements FromCollection, WithHeadings, WithMapping, WithStyles
 {
-    use \Maatwebsite\Excel\Concerns\Exportable;
+    use Exportable;
 
     private int $row = 0;
 
@@ -26,14 +26,14 @@ class LossReport extends BaseExport implements FromCollection, WithHeadings, Wit
     public function collection()
     {
         $query = StockOpnameItem::select(
-                'items.name as item_name',
-                'item_categories.label as category_name',
-                'item_categories.code as category_code',
-                'items.hpp',
-                DB::raw('SUM(CASE WHEN stock_opname_items.computed_variance < 0 THEN ABS(stock_opname_items.computed_variance) ELSE 0 END) as qty_loss'),
-                DB::raw('SUM(CASE WHEN stock_opname_items.computed_variance > 0 THEN stock_opname_items.computed_variance ELSE 0 END) as qty_surplus'),
-                DB::raw('COUNT(DISTINCT stock_opname_items.stock_opname_id) as opname_count')
-            )
+            'items.name as item_name',
+            'item_categories.label as category_name',
+            'item_categories.code as category_code',
+            'items.hpp',
+            DB::raw('SUM(CASE WHEN stock_opname_items.computed_variance < 0 THEN ABS(stock_opname_items.computed_variance) ELSE 0 END) as qty_loss'),
+            DB::raw('SUM(CASE WHEN stock_opname_items.computed_variance > 0 THEN stock_opname_items.computed_variance ELSE 0 END) as qty_surplus'),
+            DB::raw('COUNT(DISTINCT stock_opname_items.stock_opname_id) as opname_count')
+        )
             ->join('items', 'stock_opname_items.item_id', '=', 'items.id')
             ->leftJoin('item_categories', 'items.category_id', '=', 'item_categories.id')
             ->groupBy('items.id', 'items.name', 'item_categories.label', 'item_categories.code', 'items.hpp')
@@ -78,7 +78,7 @@ class LossReport extends BaseExport implements FromCollection, WithHeadings, Wit
 
         return [
             $this->row,
-            $item->item_name . ' (' . ($item->category_name ?? '-') . ')',
+            $item->item_name.' ('.($item->category_name ?? '-').')',
             $item->qty_loss,
             $hpp,
             $totalLoss,
@@ -88,7 +88,7 @@ class LossReport extends BaseExport implements FromCollection, WithHeadings, Wit
         ];
     }
 
-    public function styles(Worksheet $sheet): void
+    public function styles(Worksheet $sheet): ?array
     {
         $colCount = 8;
         $headerRow = $this->headerRow();
@@ -96,29 +96,29 @@ class LossReport extends BaseExport implements FromCollection, WithHeadings, Wit
         $lastRow = $dataStart + $this->row - 1;
 
         $this->setTitle($sheet, 'LAPORAN SUSUT STOK (LOSS/GAIN)', $colCount);
-        $this->setSubtitle($sheet, 'Periode: ' . ($this->period ?? 'Semua Periode'), $colCount);
+        $this->setSubtitle($sheet, 'Periode: '.($this->period ?? 'Semua Periode'), $colCount);
 
         $this->applyHeaderStyle($sheet, $headerRow, $colCount);
         $this->applyDataStyle($sheet, $dataStart, $lastRow, $colCount);
 
         for ($i = $dataStart; $i <= $lastRow; $i++) {
-            $netLoss = $sheet->getCell('H' . $i)->getValue();
+            $netLoss = $sheet->getCell('H'.$i)->getValue();
             if (is_numeric($netLoss)) {
                 if ($netLoss > 0) {
-                    $sheet->getStyle('H' . $i)->getFont()->getColor()->setRGB('006600');
+                    $sheet->getStyle('H'.$i)->getFont()->getColor()->setRGB('006600');
                 } elseif ($netLoss < 0) {
-                    $sheet->getStyle('H' . $i)->getFont()->getColor()->setRGB('CC0000');
+                    $sheet->getStyle('H'.$i)->getFont()->getColor()->setRGB('CC0000');
                 }
             }
 
-            $totalLoss = $sheet->getCell('E' . $i)->getValue();
+            $totalLoss = $sheet->getCell('E'.$i)->getValue();
             if (is_numeric($totalLoss) && $totalLoss > 0) {
-                $sheet->getStyle('E' . $i)->getFont()->getColor()->setRGB('CC0000');
+                $sheet->getStyle('E'.$i)->getFont()->getColor()->setRGB('CC0000');
             }
 
-            $totalSurplus = $sheet->getCell('G' . $i)->getValue();
+            $totalSurplus = $sheet->getCell('G'.$i)->getValue();
             if (is_numeric($totalSurplus) && $totalSurplus > 0) {
-                $sheet->getStyle('G' . $i)->getFont()->getColor()->setRGB('006600');
+                $sheet->getStyle('G'.$i)->getFont()->getColor()->setRGB('006600');
             }
         }
 
@@ -126,12 +126,12 @@ class LossReport extends BaseExport implements FromCollection, WithHeadings, Wit
             $totalRow = $lastRow + 1;
             $this->applyTotalStyle($sheet, $totalRow, $colCount);
 
-            $sheet->setCellValue('A' . $totalRow, 'GRAND TOTAL');
-            $sheet->setCellValue('C' . $totalRow, '=SUM(C' . $dataStart . ':C' . $lastRow . ')');
-            $sheet->setCellValue('E' . $totalRow, '=SUM(E' . $dataStart . ':E' . $lastRow . ')');
-            $sheet->setCellValue('F' . $totalRow, '=SUM(F' . $dataStart . ':F' . $lastRow . ')');
-            $sheet->setCellValue('G' . $totalRow, '=SUM(G' . $dataStart . ':G' . $lastRow . ')');
-            $sheet->setCellValue('H' . $totalRow, '=SUM(H' . $dataStart . ':H' . $lastRow . ')');
+            $sheet->setCellValue('A'.$totalRow, 'GRAND TOTAL');
+            $sheet->setCellValue('C'.$totalRow, '=SUM(C'.$dataStart.':C'.$lastRow.')');
+            $sheet->setCellValue('E'.$totalRow, '=SUM(E'.$dataStart.':E'.$lastRow.')');
+            $sheet->setCellValue('F'.$totalRow, '=SUM(F'.$dataStart.':F'.$lastRow.')');
+            $sheet->setCellValue('G'.$totalRow, '=SUM(G'.$dataStart.':G'.$lastRow.')');
+            $sheet->setCellValue('H'.$totalRow, '=SUM(H'.$dataStart.':H'.$lastRow.')');
 
             $this->setFormatRupiah($sheet, 'D', $dataStart, $totalRow);
             $this->setFormatRupiah($sheet, 'E', $dataStart, $totalRow);
@@ -146,6 +146,8 @@ class LossReport extends BaseExport implements FromCollection, WithHeadings, Wit
             'E' => 18, 'F' => 12, 'G' => 18, 'H' => 18,
         ]);
 
-        $sheet->freezePane('A' . ($headerRow + 1));
+        $sheet->freezePane('A'.($headerRow + 1));
+
+        return null;
     }
 }

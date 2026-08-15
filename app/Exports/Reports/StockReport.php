@@ -4,7 +4,9 @@ namespace App\Exports\Reports;
 
 use App\Exports\BaseExport;
 use App\Models\StockBalance;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\WithChunkReading;
 use Maatwebsite\Excel\Concerns\WithHeadings;
@@ -12,11 +14,12 @@ use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class StockReport extends BaseExport implements FromQuery, WithHeadings, WithMapping, WithStyles, WithChunkReading
+class StockReport extends BaseExport implements FromQuery, WithChunkReading, WithHeadings, WithMapping, WithStyles
 {
-    use \Maatwebsite\Excel\Concerns\Exportable;
+    use Exportable;
 
     private int $row = 0;
+
     private string $lastCategory = '';
 
     public function __construct(
@@ -24,7 +27,7 @@ class StockReport extends BaseExport implements FromQuery, WithHeadings, WithMap
         private ?string $gender = null
     ) {}
 
-    public function query(): \Illuminate\Database\Eloquent\Builder
+    public function query(): Builder
     {
         $movementTotals = DB::table('stock_movements')
             ->select(
@@ -111,7 +114,7 @@ class StockReport extends BaseExport implements FromQuery, WithHeadings, WithMap
         ];
     }
 
-    public function styles(Worksheet $sheet): void
+    public function styles(Worksheet $sheet): ?array
     {
         $colCount = 11;
         $headerRow = $this->headerRow();
@@ -121,9 +124,9 @@ class StockReport extends BaseExport implements FromQuery, WithHeadings, WithMap
         $this->setTitle($sheet, 'LAPORAN STOK INVENTARIS', $colCount);
         $filterText = 'Semua Kategori';
         if ($this->category) {
-            $filterText = 'Kategori: ' . $this->category;
+            $filterText = 'Kategori: '.$this->category;
         }
-        $this->setSubtitle($sheet, 'Periode: ' . now()->format('d/m/Y') . ' | ' . $filterText, $colCount);
+        $this->setSubtitle($sheet, 'Periode: '.now()->format('d/m/Y').' | '.$filterText, $colCount);
 
         $this->applyHeaderStyle($sheet, $headerRow, $colCount);
         $this->applyDataStyle($sheet, $dataStart, $lastRow, $colCount);
@@ -132,12 +135,12 @@ class StockReport extends BaseExport implements FromQuery, WithHeadings, WithMap
             $totalRow = $lastRow + 1;
             $this->applyTotalStyle($sheet, $totalRow, $colCount);
 
-            $sheet->setCellValue('A' . $totalRow, 'TOTAL');
-            $sheet->setCellValue('G' . $totalRow, '=SUM(G' . $dataStart . ':G' . $lastRow . ')');
-            $sheet->setCellValue('H' . $totalRow, '=SUM(H' . $dataStart . ':H' . $lastRow . ')');
-            $sheet->setCellValue('I' . $totalRow, '=SUM(I' . $dataStart . ':I' . $lastRow . ')');
-            $sheet->setCellValue('J' . $totalRow, '=SUM(J' . $dataStart . ':J' . $lastRow . ')');
-            $sheet->setCellValue('K' . $totalRow, '=SUM(K' . $dataStart . ':K' . $lastRow . ')');
+            $sheet->setCellValue('A'.$totalRow, 'TOTAL');
+            $sheet->setCellValue('G'.$totalRow, '=SUM(G'.$dataStart.':G'.$lastRow.')');
+            $sheet->setCellValue('H'.$totalRow, '=SUM(H'.$dataStart.':H'.$lastRow.')');
+            $sheet->setCellValue('I'.$totalRow, '=SUM(I'.$dataStart.':I'.$lastRow.')');
+            $sheet->setCellValue('J'.$totalRow, '=SUM(J'.$dataStart.':J'.$lastRow.')');
+            $sheet->setCellValue('K'.$totalRow, '=SUM(K'.$dataStart.':K'.$lastRow.')');
 
             $this->setFormatRupiah($sheet, 'K', $dataStart, $totalRow);
             $this->setFormatNumber($sheet, 'G', $dataStart, $totalRow);
@@ -151,6 +154,8 @@ class StockReport extends BaseExport implements FromQuery, WithHeadings, WithMap
             'F' => 10, 'G' => 14, 'H' => 14, 'I' => 14, 'J' => 14, 'K' => 18,
         ]);
 
-        $sheet->freezePane('A' . ($headerRow + 1));
+        $sheet->freezePane('A'.($headerRow + 1));
+
+        return null;
     }
 }

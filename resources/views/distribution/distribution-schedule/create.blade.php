@@ -77,6 +77,12 @@
                             </div>
 
                             <div>
+                                <x-input-label for="period" :value="__('Period')" />
+                                <x-text-input id="period" name="period" type="month" class="mt-1 block w-full" :value="old('period', now()->format('Y-m'))" />
+                                <x-input-error :messages="$errors->get('period')" class="mt-2" />
+                            </div>
+
+                            <div>
                                 <x-input-label for="student_level" :value="__('Student Level')" />
                                 <select id="student_level" name="student_level" x-model="studentLevel"
                                         class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500">

@@ -41,6 +41,7 @@ $c = $config[$type] ?? $config['info'];
 @endphp
 
 <div x-data="{ show: true }" x-show="show"
+     x-init="setTimeout(() => show = false, 5000)"
      x-transition:leave="transition ease-in duration-150"
      x-transition:leave-start="opacity-100"
      x-transition:leave-end="opacity-0"

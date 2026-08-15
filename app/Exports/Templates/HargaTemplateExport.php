@@ -4,13 +4,14 @@ namespace App\Exports\Templates;
 
 use App\Exports\BaseExport;
 use Maatwebsite\Excel\Concerns\FromArray;
+use Maatwebsite\Excel\Concerns\WithCustomStartCell;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\WithTitle;
-use Maatwebsite\Excel\Concerns\WithCustomStartCell;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class HargaTemplateExport extends BaseExport implements FromArray, WithHeadings, WithStyles, WithTitle, WithCustomStartCell
+class HargaTemplateExport extends BaseExport implements FromArray, WithCustomStartCell, WithHeadings, WithStyles, WithTitle
 {
     public function startCell(): string
     {
@@ -33,7 +34,7 @@ class HargaTemplateExport extends BaseExport implements FromArray, WithHeadings,
         ];
     }
 
-    public function styles(Worksheet $sheet): void
+    public function styles(Worksheet $sheet): ?array
     {
         $colCount = 5;
 
@@ -46,8 +47,8 @@ class HargaTemplateExport extends BaseExport implements FromArray, WithHeadings,
         $sheet->getStyle('A3')->applyFromArray([
             'font' => ['italic' => true, 'color' => ['rgb' => '888888'], 'size' => 10],
             'alignment' => [
-                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT,
-                'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+                'horizontal' => Alignment::HORIZONTAL_LEFT,
+                'vertical' => Alignment::VERTICAL_CENTER,
             ],
         ]);
         $sheet->getRowDimension(3)->setRowHeight(20);
@@ -65,8 +66,10 @@ class HargaTemplateExport extends BaseExport implements FromArray, WithHeadings,
         $this->setFormatRupiah($sheet, 'D', $dataStart, $dataEnd);
         $this->setFormatRupiah($sheet, 'E', $dataStart, $dataEnd);
 
-        $sheet->freezePane('A' . ($headerRow + 1));
-        $sheet->setAutoFilter('A' . $headerRow . ':E' . $headerRow);
+        $sheet->freezePane('A'.($headerRow + 1));
+        $sheet->setAutoFilter('A'.$headerRow.':E'.$headerRow);
+
+        return null;
     }
 
     public function title(): string

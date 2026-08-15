@@ -3,6 +3,9 @@
 namespace App\Exports;
 
 use App\Models\DistributionItem;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
+use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\WithChunkReading;
 use Maatwebsite\Excel\Concerns\WithCustomStartCell;
@@ -11,9 +14,9 @@ use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class DistributionReportExport extends BaseExport implements FromQuery, WithHeadings, WithMapping, WithStyles, WithChunkReading, WithCustomStartCell
+class DistributionReportExport extends BaseExport implements FromQuery, WithChunkReading, WithCustomStartCell, WithHeadings, WithMapping, WithStyles
 {
-    use \Maatwebsite\Excel\Concerns\Exportable;
+    use Exportable;
 
     private int $row = 0;
 
@@ -26,7 +29,7 @@ class DistributionReportExport extends BaseExport implements FromQuery, WithHead
         return 'A4';
     }
 
-    public function query(): \Illuminate\Database\Eloquent\Builder
+    public function query(): Builder
     {
         $query = DistributionItem::with('item', 'transaction.student', 'transaction.schedule')
             ->join('distribution_transactions', 'distribution_items.transaction_id', '=', 'distribution_transactions.id')
@@ -80,11 +83,11 @@ class DistributionReportExport extends BaseExport implements FromQuery, WithHead
             $item->actual_size ?? '-',
             $item->quantity,
             $item->transaction_status,
-            $item->pickup_time ? \Carbon\Carbon::parse($item->pickup_time)->format('d/m/Y H:i') : '-',
+            $item->pickup_time ? Carbon::parse($item->pickup_time)->format('d/m/Y H:i') : '-',
         ];
     }
 
-    public function styles(Worksheet $sheet): void
+    public function styles(Worksheet $sheet): ?array
     {
         $colCount = 9;
         $headerRow = $this->headerRow();
@@ -92,7 +95,7 @@ class DistributionReportExport extends BaseExport implements FromQuery, WithHead
         $lastRow = $dataStart + $this->row - 1;
 
         $this->setTitle($sheet, 'LAPORAN REKAP PEMBAGIAN', $colCount);
-        $filterText = $this->period ? 'Periode: ' . $this->period : 'Semua Periode';
+        $filterText = $this->period ? 'Periode: '.$this->period : 'Semua Periode';
         $this->setSubtitle($sheet, $filterText, $colCount);
 
         $this->applyHeaderStyle($sheet, $headerRow, $colCount);
@@ -103,6 +106,8 @@ class DistributionReportExport extends BaseExport implements FromQuery, WithHead
             'E' => 18, 'F' => 18, 'G' => 10, 'H' => 14, 'I' => 18,
         ]);
 
-        $sheet->freezePane('A' . ($headerRow + 1));
+        $sheet->freezePane('A'.($headerRow + 1));
+
+        return null;
     }
 }

@@ -2,12 +2,10 @@
 
 namespace App\Services;
 
-use App\Models\StockBalance;
 use App\Models\StockBatch;
 use App\Models\StockMovement;
 use App\Models\StockOpname;
 use App\Models\StockOpnameAdjustment;
-use App\Models\StockOpnameItem;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -39,30 +37,6 @@ class StockOpnameService
         return $batch;
     }
 
-    public function processUpload(StockOpname $batch, array $items): void
-    {
-        DB::transaction(function () use ($batch, $items) {
-            foreach ($items as $itemData) {
-                $stockBalance = StockBalance::where('item_id', $itemData['item_id'])
-                    ->where('variant_id', $itemData['variant_id'] ?? null)
-                    ->first();
-
-                $systemQuantity = $stockBalance ? $stockBalance->quantity : 0;
-
-                StockOpnameItem::create([
-                    'stock_opname_id' => $batch->id,
-                    'item_id' => $itemData['item_id'],
-                    'variant_id' => $itemData['variant_id'] ?? null,
-                    'system_quantity' => $systemQuantity,
-                    'physical_quantity' => $itemData['physical_quantity'],
-                    'notes' => $itemData['notes'] ?? null,
-                ]);
-            }
-
-            $batch->update(['status' => 'counted']);
-        });
-    }
-
     public function calculateVariance(StockOpname $batch): void
     {
         $batch->load('items');
@@ -91,6 +65,11 @@ class StockOpnameService
             $batch->load('items.item', 'items.variant');
 
             foreach ($batch->items as $item) {
+                $balance = $this->stockService->getBalance($item->item_id, $item->variant_id);
+                $currentSystemQuantity = $balance?->quantity ?? 0;
+
+                $item->update(['system_quantity' => $currentSystemQuantity]);
+
                 if ($item->variance == 0) {
                     continue;
                 }
@@ -99,6 +78,22 @@ class StockOpnameService
                 $quantity = abs($item->variance);
 
                 if ($type === 'OUT') {
+                    $balance = $this->stockService->getBalance($item->item_id, $item->variant_id);
+                    $availableStock = $balance?->quantity ?? 0;
+
+                    if ($availableStock <= 0) {
+                        $item->update(['notes' => 'Shortage: '.(-1 * $item->variance).' (stok sudah 0, tidak ada adjustment)']);
+
+                        continue;
+                    }
+
+                    if ($quantity > $availableStock) {
+                        $item->update([
+                            'notes' => 'Shortage: '.(-1 * $item->variance).' (diselaraskan ke stok tersedia '.$availableStock.')',
+                        ]);
+                        $quantity = $availableStock;
+                    }
+
                     $fifoResult = $this->stockService->deductStockFifo(
                         $item->item_id,
                         $item->variant_id,

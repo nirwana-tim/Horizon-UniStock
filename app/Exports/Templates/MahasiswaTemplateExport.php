@@ -31,7 +31,7 @@ class MahasiswaTemplateExport extends BaseExport implements FromArray, WithHeadi
         ];
     }
 
-    public function styles(Worksheet $sheet): void
+    public function styles(Worksheet $sheet): ?array
     {
         $colCount = 9;
         $this->applyHeaderStyle($sheet, 1, $colCount);
@@ -43,6 +43,8 @@ class MahasiswaTemplateExport extends BaseExport implements FromArray, WithHeadi
 
         $sheet->freezePane('A2');
         $sheet->setAutoFilter('A1:I1');
+
+        return null;
     }
 
     public function title(): string

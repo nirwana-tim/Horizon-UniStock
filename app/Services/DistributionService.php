@@ -22,6 +22,7 @@ class DistributionService
     public function __construct(
         private readonly StockService $stockService,
         private readonly StudentSizeService $studentSizeService,
+        private readonly EntitlementService $entitlementService,
     ) {}
 
     public function findStudent(string $query): ?Student
@@ -45,18 +46,7 @@ class DistributionService
 
     public function getEntitlementForStudent(Student $student): ?Entitlement
     {
-        if (! $student->entitlement_code) {
-            return null;
-        }
-
-        return Entitlement::where('code', $student->entitlement_code)
-            ->where('is_active', true)
-            ->where(function ($q) use ($student) {
-                $q->where('student_level', $student->student_level)
-                    ->orWhereNull('student_level');
-            })
-            ->with('items.item')
-            ->first();
+        return $this->entitlementService->getEntitlement($student);
     }
 
     /**
@@ -98,6 +88,12 @@ class DistributionService
                 );
             }
 
+            if ($schedule->date && $schedule->date->gt(today())) {
+                throw new \Exception(
+                    'Jadwal distribusi "'.$schedule->name.'" belum dimulai (mulai '.$schedule->date->format('d M Y').'). Tidak dapat melakukan distribusi sebelum tanggal jadwal.'
+                );
+            }
+
             $isApplicable = DistributionSchedule::whereKey($schedule->id)
                 ->forStudent($student)
                 ->exists();
@@ -106,6 +102,16 @@ class DistributionService
                     'Jadwal distribusi "'.$schedule->name.'" tidak sesuai dengan mahasiswa ini. '.
                     'Pastikan fakultas/prodi/angkatan sesuai.'
                 );
+            }
+
+            $scheduleItemIds = $schedule->items()->pluck('item_id')->all();
+            $submittedItemIds = array_values(array_unique(array_filter(array_map(
+                fn ($row) => (int) ($row['item_id'] ?? 0),
+                $items
+            ))));
+            $invalidItemIds = array_diff($submittedItemIds, $scheduleItemIds);
+            if (! empty($invalidItemIds)) {
+                throw new \Exception('Terdapat barang yang tidak termasuk dalam jadwal distribusi "'.$schedule->name.'".');
             }
 
             $existingTransaction = DistributionTransaction::where('student_id', $student->id)
@@ -139,6 +145,7 @@ class DistributionService
 
             $allFullyStocked = true;
             $autoNotes = [];
+            $distributedInRequest = [];
 
             foreach ($items as $itemData) {
                 $item = null;
@@ -155,7 +162,8 @@ class DistributionService
                 $entitlementItem = $entitlementMap->get($item->id);
                 if ($entitlementItem) {
                     $requestedQty = (int) ($itemData['quantity'] ?? 1);
-                    $alreadyDistributed = (int) ($distributedByItem[$item->id] ?? 0);
+                    $alreadyDistributed = (int) ($distributedByItem[$item->id] ?? 0)
+                        + (int) ($distributedInRequest[$item->id] ?? 0);
                     $remaining = (int) $entitlementItem->quantity - $alreadyDistributed;
 
                     if ($remaining <= 0) {
@@ -169,6 +177,8 @@ class DistributionService
                             "Jumlah {$item->name} melebihi hak distribusi ({$requestedQty} diminta, sisa hak {$remaining})."
                         );
                     }
+
+                    $distributedInRequest[$item->id] = ($distributedInRequest[$item->id] ?? 0) + $requestedQty;
                 }
 
                 $variant = ItemVariant::where('item_id', $item->id)

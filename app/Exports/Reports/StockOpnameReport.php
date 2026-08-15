@@ -4,17 +4,18 @@ namespace App\Exports\Reports;
 
 use App\Exports\BaseExport;
 use App\Models\StockOpname;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\WithChunkReading;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStyles;
-use PhpOffice\PhpSpreadsheet\Style\Color;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class StockOpnameReport extends BaseExport implements FromQuery, WithHeadings, WithMapping, WithStyles, WithChunkReading
+class StockOpnameReport extends BaseExport implements FromQuery, WithChunkReading, WithHeadings, WithMapping, WithStyles
 {
-    use \Maatwebsite\Excel\Concerns\Exportable;
+    use Exportable;
 
     private int $row = 0;
 
@@ -22,7 +23,7 @@ class StockOpnameReport extends BaseExport implements FromQuery, WithHeadings, W
         private StockOpname $stockOpname
     ) {}
 
-    public function query(): \Illuminate\Database\Eloquent\Relations\Relation
+    public function query(): Relation
     {
         return $this->stockOpname->items()
             ->with('item.category', 'variant')
@@ -73,7 +74,7 @@ class StockOpnameReport extends BaseExport implements FromQuery, WithHeadings, W
         ];
     }
 
-    public function styles(Worksheet $sheet): void
+    public function styles(Worksheet $sheet): ?array
     {
         $colCount = 8;
         $headerRow = $this->headerRow();
@@ -81,19 +82,19 @@ class StockOpnameReport extends BaseExport implements FromQuery, WithHeadings, W
         $lastRow = $dataStart + $this->row - 1;
 
         $this->setTitle($sheet, 'LAPORAN STOK OPNAME', $colCount);
-        $this->setSubtitle($sheet, 'Periode: ' . ($this->stockOpname->period ?? $this->stockOpname->opname_date->format('d/m/Y'))
-            . ' | ' . $this->stockOpname->reference_number, $colCount);
+        $this->setSubtitle($sheet, 'Periode: '.($this->stockOpname->period ?? $this->stockOpname->opname_date->format('d/m/Y'))
+            .' | '.$this->stockOpname->reference_number, $colCount);
 
         $this->applyHeaderStyle($sheet, $headerRow, $colCount);
         $this->applyDataStyle($sheet, $dataStart, $lastRow, $colCount);
 
         for ($i = $dataStart; $i <= $lastRow; $i++) {
-            $variance = $sheet->getCell('G' . $i)->getValue();
+            $variance = $sheet->getCell('G'.$i)->getValue();
             if (is_numeric($variance)) {
                 if ($variance > 0) {
-                    $sheet->getStyle('G' . $i)->getFont()->getColor()->setRGB('006600');
+                    $sheet->getStyle('G'.$i)->getFont()->getColor()->setRGB('006600');
                 } elseif ($variance < 0) {
-                    $sheet->getStyle('G' . $i)->getFont()->getColor()->setRGB('CC0000');
+                    $sheet->getStyle('G'.$i)->getFont()->getColor()->setRGB('CC0000');
                 }
             }
         }
@@ -102,10 +103,10 @@ class StockOpnameReport extends BaseExport implements FromQuery, WithHeadings, W
             $totalRow = $lastRow + 1;
             $this->applyTotalStyle($sheet, $totalRow, $colCount);
 
-            $sheet->setCellValue('A' . $totalRow, 'TOTAL');
-            $sheet->setCellValue('E' . $totalRow, '=SUM(E' . $dataStart . ':E' . $lastRow . ')');
-            $sheet->setCellValue('F' . $totalRow, '=SUM(F' . $dataStart . ':F' . $lastRow . ')');
-            $sheet->setCellValue('G' . $totalRow, '=SUM(G' . $dataStart . ':G' . $lastRow . ')');
+            $sheet->setCellValue('A'.$totalRow, 'TOTAL');
+            $sheet->setCellValue('E'.$totalRow, '=SUM(E'.$dataStart.':E'.$lastRow.')');
+            $sheet->setCellValue('F'.$totalRow, '=SUM(F'.$dataStart.':F'.$lastRow.')');
+            $sheet->setCellValue('G'.$totalRow, '=SUM(G'.$dataStart.':G'.$lastRow.')');
 
             $this->setFormatNumber($sheet, 'E', $dataStart, $totalRow);
             $this->setFormatNumber($sheet, 'F', $dataStart, $totalRow);
@@ -117,6 +118,8 @@ class StockOpnameReport extends BaseExport implements FromQuery, WithHeadings, W
             'E' => 14, 'F' => 14, 'G' => 12, 'H' => 25,
         ]);
 
-        $sheet->freezePane('A' . ($headerRow + 1));
+        $sheet->freezePane('A'.($headerRow + 1));
+
+        return null;
     }
 }

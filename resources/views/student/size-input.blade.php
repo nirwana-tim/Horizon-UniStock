@@ -4,14 +4,6 @@
         $currentSepatu = $currentSizes['sepatu'] ?? null;
     @endphp
 
-    {{-- Flash Messages --}}
-    @if(session('success'))
-        <x-alert type="success">{{ session('success') }}</x-alert>
-    @endif
-    @if(session('error'))
-        <x-alert type="error">{{ session('error') }}</x-alert>
-    @endif
-
     {{-- Hero Banner --}}
     <div class="mb-6 overflow-hidden rounded-2xl h-48 relative shadow-card bg-gradient-to-br from-primary-700 to-primary-900">
         <div class="absolute inset-0 opacity-20" style="background-image: radial-gradient(circle at 20% 20%, rgba(255,255,255,0.3) 0, transparent 40%), radial-gradient(circle at 80% 70%, rgba(255,255,255,0.2) 0, transparent 35%);"></div>

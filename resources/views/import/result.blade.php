@@ -21,9 +21,6 @@
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
 
-                    <x-alert type="success">{{ session('success') }}</x-alert>
-                    <x-alert type="error">{{ session('error') }}</x-alert>
-
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                         <div class="bg-gray-50 p-4 rounded-lg">
                             <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-2">{{ __('File Name') }}</h3>

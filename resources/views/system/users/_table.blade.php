@@ -5,10 +5,14 @@
         </td>
         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $user->email }}</td>
         <td class="px-6 py-4 whitespace-nowrap">
-@if ($user->hasRole('admin'))
+@if ($user->hasRole('super_admin'))
+                <x-badge type="danger">Super Admin</x-badge>
+            @elseif ($user->hasRole('admin'))
                 <x-badge type="primary">Admin Finance</x-badge>
-            @else
+            @elseif ($user->hasRole('staff'))
                 <x-badge type="neutral">Staff</x-badge>
+            @else
+                <x-badge type="neutral">{{ ucfirst($user->roles->first()->name ?? 'Mahasiswa') }}</x-badge>
             @endif
         </td>
         <td class="px-6 py-4 whitespace-nowrap">

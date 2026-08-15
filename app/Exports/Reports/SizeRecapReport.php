@@ -3,16 +3,19 @@
 namespace App\Exports\Reports;
 
 use App\Exports\BaseExport;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStyles;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class SizeRecapReport extends BaseExport implements FromCollection, WithHeadings, WithMapping, WithStyles
 {
-    use \Maatwebsite\Excel\Concerns\Exportable;
+    use Exportable;
 
     private int $row = 0;
 
@@ -21,7 +24,7 @@ class SizeRecapReport extends BaseExport implements FromCollection, WithHeadings
         private ?int $studyProgramId = null
     ) {}
 
-    public function collection(): \Illuminate\Support\Collection
+    public function collection(): Collection
     {
         $query = DB::table('student_size_items')
             ->join('student_size_profiles', 'student_size_items.size_profile_id', '=', 'student_size_profiles.id')
@@ -29,7 +32,7 @@ class SizeRecapReport extends BaseExport implements FromCollection, WithHeadings
             ->join('items', 'student_size_items.item_id', '=', 'items.id')
             ->leftJoin('item_variants', function ($join) {
                 $join->on('student_size_items.item_id', '=', 'item_variants.item_id')
-                     ->on('student_size_items.size', '=', 'item_variants.size');
+                    ->on('student_size_items.size', '=', 'item_variants.size');
             })
             ->select(
                 'items.name as item_name',
@@ -75,7 +78,7 @@ class SizeRecapReport extends BaseExport implements FromCollection, WithHeadings
         ];
     }
 
-    public function styles(Worksheet $sheet): void
+    public function styles(Worksheet $sheet): ?array
     {
         $colCount = 5;
         $headerRow = $this->headerRow();
@@ -83,17 +86,21 @@ class SizeRecapReport extends BaseExport implements FromCollection, WithHeadings
         $lastRow = $dataStart + $this->row - 1;
 
         $this->setTitle($sheet, 'LAPORAN REKAP KEBUTUHAN UKURAN MAHASISWA', $colCount);
-        
+
         $filterText = 'Semua Generasi & Prodi';
         if ($this->generationId || $this->studyProgramId) {
             $parts = [];
             if ($this->generationId) {
                 $level = DB::table('student_generations')->where('id', $this->generationId)->first();
-                if ($level) $parts[] = 'Generasi: ' . $level->name;
+                if ($level) {
+                    $parts[] = 'Generasi: '.$level->name;
+                }
             }
             if ($this->studyProgramId) {
                 $prodi = DB::table('study_programs')->where('id', $this->studyProgramId)->first();
-                if ($prodi) $parts[] = 'Prodi: ' . $prodi->name;
+                if ($prodi) {
+                    $parts[] = 'Prodi: '.$prodi->name;
+                }
             }
             $filterText = implode(' | ', $parts);
         }
@@ -103,9 +110,9 @@ class SizeRecapReport extends BaseExport implements FromCollection, WithHeadings
         $this->applyDataStyle($sheet, $dataStart, $lastRow, $colCount);
 
         // Align right for quantity column
-        $sheet->getStyle('E' . $dataStart . ':E' . $lastRow)->applyFromArray([
+        $sheet->getStyle('E'.$dataStart.':E'.$lastRow)->applyFromArray([
             'alignment' => [
-                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT,
+                'horizontal' => Alignment::HORIZONTAL_RIGHT,
             ],
         ]);
 
@@ -113,6 +120,8 @@ class SizeRecapReport extends BaseExport implements FromCollection, WithHeadings
             'A' => 6, 'B' => 20, 'C' => 35, 'D' => 15, 'E' => 25,
         ]);
 
-        $sheet->freezePane('A' . ($headerRow + 1));
+        $sheet->freezePane('A'.($headerRow + 1));
+
+        return null;
     }
 }

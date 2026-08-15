@@ -10,6 +10,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -80,10 +81,12 @@ class StockOpnameController extends Controller
         $file = $request->file('opname_file');
         $import = new StockOpnameImport($stockOpname->id);
 
-        $stockOpname->items()->delete();
-        Excel::import($import, $file);
+        DB::transaction(function () use ($stockOpname, $import, $file) {
+            $stockOpname->items()->delete();
+            Excel::import($import, $file);
 
-        $stockOpname->update(['status' => 'counted']);
+            $stockOpname->update(['status' => 'counted']);
+        });
 
         return redirect()->route('inventory.stock-opname.show', $stockOpname)
             ->with('success', 'Data stock opname berhasil diupload.')

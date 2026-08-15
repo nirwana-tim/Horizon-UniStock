@@ -4,13 +4,15 @@ namespace App\Exports\Templates;
 
 use App\Exports\BaseExport;
 use Maatwebsite\Excel\Concerns\FromArray;
+use Maatwebsite\Excel\Concerns\WithCustomStartCell;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\WithTitle;
-use Maatwebsite\Excel\Concerns\WithCustomStartCell;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class StockOpnameTemplateExport extends BaseExport implements FromArray, WithHeadings, WithStyles, WithTitle, WithCustomStartCell
+class StockOpnameTemplateExport extends BaseExport implements FromArray, WithCustomStartCell, WithHeadings, WithStyles, WithTitle
 {
     public function startCell(): string
     {
@@ -31,7 +33,7 @@ class StockOpnameTemplateExport extends BaseExport implements FromArray, WithHea
         ];
     }
 
-    public function styles(Worksheet $sheet): void
+    public function styles(Worksheet $sheet): ?array
     {
         $colCount = 3;
 
@@ -43,8 +45,8 @@ class StockOpnameTemplateExport extends BaseExport implements FromArray, WithHea
         $sheet->getStyle('A3')->applyFromArray([
             'font' => ['italic' => true, 'color' => ['rgb' => '888888'], 'size' => 10],
             'alignment' => [
-                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT,
-                'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+                'horizontal' => Alignment::HORIZONTAL_LEFT,
+                'vertical' => Alignment::VERTICAL_CENTER,
             ],
         ]);
         $sheet->getRowDimension(3)->setRowHeight(20);
@@ -62,9 +64,11 @@ class StockOpnameTemplateExport extends BaseExport implements FromArray, WithHea
         $dataEnd = 1000;
         $this->setFormatNumber($sheet, 'C', $dataStart, $dataEnd);
 
-        $lastCol = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colCount);
-        $sheet->freezePane('A' . ($headerRow + 1));
-        $sheet->setAutoFilter('A' . $headerRow . ':' . $lastCol . $headerRow);
+        $lastCol = Coordinate::stringFromColumnIndex($colCount);
+        $sheet->freezePane('A'.($headerRow + 1));
+        $sheet->setAutoFilter('A'.$headerRow.':'.$lastCol.$headerRow);
+
+        return null;
     }
 
     public function title(): string

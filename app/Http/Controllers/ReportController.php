@@ -6,44 +6,38 @@ use App\Exports\DistributionReportExport;
 use App\Exports\GpmReportExport;
 use App\Exports\InventoryReportExport;
 use App\Exports\Reports\LossReport;
+use App\Exports\Reports\SizeRecapReport;
 use App\Exports\Reports\StockCardReport;
 use App\Exports\Reports\StockOpnameReport;
 use App\Exports\Reports\StockReport;
 use App\Models\DistributionSchedule;
 use App\Models\Item;
-use App\Exports\Reports\SizeRecapReport;
-use App\Models\StudentGeneration;
-use App\Models\StudyProgram;
 use App\Models\ItemCategory;
 use App\Models\StockOpname;
+use App\Models\StudentGeneration;
+use App\Models\StudyProgram;
 use App\Services\ReportService;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
-use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class ReportController extends Controller
 {
     public function index(): View
     {
-        $periods = cache()->remember('report-periods', 3600, fn () =>
-            DistributionSchedule::select('period')->whereNotNull('period')->groupBy('period')->orderBy('period', 'desc')->pluck('period', 'period')
+        $periods = cache()->remember('report-periods', 3600, fn () => DistributionSchedule::select('period')->whereNotNull('period')->groupBy('period')->orderBy('period', 'desc')->pluck('period', 'period')
         );
-        $stockOpnames = cache()->remember('report-stock-opnames', 3600, fn () =>
-            StockOpname::orderBy('created_at', 'desc')->pluck('period', 'id')
+        $stockOpnames = cache()->remember('report-stock-opnames', 3600, fn () => StockOpname::orderBy('created_at', 'desc')->pluck('period', 'id')
         );
-        $items = cache()->remember('report-items', 3600, fn () =>
-            Item::orderBy('name', 'asc')->pluck('code', 'code')
+        $items = cache()->remember('report-items', 3600, fn () => Item::orderBy('name', 'asc')->pluck('code', 'code')
         );
-        $categories = cache()->remember('report-categories', 3600, fn () =>
-            ItemCategory::orderBy('code', 'asc')->get(['code', 'label'])
+        $categories = cache()->remember('report-categories', 3600, fn () => ItemCategory::orderBy('code', 'asc')->get(['code', 'label'])
         );
-        $generations = cache()->remember('report-generations', 3600, fn () =>
-            StudentGeneration::orderBy('name', 'asc')->get()
+        $generations = cache()->remember('report-generations', 3600, fn () => StudentGeneration::orderBy('name', 'asc')->get()
         );
-        $studyPrograms = cache()->remember('report-study-programs', 3600, fn () =>
-            StudyProgram::orderBy('name', 'asc')->get()
+        $studyPrograms = cache()->remember('report-study-programs', 3600, fn () => StudyProgram::orderBy('name', 'asc')->get()
         );
 
         return view('report.index', compact('periods', 'stockOpnames', 'items', 'categories', 'generations', 'studyPrograms'));
@@ -70,7 +64,7 @@ class ReportController extends Controller
         ]);
 
         $period = $request->input('period');
-        $filename = 'Laporan_Distribusi' . ($period ? "_{$period}" : '') . '.xlsx';
+        $filename = 'Laporan_Distribusi'.($period ? "_{$period}" : '').'.xlsx';
 
         return Excel::download(new DistributionReportExport($period), $filename);
     }
@@ -82,7 +76,7 @@ class ReportController extends Controller
         ]);
 
         $category = $request->input('category');
-        $filename = 'Laporan_Inventory' . ($category ? "_{$category}" : '') . '.xlsx';
+        $filename = 'Laporan_Inventory'.($category ? "_{$category}" : '').'.xlsx';
 
         return Excel::download(new InventoryReportExport($category), $filename);
     }
@@ -94,7 +88,7 @@ class ReportController extends Controller
         ]);
 
         $period = $request->input('period');
-        $filename = 'Laporan_GPM' . ($period ? "_{$period}" : '') . '.xlsx';
+        $filename = 'Laporan_GPM'.($period ? "_{$period}" : '').'.xlsx';
 
         return Excel::download(new GpmReportExport($period), $filename);
     }
@@ -121,7 +115,7 @@ class ReportController extends Controller
         ]);
 
         $stockOpname = StockOpname::findOrFail($request->input('stock_opname_id'));
-        $filename = 'Laporan_Stok_Opname_' . $stockOpname->reference_number . '.xlsx';
+        $filename = 'Laporan_Stok_Opname_'.$stockOpname->reference_number.'.xlsx';
 
         return Excel::download(new StockOpnameReport($stockOpname), $filename);
     }
@@ -134,7 +128,7 @@ class ReportController extends Controller
             'end_date' => 'nullable|date',
         ]);
 
-        $filename = 'Kartu_Stok_' . $request->input('item_code') . '.xlsx';
+        $filename = 'Kartu_Stok_'.$request->input('item_code').'.xlsx';
 
         return Excel::download(
             new StockCardReport(
@@ -152,6 +146,7 @@ class ReportController extends Controller
             $items = Item::where('category_id', $request->input('category_id'))
                 ->orderBy('name')
                 ->get(['id', 'name']);
+
             return response()->json($items);
         }
 
@@ -162,30 +157,13 @@ class ReportController extends Controller
                 $request->input('category_id') ? (int) $request->input('category_id') : null,
                 $request->input('item_id') ? (int) $request->input('item_id') : null
             );
+
             return response()->json($processed);
         }
 
-        $minDate = \Illuminate\Support\Facades\DB::table('distribution_transactions')->whereNotNull('pickup_time')->min('pickup_time');
-        $maxDate = \Illuminate\Support\Facades\DB::table('distribution_transactions')->whereNotNull('pickup_time')->max('pickup_time');
+        $data = app(ReportService::class)->getSalesDashboardViewData();
 
-        $defaultStart = $minDate ? \Carbon\Carbon::parse($minDate)->toDateString() : now()->startOfMonth()->toDateString();
-        $defaultEnd = $maxDate ? \Carbon\Carbon::parse($maxDate)->toDateString() : now()->toDateString();
-
-        $categories = cache()->remember('report-categories-options', 3600, fn () =>
-            ItemCategory::orderBy('code', 'asc')->get(['id', 'code', 'label'])
-        );
-
-        $stockService = app(\App\Services\StockService::class);
-        $shortageItems = cache()->remember('dashboard-shortage-items', 300, fn () => $stockService->getDemandShortageItems());
-        $outOfStockItems = cache()->remember('dashboard-out-of-stock-items', 300, fn () => $stockService->getOutOfStockItems());
-
-        return view('report.sales-dashboard', compact(
-            'defaultStart',
-            'defaultEnd',
-            'categories',
-            'shortageItems',
-            'outOfStockItems'
-        ));
+        return view('report.sales-dashboard', $data);
     }
 
     public function distributionRecap(Request $request): View|JsonResponse
@@ -197,14 +175,13 @@ class ReportController extends Controller
 
         if ($request->ajax()) {
             $html = view('report.distribution-recap', compact('data'))->render();
+
             return response()->json(compact('html'));
         }
 
-        $periods = cache()->remember('report-periods', 3600, fn () =>
-            DistributionSchedule::select('period')->whereNotNull('period')->groupBy('period')->orderBy('period', 'desc')->pluck('period', 'period')
+        $periods = cache()->remember('report-periods', 3600, fn () => DistributionSchedule::select('period')->whereNotNull('period')->groupBy('period')->orderBy('period', 'desc')->pluck('period', 'period')
         );
-        $studyPrograms = cache()->remember('report-study-programs', 3600, fn () =>
-            StudyProgram::orderBy('name', 'asc')->get()
+        $studyPrograms = cache()->remember('report-study-programs', 3600, fn () => StudyProgram::orderBy('name', 'asc')->get()
         );
 
         return view('report.distribution-recap', compact('data', 'periods', 'studyPrograms', 'period', 'studyProgramId'));

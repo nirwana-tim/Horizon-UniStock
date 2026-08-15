@@ -1,7 +1,4 @@
 <x-app-layout>
-    @if(session('success'))
-        <x-alert type="success">{{ session('success') }}</x-alert>
-    @endif
 
     <main class="flex-grow px-container-margin pt-6 pb-32 flex flex-col items-center">
         {{-- QR Card --}}

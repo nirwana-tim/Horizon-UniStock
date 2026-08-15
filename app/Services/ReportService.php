@@ -5,10 +5,11 @@ namespace App\Services;
 use App\Models\DistributionItem;
 use App\Models\DistributionTransaction;
 use App\Models\Item;
-use App\Models\StockBalance;
+use App\Models\ItemCategory;
 use App\Models\StockMovement;
 use App\Models\StockOpname;
 use App\Models\StockOpnameItem;
+use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -321,10 +322,28 @@ class ReportService
         return $query->get();
     }
 
+    public function getSalesDashboardViewData(): array
+    {
+        $minDate = DB::table('distribution_transactions')->whereNotNull('pickup_time')->min('pickup_time');
+        $maxDate = DB::table('distribution_transactions')->whereNotNull('pickup_time')->max('pickup_time');
+
+        $defaultStart = $minDate ? Carbon::parse($minDate)->toDateString() : now()->startOfMonth()->toDateString();
+        $defaultEnd = $maxDate ? Carbon::parse($maxDate)->toDateString() : now()->toDateString();
+
+        $categories = cache()->remember('report-categories-options', 3600, fn () => ItemCategory::orderBy('code', 'asc')->get(['id', 'code', 'label'])
+        );
+
+        $stockService = app(StockService::class);
+        $shortageItems = cache()->remember('dashboard-shortage-items', 300, fn () => $stockService->getDemandShortageItems());
+        $outOfStockItems = cache()->remember('dashboard-out-of-stock-items', 300, fn () => $stockService->getOutOfStockItems());
+
+        return compact('defaultStart', 'defaultEnd', 'categories', 'shortageItems', 'outOfStockItems');
+    }
+
     public function getSalesDashboardProcessedData(?string $startDate = null, ?string $endDate = null, ?int $categoryId = null, ?int $itemId = null): array
     {
-        $start = $startDate ? \Carbon\Carbon::parse($startDate)->startOfDay() : null;
-        $end = $endDate ? \Carbon\Carbon::parse($endDate)->endOfDay() : null;
+        $start = $startDate ? Carbon::parse($startDate)->startOfDay() : null;
+        $end = $endDate ? Carbon::parse($endDate)->endOfDay() : null;
 
         // 1. KPI Sold Data
         $soldQuery = DB::table('distribution_items as di')
@@ -371,22 +390,22 @@ class ReportService
         foreach ($categoriesList as $cat) {
             $catId = $cat->id;
             $key = strtolower($cat->code);
-            
+
             $sold = (int) ($soldData[$catId] ?? 0);
             $stock = (int) ($stockData[$catId] ?? 0);
-            
+
             $kpis[$key] = [
                 'sold' => $sold,
-                'stock' => $stock
+                'stock' => $stock,
             ];
-            
+
             $grandTotalSold += $sold;
             $grandTotalStock += $stock;
         }
 
         $kpis['grand_total'] = [
             'sold' => $grandTotalSold,
-            'stock' => $grandTotalStock
+            'stock' => $grandTotalStock,
         ];
 
         // 4. Chart 1: Unit Sold by Items
@@ -419,11 +438,11 @@ class ReportService
             'datasets' => [
                 [
                     'label' => 'Unit Sold',
-                    'data' => $c1Data->pluck('total_sold')->map(fn($v) => (int) $v)->toArray(),
+                    'data' => $c1Data->pluck('total_sold')->map(fn ($v) => (int) $v)->toArray(),
                     'backgroundColor' => '#980416',
-                    'borderRadius' => 4
-                ]
-            ]
+                    'borderRadius' => 4,
+                ],
+            ],
         ];
 
         // 5. Chart 2: Revenue by Items
@@ -456,11 +475,11 @@ class ReportService
             'datasets' => [
                 [
                     'label' => 'Revenue',
-                    'data' => $c2Data->pluck('total_revenue')->map(fn($v) => (int) $v)->toArray(),
+                    'data' => $c2Data->pluck('total_revenue')->map(fn ($v) => (int) $v)->toArray(),
                     'backgroundColor' => '#10B981',
-                    'borderRadius' => 4
-                ]
-            ]
+                    'borderRadius' => 4,
+                ],
+            ],
         ];
 
         // 6. Chart 3: Combo Chart (Revenue & Unit Sold by Month)
@@ -506,22 +525,22 @@ class ReportService
                 [
                     'type' => 'bar',
                     'label' => 'Revenue',
-                    'data' => $c3Data->pluck('total_revenue')->map(fn($v) => (int) $v)->toArray(),
+                    'data' => $c3Data->pluck('total_revenue')->map(fn ($v) => (int) $v)->toArray(),
                     'backgroundColor' => '#980416',
                     'yAxisID' => 'y',
-                    'borderRadius' => 4
+                    'borderRadius' => 4,
                 ],
                 [
                     'type' => 'line',
                     'label' => 'Unit Sold',
-                    'data' => $c3Data->pluck('total_sold')->map(fn($v) => (int) $v)->toArray(),
+                    'data' => $c3Data->pluck('total_sold')->map(fn ($v) => (int) $v)->toArray(),
                     'borderColor' => '#2563EB',
                     'backgroundColor' => 'rgba(37, 99, 235, 0.1)',
                     'yAxisID' => 'y1',
                     'tension' => 0.4,
-                    'fill' => true
-                ]
-            ]
+                    'fill' => true,
+                ],
+            ],
         ];
 
         // 7. Chart 4: Available Stock
@@ -546,11 +565,11 @@ class ReportService
             'datasets' => [
                 [
                     'label' => 'Available Stock',
-                    'data' => $c4Data->pluck('total_stock')->map(fn($v) => (int) $v)->toArray(),
+                    'data' => $c4Data->pluck('total_stock')->map(fn ($v) => (int) $v)->toArray(),
                     'backgroundColor' => '#F59E0B',
-                    'borderRadius' => 4
-                ]
-            ]
+                    'borderRadius' => 4,
+                ],
+            ],
         ];
 
         // 8. Chart 5: Value Stock
@@ -575,11 +594,11 @@ class ReportService
             'datasets' => [
                 [
                     'label' => 'Value Stock (Rp)',
-                    'data' => $c5Data->pluck('total_value')->map(fn($v) => (int) $v)->toArray(),
+                    'data' => $c5Data->pluck('total_value')->map(fn ($v) => (int) $v)->toArray(),
                     'backgroundColor' => '#3B82F6',
-                    'borderRadius' => 4
-                ]
-            ]
+                    'borderRadius' => 4,
+                ],
+            ],
         ];
 
         // 9. Chart 6: % Unit Sold
@@ -622,12 +641,12 @@ class ReportService
             'labels' => $c6Data->pluck('name')->toArray(),
             'datasets' => [
                 [
-                    'data' => $c6Data->pluck('total_sold')->map(fn($v) => (int) $v)->toArray(),
+                    'data' => $c6Data->pluck('total_sold')->map(fn ($v) => (int) $v)->toArray(),
                     'backgroundColor' => array_slice($colors, 0, $c6Data->count()),
                     'borderWidth' => 2,
-                    'borderColor' => '#ffffff'
-                ]
-            ]
+                    'borderColor' => '#ffffff',
+                ],
+            ],
         ];
 
         return [

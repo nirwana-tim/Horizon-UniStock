@@ -21,19 +21,6 @@
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
 
-                    @if (session('success'))
-                        <x-alert type="success">{{ session('success') }}</x-alert>
-                    @endif
-                    @if (session('error'))
-                        <x-alert type="error">{{ session('error') }}</x-alert>
-                    @endif
-                    @if (session('warning'))
-                        <x-alert type="warning">{{ session('warning') }}</x-alert>
-                    @endif
-                    @if (session('info'))
-                        <x-alert type="info">{{ session('info') }}</x-alert>
-                    @endif
-
                     {{-- Stats --}}
                     <div class="flex flex-wrap gap-2 mb-4">
                         <x-badge type="primary">{{ $totalWithAccount }} Punya Akun</x-badge>

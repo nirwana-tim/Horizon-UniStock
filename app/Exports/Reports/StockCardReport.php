@@ -5,6 +5,8 @@ namespace App\Exports\Reports;
 use App\Exports\BaseExport;
 use App\Models\Item;
 use App\Models\StockMovement;
+use Illuminate\Database\Eloquent\Builder;
+use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\WithChunkReading;
 use Maatwebsite\Excel\Concerns\WithHeadings;
@@ -12,11 +14,12 @@ use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class StockCardReport extends BaseExport implements FromQuery, WithHeadings, WithMapping, WithStyles, WithChunkReading
+class StockCardReport extends BaseExport implements FromQuery, WithChunkReading, WithHeadings, WithMapping, WithStyles
 {
-    use \Maatwebsite\Excel\Concerns\Exportable;
+    use Exportable;
 
     private int $row = 0;
+
     private int $runningBalance = 0;
 
     public function __construct(
@@ -25,7 +28,7 @@ class StockCardReport extends BaseExport implements FromQuery, WithHeadings, Wit
         private ?string $endDate = null
     ) {}
 
-    public function query(): \Illuminate\Database\Eloquent\Builder
+    public function query(): Builder
     {
         $movements = StockMovement::with('item', 'variant')
             ->whereIn('item_id', Item::where('code', $this->itemCode)->pluck('id'))
@@ -81,7 +84,7 @@ class StockCardReport extends BaseExport implements FromQuery, WithHeadings, Wit
         return [
             $this->row,
             $movement->created_at->format('d/m/Y'),
-            $movement->reference_type . ' #' . $movement->reference_id,
+            $movement->reference_type.' #'.$movement->reference_id,
             $movement->notes ?? ($movement->type === 'IN' ? 'Penerimaan Stok' : 'Pengeluaran Stok'),
             $in,
             $out,
@@ -91,7 +94,7 @@ class StockCardReport extends BaseExport implements FromQuery, WithHeadings, Wit
         ];
     }
 
-    public function styles(Worksheet $sheet): void
+    public function styles(Worksheet $sheet): ?array
     {
         $colCount = 9;
         $headerRow = $this->headerRow();
@@ -99,8 +102,8 @@ class StockCardReport extends BaseExport implements FromQuery, WithHeadings, Wit
         $lastRow = $dataStart + $this->row - 1;
 
         $this->setTitle($sheet, 'KARTU STOK', $colCount);
-        $this->setSubtitle($sheet, 'Barang: ' . $this->itemCode
-            . ' | ' . ($this->startDate ?? 'Awal') . ' - ' . ($this->endDate ?? now()->format('d/m/Y')), $colCount);
+        $this->setSubtitle($sheet, 'Barang: '.$this->itemCode
+            .' | '.($this->startDate ?? 'Awal').' - '.($this->endDate ?? now()->format('d/m/Y')), $colCount);
 
         $this->applyHeaderStyle($sheet, $headerRow, $colCount);
         $this->applyDataStyle($sheet, $dataStart, $lastRow, $colCount);
@@ -109,10 +112,10 @@ class StockCardReport extends BaseExport implements FromQuery, WithHeadings, Wit
             $totalRow = $lastRow + 1;
             $this->applyTotalStyle($sheet, $totalRow, $colCount);
 
-            $sheet->setCellValue('A' . $totalRow, 'TOTAL');
-            $sheet->setCellValue('E' . $totalRow, '=SUM(E' . $dataStart . ':E' . $lastRow . ')');
-            $sheet->setCellValue('F' . $totalRow, '=SUM(F' . $dataStart . ':F' . $lastRow . ')');
-            $sheet->setCellValue('H' . $totalRow, '=SUM(H' . $dataStart . ':H' . $lastRow . ')');
+            $sheet->setCellValue('A'.$totalRow, 'TOTAL');
+            $sheet->setCellValue('E'.$totalRow, '=SUM(E'.$dataStart.':E'.$lastRow.')');
+            $sheet->setCellValue('F'.$totalRow, '=SUM(F'.$dataStart.':F'.$lastRow.')');
+            $sheet->setCellValue('H'.$totalRow, '=SUM(H'.$dataStart.':H'.$lastRow.')');
 
             $this->setFormatRupiah($sheet, 'G', $dataStart, $totalRow);
             $this->setFormatRupiah($sheet, 'H', $dataStart, $totalRow);
@@ -126,6 +129,8 @@ class StockCardReport extends BaseExport implements FromQuery, WithHeadings, Wit
             'E' => 14, 'F' => 14, 'G' => 16, 'H' => 16, 'I' => 14,
         ]);
 
-        $sheet->freezePane('A' . ($headerRow + 1));
+        $sheet->freezePane('A'.($headerRow + 1));
+
+        return null;
     }
 }

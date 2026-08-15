@@ -3,6 +3,8 @@
 namespace App\Exports;
 
 use App\Models\StockBalance;
+use Illuminate\Database\Eloquent\Builder;
+use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\WithChunkReading;
 use Maatwebsite\Excel\Concerns\WithCustomStartCell;
@@ -11,11 +13,12 @@ use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class InventoryReportExport extends BaseExport implements FromQuery, WithHeadings, WithMapping, WithStyles, WithChunkReading, WithCustomStartCell
+class InventoryReportExport extends BaseExport implements FromQuery, WithChunkReading, WithCustomStartCell, WithHeadings, WithMapping, WithStyles
 {
-    use \Maatwebsite\Excel\Concerns\Exportable;
+    use Exportable;
 
     private int $row = 0;
+
     private string $lastCategory = '';
 
     public function __construct(
@@ -28,7 +31,7 @@ class InventoryReportExport extends BaseExport implements FromQuery, WithHeading
         return 'A4';
     }
 
-    public function query(): \Illuminate\Database\Eloquent\Builder
+    public function query(): Builder
     {
         $query = StockBalance::with('item.category', 'variant')
             ->join('items', 'stock_balances.item_id', '=', 'items.id')
@@ -93,7 +96,7 @@ class InventoryReportExport extends BaseExport implements FromQuery, WithHeading
         ];
     }
 
-    public function styles(Worksheet $sheet): void
+    public function styles(Worksheet $sheet): ?array
     {
         $colCount = 8;
         $headerRow = $this->headerRow();
@@ -101,7 +104,7 @@ class InventoryReportExport extends BaseExport implements FromQuery, WithHeading
         $lastRow = $dataStart + $this->row - 1;
 
         $this->setTitle($sheet, 'LAPORAN INVENTARIS', $colCount);
-        $this->setSubtitle($sheet, 'Periode: ' . now()->format('d/m/Y'), $colCount);
+        $this->setSubtitle($sheet, 'Periode: '.now()->format('d/m/Y'), $colCount);
 
         $this->applyHeaderStyle($sheet, $headerRow, $colCount);
         $this->applyDataStyle($sheet, $dataStart, $lastRow, $colCount);
@@ -111,6 +114,8 @@ class InventoryReportExport extends BaseExport implements FromQuery, WithHeading
             'E' => 10, 'F' => 10, 'G' => 14, 'H' => 18,
         ]);
 
-        $sheet->freezePane('A' . ($headerRow + 1));
+        $sheet->freezePane('A'.($headerRow + 1));
+
+        return null;
     }
 }

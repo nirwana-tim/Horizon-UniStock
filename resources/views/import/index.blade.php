@@ -10,14 +10,6 @@
                 Fitur import data telah diintegrasikan langsung ke masing-masing halaman modul agar lebih mudah digunakan tanpa perlu memilih dari dropdown. Anda juga dapat melakukan import langsung dari kartu di bawah ini.
             </x-alert>
 
-            @if(session('success'))
-                <x-alert type="success">{{ session('success') }}</x-alert>
-            @endif
-
-            @if(session('error'))
-                <x-alert type="error">{{ session('error') }}</x-alert>
-            @endif
-
             {{-- Import Modules Grid --}}
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 

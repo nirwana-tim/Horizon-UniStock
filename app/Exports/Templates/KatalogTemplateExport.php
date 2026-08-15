@@ -5,14 +5,14 @@ namespace App\Exports\Templates;
 use App\Exports\BaseExport;
 use App\Models\ItemSize;
 use Maatwebsite\Excel\Concerns\FromArray;
+use Maatwebsite\Excel\Concerns\WithCustomStartCell;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\WithTitle;
-use Maatwebsite\Excel\Concerns\WithCustomStartCell;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class KatalogTemplateExport extends BaseExport implements FromArray, WithHeadings, WithStyles, WithTitle, WithCustomStartCell
+class KatalogTemplateExport extends BaseExport implements FromArray, WithCustomStartCell, WithHeadings, WithStyles, WithTitle
 {
     public function startCell(): string
     {
@@ -34,7 +34,7 @@ class KatalogTemplateExport extends BaseExport implements FromArray, WithHeading
         );
     }
 
-    public function styles(Worksheet $sheet): void
+    public function styles(Worksheet $sheet): ?array
     {
         $sizes = ItemSize::orderBy('code')->pluck('label');
         $fixedCols = 8;
@@ -58,8 +58,10 @@ class KatalogTemplateExport extends BaseExport implements FromArray, WithHeading
         $this->setFormatRupiah($sheet, 'H', $this->dataStartRow(), 1000);
 
         $lastCol = Coordinate::stringFromColumnIndex($colCount);
-        $sheet->freezePane('A' . ($headerRow + 1));
-        $sheet->setAutoFilter('A' . $headerRow . ':' . $lastCol . $headerRow);
+        $sheet->freezePane('A'.($headerRow + 1));
+        $sheet->setAutoFilter('A'.$headerRow.':'.$lastCol.$headerRow);
+
+        return null;
     }
 
     public function title(): string

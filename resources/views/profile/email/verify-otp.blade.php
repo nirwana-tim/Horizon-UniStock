@@ -4,10 +4,6 @@
         <p class="text-xs text-gray-500 mt-0.5">Masukkan kode OTP yang dikirim ke email baru Anda</p>
     </div>
 
-    @if(session('success'))
-        <x-alert type="success">{{ session('success') }}</x-alert>
-    @endif
-
     <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
         @if(!$email)
             <p class="text-sm text-gray-500">Sesi tidak valid. Silakan mulai ulang.</p>

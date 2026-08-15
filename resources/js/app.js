@@ -28,6 +28,13 @@ Alpine.data('serverTable', (url) => ({
     generationId: '',
     isActive: '',
     period: '',
+    category: '',
+    gender: '',
+    type: '',
+    startDate: '',
+    endDate: '',
+    role: '',
+    status: '',
     tableHtml: '',
     paginationHtml: '',
     loading: false,
@@ -61,6 +68,13 @@ Alpine.data('serverTable', (url) => ({
         if (this.generationId) params.generation_id = this.generationId;
         if (this.isActive !== '') params.is_active = this.isActive;
         if (this.period !== '') params.period = this.period;
+        if (this.category !== '') params.category = this.category;
+        if (this.gender !== '') params.gender = this.gender;
+        if (this.type !== '') params.type = this.type;
+        if (this.startDate !== '') params.start_date = this.startDate;
+        if (this.endDate !== '') params.end_date = this.endDate;
+        if (this.role !== '') params.role = this.role;
+        if (this.status !== '') params.status = this.status;
         axios.get(url, { params, signal: this._abortController.signal })
         .then(res => {
             this.tableHtml = res.data.html || res.data.tableHtml || '';

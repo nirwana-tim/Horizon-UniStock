@@ -3,10 +3,6 @@
         <div class="max-w-5xl mx-auto sm:px-6 lg:px-8 space-y-6">
             <x-page-header title="Level Mahasiswa" />
 
-            @if(session('success'))
-                <x-alert type="success">{{ session('success') }}</x-alert>
-            @endif
-
             <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">

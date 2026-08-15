@@ -5,9 +5,9 @@ namespace App\Http\Controllers;
 use App\Enums\Role;
 use App\Models\DistributionSchedule;
 use App\Models\DistributionTransaction;
-use App\Models\SizeChangeEvent;
 use App\Models\SizeEventSubmission;
 use App\Models\Student;
+use App\Services\ReportService;
 use App\Services\StudentSizeService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -21,7 +21,9 @@ class DashboardController extends Controller
         $user = Auth::user();
 
         if ($user->hasRole(Role::SuperAdmin->value) || $user->hasRole(Role::Admin->value)) {
-            return app(ReportController::class)->salesDashboard($request);
+            $data = app(ReportService::class)->getSalesDashboardViewData();
+
+            return view('report.sales-dashboard', $data);
         }
 
         if ($user->hasRole(Role::Staff->value)) {

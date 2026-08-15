@@ -13,8 +13,6 @@
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
 
-                    <x-alert type="success">{{ session('success') }}</x-alert>
-
                     <form action="{{ route('master-data.faculty.store') }}" method="POST">
                         @csrf
 

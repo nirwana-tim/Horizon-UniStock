@@ -4,10 +4,6 @@
             <div x-data="serverTable('{{ route('students.promote.form') }}')">
                 <x-page-header title="Promote Students" />
 
-                @if(session('success'))
-                    <x-alert type="success">{{ session('success') }}</x-alert>
-                @endif
-
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6 text-gray-900">
                         <form action="{{ route('students.promote') }}" method="POST" id="promote-form">

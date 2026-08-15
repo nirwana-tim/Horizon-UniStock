@@ -7,7 +7,6 @@
 
     <div class="py-12">
         <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
-            <x-alert type="success">{{ session('success') }}</x-alert>
 
             <div class="mb-4 flex items-center gap-4">
                 <div class="flex items-center gap-2 text-sm text-gray-600">
