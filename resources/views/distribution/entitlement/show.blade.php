@@ -62,13 +62,13 @@ label="Delete Entitlement"
                                             @php
                                                 $item = $ei->item;
                                                 $baseCode = $item->base_code ?? $item->code;
-                                                $availableSizes = $availableSizes[$baseCode] ?? null;
+                                                $itemSizes = $availableSizes[$baseCode] ?? null;
                                             @endphp
                                             <tr class="hover:bg-gray-50">
                                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $loop->iteration }}</td>
                                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $item?->name ?? '-' }}</td>
                                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-500">{{ $baseCode }}</td>
-                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $availableSizes ?: '-' }}</td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $itemSizes ?: '-' }}</td>
                                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-semibold">{{ $ei->quantity }}</td>
                                             </tr>
                                         @endforeach

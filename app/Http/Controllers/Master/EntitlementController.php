@@ -76,7 +76,7 @@ class EntitlementController extends Controller
             ->unique()
             ->values();
 
-        $availableSizes = App\Models\Item::whereIn('base_code', $baseCodes)
+        $availableSizes = Item::whereIn('base_code', $baseCodes)
             ->orWhereIn('code', $baseCodes)
             ->with('variants')
             ->get()
