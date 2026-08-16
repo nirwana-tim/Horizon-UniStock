@@ -16,12 +16,39 @@
 
         <div class="bg-white rounded-xl border border-gray-200 shadow-sm">
             <div class="p-5 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center gap-3">
-                <div class="flex items-center gap-2 text-xs font-medium text-gray-700">
+                <div class="flex items-center gap-2 text-xs font-medium text-gray-700 flex-wrap">
                     <span>Filter:</span>
-                    <button type="button" @click="role=''; status=''; page=1; fetchData()" class="px-3 py-1 rounded-full cursor-pointer {{ !request('role') && !request('status') ? 'bg-primary-700 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}">Semua</button>
-                    <button type="button" @click="role='admin'; status=''; page=1; fetchData()" class="px-3 py-1 rounded-full cursor-pointer {{ request('role') === 'admin' ? 'bg-primary-700 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}">Admin</button>
-                    <button type="button" @click="role='staff'; status=''; page=1; fetchData()" class="px-3 py-1 rounded-full cursor-pointer {{ request('role') === 'staff' ? 'bg-primary-700 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}">Staff</button>
-                    <button type="button" @click="status='inactive'; role=''; page=1; fetchData()" class="px-3 py-1 rounded-full cursor-pointer {{ request('status') === 'inactive' ? 'bg-primary-700 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}">Nonaktif</button>
+                    <button type="button"
+                        @click="role=''; status=''; search=''; page=1; fetchData()"
+                        class="px-3 py-1 rounded-full cursor-pointer"
+                        :class="role === '' && status === '' ? 'bg-primary-700 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'">
+                        Semua
+                    </button>
+                    <button type="button"
+                        @click="role='admin'; status=''; search=''; page=1; fetchData()"
+                        class="px-3 py-1 rounded-full cursor-pointer"
+                        :class="role === 'admin' ? 'bg-primary-700 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'">
+                        Admin
+                    </button>
+                    <button type="button"
+                        @click="role='staff'; status=''; search=''; page=1; fetchData()"
+                        class="px-3 py-1 rounded-full cursor-pointer"
+                        :class="role === 'staff' ? 'bg-primary-700 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'">
+                        Staff
+                    </button>
+                    <span class="text-gray-300">|</span>
+                    <button type="button"
+                        @click="status='active'; role=''; search=''; page=1; fetchData()"
+                        class="px-3 py-1 rounded-full cursor-pointer"
+                        :class="status === 'active' ? 'bg-primary-700 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'">
+                        Aktif
+                    </button>
+                    <button type="button"
+                        @click="status='inactive'; role=''; search=''; page=1; fetchData()"
+                        class="px-3 py-1 rounded-full cursor-pointer"
+                        :class="status === 'inactive' ? 'bg-primary-700 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'">
+                        Nonaktif
+                    </button>
                 </div>
             </div>
 
