@@ -112,10 +112,8 @@
         function sizeSheetHTML(category) {
             const opts = sizeOptions[category] || [];
             const title = category === 'baju' ? 'Ukuran Baju' : 'Ukuran Sepatu';
-            return '<div class="py-2">' +
-                '<h3 class="font-headline-sm text-headline-sm text-on-surface mb-4">' + title + '</h3>' +
-                '<div class="space-y-1 max-h-[312px] overflow-y-auto overscroll-contain scrollbar-hide">' +
-                opts.map(function(size) {
+            const optionsHtml = opts.length > 0
+                ? opts.map(function(size) {
                     const active = size === selectedSizes[category]
                         ? ' bg-primary/5 text-primary font-semibold'
                         : ' text-secondary/70';
@@ -123,7 +121,12 @@
                         '" data-size-category="' + category + '" data-size-value="' + size +
                         '"><span class="font-body-md text-body-md">' + size +
                         '</span><span class="material-symbols-outlined text-[18px]">check</span></button>';
-                }).join('') +
+                }).join('')
+                : '<p class="font-body-md text-body-md text-secondary/60 px-4 py-3 text-center">Ukuran belum diatur oleh admin.</p>';
+            return '<div class="py-2">' +
+                '<h3 class="font-headline-sm text-headline-sm text-on-surface mb-4">' + title + '</h3>' +
+                '<div class="space-y-1 max-h-[312px] overflow-y-auto overscroll-contain scrollbar-hide">' +
+                optionsHtml +
                 '</div></div>';
         }
 

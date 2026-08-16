@@ -188,7 +188,9 @@
                                                     $sizeInfo       = $studentSizes[$baseCode] ?? null;
                                                     $expectedSize   = $sizeInfo['size'] ?? '-';
                                                     $expectedLabel  = $sizeInfo['size_label'] ?? $expectedSize;
-                                                    $availableStock = $stockInfo[$baseCode][$expectedSize] ?? 0;
+                                                    $sizeStock      = $stockInfo[$baseCode][$expectedSize] ?? 0;
+                                                    $totalStock     = array_sum($stockInfo[$baseCode] ?? []);
+                                                    $availableStock = $sizeStock > 0 ? $sizeStock : $totalStock;
                                                     $outOfStock     = $availableStock <= 0;
                                                     $takenQty       = $distributedItems[$baseCode] ?? 0;
                                                     $entitledQty    = $entitledQuantities[$baseCode] ?? 0;

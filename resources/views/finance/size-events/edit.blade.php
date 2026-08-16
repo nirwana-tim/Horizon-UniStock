@@ -95,7 +95,7 @@
                     <hr class="my-4 border-gray-200">
 
                     <h4 class="text-sm font-semibold text-gray-800">Opsi Ukuran (Opsional)</h4>
-                    <p class="text-xs text-gray-500 mb-3">Kosongkan untuk menggunakan ukuran default dari database. Pisahkan dengan koma untuk opsi custom.</p>
+                    <p class="text-xs text-gray-500 mb-3">Isi ukuran yang akan ditampilkan ke mahasiswa. Kosongkan untuk menghapus opsi. Pisahkan dengan koma untuk opsi custom.</p>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>

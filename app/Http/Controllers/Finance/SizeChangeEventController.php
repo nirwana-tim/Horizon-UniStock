@@ -5,9 +5,9 @@ namespace App\Http\Controllers\Finance;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Finance\SizeChangeEventRequest;
 use App\Models\Faculty;
+use App\Models\SizeChangeEvent;
 use App\Models\StudentGeneration;
 use App\Models\StudentLevel;
-use App\Models\SizeChangeEvent;
 use App\Models\StudyProgram;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
@@ -56,8 +56,8 @@ class SizeChangeEventController extends Controller
         $generations = StudentGeneration::orderBy('name')->get();
         $studentLevels = StudentLevel::orderBy('kode')->get();
 
-        $bajuOptionsText = $sizeEvent->baju_size_options ? implode(', ', $sizeEvent->baju_size_options) : 'XS, S, M, L, XL, XXL, XXXL, XXXXL, XXXXXL, XXXXXXL';
-        $sepatuOptionsText = $sizeEvent->sepatu_size_options ? implode(', ', $sizeEvent->sepatu_size_options) : '38, 39, 40, 41, 42, 43, 44, 45';
+        $bajuOptionsText = $sizeEvent->baju_size_options ? implode(', ', $sizeEvent->baju_size_options) : '';
+        $sepatuOptionsText = $sizeEvent->sepatu_size_options ? implode(', ', $sizeEvent->sepatu_size_options) : '';
 
         return view('finance.size-events.edit', compact('sizeEvent', 'faculties', 'studyPrograms', 'generations', 'studentLevels', 'bajuOptionsText', 'sepatuOptionsText'));
     }
@@ -87,15 +87,22 @@ class SizeChangeEventController extends Controller
 
     private function parseSizeOptions(array $validated): array
     {
-        if (! empty($validated['baju_size_options_text'])) {
-            $validated['baju_size_options'] = array_map('trim', explode(',', $validated['baju_size_options_text']));
-        }
-        if (! empty($validated['sepatu_size_options_text'])) {
-            $validated['sepatu_size_options'] = array_map('trim', explode(',', $validated['sepatu_size_options_text']));
-        }
+        $validated['baju_size_options'] = $this->parseSizeOptionText($validated['baju_size_options_text'] ?? null);
+        $validated['sepatu_size_options'] = $this->parseSizeOptionText($validated['sepatu_size_options_text'] ?? null);
 
         unset($validated['baju_size_options_text'], $validated['sepatu_size_options_text']);
 
         return $validated;
+    }
+
+    private function parseSizeOptionText(?string $text): ?array
+    {
+        if ($text === null || trim($text) === '') {
+            return null;
+        }
+
+        $parts = array_filter(array_map('trim', explode(',', $text)), fn ($value) => $value !== '');
+
+        return array_values($parts);
     }
 }

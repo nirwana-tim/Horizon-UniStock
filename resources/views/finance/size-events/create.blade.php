@@ -94,13 +94,13 @@
                     <hr class="my-4 border-gray-200">
 
                     <h4 class="text-sm font-semibold text-gray-800">Opsi Ukuran (Opsional)</h4>
-                    <p class="text-xs text-gray-500 mb-3">Kosongkan untuk menggunakan ukuran default dari database. Pisahkan dengan koma untuk opsi custom.</p>
+                    <p class="text-xs text-gray-500 mb-3">Isi ukuran yang akan ditampilkan ke mahasiswa. Kosongkan jika belum tersedia. Pisahkan dengan koma untuk opsi custom.</p>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <x-input-label value="Opsi Ukuran Baju" />
                             <input type="text" name="baju_size_options_text"
-                                value="{{ old('baju_size_options_text', 'XS, S, M, L, XL, XXL, XXXL, XXXXL, XXXXXL, XXXXXXL') }}"
+                                value="{{ old('baju_size_options_text') }}"
                                 placeholder="XS, S, M, L, XL, XXL, XXXL"
                                 class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500 text-sm">
                             <p class="mt-1 text-xs text-gray-400">Pisahkan dengan koma. Contoh: XS, S, M, L, XL, XXL</p>
@@ -109,7 +109,7 @@
                         <div>
                             <x-input-label value="Opsi Ukuran Sepatu" />
                             <input type="text" name="sepatu_size_options_text"
-                                value="{{ old('sepatu_size_options_text', '38, 39, 40, 41, 42, 43, 44, 45') }}"
+                                value="{{ old('sepatu_size_options_text') }}"
                                 placeholder="38, 39, 40, 41, 42, 43, 44, 45"
                                 class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500 text-sm">
                             <p class="mt-1 text-xs text-gray-400">Pisahkan dengan koma. Contoh: 38, 39, 40, 41, 42, 43, 44, 45</p>

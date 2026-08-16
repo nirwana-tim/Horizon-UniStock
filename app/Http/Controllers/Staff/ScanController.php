@@ -259,6 +259,54 @@ class ScanController extends Controller
             }
         }
 
+        // Fallback ukuran harapan untuk item yang belum memiliki ukuran mahasiswa
+        // (mis. kategori selain UNF/SHO seperti ALM) agar stok tetap terbaca.
+        if ($scheduleItems->isNotEmpty()) {
+            foreach ($scheduleItems as $item) {
+                $baseCode = $item->base_code ?? $item->code;
+                if (! $baseCode || isset($studentSizes[$baseCode])) {
+                    continue;
+                }
+
+                $variants = $item->variants;
+                if ($variants->isEmpty()) {
+                    continue;
+                }
+
+                $candidate = null;
+                if ($sizeProfile?->baju_size) {
+                    $resolved = $this->studentSizeService->resolveSizeValue($item, $sizeProfile->baju_size);
+                    if ($resolved && $variants->contains('size', $resolved['code'])) {
+                        $candidate = $resolved;
+                    }
+                }
+
+                if (! $candidate && $sizeProfile?->sepatu_size) {
+                    $resolved = $this->studentSizeService->resolveSizeValue($item, $sizeProfile->sepatu_size);
+                    if ($resolved && $variants->contains('size', $resolved['code'])) {
+                        $candidate = $resolved;
+                    }
+                }
+
+                if (! $candidate) {
+                    $stocked = collect($stockInfo[$baseCode] ?? []);
+                    $size = $stocked->isNotEmpty()
+                        ? $stocked->sort()->reverse()->keys()->first()
+                        : $variants->first()->size;
+                    $candidate = [
+                        'code' => $size,
+                        'label' => $variants->firstWhere('size', $size)?->size_label ?? $size,
+                    ];
+                }
+
+                $studentSizes[$baseCode] = [
+                    'size' => $candidate['code'],
+                    'size_label' => $candidate['label'],
+                    'change_count' => 0,
+                ];
+            }
+        }
+
         $itemPrices = [];
         $itemIds = $scheduleItems->pluck('id');
         if ($itemIds->isNotEmpty()) {

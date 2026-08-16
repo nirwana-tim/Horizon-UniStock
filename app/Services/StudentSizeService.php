@@ -10,22 +10,13 @@ use App\Models\ItemVariant;
 use App\Models\SizeChangeEvent;
 use App\Models\SizeEventSubmission;
 use App\Models\Student;
-use App\Models\StudentSizeHistory;
 use App\Models\StudentSizeItem;
 use App\Models\StudentSizeProfile;
-use App\Services\AuditService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class StudentSizeService
 {
-    /**
-     * Default size options (fallback when event has no custom options).
-     * These are derived from DB seeders but cached here for performance.
-     */
-    private const DEFAULT_BAJU_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL', 'XXXXL', 'XXXXXL', 'XXXXXXL'];
-    private const DEFAULT_SEPATU_SIZES = ['38', '39', '40', '41', '42', '43', '44', '45'];
-
     public function getEntitlementItems(Student $student): Collection
     {
         if (! $student->entitlement_code) {
@@ -66,7 +57,7 @@ class StudentSizeService
         return $unique->values();
     }
 
-    public function getEventsForStudent(Student $student): \Illuminate\Support\Collection
+    public function getEventsForStudent(Student $student): Collection
     {
         return SizeChangeEvent::where('is_active', true)
             ->where('start_date', '<=', now())
@@ -83,65 +74,14 @@ class StudentSizeService
 
     /**
      * Get size options for baju and sepatu.
-     * Merges event-specific JSON overrides with DB defaults.
+     * Hanya mengikuti opsi yang diisi admin pada event; tanpa fallback dari tabel lain.
      */
     public function getSizeOptions(SizeChangeEvent $event): array
     {
-        $bajuOptions = $event->baju_size_options ?? $this->getDefaultBajuSizes();
-        $sepatuOptions = $event->sepatu_size_options ?? $this->getDefaultSepatuSizes();
-
         return [
-            'baju' => $bajuOptions,
-            'sepatu' => $sepatuOptions,
+            'baju' => $event->baju_size_options ?? [],
+            'sepatu' => $event->sepatu_size_options ?? [],
         ];
-    }
-
-    /**
-     * Get default baju sizes from DB (category UNF) with fallback to hardcoded.
-     */
-    public function getDefaultBajuSizes(): array
-    {
-        try {
-            $unfCategory = ItemCategory::where('code', 'UNF')->first();
-            if (! $unfCategory) {
-                return self::DEFAULT_BAJU_SIZES;
-            }
-
-            $sizes = ItemSize::whereHas('categories', fn ($q) => $q->where('item_category_id', $unfCategory->id))
-                ->orderBy('code')
-                ->pluck('label')
-                ->filter()
-                ->values()
-                ->toArray();
-
-            return $sizes->isNotEmpty() ? $sizes->toArray() : self::DEFAULT_BAJU_SIZES;
-        } catch (\Exception $e) {
-            return self::DEFAULT_BAJU_SIZES;
-        }
-    }
-
-    /**
-     * Get default sepatu sizes from DB (category SHO) with fallback to hardcoded.
-     */
-    public function getDefaultSepatuSizes(): array
-    {
-        try {
-            $shoCategory = ItemCategory::where('code', 'SHO')->first();
-            if (! $shoCategory) {
-                return self::DEFAULT_SEPATU_SIZES;
-            }
-
-            $sizes = ItemSize::whereHas('categories', fn ($q) => $q->where('item_category_id', $shoCategory->id))
-                ->orderBy('code')
-                ->pluck('label')
-                ->filter()
-                ->values()
-                ->toArray();
-
-            return $sizes->isNotEmpty() ? $sizes->toArray() : self::DEFAULT_SEPATU_SIZES;
-        } catch (\Exception $e) {
-            return self::DEFAULT_SEPATU_SIZES;
-        }
     }
 
     /**
@@ -274,9 +214,7 @@ class StudentSizeService
     /**
      * Save student sizes (baju + sepatu) for a given event.
      *
-     * @param  Student  $student
      * @param  array{baju: string, sepatu: string}  $sizes
-     * @param  int|null  $eventId
      */
     public function saveSizes(Student $student, array $sizes, ?int $eventId = null): void
     {
@@ -336,7 +274,7 @@ class StudentSizeService
 
             if ($submissionCount >= $event->max_changes) {
                 throw new \RuntimeException(
-                    'Kamu sudah mencapai batas maksimal pengisian (' . $event->max_changes . 'x) untuk event ini.'
+                    'Kamu sudah mencapai batas maksimal pengisian ('.$event->max_changes.'x) untuk event ini.'
                 );
             }
 
