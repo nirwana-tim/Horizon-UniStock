@@ -61,6 +61,9 @@ label="Delete Entitlement"
                                         @foreach($entitlement->items as $ei)
                                             @php
                                                 $item = $ei->item;
+                                                if (! $item) {
+                                                    continue;
+                                                }
                                                 $baseCode = $item->base_code ?? $item->code;
                                                 $itemSizes = $availableSizes[$baseCode] ?? null;
                                             @endphp

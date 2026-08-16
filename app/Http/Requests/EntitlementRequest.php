@@ -26,7 +26,7 @@ class EntitlementRequest extends FormRequest
                     ->ignore($entitlementId),
             ],
             'student_level' => 'nullable|string|exists:student_levels,kode',
-            'description' => 'nullable|string|max:500',
+            'description' => 'nullable|string|max:255',
             'is_active' => 'boolean',
             'items' => 'required|array|min:1',
             'items.*.item_id' => 'required|integer|exists:items,id',

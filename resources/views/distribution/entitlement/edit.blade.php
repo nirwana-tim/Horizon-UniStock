@@ -55,9 +55,7 @@
 
                             {{-- Simplified Grid of Checked Items --}}
                             <div class="md:col-span-2">
-                                <div x-data="{ gridHtml: '' }" x-init="axios.get('{{ route('distribution.entitlement.items-grid') }}?entitlement_id={{ $entitlement->id }}').then(r => { gridHtml = r.data })">
-                                    <div x-html="gridHtml"><p class="text-sm text-gray-400 italic">Loading items...</p></div>
-                                </div>
+                                @include('distribution.entitlement._items-grid', ['items' => $items, 'entitlement' => $entitlement])
                                 <x-input-error :messages="$errors->get('items')" class="mt-2" />
                             </div>
                         </div>

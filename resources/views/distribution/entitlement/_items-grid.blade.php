@@ -4,14 +4,18 @@
 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
     @foreach($items as $idx => $item)
         @php
-            $existingItems = $entitlement?->items ?? collect(old('items', []));
-            $oldItem = $existingItems->first(fn($i) => 
-                ($i instanceof \App\Models\EntitlementItem) 
+            $existingItems = collect(old('items', $entitlement?->items ?? []));
+            $oldItem = $existingItems->first(fn ($i) =>
+                ($i instanceof \App\Models\EntitlementItem)
                     ? ($i->item?->base_code ?? '') === $item->code
-                    : ($i['base_code'] ?? '') === $item->code
+                    : $item->sizes->has((int) ($i['item_id'] ?? 0))
             );
             $isChecked = !empty($oldItem);
-            $qty = $isChecked ? ($oldItem['quantity'] ?? $oldItem->quantity ?? 1) : 1;
+            $qty = $oldItem
+                ? (int) (($oldItem instanceof \App\Models\EntitlementItem)
+                    ? $oldItem->quantity
+                    : ($oldItem['quantity'] ?? 1))
+                : 1;
         @endphp
         <div class="flex items-center justify-between p-3 border rounded-lg bg-gray-50 hover:bg-gray-100 transition">
             <label class="flex items-center space-x-2 cursor-pointer flex-1 mr-2">

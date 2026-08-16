@@ -80,7 +80,6 @@ Route::middleware(['auth', 'password.changed', 'role:super_admin|admin', 'thrott
 
 Route::middleware(['auth', 'password.changed', 'throttle:web'])->prefix('distribution')->name('distribution.')->group(function () {
     Route::middleware('role:super_admin|admin')->group(function () {
-        Route::get('entitlement/items-grid', [EntitlementController::class, 'itemsGrid'])->name('entitlement.items-grid');
         Route::resource('entitlement', EntitlementController::class);
         Route::get('distribution-schedule/fetch-items', [DistributionScheduleController::class, 'fetchItems'])->name('distribution-schedule.fetch-items');
         Route::get('distribution-schedule/{distributionSchedule}/transactions', [DistributionScheduleController::class, 'transactions'])->name('distribution-schedule.transactions');
