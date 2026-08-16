@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class EntitlementRequest extends FormRequest
 {
@@ -20,7 +21,9 @@ class EntitlementRequest extends FormRequest
                 'required',
                 'string',
                 'max:50',
-                "unique:entitlements,code,{$entitlementId}",
+                Rule::unique('entitlements')
+                    ->where(fn ($q) => $q->where('student_level', $this->input('student_level')))
+                    ->ignore($entitlementId),
             ],
             'student_level' => 'nullable|string|exists:student_levels,kode',
             'description' => 'nullable|string|max:500',
@@ -39,7 +42,9 @@ class EntitlementRequest extends FormRequest
             foreach ($this->items as $item) {
                 if (isset($item['checked']) && $item['checked'] == '1') {
                     $itemId = (int) $item['item_id'];
-                    if (in_array($itemId, $seen, true)) continue;
+                    if (in_array($itemId, $seen, true)) {
+                        continue;
+                    }
                     $seen[] = $itemId;
                     $filtered[] = [
                         'item_id' => $itemId,
