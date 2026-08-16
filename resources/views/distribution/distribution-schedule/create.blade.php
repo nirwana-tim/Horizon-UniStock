@@ -30,6 +30,7 @@
                               prodiByFaculty: {{ json_encode($prodiByFaculty) }},
                               allProdi: {{ json_encode($allProdi) }},
                               itemHtml: '',
+                              itemError: '',
                               itemSearch: '',
                               selectedItemIds: @json(old('item_ids', [])),
                               get filteredProdi() {
@@ -55,8 +56,13 @@
                                   if (this.selectedItemIds.length) {
                                       params.checked_ids = this.selectedItemIds.join(',');
                                   }
+                                  this.itemError = '';
                                   axios.get('{{ route('distribution.distribution-schedule.fetch-items') }}', { params })
-                                      .then(res => this.itemHtml = res.data.html);
+                                      .then(res => this.itemHtml = res.data.html)
+                                      .catch(err => {
+                                          this.itemHtml = '';
+                                          this.itemError = 'Gagal memuat item (status ' + (err.response?.status ?? 'network') + '). Muat ulang halaman atau coba lagi.';
+                                      });
                               },
                               onItemChange(event) {
                                   const cb = event.target;
@@ -153,6 +159,7 @@
                                        class="mb-4 w-full sm:w-80 border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500 text-sm">
 
                                 <div x-html="itemHtml" @change="onItemChange($event)" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3"></div>
+                                <p x-show="itemError" x-text="itemError" class="mt-2 text-sm text-red-600"></p>
                                 <x-input-error :messages="$errors->get('item_ids')" class="mt-2" />
                             </div>
                         </div>

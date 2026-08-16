@@ -6,6 +6,7 @@ use App\Models\DistributionSchedule;
 use App\Models\Entitlement;
 use App\Models\Faculty;
 use App\Models\Item;
+use App\Models\Student;
 use App\Models\StudyProgram;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
@@ -106,22 +107,35 @@ class DistributionScheduleService
             })->orderBy('name')->get();
         } else {
             $studyProgram = StudyProgram::with('faculty')->find($studyProgramId);
-            $faculty = $facultyId ? Faculty::find($facultyId) : null;
-            $facultyCode = $faculty?->code ?? $studyProgram?->faculty?->code ?? '';
-            $prodiCode = $studyProgram?->code ?? '';
 
             $allowedIds = collect();
 
-            if ($prodiCode) {
+            if ($studyProgram) {
+                $facultyCode = $facultyId
+                    ? (Faculty::find($facultyId)?->code ?? '')
+                    : ($studyProgram->faculty?->code ?? '');
+                $prodiCode = $studyProgram->code;
+
                 $codeLike = $studentLevel
                     ? $studentLevel.$facultyCode.$prodiCode.'%'
                     : '%'.$facultyCode.$prodiCode.'%';
 
+                $entitlementCodes = Student::query()
+                    ->where('study_program_id', $studyProgram->id)
+                    ->whereNotNull('entitlement_code')
+                    ->when($studentLevel, fn ($q) => $q->where('student_level', $studentLevel))
+                    ->distinct()
+                    ->pluck('entitlement_code');
+
                 $entitlements = Entitlement::with('items')
                     ->where('is_active', true)
                     ->when($studentLevel, fn ($q) => $q->where('student_level', $studentLevel))
-                    ->when($facultyCode, fn ($q) => $q->where('code', 'like', $codeLike))
-                    ->when(! $facultyCode, fn ($q) => $q->where('code', 'like', '%'.$prodiCode.'%'))
+                    ->where(function ($q) use ($entitlementCodes, $codeLike) {
+                        if ($entitlementCodes->isNotEmpty()) {
+                            $q->whereIn('code', $entitlementCodes);
+                        }
+                        $q->orWhere('code', 'like', $codeLike);
+                    })
                     ->get();
 
                 $allowedIds = $entitlements->flatMap(fn ($e) => $e->items->pluck('item_id'))->unique()->values();
