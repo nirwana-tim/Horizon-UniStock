@@ -17,7 +17,7 @@ class ItemRequest extends FormRequest
 
         return [
             'code' => ['nullable', 'string', 'max:50', 'unique:items,code,'.$itemId],
-            'name' => 'required|string|max:255',
+            'name' => 'nullable|string|max:255',
             'category_id' => 'required|exists:item_categories,id',
             'type_id' => 'nullable|exists:item_types,id',
             'department_id' => 'nullable|exists:item_departments,id',
