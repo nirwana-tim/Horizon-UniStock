@@ -13,6 +13,7 @@
         itemSearch: '',
         itemSearchResults: [],
         itemSearchLoading: false,
+        itemSearchError: '',
         searchItemsUrl: '{{ route('inventory.stock-receive.search-items') }}',
         variantUrlBase: '{{ url('inventory/stock-receive/variants-by-base-code') }}',
         variantByItemUrl: '{{ url('inventory/stock-receive/variants-by-item') }}',
@@ -81,6 +82,7 @@
             this.newItem = { item_id: '', item_label: '', item_label_display: '', variant_id: '', variant_label: '', quantity: 1, unit_price: 0, hpp: 0 };
             this.itemSearch = '';
             this.itemSearchResults = [];
+            this.itemSearchError = '';
             this.variantOptions = [];
             this.editIndex = null;
             this.showModal = false;
@@ -94,12 +96,24 @@
             if (this.debounceTimer) clearTimeout(this.debounceTimer);
             if (!this.itemSearch || this.itemSearch.length < 2) {
                 this.itemSearchResults = [];
+                this.itemSearchError = '';
                 return;
             }
             this.debounceTimer = setTimeout(() => {
                 this.itemSearchLoading = true;
+                this.itemSearchError = '';
                 axios.get(this.searchItemsUrl, { params: { q: this.itemSearch } })
-                    .then(res => { this.itemSearchResults = res.data; })
+                    .then(res => {
+                        this.itemSearchResults = Array.isArray(res.data) ? res.data : [];
+                        if (!Array.isArray(res.data)) {
+                            this.itemSearchError = 'Terjadi kesalahan pada respons pencarian.';
+                        }
+                    })
+                    .catch(err => {
+                        this.itemSearchResults = [];
+                        const status = err.response ? err.response.status : '';
+                        this.itemSearchError = 'Gagal memuat item' + (status ? ' (status ' + status + ')' : '') + '. Silakan coba lagi.';
+                    })
                     .finally(() => { this.itemSearchLoading = false; });
             }, 300);
         },
@@ -115,7 +129,8 @@
             this.variantOptions = [];
 
             axios.get(this.variantUrlBase + '/' + encodeURIComponent(item.id))
-                .then(res => { this.variantOptions = res.data; });
+                .then(res => { this.variantOptions = Array.isArray(res.data) ? res.data : []; })
+                .catch(() => { this.variantOptions = []; });
         }
     }">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
@@ -264,13 +279,14 @@
                                 </div>
                                 <ul class="overflow-y-auto max-h-48 py-1">
                                     <li x-show="itemSearchLoading" class="px-3 py-2 text-sm text-gray-400 italic">Searching...</li>
+                                    <li x-show="itemSearchError" class="px-3 py-2 text-sm text-red-600 text-center" x-text="itemSearchError"></li>
                                     <template x-for="item in itemSearchResults" :key="item.id">
                                         <li @click="selectItem(item)" @mouseenter="highlightedIdx = $index"
                                             class="px-3 py-2 text-sm cursor-pointer hover:bg-primary-50 hover:text-primary-700 text-gray-900">
                                             <span x-text="item.label"></span>
                                         </li>
                                     </template>
-                                    <li x-show="!itemSearchLoading && itemSearch.length >= 2 && itemSearchResults.length === 0"
+                                    <li x-show="!itemSearchLoading && !itemSearchError && itemSearch.length >= 2 && itemSearchResults.length === 0"
                                         class="px-3 py-2 text-sm text-gray-400 italic text-center">Not found</li>
                                 </ul>
                             </div>

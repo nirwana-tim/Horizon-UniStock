@@ -6,6 +6,6 @@ trait EscapesLikeWildcards
 {
     protected function escapeLike(string $value): string
     {
-        return escapeLike($value);
+        return str_replace(['%', '_'], ['\%', '\_'], $value);
     }
 }

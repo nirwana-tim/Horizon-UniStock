@@ -5,12 +5,12 @@ namespace App\Imports;
 use App\Models\Entitlement;
 use App\Models\EntitlementItem;
 use App\Models\Item;
-use App\Models\StudentGeneration;
 use App\Models\Student;
+use App\Models\StudentGeneration;
+use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
-use Illuminate\Support\Collection;
 
 class EntitlementImport implements ToCollection, WithHeadingRow, WithValidation
 {
@@ -23,7 +23,7 @@ class EntitlementImport implements ToCollection, WithHeadingRow, WithValidation
     {
         foreach ($rows as $row) {
             $generation = StudentGeneration::where('name', $row['prodi_level'])->first();
-            if (!$generation) {
+            if (! $generation) {
                 continue;
             }
 
@@ -70,7 +70,7 @@ class EntitlementImport implements ToCollection, WithHeadingRow, WithValidation
                     }
 
                     $item = $this->findItemByName($itemName);
-                    if (!$item) {
+                    if (! $item) {
                         continue;
                     }
 
@@ -90,11 +90,13 @@ class EntitlementImport implements ToCollection, WithHeadingRow, WithValidation
     {
         $normalized = strtolower(trim(str_replace('_', ' ', $name)));
 
+        $escaped = str_replace(['%', '_'], ['\%', '\_'], $normalized);
+
         return Item::whereRaw('LOWER(TRIM(name)) = ?', [$normalized])->first()
-            ?? Item::whereRaw('LOWER(name) LIKE ?', ['%' . escapeLike($normalized) . '%'])
+            ?? Item::whereRaw('LOWER(name) LIKE ?', ['%'.$escaped.'%'])
                 ->orderByRaw('LENGTH(name) ASC')
                 ->first()
-            ?? Item::whereHas('category', fn ($q) => $q->whereRaw('LOWER(label) LIKE ?', ['%' . escapeLike($normalized) . '%']))
+            ?? Item::whereHas('category', fn ($q) => $q->whereRaw('LOWER(label) LIKE ?', ['%'.$escaped.'%']))
                 ->orderByRaw('LENGTH(name) ASC')
                 ->first();
     }

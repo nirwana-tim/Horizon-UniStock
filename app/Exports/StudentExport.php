@@ -3,14 +3,16 @@
 namespace App\Exports;
 
 use App\Models\Student;
+use Illuminate\Database\Eloquent\Builder;
+use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\WithChunkReading;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 
-class StudentExport implements FromQuery, WithHeadings, WithMapping, WithChunkReading
+class StudentExport implements FromQuery, WithChunkReading, WithHeadings, WithMapping
 {
-    use \Maatwebsite\Excel\Concerns\Exportable;
+    use Exportable;
 
     private int $row = 0;
 
@@ -20,12 +22,12 @@ class StudentExport implements FromQuery, WithHeadings, WithMapping, WithChunkRe
         private ?int $generationId = null,
     ) {}
 
-    public function query(): \Illuminate\Database\Eloquent\Builder
+    public function query(): Builder
     {
         $query = Student::with(['studyProgram.faculty', 'generation', 'studentLevel']);
 
         if ($this->search) {
-            $search = escapeLike($this->search);
+            $search = str_replace(['%', '_'], ['\%', '\_'], $this->search);
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                     ->orWhere('nim', 'like', "%{$search}%");
