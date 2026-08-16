@@ -81,7 +81,11 @@ class EntitlementController extends Controller
             ->with('variants')
             ->get()
             ->groupBy('base_code')
-            ->map(fn ($items) => $items->pluck('variants.0.size_label')->filter()->implode(', '))
+            ->map(fn ($items) => $items
+                ->flatMap(fn ($item) => $item->variants->pluck('size_label'))
+                ->filter()
+                ->unique()
+                ->implode(', '))
             ->all();
 
         return view('distribution.entitlement.show', compact('entitlement', 'availableSizes'));
