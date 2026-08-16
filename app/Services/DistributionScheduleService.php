@@ -113,10 +113,14 @@ class DistributionScheduleService
             $allowedIds = collect();
 
             if ($prodiCode) {
+                $codeLike = $studentLevel
+                    ? $studentLevel.$facultyCode.$prodiCode.'%'
+                    : '%'.$facultyCode.$prodiCode.'%';
+
                 $entitlements = Entitlement::with('items')
                     ->where('is_active', true)
                     ->when($studentLevel, fn ($q) => $q->where('student_level', $studentLevel))
-                    ->when($facultyCode, fn ($q) => $q->where('code', 'like', $studentLevel.$facultyCode.$prodiCode.'%'))
+                    ->when($facultyCode, fn ($q) => $q->where('code', 'like', $codeLike))
                     ->when(! $facultyCode, fn ($q) => $q->where('code', 'like', '%'.$prodiCode.'%'))
                     ->get();
 
