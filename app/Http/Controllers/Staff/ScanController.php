@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Staff;
 
 use App\Http\Controllers\Controller;
 use App\Models\DistributionSchedule;
+use App\Models\DistributionTransaction;
 use App\Models\Item;
 use App\Models\ItemCategory;
 use App\Models\ItemPrice;
@@ -32,7 +33,7 @@ class ScanController extends Controller
 
         $staff = auth()->user();
 
-        $todayCount = \App\Models\DistributionTransaction::whereDate('created_at', today())
+        $todayCount = DistributionTransaction::whereDate('created_at', today())
             ->whereHas('schedule', fn ($q) => $q->where('is_active', true))
             ->count();
 
@@ -75,6 +76,7 @@ class ScanController extends Controller
         if ($nim) {
             return redirect()->route('distribution.scan.student', $nim);
         }
+
         return redirect()->route('distribution.scan.index');
     }
 
@@ -84,7 +86,7 @@ class ScanController extends Controller
 
         if (! $student) {
             return redirect()->route('distribution.scan.index')
-                ->with('error', 'Mahasiswa dengan NIM ' . $nim . ' tidak ditemukan.');
+                ->with('error', 'Mahasiswa dengan NIM '.$nim.' tidak ditemukan.');
         }
 
         return $this->showDistribution($student);
@@ -126,7 +128,7 @@ class ScanController extends Controller
             );
         } catch (\Exception $e) {
             return redirect()->route('distribution.scan.index')
-                ->with('error', 'Distribusi gagal: ' . $e->getMessage());
+                ->with('error', 'Distribusi gagal: '.$e->getMessage());
         }
 
         return redirect()->route('distribution.scan.index')
@@ -185,6 +187,7 @@ class ScanController extends Controller
                         'size_label' => $resolved['label'],
                         'change_count' => $sizeItem?->change_count ?? 0,
                     ];
+
                     continue;
                 }
 
@@ -221,19 +224,36 @@ class ScanController extends Controller
 
         $stockInfo = [];
         if ($activeSchedule) {
-            $allItemIds = $scheduleItems->pluck('id');
-            $allVariantIds = $scheduleItems->flatMap(fn ($i) => $i->variants->pluck('id'));
-            $allBalances = StockBalance::whereIn('item_id', $allItemIds)
-                ->whereIn('variant_id', $allVariantIds)
-                ->get()
-                ->keyBy(fn ($b) => $b->item_id . '-' . $b->variant_id);
+            $baseCodes = $scheduleItems->pluck('base_code')->filter()->unique()->values();
+            $groupItems = Item::whereIn('base_code', $baseCodes)->with('variants')->get();
+            $noBaseScheduleItems = $scheduleItems->filter(fn ($i) => empty($i->base_code))->values();
 
-            foreach ($scheduleItems as $item) {
-                $baseCode = $item->base_code ?? $item->code;
+            $balanceItems = $groupItems->concat($noBaseScheduleItems);
+            $allBalances = StockBalance::whereIn('item_id', $balanceItems->pluck('id'))
+                ->whereIn('variant_id', $balanceItems->flatMap->variants->pluck('id'))
+                ->get()
+                ->keyBy(fn ($b) => $b->item_id.'-'.$b->variant_id);
+
+            foreach ($groupItems as $item) {
+                $baseCode = $item->base_code;
+                if (! $baseCode) {
+                    continue;
+                }
                 foreach ($item->variants as $variant) {
-                    $key = $item->id . '-' . $variant->id;
-                    $balance = $allBalances[$key] ?? null;
+                    $balance = $allBalances[$item->id.'-'.$variant->id] ?? null;
                     $stockInfo[$baseCode][$variant->size] = ($stockInfo[$baseCode][$variant->size] ?? 0)
+                        + ($balance ? $balance->quantity : 0);
+                }
+            }
+
+            foreach ($noBaseScheduleItems as $item) {
+                $code = $item->code;
+                if (! $code) {
+                    continue;
+                }
+                foreach ($item->variants as $variant) {
+                    $balance = $allBalances[$item->id.'-'.$variant->id] ?? null;
+                    $stockInfo[$code][$variant->size] = ($stockInfo[$code][$variant->size] ?? 0)
                         + ($balance ? $balance->quantity : 0);
                 }
             }
@@ -247,7 +267,7 @@ class ScanController extends Controller
                 ->orderBy('effective_date', 'desc')
                 ->get()
                 ->groupBy('item_id')
-                ->map(fn($prices) => $prices->first()->selling_price);
+                ->map(fn ($prices) => $prices->first()->selling_price);
             foreach ($scheduleItems as $item) {
                 $itemPrices[$item->id] = $allPrices[$item->id] ?? $item->selling_price ?? 0;
             }
@@ -260,7 +280,9 @@ class ScanController extends Controller
             ->groupBy('base_code');
         foreach ($scheduleItems as $item) {
             $baseCode = $item->base_code ?? $item->code;
-            if (isset($variantOptions[$baseCode])) continue;
+            if (isset($variantOptions[$baseCode])) {
+                continue;
+            }
             if ($item->base_code) {
                 $group = $preloadedGroupVariants->get($item->base_code, collect());
                 $variantOptions[$baseCode] = $group->flatMap->variants;

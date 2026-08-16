@@ -11,6 +11,7 @@ use App\Models\Item;
 use App\Models\ItemCategory;
 use App\Models\ItemPrice;
 use App\Models\ItemVariant;
+use App\Models\StockBalance;
 use App\Models\Student;
 use App\Models\StudentSizeHistory;
 use App\Models\StudentSizeItem;
@@ -55,10 +56,28 @@ class DistributionService
      */
     public function findItemByBaseCodeAndSize(string $baseCode, string $size): ?Item
     {
-        return Item::where('base_code', $baseCode)
+        $candidates = Item::where('base_code', $baseCode)
             ->whereHas('variants', fn ($q) => $q->where('size', $size))
-            ->with('variants')
-            ->first();
+            ->with(['variants' => fn ($q) => $q->where('size', $size)])
+            ->get();
+
+        if ($candidates->isEmpty()) {
+            return null;
+        }
+
+        $balances = StockBalance::whereIn('item_id', $candidates->pluck('id'))
+            ->whereIn('variant_id', $candidates->flatMap->variants->pluck('id'))
+            ->get()
+            ->keyBy(fn ($b) => $b->item_id.'-'.$b->variant_id);
+
+        return $candidates->sortByDesc(function (Item $item) use ($balances) {
+            $variant = $item->variants->first();
+            if (! $variant) {
+                return 0;
+            }
+
+            return $balances[$item->id.'-'.$variant->id]->quantity ?? 0;
+        })->first();
     }
 
     public function processDistribution(
@@ -134,6 +153,9 @@ class DistributionService
 
             $entitlement = $this->getEntitlementForStudent($student);
             $entitlementMap = $entitlement ? $entitlement->items->keyBy('item_id') : collect();
+            $entitlementByBaseCode = $entitlement
+                ? $entitlement->items->mapWithKeys(fn ($ei) => $ei->item?->base_code ? [$ei->item->base_code => $ei] : [])->all()
+                : [];
 
             $distributedByItem = DistributionItem::query()
                 ->join('distribution_transactions', 'distribution_items.transaction_id', '=', 'distribution_transactions.id')
@@ -141,7 +163,19 @@ class DistributionService
                 ->where('distribution_transactions.status', '!=', 'cancelled')
                 ->groupBy('distribution_items.item_id')
                 ->selectRaw('distribution_items.item_id, SUM(distribution_items.quantity) as total')
-                ->pluck('total', 'item_id');
+                ->pluck('total', 'item_id')
+                ->map(fn ($v) => (int) $v);
+
+            $distributedByBaseCode = DistributionItem::query()
+                ->join('distribution_transactions', 'distribution_items.transaction_id', '=', 'distribution_transactions.id')
+                ->join('items', 'distribution_items.item_id', '=', 'items.id')
+                ->where('distribution_transactions.student_id', $student->id)
+                ->where('distribution_transactions.status', '!=', 'cancelled')
+                ->whereNotNull('items.base_code')
+                ->groupBy('items.base_code')
+                ->selectRaw('items.base_code, SUM(distribution_items.quantity) as total')
+                ->pluck('total', 'base_code')
+                ->map(fn ($v) => (int) $v);
 
             $allFullyStocked = true;
             $autoNotes = [];
@@ -159,11 +193,15 @@ class DistributionService
                     continue;
                 }
 
-                $entitlementItem = $entitlementMap->get($item->id);
+                $entitlementItem = $entitlementMap->get($item->id)
+                    ?? ($entitlementByBaseCode[$item->base_code ?? ''] ?? null);
                 if ($entitlementItem) {
                     $requestedQty = (int) ($itemData['quantity'] ?? 1);
-                    $alreadyDistributed = (int) ($distributedByItem[$item->id] ?? 0)
-                        + (int) ($distributedInRequest[$item->id] ?? 0);
+                    $productKey = $item->base_code ?? (string) $item->id;
+                    $alreadyDistributed = (int) ($item->base_code
+                            ? ($distributedByBaseCode[$item->base_code] ?? 0)
+                            : ($distributedByItem[$item->id] ?? 0))
+                        + (int) ($distributedInRequest[$productKey] ?? 0);
                     $remaining = (int) $entitlementItem->quantity - $alreadyDistributed;
 
                     if ($remaining <= 0) {
@@ -178,7 +216,7 @@ class DistributionService
                         );
                     }
 
-                    $distributedInRequest[$item->id] = ($distributedInRequest[$item->id] ?? 0) + $requestedQty;
+                    $distributedInRequest[$productKey] = ($distributedInRequest[$productKey] ?? 0) + $requestedQty;
                 }
 
                 $variant = ItemVariant::where('item_id', $item->id)
