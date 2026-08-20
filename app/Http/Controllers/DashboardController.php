@@ -66,8 +66,10 @@ class DashboardController extends Controller
             ->get()
             ->keyBy('event_id');
 
+        $distributionSchedules = DistributionSchedule::upcomingForStudent($student)->get();
+
         $profile = $student->activeSizeProfile;
 
-        return view('dashboards.student', compact('student', 'sizeEvents', 'submissions', 'profile'));
+        return view('dashboards.student', compact('student', 'sizeEvents', 'submissions', 'distributionSchedules', 'profile'));
     }
 }

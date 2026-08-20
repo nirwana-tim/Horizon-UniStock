@@ -12,13 +12,13 @@ class SmtpSettingsServiceProvider extends ServiceProvider
 {
     public function boot(): void
     {
-        if (!Schema::hasTable('smtp_settings')) {
-            return;
-        }
-
         try {
+            if (! Schema::hasTable('smtp_settings')) {
+                return;
+            }
+
             $s = SmtpSetting::getActive();
-            if (!$s) {
+            if (! $s) {
                 return;
             }
 

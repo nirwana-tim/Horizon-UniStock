@@ -30,7 +30,9 @@ class AppServiceProvider extends ServiceProvider
         });
 
         $proxies = config('trustproxies.proxies');
-        if ($proxies !== []) {
+        if (in_array('*', $proxies, true) || in_array('**', $proxies, true)) {
+            TrustProxies::at('*');
+        } elseif ($proxies !== []) {
             TrustProxies::at($proxies);
         }
 

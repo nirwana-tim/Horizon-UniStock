@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class DistributionSchedule extends Model
 {
     use SoftDeletes;
+
     protected $fillable = [
         'name',
         'period',
@@ -39,6 +40,16 @@ class DistributionSchedule extends Model
             ->where(fn (Builder $q) => $q->whereNull('faculty_id')->orWhere('faculty_id', $student->studyProgram?->faculty_id))
             ->where(fn (Builder $q) => $q->whereNull('study_program_id')->orWhere('study_program_id', $student->study_program_id))
             ->where(fn (Builder $q) => $q->whereNull('generation_id')->orWhere('generation_id', $student->generation_id));
+    }
+
+    public function scopeUpcomingForStudent(Builder $query, Student $student): Builder
+    {
+        return $query
+            ->with(['faculty', 'generation'])
+            ->where('is_active', true)
+            ->where('date', '>=', now()->format('Y-m-d'))
+            ->forStudent($student)
+            ->orderBy('date');
     }
 
     public function getStudentLevelLabelAttribute(): string
@@ -84,5 +95,4 @@ class DistributionSchedule extends Model
     {
         return $this->belongsTo(StudentLevel::class, 'student_level', 'kode');
     }
-
 }

@@ -49,10 +49,43 @@
                 @endif
             </div>
 
+            {{-- Distribution Schedules --}}
+            <section class="mb-8">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="font-headline-sm text-headline-sm text-on-background">Jadwal Distribusi</h2>
+                </div>
+
+                @if($distributionSchedules->isEmpty())
+                    <div class="bg-white shadow-card rounded-2xl p-6 text-center">
+                        <span class="material-symbols-outlined text-4xl text-secondary/30 mb-3">event_busy</span>
+                        <p class="font-body-md text-body-md text-secondary/50">Belum ada jadwal distribusi</p>
+                        <p class="font-body-md text-[12px] text-secondary/40 mt-1">Silakan hubungi admin untuk informasi lebih lanjut.</p>
+                    </div>
+                @else
+                    <div class="bg-white shadow-card rounded-2xl overflow-hidden">
+                        @foreach($distributionSchedules as $schedule)
+                            <div class="flex items-center px-5 py-4 {{ !$loop->last ? 'divider-subtle' : '' }}">
+                                <div class="w-12 h-12 rounded-xl bg-primary/5 flex flex-col items-center justify-center mr-4 shrink-0">
+                                    <span class="text-[10px] font-bold text-primary uppercase">{{ $schedule->date->format('M') }}</span>
+                                    <span class="text-lg font-extrabold text-primary leading-tight">{{ $schedule->date->format('d') }}</span>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <h4 class="font-headline-sm text-[15px] text-on-background">{{ $schedule->name }}</h4>
+                                    <p class="font-body-md text-[13px] text-secondary/60 mt-0.5">{{ $schedule->date->format('d M Y') }}{{ $schedule->location ? ' • ' . $schedule->location : '' }}</p>
+                                    @if($schedule->session)
+                                        <p class="font-body-md text-[12px] text-secondary/50 mt-1">Sesi: {{ $schedule->session }}</p>
+                                    @endif
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
+            </section>
+
             {{-- Events --}}
             <section>
                 <div class="flex justify-between items-center mb-4">
-                    <h2 class="font-headline-sm text-headline-sm text-on-background">Jadwal Distribusi</h2>
+                    <h2 class="font-headline-sm text-headline-sm text-on-background">Event Input Ukuran</h2>
                 </div>
 
                 @if($events->isEmpty())

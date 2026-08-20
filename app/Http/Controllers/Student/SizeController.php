@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\DistributionSchedule;
 use App\Models\DistributionTransaction;
 use App\Models\SizeChangeEvent;
+use App\Models\SizeEventSubmission;
 use App\Models\Student;
 use App\Services\QrCodeService;
 use App\Services\StudentSizeService;
@@ -28,14 +29,16 @@ class SizeController extends Controller
         $events = $this->sizeService->getEventsForStudent($student);
 
         $eventIds = $events->pluck('id');
-        $submissions = \App\Models\SizeEventSubmission::where('student_id', $student->id)
+        $submissions = SizeEventSubmission::where('student_id', $student->id)
             ->whereIn('event_id', $eventIds)
             ->get()
             ->keyBy('event_id');
 
         $profile = $student->activeSizeProfile;
 
-        return view('student.sizes-index', compact('student', 'events', 'submissions', 'profile'));
+        $distributionSchedules = DistributionSchedule::upcomingForStudent($student)->get();
+
+        return view('student.sizes-index', compact('student', 'events', 'submissions', 'distributionSchedules', 'profile'));
     }
 
     public function input(SizeChangeEvent $event): View
@@ -55,7 +58,7 @@ class SizeController extends Controller
             'sepatu' => $profile?->sepatu_size ?? null,
         ];
 
-        $submission = \App\Models\SizeEventSubmission::where('student_id', $student->id)
+        $submission = SizeEventSubmission::where('student_id', $student->id)
             ->where('event_id', $event->id)->first();
         $submissionCount = $submission?->submission_count ?? 0;
         $canEdit = $event->canEdit($student);

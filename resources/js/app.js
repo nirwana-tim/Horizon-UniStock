@@ -186,7 +186,7 @@ document.addEventListener('alpine:init', () => {
     // ── Modal Content Generators ──
     window.modalContent = function(type) {
         // Schedule detail modal
-        if (type.indexOf('schedule-') === 0) {
+        if (type.indexOf('schedule-') === 0 || type.indexOf('dist-') === 0) {
             const btn = document.querySelector('[data-modal="' + type + '"]');
             if (!btn) return '';
             const title = btn.getAttribute('data-event-title') || 'Detail Jadwal';
