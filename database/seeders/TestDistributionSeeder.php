@@ -27,6 +27,7 @@ use Illuminate\Support\Facades\Hash;
 class TestDistributionSeeder extends Seeder
 {
     private const STUDENT_NIM = '4112757201240008';
+
     private const STUDENT_PASSWORD = 'password';
 
     public function run(): void
@@ -103,7 +104,7 @@ class TestDistributionSeeder extends Seeder
         $student->update(['user_id' => $studentUser->id]);
 
         // entitlement_code = Y1S1FICTS1 SI
-        $entitlementCode = $student->student_level . $faculty->code . $program->code;
+        $entitlementCode = $student->student_level.$faculty->code.$program->code;
         $student->update(['entitlement_code' => $entitlementCode]);
 
         // ---- Eligibility (Lunas) ----
@@ -142,6 +143,8 @@ class TestDistributionSeeder extends Seeder
                 'is_active' => true,
                 'allow_reedit' => false,
                 'created_by' => $superadmin?->id,
+                'baju_size_options' => ['XS', 'S', 'M', 'L', 'XL', 'XXL'],
+                'sepatu_size_options' => ['38', '39', '40', '41', '42', '43', '44'],
             ]
         );
 
@@ -165,10 +168,10 @@ class TestDistributionSeeder extends Seeder
         }
 
         $this->command->info('=== TEST DATA SIAP ===');
-        $this->command->info('Student NIM   : ' . self::STUDENT_NIM);
-        $this->command->info('Student login : student.test@horizon-unistock.test / ' . self::STUDENT_PASSWORD);
-        $this->command->info('Entitlement   : ' . $entitlementCode);
-        $this->command->info('Items         : ' . $unfItem->code . ' (UNF M=04) & ' . $shoItem->code . ' (SHO 38)');
+        $this->command->info('Student NIM   : '.self::STUDENT_NIM);
+        $this->command->info('Student login : student.test@horizon-unistock.test / '.self::STUDENT_PASSWORD);
+        $this->command->info('Entitlement   : '.$entitlementCode);
+        $this->command->info('Items         : '.$unfItem->code.' (UNF M=04) & '.$shoItem->code.' (SHO 38)');
     }
 
     private function createItem(

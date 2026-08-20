@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Finance;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Finance\SizeChangeEventRequest;
 use App\Models\Faculty;
+use App\Models\ItemCategory;
+use App\Models\ItemSize;
 use App\Models\SizeChangeEvent;
 use App\Models\StudentGeneration;
 use App\Models\StudentLevel;
@@ -30,7 +32,10 @@ class SizeChangeEventController extends Controller
         $generations = StudentGeneration::orderBy('name')->get();
         $studentLevels = StudentLevel::orderBy('kode')->get();
 
-        return view('finance.size-events.create', compact('faculties', 'studyPrograms', 'generations', 'studentLevels'));
+        $bajuMasterSizes = $this->sizeLabelsFor(config('student-size.baju_category_codes', []));
+        $sepatuMasterSizes = $this->sizeLabelsFor(config('student-size.sepatu_category_codes', []));
+
+        return view('finance.size-events.create', compact('faculties', 'studyPrograms', 'generations', 'studentLevels', 'bajuMasterSizes', 'sepatuMasterSizes'));
     }
 
     public function store(SizeChangeEventRequest $request): RedirectResponse
@@ -41,7 +46,7 @@ class SizeChangeEventController extends Controller
         $validated['allow_reedit'] = $request->boolean('allow_reedit', false);
         $validated['created_by'] = auth()->id();
 
-        $validated = $this->parseSizeOptions($validated);
+        $validated = $this->applySizeOptions($validated);
 
         SizeChangeEvent::create($validated);
 
@@ -56,10 +61,19 @@ class SizeChangeEventController extends Controller
         $generations = StudentGeneration::orderBy('name')->get();
         $studentLevels = StudentLevel::orderBy('kode')->get();
 
-        $bajuOptionsText = $sizeEvent->baju_size_options ? implode(', ', $sizeEvent->baju_size_options) : '';
-        $sepatuOptionsText = $sizeEvent->sepatu_size_options ? implode(', ', $sizeEvent->sepatu_size_options) : '';
+        $bajuMasterSizes = $this->sizeLabelsFor(config('student-size.baju_category_codes', []));
+        $sepatuMasterSizes = $this->sizeLabelsFor(config('student-size.sepatu_category_codes', []));
 
-        return view('finance.size-events.edit', compact('sizeEvent', 'faculties', 'studyPrograms', 'generations', 'studentLevels', 'bajuOptionsText', 'sepatuOptionsText'));
+        $bajuSelected = $sizeEvent->baju_size_options ?? [];
+        $sepatuSelected = $sizeEvent->sepatu_size_options ?? [];
+
+        $bajuCustomText = implode(', ', array_values(array_diff($bajuSelected, $bajuMasterSizes)));
+        $sepatuCustomText = implode(', ', array_values(array_diff($sepatuSelected, $sepatuMasterSizes)));
+
+        return view('finance.size-events.edit', compact(
+            'sizeEvent', 'faculties', 'studyPrograms', 'generations', 'studentLevels',
+            'bajuMasterSizes', 'sepatuMasterSizes', 'bajuSelected', 'sepatuSelected', 'bajuCustomText', 'sepatuCustomText'
+        ));
     }
 
     public function update(SizeChangeEventRequest $request, SizeChangeEvent $sizeEvent): RedirectResponse
@@ -69,7 +83,7 @@ class SizeChangeEventController extends Controller
         $validated['is_active'] = $request->boolean('is_active', true);
         $validated['allow_reedit'] = $request->boolean('allow_reedit', false);
 
-        $validated = $this->parseSizeOptions($validated);
+        $validated = $this->applySizeOptions($validated);
 
         $sizeEvent->update($validated);
 
@@ -85,14 +99,56 @@ class SizeChangeEventController extends Controller
             ->with('success', 'Event Pengisian / Perubahan Ukuran berhasil dihapus.');
     }
 
-    private function parseSizeOptions(array $validated): array
+    private function applySizeOptions(array $validated): array
     {
-        $validated['baju_size_options'] = $this->parseSizeOptionText($validated['baju_size_options_text'] ?? null);
-        $validated['sepatu_size_options'] = $this->parseSizeOptionText($validated['sepatu_size_options_text'] ?? null);
+        $validated['baju_size_options'] = $this->resolveSizeOptions($validated, 'baju');
+        $validated['sepatu_size_options'] = $this->resolveSizeOptions($validated, 'sepatu');
 
-        unset($validated['baju_size_options_text'], $validated['sepatu_size_options_text']);
+        unset(
+            $validated['baju_size_options_custom'],
+            $validated['baju_size_options_text'],
+            $validated['sepatu_size_options_custom'],
+            $validated['sepatu_size_options_text'],
+        );
 
         return $validated;
+    }
+
+    private function resolveSizeOptions(array $validated, string $category): ?array
+    {
+        $optionsKey = $category.'_size_options';
+        $customKey = $category.'_size_options_custom';
+        $textKey = $category.'_size_options_text';
+
+        $chips = $validated[$optionsKey] ?? null;
+        $custom = $validated[$customKey] ?? null;
+        $legacy = $validated[$textKey] ?? null;
+
+        if (is_array($chips) || ($custom !== null && trim($custom) !== '')) {
+            $merged = array_merge($chips ?? [], $this->parseSizeOptionText($custom) ?? []);
+            $merged = array_values(array_unique(array_filter(array_map('trim', $merged))));
+
+            return $merged === [] ? null : $merged;
+        }
+
+        return $this->parseSizeOptionText($legacy);
+    }
+
+    private function sizeLabelsFor(array $categoryCodes): array
+    {
+        $categoryIds = ItemCategory::whereIn('code', $categoryCodes)->pluck('id');
+
+        if ($categoryIds->isEmpty()) {
+            return [];
+        }
+
+        return ItemSize::whereHas('categories', fn ($q) => $q->whereIn('item_category_id', $categoryIds))
+            ->orderBy('code')
+            ->get(['label'])
+            ->pluck('label')
+            ->unique()
+            ->values()
+            ->all();
     }
 
     private function parseSizeOptionText(?string $text): ?array

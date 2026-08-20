@@ -94,27 +94,59 @@
 
                     <hr class="my-4 border-gray-200">
 
-                    <h4 class="text-sm font-semibold text-gray-800">Opsi Ukuran (Opsional)</h4>
-                    <p class="text-xs text-gray-500 mb-3">Isi ukuran yang akan ditampilkan ke mahasiswa. Kosongkan untuk menghapus opsi. Pisahkan dengan koma untuk opsi custom.</p>
+                    <div class="flex items-center justify-between mb-3">
+                        <h4 class="text-sm font-semibold text-gray-800">Opsi Ukuran untuk Mahasiswa</h4>
+                        <p class="text-xs text-gray-400">Klik ukuran untuk pilih / hapus. Ukuran lain bisa ditambahkan manual.</p>
+                    </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <x-input-label value="Opsi Ukuran Baju" />
-                            <input type="text" name="baju_size_options_text"
-                                value="{{ old('baju_size_options_text', $bajuOptionsText) }}"
-                                placeholder="XS, S, M, L, XL, XXL, XXXL"
-                                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500 text-sm">
-                            <p class="mt-1 text-xs text-gray-400">Pisahkan dengan koma. Contoh: XS, S, M, L, XL, XXL</p>
+                    {{-- BAJU --}}
+                    <div class="border border-gray-200 rounded-lg p-4 mb-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <h5 class="text-sm font-semibold text-gray-800">UKURAN BAJU <span class="font-normal text-gray-400">(huruf)</span></h5>
+                            <span class="text-xs text-gray-400">Kategori: {{ implode(', ', config('student-size.baju_category_codes', [])) }}</span>
                         </div>
+                        @if($bajuMasterSizes)
+                            <div class="flex flex-wrap gap-2 mb-3">
+                                @foreach($bajuMasterSizes as $index => $size)
+                                    <input type="checkbox" id="baju-chip-{{ $index }}" name="baju_size_options[]" value="{{ $size }}" class="peer sr-only" {{ in_array($size, $bajuSelected, true) ? 'checked' : '' }}>
+                                    <label for="baju-chip-{{ $index }}"
+                                           class="cursor-pointer rounded-lg border border-gray-300 px-3 py-1.5 text-sm text-gray-600 hover:border-primary-500 peer-checked:bg-primary-700 peer-checked:text-white peer-checked:border-primary-700 transition-colors select-none">
+                                        {{ $size }}
+                                    </label>
+                                @endforeach
+                            </div>
+                        @else
+                            <p class="text-xs text-gray-400 mb-3">Belum ada kategori ukuran baju terkonfigurasi (cek config/student-size.php).</p>
+                        @endif
+                        <input type="text" name="baju_size_options_custom" value="{{ old('baju_size_options_custom', $bajuCustomText) }}"
+                            placeholder="Ukuran baju lain (pisahkan koma), mis: XXL Plus, 3XL"
+                            class="block w-full border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500 text-sm">
+                        <x-input-error :messages="$errors->get('baju_size_options_custom')" class="mt-1" />
+                    </div>
 
-                        <div>
-                            <x-input-label value="Opsi Ukuran Sepatu" />
-                            <input type="text" name="sepatu_size_options_text"
-                                value="{{ old('sepatu_size_options_text', $sepatuOptionsText) }}"
-                                placeholder="38, 39, 40, 41, 42, 43, 44, 45"
-                                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500 text-sm">
-                            <p class="mt-1 text-xs text-gray-400">Pisahkan dengan koma. Contoh: 38, 39, 40, 41, 42, 43, 44, 45</p>
+                    {{-- SEPATU --}}
+                    <div class="border border-gray-200 rounded-lg p-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <h5 class="text-sm font-semibold text-gray-800">UKURAN SEPATU <span class="font-normal text-gray-400">(angka)</span></h5>
+                            <span class="text-xs text-gray-400">Kategori: {{ implode(', ', config('student-size.sepatu_category_codes', [])) }}</span>
                         </div>
+                        @if($sepatuMasterSizes)
+                            <div class="flex flex-wrap gap-2 mb-3">
+                                @foreach($sepatuMasterSizes as $index => $size)
+                                    <input type="checkbox" id="sepatu-chip-{{ $index }}" name="sepatu_size_options[]" value="{{ $size }}" class="peer sr-only" {{ in_array($size, $sepatuSelected, true) ? 'checked' : '' }}>
+                                    <label for="sepatu-chip-{{ $index }}"
+                                           class="cursor-pointer rounded-lg border border-gray-300 px-3 py-1.5 text-sm text-gray-600 hover:border-primary-500 peer-checked:bg-primary-700 peer-checked:text-white peer-checked:border-primary-700 transition-colors select-none">
+                                        {{ $size }}
+                                    </label>
+                                @endforeach
+                            </div>
+                        @else
+                            <p class="text-xs text-gray-400 mb-3">Belum ada kategori ukuran sepatu terkonfigurasi (cek config/student-size.php).</p>
+                        @endif
+                        <input type="text" name="sepatu_size_options_custom" value="{{ old('sepatu_size_options_custom', $sepatuCustomText) }}"
+                            placeholder="Ukuran sepatu lain (pisahkan koma), mis: 46.5, 47"
+                            class="block w-full border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500 text-sm">
+                        <x-input-error :messages="$errors->get('sepatu_size_options_custom')" class="mt-1" />
                     </div>
 
                     <div class="pt-4 flex items-center gap-3">

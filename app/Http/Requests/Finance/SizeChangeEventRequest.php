@@ -25,7 +25,13 @@ class SizeChangeEventRequest extends FormRequest
             'max_changes' => ['required', 'integer', 'min:0'],
             'is_active' => ['boolean'],
             'allow_reedit' => ['boolean'],
+            'baju_size_options' => ['nullable', 'array'],
+            'baju_size_options.*' => ['string', 'max:20'],
+            'baju_size_options_custom' => ['nullable', 'string', 'max:255'],
             'baju_size_options_text' => ['nullable', 'string'],
+            'sepatu_size_options' => ['nullable', 'array'],
+            'sepatu_size_options.*' => ['string', 'max:20'],
+            'sepatu_size_options_custom' => ['nullable', 'string', 'max:255'],
             'sepatu_size_options_text' => ['nullable', 'string'],
         ];
     }
