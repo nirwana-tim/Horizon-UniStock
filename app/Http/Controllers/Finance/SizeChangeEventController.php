@@ -11,6 +11,7 @@ use App\Models\SizeChangeEvent;
 use App\Models\StudentGeneration;
 use App\Models\StudentLevel;
 use App\Models\StudyProgram;
+use App\Services\StudentSizeCategoryService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
@@ -25,17 +26,19 @@ class SizeChangeEventController extends Controller
         return view('finance.size-events.index', compact('events'));
     }
 
-    public function create(): View
+    public function create(StudentSizeCategoryService $categoryService): View
     {
         $faculties = Faculty::orderBy('name')->get();
         $studyPrograms = StudyProgram::with('faculty')->orderBy('name')->get();
         $generations = StudentGeneration::orderBy('name')->get();
         $studentLevels = StudentLevel::orderBy('kode')->get();
 
-        $bajuMasterSizes = $this->sizeLabelsFor(config('student-size.baju_category_codes', []));
-        $sepatuMasterSizes = $this->sizeLabelsFor(config('student-size.sepatu_category_codes', []));
+        $bajuCategoryCodes = $categoryService->bajuCategoryCodes();
+        $sepatuCategoryCodes = $categoryService->sepatuCategoryCodes();
+        $bajuMasterSizes = $this->sizeLabelsFor($bajuCategoryCodes);
+        $sepatuMasterSizes = $this->sizeLabelsFor($sepatuCategoryCodes);
 
-        return view('finance.size-events.create', compact('faculties', 'studyPrograms', 'generations', 'studentLevels', 'bajuMasterSizes', 'sepatuMasterSizes'));
+        return view('finance.size-events.create', compact('faculties', 'studyPrograms', 'generations', 'studentLevels', 'bajuMasterSizes', 'sepatuMasterSizes', 'bajuCategoryCodes', 'sepatuCategoryCodes'));
     }
 
     public function store(SizeChangeEventRequest $request): RedirectResponse
@@ -54,15 +57,17 @@ class SizeChangeEventController extends Controller
             ->with('success', 'Event Pengisian / Perubahan Ukuran berhasil dibuat.');
     }
 
-    public function edit(SizeChangeEvent $sizeEvent): View
+    public function edit(SizeChangeEvent $sizeEvent, StudentSizeCategoryService $categoryService): View
     {
         $faculties = Faculty::orderBy('name')->get();
         $studyPrograms = StudyProgram::with('faculty')->orderBy('name')->get();
         $generations = StudentGeneration::orderBy('name')->get();
         $studentLevels = StudentLevel::orderBy('kode')->get();
 
-        $bajuMasterSizes = $this->sizeLabelsFor(config('student-size.baju_category_codes', []));
-        $sepatuMasterSizes = $this->sizeLabelsFor(config('student-size.sepatu_category_codes', []));
+        $bajuCategoryCodes = $categoryService->bajuCategoryCodes();
+        $sepatuCategoryCodes = $categoryService->sepatuCategoryCodes();
+        $bajuMasterSizes = $this->sizeLabelsFor($bajuCategoryCodes);
+        $sepatuMasterSizes = $this->sizeLabelsFor($sepatuCategoryCodes);
 
         $bajuSelected = $sizeEvent->baju_size_options ?? [];
         $sepatuSelected = $sizeEvent->sepatu_size_options ?? [];
@@ -72,7 +77,8 @@ class SizeChangeEventController extends Controller
 
         return view('finance.size-events.edit', compact(
             'sizeEvent', 'faculties', 'studyPrograms', 'generations', 'studentLevels',
-            'bajuMasterSizes', 'sepatuMasterSizes', 'bajuSelected', 'sepatuSelected', 'bajuCustomText', 'sepatuCustomText'
+            'bajuMasterSizes', 'sepatuMasterSizes', 'bajuSelected', 'sepatuSelected', 'bajuCustomText', 'sepatuCustomText',
+            'bajuCategoryCodes', 'sepatuCategoryCodes'
         ));
     }
 
