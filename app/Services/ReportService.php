@@ -326,18 +326,14 @@ class ReportService
     {
         $minDate = DB::table('distribution_transactions')->whereNotNull('pickup_time')->min('pickup_time');
         $maxDate = DB::table('distribution_transactions')->whereNotNull('pickup_time')->max('pickup_time');
+$defaultStart = $minDate ? Carbon::parse($minDate)->toDateString() : now()->startOfMonth()->toDateString();
 
-        $defaultStart = $minDate ? Carbon::parse($minDate)->toDateString() : now()->startOfMonth()->toDateString();
         $defaultEnd = $maxDate ? Carbon::parse($maxDate)->toDateString() : now()->toDateString();
 
         $categories = cache()->remember('report-categories-options', 3600, fn () => ItemCategory::orderBy('code', 'asc')->get(['id', 'code', 'label'])
         );
 
-        $stockService = app(StockService::class);
-        $shortageItems = cache()->remember('dashboard-shortage-items', 300, fn () => $stockService->getDemandShortageItems());
-        $outOfStockItems = cache()->remember('dashboard-out-of-stock-items', 300, fn () => $stockService->getOutOfStockItems());
-
-        return compact('defaultStart', 'defaultEnd', 'categories', 'shortageItems', 'outOfStockItems');
+        return compact('defaultStart', 'defaultEnd', 'categories');
     }
 
     public function getSalesDashboardProcessedData(?string $startDate = null, ?string $endDate = null, ?int $categoryId = null, ?int $itemId = null): array
