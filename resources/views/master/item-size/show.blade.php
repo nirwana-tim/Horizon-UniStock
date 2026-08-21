@@ -13,6 +13,18 @@
                             <p class="mt-1 text-sm text-gray-900 font-semibold">{{ $itemSize->label }} ({{ $itemSize->code }})</p>
                         </div>
 
+                        <div class="mt-2">
+                            <h3 class="text-sm font-medium text-gray-500">Kategori</h3>
+                            <div class="flex gap-2">
+                                <span class="px-2 py-1 rounded text-xs font-medium bg-primary-100 text-primary-700 {{ $itemSize->is_baju ? 'bg-primary-700 text-primary-700' : 'bg-gray-200 text-gray-500' }}">
+                                    {{ $itemSize->is_baju ? 'Baju' : '-' }}
+                                </span>
+                                <span class="px-2 py-1 rounded text-xs font-medium bg-gray-200 text-gray-500 {{ $itemSize->is_sepatu ? 'bg-primary-100 text-primary-700' : 'bg-gray-200 text-gray-500' }}">
+                                    {{ $itemSize->is_sepatu ? 'Sepatu' : '-' }}
+                                </span>
+                            </div>
+                        </div>
+
                         <div>
                             <h3 class="text-sm font-medium text-gray-500">Category</h3>
                             <p class="mt-1 text-sm text-gray-900">{{ $itemSize->categories->map(fn($c) => $c->label . ' (' . $c->code . ')')->implode(', ') ?: '-' }}</p>

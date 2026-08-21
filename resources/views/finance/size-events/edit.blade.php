@@ -116,7 +116,7 @@
                                 @endforeach
                             </div>
                         @else
-                            <p class="text-xs text-gray-400 mb-3">Belum ada kategori ukuran baju terkonfigurasi (cek config/student-size.php).</p>
+                            <p class="text-xs text-gray-400 mb-3">Belum ada ukuran baju ditandai. Tandai ukuran di Master Data → Item Size.</p>
                         @endif
                         <input type="text" name="baju_size_options_custom" value="{{ old('baju_size_options_custom', $bajuCustomText) }}"
                             placeholder="Ukuran baju lain (pisahkan koma), mis: XXL Plus, 3XL"
@@ -141,7 +141,7 @@
                                 @endforeach
                             </div>
                         @else
-                            <p class="text-xs text-gray-400 mb-3">Belum ada kategori ukuran sepatu terkonfigurasi (cek config/student-size.php).</p>
+                            <p class="text-xs text-gray-400 mb-3">Belum ada ukuran sepatu ditandai. Tandai ukuran di Master Data → Item Size.</p>
                         @endif
                         <input type="text" name="sepatu_size_options_custom" value="{{ old('sepatu_size_options_custom', $sepatuCustomText) }}"
                             placeholder="Ukuran sepatu lain (pisahkan koma), mis: 46.5, 47"

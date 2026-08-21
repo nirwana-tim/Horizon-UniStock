@@ -4,6 +4,7 @@ namespace App\Services\Master;
 
 use App\Models\ItemSize;
 use App\Services\AuditService;
+use Illuminate\Validation\ValidationException;
 
 class ItemSizeService
 {
@@ -19,18 +20,18 @@ class ItemSizeService
             $code = null;
             for ($i = 1; $i <= 99; $i++) {
                 $candidate = str_pad($i, 2, '0', STR_PAD_LEFT);
-                if (!ItemSize::where('code', '=', $candidate, 'and')->exists()) {
+                if (! ItemSize::where('code', '=', $candidate, 'and')->exists()) {
                     $code = $candidate;
                     break;
                 }
             }
-            if (!$code) {
+            if (! $code) {
                 $code = substr(strtoupper(preg_replace('/[^A-Za-z0-9]/', '', $label)), 0, 3);
             }
         }
 
         if (ItemSize::where('code', '=', $code, 'and')->exists()) {
-            throw \Illuminate\Validation\ValidationException::withMessages([
+            throw ValidationException::withMessages([
                 'label' => "Kode ukuran '{$code}' untuk label '{$label}' sudah terpakai. Harap gunakan label lain.",
             ]);
         }
@@ -41,6 +42,7 @@ class ItemSizeService
         $size->categories()->sync($categoryIds);
 
         AuditService::log('create', 'item_size', $size->id, null, $data);
+
         return $size;
     }
 
@@ -55,6 +57,7 @@ class ItemSizeService
         $itemSize->categories()->sync($categoryIds);
 
         AuditService::log('update', 'item_size', $itemSize->id, $old, $data);
+
         return $itemSize;
     }
 
@@ -62,5 +65,17 @@ class ItemSizeService
     {
         AuditService::log('delete', 'item_size', $itemSize->id, $itemSize->toArray(), null);
         $itemSize->delete();
+    }
+
+    public function toggleTag(ItemSize $itemSize, string $field, bool $value): ItemSize
+    {
+        $itemSize->update([$field => $value]);
+
+        $old = $itemSize->toArray();
+        $new = $itemSize->fresh()->toArray();
+
+        AuditService::log('toggle', 'item_size', $itemSize->id, $old, $new);
+
+        return $itemSize;
     }
 }

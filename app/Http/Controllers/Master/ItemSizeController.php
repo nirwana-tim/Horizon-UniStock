@@ -92,7 +92,7 @@ class ItemSizeController extends Controller
             'value' => ['required', 'boolean'],
         ]);
 
-        $itemSize->update([$validated['field'] => $validated['value']]);
+        $this->sizeService->toggleTag($itemSize, $validated['field'], $validated['value']);
 
         return response()->json([
             'ok' => true,

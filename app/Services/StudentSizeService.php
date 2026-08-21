@@ -79,9 +79,77 @@ class StudentSizeService
     public function getSizeOptions(SizeChangeEvent $event): array
     {
         return [
-            'baju' => $event->baju_size_options ?? [],
-            'sepatu' => $event->sepatu_size_options ?? [],
+            'baju' => $this->resolveOptionLabels($event->baju_size_options, 'is_baju'),
+            'sepatu' => $this->resolveOptionLabels($event->sepatu_size_options, 'is_sepatu'),
         ];
+    }
+
+    /**
+     * Resolve size option labels from stored chips/text to actual item_size labels.
+     *
+     * - "All Size"  → semua flagged sizes dari item_sizes (dari DB, selalu up-to-date)
+     * - Opsi spesifik → filter hanya ukuran yang masih ada di item_sizes
+     */
+    private function resolveOptionLabels(?array $options, string $flagColumn): array
+    {
+        if (empty($options)) {
+            return [];
+        }
+
+        // "All Size" → ambil semua flagged sizes dari item_sizes
+        if (in_array('All Size', $options)) {
+            return $this->resolveAllFlaggedSizes($flagColumn);
+        }
+
+        // Filter hanya yang masih ada di item_sizes dengan flag yang benar
+        return $this->resolveSpecificOptions($options, $flagColumn);
+    }
+
+    /**
+     * Ambil semua flagged sizes dari item_sizes.
+     * Jika gagal (misal tabel kosong), fall back ke stored options.
+     */
+    private function resolveAllFlaggedSizes(string $flagColumn): array
+    {
+        try {
+            $sizes = ItemSize::where($flagColumn, true)
+                ->orderBy('code')
+                ->pluck('label')
+                ->toArray();
+
+            if (! empty($sizes)) {
+                return $sizes;
+            }
+        } catch (\Throwable) {
+            // Jika error (misal: table belum ada, migrasi belum jalan), lanjut ke fallback
+        }
+
+        // Fallback: return stored options (bisa "All Size" literal atau array lain)
+        return [];
+    }
+
+    /**
+     * Filter opsi spesifik yang masih ada di item_sizes dengan flag yang benar.
+     * Jika tidak ada yang match, fallback ke stored options.
+     */
+    private function resolveSpecificOptions(array $options, string $flagColumn): array
+    {
+        try {
+            $sizes = ItemSize::where($flagColumn, true)
+                ->whereIn('label', $options)
+                ->orderBy('code')
+                ->pluck('label')
+                ->toArray();
+
+            if (! empty($sizes)) {
+                return $sizes;
+            }
+        } catch (\Throwable) {
+            // Jika error, lanjut ke fallback
+        }
+
+        // Fallback: return stored options (bisa "All Size" literal atau array lain)
+        return $options;
     }
 
     /**
