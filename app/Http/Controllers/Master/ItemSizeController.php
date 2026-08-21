@@ -84,4 +84,20 @@ class ItemSizeController extends Controller
 
         return redirect()->route('master-data.item-size.index')->with('success', 'Ukuran item berhasil dihapus.');
     }
+
+    public function toggleTag(Request $request, ItemSize $itemSize): JsonResponse
+    {
+        $validated = $request->validate([
+            'field' => ['required', 'string', 'in:is_baju,is_sepatu'],
+            'value' => ['required', 'boolean'],
+        ]);
+
+        $itemSize->update([$validated['field'] => $validated['value']]);
+
+        return response()->json([
+            'ok' => true,
+            'is_baju' => (bool) $itemSize->fresh()->is_baju,
+            'is_sepatu' => (bool) $itemSize->fresh()->is_sepatu,
+        ]);
+    }
 }

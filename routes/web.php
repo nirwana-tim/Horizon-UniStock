@@ -33,7 +33,6 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\Staff\ScanController;
 use App\Http\Controllers\Student\SizeController;
 use App\Http\Controllers\System\SmtpSettingController;
-use App\Http\Controllers\System\StudentSizeCategoryController;
 use App\Http\Controllers\System\UserController;
 use App\Http\Controllers\TemplateController;
 use Illuminate\Support\Facades\Route;
@@ -68,6 +67,7 @@ Route::middleware(['auth', 'password.changed', 'role:super_admin|admin', 'thrott
     Route::resource('item-type', ItemTypeController::class);
     Route::resource('item-department', ItemDepartmentController::class);
     Route::resource('item-size', ItemSizeController::class);
+    Route::put('item-size/{item_size}/tag', [ItemSizeController::class, 'toggleTag'])->name('item-size.tag');
 
     Route::get('item/sizes-types-by-category', [ItemController::class, 'sizesTypesByCategory'])->name('item.sizes-types-by-category');
     Route::resource('item', ItemController::class);
@@ -189,12 +189,6 @@ Route::middleware(['auth', 'password.changed', 'role:super_admin'])->prefix('sys
     Route::post('/smtp/test', [SmtpSettingController::class, 'test'])->middleware('throttle:5,1')->name('smtp.test');
     Route::post('/smtp/verify', [SmtpSettingController::class, 'verify'])->middleware('throttle:10,1')->name('smtp.verify');
 });
-
-Route::middleware(['auth', 'password.changed', 'role:super_admin|admin', 'throttle:web'])
-    ->prefix('system')->name('system.')->group(function () {
-        Route::get('/size-categories', [StudentSizeCategoryController::class, 'show'])->name('student-size.show');
-        Route::put('/size-categories', [StudentSizeCategoryController::class, 'store'])->name('student-size.store');
-    });
 
 Route::middleware(['auth', 'password.changed', 'role:super_admin|admin', 'throttle:web'])
     ->prefix('admin/users')->name('admin.user.')->group(function () {

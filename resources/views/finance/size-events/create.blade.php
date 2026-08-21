@@ -102,7 +102,7 @@
                     <div class="border border-gray-200 rounded-lg p-4 mb-4">
                         <div class="flex items-center justify-between mb-3">
                             <h5 class="text-sm font-semibold text-gray-800">UKURAN BAJU <span class="font-normal text-gray-400">(huruf)</span></h5>
-                            <span class="text-xs text-gray-400">Kategori: {{ implode(', ', $bajuCategoryCodes) }}</span>
+                            <span class="text-xs text-gray-400">Kelola di Master Data → Item Size</span>
                         </div>
                         @if($bajuMasterSizes)
                             <div class="flex flex-wrap gap-2 mb-3">
@@ -127,7 +127,7 @@
                     <div class="border border-gray-200 rounded-lg p-4">
                         <div class="flex items-center justify-between mb-3">
                             <h5 class="text-sm font-semibold text-gray-800">UKURAN SEPATU <span class="font-normal text-gray-400">(angka)</span></h5>
-                            <span class="text-xs text-gray-400">Kategori: {{ implode(', ', $sepatuCategoryCodes) }}</span>
+                            <span class="text-xs text-gray-400">Kelola di Master Data → Item Size</span>
                         </div>
                         @if($sepatuMasterSizes)
                             <div class="flex flex-wrap gap-2 mb-3">

@@ -94,18 +94,25 @@ class ItemSizeSeeder extends Seeder
             ['code' => 'TM', 'label' => 'Termos'],
             ['code' => 'TL', 'label' => 'Tali'],
             ['code' => 'VR', 'label' => 'Viral'],
-            
+
         ];
 
         foreach ($sizes as $size) {
+            $catCodes = $sizeCategories[$size['code']] ?? [];
+            $isBaju = count(array_intersect($catCodes, ['UNF', 'KIT', 'KTM'])) > 0;
+            $isSepatu = in_array('SHO', $catCodes);
+
             $itemSize = ItemSize::firstOrCreate(
                 ['code' => $size['code']],
-                ['label' => $size['label']]
+                ['label' => $size['label'], 'is_baju' => $isBaju, 'is_sepatu' => $isSepatu]
             );
 
-            $catCodes = $sizeCategories[$size['code']];
-            $catIds = array_map(fn ($code) => $categoryIds[$code], $catCodes);
-            $itemSize->categories()->syncWithoutDetaching($catIds);
+            if (! empty($catCodes)) {
+                $catIds = array_map(fn ($code) => $categoryIds[$code], array_filter($catCodes, fn ($c) => isset($categoryIds[$c])));
+                if ($catIds) {
+                    $itemSize->categories()->syncWithoutDetaching($catIds);
+                }
+            }
         }
     }
 }

@@ -94,6 +94,19 @@ Alpine.data('serverTable', (url) => ({
     }
 }));
 
+window.toggleItemSizeFlag = function(checkbox) {
+    const url = checkbox.dataset.tagUrl;
+    const field = checkbox.dataset.field;
+    const value = checkbox.checked;
+    axios.put(url, { field, value })
+        .then(() => {
+            checkbox.checked = value;
+        })
+        .catch(() => {
+            checkbox.checked = !value;
+        });
+};
+
 document.addEventListener('alpine:init', () => {
     // Global touch feedback directive
     Alpine.directive('touch-feedback', (el) => {

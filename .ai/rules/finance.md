@@ -1,9 +1,9 @@
 ---
 paths:
-  - 'app/Services/StudentSizeCategoryService.php,app/Http/Controllers/Finance/SizeChangeEventController.php'
+  - 'app/Http/Controllers/Finance/SizeChangeEventController.php'
 ---
 
 # Finance
 
-## Baju/sepatu category mapping is DB-overridable
-config/student-size.php holds only DEFAULTS. Super admin/admin override them via System -> Konfigurasi Ukuran, stored as app_settings keys `student-size.baju_category_codes` / `student-size.sepatu_category_codes`. Always read through StudentSizeCategoryService::bajuCategoryCodes()/sepatuCategoryCodes() (DB first, config fallback) — never read config('student-size.*') directly.
+## Baju/sepatu size flags
+Item sizes are tagged via `is_baju` / `is_sepatu` boolean columns on the `item_sizes` table. Toggle from Master Data → Item Size (checkboxes). SizeChangeEventController queries `ItemSize::where('is_baju', true)` for chip options — never read config or category pivot directly.

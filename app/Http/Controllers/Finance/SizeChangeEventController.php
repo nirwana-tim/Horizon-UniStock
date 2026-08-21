@@ -5,13 +5,11 @@ namespace App\Http\Controllers\Finance;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Finance\SizeChangeEventRequest;
 use App\Models\Faculty;
-use App\Models\ItemCategory;
 use App\Models\ItemSize;
 use App\Models\SizeChangeEvent;
 use App\Models\StudentGeneration;
 use App\Models\StudentLevel;
 use App\Models\StudyProgram;
-use App\Services\StudentSizeCategoryService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
@@ -26,19 +24,17 @@ class SizeChangeEventController extends Controller
         return view('finance.size-events.index', compact('events'));
     }
 
-    public function create(StudentSizeCategoryService $categoryService): View
+    public function create(): View
     {
         $faculties = Faculty::orderBy('name')->get();
         $studyPrograms = StudyProgram::with('faculty')->orderBy('name')->get();
         $generations = StudentGeneration::orderBy('name')->get();
         $studentLevels = StudentLevel::orderBy('kode')->get();
 
-        $bajuCategoryCodes = $categoryService->bajuCategoryCodes();
-        $sepatuCategoryCodes = $categoryService->sepatuCategoryCodes();
-        $bajuMasterSizes = $this->sizeLabelsFor($bajuCategoryCodes);
-        $sepatuMasterSizes = $this->sizeLabelsFor($sepatuCategoryCodes);
+        $bajuMasterSizes = $this->flaggedSizeLabels('is_baju');
+        $sepatuMasterSizes = $this->flaggedSizeLabels('is_sepatu');
 
-        return view('finance.size-events.create', compact('faculties', 'studyPrograms', 'generations', 'studentLevels', 'bajuMasterSizes', 'sepatuMasterSizes', 'bajuCategoryCodes', 'sepatuCategoryCodes'));
+        return view('finance.size-events.create', compact('faculties', 'studyPrograms', 'generations', 'studentLevels', 'bajuMasterSizes', 'sepatuMasterSizes'));
     }
 
     public function store(SizeChangeEventRequest $request): RedirectResponse
@@ -57,17 +53,15 @@ class SizeChangeEventController extends Controller
             ->with('success', 'Event Pengisian / Perubahan Ukuran berhasil dibuat.');
     }
 
-    public function edit(SizeChangeEvent $sizeEvent, StudentSizeCategoryService $categoryService): View
+    public function edit(SizeChangeEvent $sizeEvent): View
     {
         $faculties = Faculty::orderBy('name')->get();
         $studyPrograms = StudyProgram::with('faculty')->orderBy('name')->get();
         $generations = StudentGeneration::orderBy('name')->get();
         $studentLevels = StudentLevel::orderBy('kode')->get();
 
-        $bajuCategoryCodes = $categoryService->bajuCategoryCodes();
-        $sepatuCategoryCodes = $categoryService->sepatuCategoryCodes();
-        $bajuMasterSizes = $this->sizeLabelsFor($bajuCategoryCodes);
-        $sepatuMasterSizes = $this->sizeLabelsFor($sepatuCategoryCodes);
+        $bajuMasterSizes = $this->flaggedSizeLabels('is_baju');
+        $sepatuMasterSizes = $this->flaggedSizeLabels('is_sepatu');
 
         $bajuSelected = $sizeEvent->baju_size_options ?? [];
         $sepatuSelected = $sizeEvent->sepatu_size_options ?? [];
@@ -77,8 +71,7 @@ class SizeChangeEventController extends Controller
 
         return view('finance.size-events.edit', compact(
             'sizeEvent', 'faculties', 'studyPrograms', 'generations', 'studentLevels',
-            'bajuMasterSizes', 'sepatuMasterSizes', 'bajuSelected', 'sepatuSelected', 'bajuCustomText', 'sepatuCustomText',
-            'bajuCategoryCodes', 'sepatuCategoryCodes'
+            'bajuMasterSizes', 'sepatuMasterSizes', 'bajuSelected', 'sepatuSelected', 'bajuCustomText', 'sepatuCustomText'
         ));
     }
 
@@ -140,17 +133,10 @@ class SizeChangeEventController extends Controller
         return $this->parseSizeOptionText($legacy);
     }
 
-    private function sizeLabelsFor(array $categoryCodes): array
+    private function flaggedSizeLabels(string $column): array
     {
-        $categoryIds = ItemCategory::whereIn('code', $categoryCodes)->pluck('id');
-
-        if ($categoryIds->isEmpty()) {
-            return [];
-        }
-
-        return ItemSize::whereHas('categories', fn ($q) => $q->whereIn('item_category_id', $categoryIds))
+        return ItemSize::where($column, true)
             ->orderBy('code')
-            ->get(['label'])
             ->pluck('label')
             ->unique()
             ->values()

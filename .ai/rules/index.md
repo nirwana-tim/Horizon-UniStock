@@ -5,5 +5,5 @@ Before planning or editing, find the row whose globs match the file's path and r
 | Applies to | Rule file |
 | --- | --- |
 | app/Exports/** | .ai/rules/exports.md |
-| app/Services/StudentSizeCategoryService.php,app/Http/Controllers/Finance/SizeChangeEventController.php | .ai/rules/finance.md |
+| app/Http/Controllers/Finance/SizeChangeEventController.php | .ai/rules/finance.md |
 | ** | .ai/rules/general.md |
