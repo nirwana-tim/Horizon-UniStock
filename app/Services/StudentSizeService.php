@@ -74,13 +74,14 @@ class StudentSizeService
 
     /**
      * Get size options for baju and sepatu.
-     * Hanya mengikuti opsi yang diisi admin pada event; tanpa fallback dari tabel lain.
+     * Selalu resolve dari flag is_baju/is_sepatu di item_sizes (terus up-to-date).
+     * Tidak bergantung pada opsi yang disimpan saat event dibuat.
      */
     public function getSizeOptions(SizeChangeEvent $event): array
     {
         return [
-            'baju' => $this->resolveOptionLabels($event->baju_size_options, 'is_baju'),
-            'sepatu' => $this->resolveOptionLabels($event->sepatu_size_options, 'is_sepatu'),
+            'baju' => $this->resolveAllFlaggedSizes('is_baju'),
+            'sepatu' => $this->resolveAllFlaggedSizes('is_sepatu'),
         ];
     }
 
