@@ -31,20 +31,17 @@ class DistributionReportExport extends BaseExport implements FromQuery, WithChun
 
     public function query(): Builder
     {
-        $query = DistributionItem::with('item', 'transaction.student.studyProgram', 'transaction.schedule')
+        $query = DistributionItem::with('item', 'variant', 'transaction.student.studyProgram', 'transaction.schedule')
             ->join('distribution_transactions', 'distribution_items.transaction_id', '=', 'distribution_transactions.id')
             ->join('distribution_schedules', 'distribution_transactions.schedule_id', '=', 'distribution_schedules.id')
             ->select(
                 'distribution_items.*',
-                'distribution_transactions.student_id',
                 'distribution_transactions.status as transaction_status',
                 'distribution_transactions.pickup_time'
             );
 
         if ($this->period) {
-            $query->whereHas('transaction.schedule', function ($q) {
-                $q->where('period', $this->period);
-            });
+            $query->where('distribution_schedules.period', $this->period);
         }
 
         return $query->orderBy('distribution_transactions.created_at')->orderBy('distribution_items.id');
@@ -58,15 +55,8 @@ class DistributionReportExport extends BaseExport implements FromQuery, WithChun
     public function headings(): array
     {
         return [
-            'No',
-            'Nama Mahasiswa',
-            'Prodi',
-            'Item',
-            'Ukuran Diharapkan',
-            'Ukuran Diberikan',
-            'Jumlah',
-            'Status',
-            'Waktu Ambil',
+            'No', 'NIM', 'Nama Mahasiswa', 'Prodi', 'Item',
+            'Ukuran Diharapkan', 'Ukuran Diberikan', 'Jumlah', 'Status', 'Waktu Ambil',
         ];
     }
 
@@ -76,11 +66,12 @@ class DistributionReportExport extends BaseExport implements FromQuery, WithChun
 
         return [
             $this->row,
-            $item->transaction->student->name ?? '-',
-            $item->transaction->student->studyProgram->name ?? '-',
+            $item->transaction?->student?->nim ?? '-',
+            $item->transaction?->student?->name ?? '-',
+            $item->transaction?->student?->studyProgram?->name ?? '-',
             $item->item->name ?? '-',
-            $item->expected_size ?? '-',
-            $item->actual_size ?? '-',
+            $item->variant?->size_label ?? $item->expected_size ?? '-',
+            $item->variant?->size_label ?? $item->actual_size ?? '-',
             $item->quantity,
             $item->transaction_status,
             $item->pickup_time ? Carbon::parse($item->pickup_time)->format('d/m/Y H:i') : '-',
@@ -89,7 +80,7 @@ class DistributionReportExport extends BaseExport implements FromQuery, WithChun
 
     public function styles(Worksheet $sheet): ?array
     {
-        $colCount = 9;
+        $colCount = 10;
         $headerRow = $this->headerRow();
         $dataStart = $this->dataStartRow();
         $lastRow = $dataStart + $this->row - 1;
@@ -102,8 +93,8 @@ class DistributionReportExport extends BaseExport implements FromQuery, WithChun
         $this->applyDataStyle($sheet, $dataStart, $lastRow, $colCount);
 
         $this->setColumnWidths($sheet, [
-            'A' => 5, 'B' => 30, 'C' => 22, 'D' => 35,
-            'E' => 18, 'F' => 18, 'G' => 10, 'H' => 14, 'I' => 18,
+            'A' => 5, 'B' => 15, 'C' => 30, 'D' => 22, 'E' => 35,
+            'F' => 18, 'G' => 18, 'H' => 10, 'I' => 14, 'J' => 18,
         ]);
 
         $sheet->freezePane('A'.($headerRow + 1));

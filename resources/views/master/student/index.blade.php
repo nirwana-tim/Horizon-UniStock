@@ -8,12 +8,6 @@
                 </svg>
                 Template
             </a>
-            <button type="button" @click="$dispatch('open-modal', 'import-student')" class="inline-flex items-center gap-1.5 px-4 py-2 border border-primary-500 text-primary-700 rounded-md font-semibold text-xs uppercase tracking-widest hover:bg-primary-50 transition">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                </svg>
-                Import Student
-            </button>
             <a href="{{ route('students.promote.form') }}" class="inline-flex items-center px-4 py-2 border border-primary-500 text-primary-700 rounded-md font-semibold text-xs uppercase tracking-widest hover:bg-primary-50 transition">
                 Promote
             </a>
@@ -65,6 +59,15 @@
                                             <option value="{{ $level->id }}">{{ $level->label }}</option>
                                         @endforeach
                                     </select>
+                            </div>
+                            <div class="flex items-center gap-2 mt-4">
+                                <button type="button" @click="$dispatch('open-modal', 'import-student')" class="inline-flex items-center gap-1.5 px-4 py-2 border border-primary-500 text-primary-700 rounded-md font-semibold text-xs uppercase tracking-widest hover:bg-primary-50 transition">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                                    </svg>
+                                    Import Student
+                                </button>
+                            </div>
                                 </div>
                             </div>
                             <div class="overflow-x-auto">
