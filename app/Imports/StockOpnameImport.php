@@ -3,19 +3,20 @@
 namespace App\Imports;
 
 use App\Models\Item;
-use App\Models\ItemVariant;
 use App\Models\StockBalance;
 use App\Models\StockOpnameItem;
+use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
-use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 class StockOpnameImport implements ToCollection, WithHeadingRow, WithValidation
 {
     protected int $stockOpnameId;
 
     private int $importedCount = 0;
+    private int $totalRows = 0;
 
     public function headingRow(): int
     {
@@ -27,44 +28,62 @@ class StockOpnameImport implements ToCollection, WithHeadingRow, WithValidation
         $this->stockOpnameId = $stockOpnameId;
     }
 
-    public function getImportedRows(): int
+    public function getImportedCount(): int
     {
         return $this->importedCount;
     }
 
+    public function getTotalRows(): int
+    {
+        return $this->totalRows;
+    }
+
+    public function countRows(Collection $rows): int
+    {
+        return count($rows);
+    }
+
     public function collection(Collection $rows): void
     {
-        foreach ($rows as $row) {
-            $item = Item::where('code', $row['kode_barang'])->first();
-            if (!$item) continue;
+        $this->totalRows = count($rows);
 
-            $variantLabel = trim((string) ($row['varian_ukuran'] ?? ''));
-            $variant = $item->variants()
-                ->where(function ($q) use ($variantLabel) {
-                    $q->where('size_label', $variantLabel)
-                      ->orWhere('size', $variantLabel);
-                })
-                ->first();
+        DB::transaction(function () use ($rows) {
+            foreach ($rows as $row) {
+                $item = Item::where('code', $row['kode_barang'])->first();
+                if (!$item) continue;
 
-            if (!$variant) continue;
+                $variantLabel = trim((string) ($row['varian_ukuran'] ?? ''));
+                $variant = $item->variants()
+                    ->where(function ($q) use ($variantLabel) {
+                        $q->where('size_label', $variantLabel)
+                          ->orWhere('size', $variantLabel);
+                    })
+                    ->first();
 
-            $stockBalance = StockBalance::where('item_id', $item->id)
-                ->where('variant_id', $variant->id)
-                ->first();
+                if (!$variant) continue;
 
-            $systemQuantity = $stockBalance?->quantity ?? 0;
-            $physicalQuantity = (int) $row['quantity_fisik'];
+                $stockBalance = StockBalance::where('item_id', $item->id)
+                    ->where('variant_id', $variant->id)
+                    ->first();
 
-            StockOpnameItem::create([
-                'stock_opname_id' => $this->stockOpnameId,
-                'item_id' => $item->id,
-                'variant_id' => $variant->id,
-                'system_quantity' => $systemQuantity,
-                'physical_quantity' => $physicalQuantity,
-            ]);
+                $systemQuantity = $stockBalance?->quantity ?? 0;
+                $physicalQuantity = (int) $row['quantity_fisik'];
 
-            $this->importedCount++;
-        }
+                StockOpnameItem::updateOrCreate(
+                    [
+                        'stock_opname_id' => $this->stockOpnameId,
+                        'item_id' => $item->id,
+                        'variant_id' => $variant->id,
+                    ],
+                    [
+                        'system_quantity' => $systemQuantity,
+                        'physical_quantity' => $physicalQuantity,
+                    ]
+                );
+
+                $this->importedCount++;
+            }
+        });
     }
 
     public function rules(): array

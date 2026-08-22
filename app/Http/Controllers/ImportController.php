@@ -62,6 +62,11 @@ class ImportController extends Controller
             $request->integer('stock_opname_id') ?: null
         );
 
+        // Clean up temporary import file after processing
+        if (Storage::disk('local')->exists($filePath)) {
+            Storage::disk('local')->delete($filePath);
+        }
+
         if ($batch->status === 'completed') {
             return redirect()
                 ->route('import.result', $batch)

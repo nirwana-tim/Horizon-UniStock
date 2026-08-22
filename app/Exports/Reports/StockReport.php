@@ -6,26 +6,27 @@ use App\Exports\BaseExport;
 use App\Models\StockBalance;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
-use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\WithChunkReading;
+use Maatwebsite\Excel\Concerns\WithCustomStartCell;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class StockReport extends BaseExport implements FromQuery, WithChunkReading, WithHeadings, WithMapping, WithStyles
+class StockReport extends BaseExport implements FromQuery, WithChunkReading, WithCustomStartCell, WithHeadings, WithMapping, WithStyles
 {
-    use Exportable;
-
     private int $row = 0;
-
-    private string $lastCategory = '';
 
     public function __construct(
         private ?string $category = null,
         private ?string $gender = null
     ) {}
+
+    public function startCell(): string
+    {
+        return 'A4';
+    }
 
     public function query(): Builder
     {
@@ -66,6 +67,10 @@ class StockReport extends BaseExport implements FromQuery, WithChunkReading, Wit
 
         if ($this->category) {
             $query->where('item_categories.code', $this->category);
+        }
+
+        if ($this->gender) {
+            $query->where('items.gender', $this->gender);
         }
 
         return $query;

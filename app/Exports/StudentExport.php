@@ -42,7 +42,7 @@ class StudentExport implements FromQuery, WithChunkReading, WithHeadings, WithMa
             $query->where('generation_id', $this->generationId);
         }
 
-        return $query->latest()->orderBy('id');
+        return $query->orderBy('id', 'desc');
     }
 
     public function chunkSize(): int

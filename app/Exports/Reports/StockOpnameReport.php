@@ -8,12 +8,13 @@ use Illuminate\Database\Eloquent\Relations\Relation;
 use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\WithChunkReading;
+use Maatwebsite\Excel\Concerns\WithCustomStartCell;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class StockOpnameReport extends BaseExport implements FromQuery, WithChunkReading, WithHeadings, WithMapping, WithStyles
+class StockOpnameReport extends BaseExport implements FromQuery, WithChunkReading, WithCustomStartCell, WithHeadings, WithMapping, WithStyles
 {
     use Exportable;
 
@@ -22,6 +23,11 @@ class StockOpnameReport extends BaseExport implements FromQuery, WithChunkReadin
     public function __construct(
         private StockOpname $stockOpname
     ) {}
+
+    public function startCell(): string
+    {
+        return 'A4';
+    }
 
     public function query(): Relation
     {

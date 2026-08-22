@@ -47,7 +47,7 @@ abstract class BaseExport
 
     protected function applyDataStyle(Worksheet $sheet, int $startRow, int $endRow, int|string|null $colCount = null): void
     {
-        $colLetter = $this->resolveColLetter($colCount, $sheet);
+        $colLetter = $this->resolveColCount($colCount, $sheet);
 
         for ($i = $startRow; $i <= $endRow; $i++) {
             $range = 'A' . $i . ':' . $colLetter . $i;
@@ -179,19 +179,6 @@ abstract class BaseExport
     }
 
     private function resolveColCount(int|string|null $colCount, Worksheet $sheet): string
-    {
-        if ($colCount === null) {
-            return $sheet->getHighestColumn();
-        }
-
-        if (is_int($colCount)) {
-            return Coordinate::stringFromColumnIndex($colCount);
-        }
-
-        return $colCount;
-    }
-
-    private function resolveColLetter(int|string|null $colCount, Worksheet $sheet): string
     {
         if ($colCount === null) {
             return $sheet->getHighestColumn();

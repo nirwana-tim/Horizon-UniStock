@@ -7,22 +7,50 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\WithCustomStartCell;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class SizeRecapReport extends BaseExport implements FromCollection, WithHeadings, WithMapping, WithStyles
+class SizeRecapReport extends BaseExport implements FromCollection, WithCustomStartCell, WithHeadings, WithMapping, WithStyles
 {
     use Exportable;
 
     private int $row = 0;
 
+    private string $filterText = 'Semua Generasi & Prodi';
+
     public function __construct(
         private ?int $generationId = null,
         private ?int $studyProgramId = null
-    ) {}
+    ) {
+        $this->resolveFilterText();
+    }
+
+    private function resolveFilterText(): void
+    {
+        $parts = [];
+        if ($this->generationId) {
+            $level = DB::table('student_generations')->where('id', $this->generationId)->first();
+            if ($level) {
+                $parts[] = 'Generasi: '.$level->name;
+            }
+        }
+        if ($this->studyProgramId) {
+            $prodi = DB::table('study_programs')->where('id', $this->studyProgramId)->first();
+            if ($prodi) {
+                $parts[] = 'Prodi: '.$prodi->name;
+            }
+        }
+        $this->filterText = $parts ? implode(' | ', $parts) : 'Semua Generasi & Prodi';
+    }
+
+    public function startCell(): string
+    {
+        return 'A4';
+    }
 
     public function collection(): Collection
     {
@@ -87,30 +115,14 @@ class SizeRecapReport extends BaseExport implements FromCollection, WithHeadings
 
         $this->setTitle($sheet, 'LAPORAN REKAP KEBUTUHAN UKURAN MAHASISWA', $colCount);
 
-        $filterText = 'Semua Generasi & Prodi';
-        if ($this->generationId || $this->studyProgramId) {
-            $parts = [];
-            if ($this->generationId) {
-                $level = DB::table('student_generations')->where('id', $this->generationId)->first();
-                if ($level) {
-                    $parts[] = 'Generasi: '.$level->name;
-                }
-            }
-            if ($this->studyProgramId) {
-                $prodi = DB::table('study_programs')->where('id', $this->studyProgramId)->first();
-                if ($prodi) {
-                    $parts[] = 'Prodi: '.$prodi->name;
-                }
-            }
-            $filterText = implode(' | ', $parts);
-        }
-        $this->setSubtitle($sheet, $filterText, $colCount);
+        $this->setSubtitle($sheet, $this->filterText, $colCount);
 
         $this->applyHeaderStyle($sheet, $headerRow, $colCount);
         $this->applyDataStyle($sheet, $dataStart, $lastRow, $colCount);
 
         // Align right for quantity column
-        $sheet->getStyle('E'.$dataStart.':E'.$lastRow)->applyFromArray([
+        if ($lastRow >= $dataStart) {
+                $sheet->getStyle('E'.$dataStart.':E'.$lastRow)->applyFromArray([
             'alignment' => [
                 'horizontal' => Alignment::HORIZONTAL_RIGHT,
             ],

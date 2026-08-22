@@ -43,19 +43,17 @@ class StudentImport implements ToCollection, WithMultipleSheets
             $student = Student::firstOrNew(
                 ['nim' => $record['nim']],
             );
-            if (!$student->exists) {
-                $student->fill([
-                    'name' => $record['name'],
-                    'email_kampus' => $record['email_kampus'],
-                    'email_pribadi' => $record['email_pribadi'],
-                    'study_program_id' => $record['study_program']->id,
-                    'generation_id' => $record['program_level']->id,
-                    'student_level' => $record['student_level'],
-                    'entitlement_code' => ($record['student_level'] ?? 'Y1S1')
-                        . ($record['study_program']->faculty->code ?? 'FHS')
-                        . $record['study_program']->code,
-                ])->save();
-            }
+            $student->fill([
+                'name' => $record['name'],
+                'email_kampus' => $record['email_kampus'],
+                'email_pribadi' => $record['email_pribadi'],
+                'study_program_id' => $record['study_program']->id,
+                'generation_id' => $record['program_level']->id,
+                'student_level' => $record['student_level'],
+                'entitlement_code' => ($record['student_level'] ?? 'Y1S1')
+                    . ($record['study_program']->faculty->code ?? 'FHS')
+                    . $record['study_program']->code,
+            ])->save();
 
             // Save shirt size & shoe size if provided
             if (!empty($record['shirt_size']) || !empty($record['shoe_size'])) {

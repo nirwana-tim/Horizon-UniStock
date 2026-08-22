@@ -7,12 +7,13 @@ use App\Models\StockOpnameItem;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\WithCustomStartCell;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class LossReport extends BaseExport implements FromCollection, WithHeadings, WithMapping, WithStyles
+class LossReport extends BaseExport implements FromCollection, WithCustomStartCell, WithHeadings, WithMapping, WithStyles
 {
     use Exportable;
 
@@ -23,7 +24,12 @@ class LossReport extends BaseExport implements FromCollection, WithHeadings, Wit
         private ?string $category = null
     ) {}
 
-    public function collection()
+    public function startCell(): string
+    {
+        return 'A4';
+    }
+
+    public function collection(): \Illuminate\Support\EloquentCollection
     {
         $query = StockOpnameItem::select(
             'items.name as item_name',

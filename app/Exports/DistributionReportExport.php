@@ -31,7 +31,7 @@ class DistributionReportExport extends BaseExport implements FromQuery, WithChun
 
     public function query(): Builder
     {
-        $query = DistributionItem::with('item', 'transaction.student', 'transaction.schedule')
+        $query = DistributionItem::with('item', 'transaction.student.studyProgram', 'transaction.schedule')
             ->join('distribution_transactions', 'distribution_items.transaction_id', '=', 'distribution_transactions.id')
             ->join('distribution_schedules', 'distribution_transactions.schedule_id', '=', 'distribution_schedules.id')
             ->select(

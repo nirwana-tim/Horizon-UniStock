@@ -90,7 +90,7 @@ class StockOpnameController extends Controller
 
         return redirect()->route('inventory.stock-opname.show', $stockOpname)
             ->with('success', 'Data stock opname berhasil diupload.')
-            ->with('total_imported', $import->getImportedRows());
+            ->with('total_imported', $import->getImportedCount());
     }
 
     public function approve(Request $request, StockOpname $stockOpname): RedirectResponse

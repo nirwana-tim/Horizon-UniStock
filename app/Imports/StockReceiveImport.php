@@ -3,7 +3,6 @@
 namespace App\Imports;
 
 use App\Models\Item;
-use App\Models\ItemVariant;
 use App\Models\Vendor;
 use App\Services\StockService;
 use Illuminate\Support\Collection;
@@ -68,7 +67,7 @@ class StockReceiveImport implements ToCollection, WithHeadingRow, WithMultipleSh
 
         foreach ($groups as $key => $group) {
             $vendor = Vendor::firstOrCreate(
-                ['name' => $group['vendor_name']]
+                ['name' => trim($group['vendor_name'])]
             );
 
             $data = [

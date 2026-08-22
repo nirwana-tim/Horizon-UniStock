@@ -9,12 +9,13 @@ use Illuminate\Database\Eloquent\Builder;
 use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\WithChunkReading;
+use Maatwebsite\Excel\Concerns\WithCustomStartCell;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class StockCardReport extends BaseExport implements FromQuery, WithChunkReading, WithHeadings, WithMapping, WithStyles
+class StockCardReport extends BaseExport implements FromQuery, WithChunkReading, WithCustomStartCell, WithHeadings, WithMapping, WithStyles
 {
     use Exportable;
 
@@ -28,6 +29,11 @@ class StockCardReport extends BaseExport implements FromQuery, WithChunkReading,
         private ?string $endDate = null
     ) {}
 
+    public function startCell(): string
+    {
+        return 'A4';
+    }
+
     public function query(): Builder
     {
         $movements = StockMovement::with('item', 'variant')
@@ -36,10 +42,10 @@ class StockCardReport extends BaseExport implements FromQuery, WithChunkReading,
             ->orderBy('id');
 
         if ($this->startDate) {
-            $movements->whereDate('created_at', '>=', $this->startDate);
+            $movements->where('created_at', '>=', \Carbon\Carbon::parse($this->startDate)->startOfDay());
         }
         if ($this->endDate) {
-            $movements->whereDate('created_at', '<=', $this->endDate);
+            $movements->where('created_at', '<=', \Carbon\Carbon::parse($this->endDate)->endOfDay());
         }
 
         return $movements;
@@ -79,7 +85,7 @@ class StockCardReport extends BaseExport implements FromQuery, WithChunkReading,
             $this->runningBalance -= $out;
         }
 
-        $hpp = $movement->item?->hpp ?? 0;
+        $hpp = $movement->hpp ?? $movement->item?->hpp ?? 0;
 
         return [
             $this->row,

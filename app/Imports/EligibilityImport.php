@@ -44,7 +44,7 @@ class EligibilityImport implements ToCollection, WithHeadingRow
                 }
 
                 $statusBayar = strtolower(trim((string) $record['status_bayar']));
-                $isEligible = $statusBayar === '' || in_array($statusBayar, ['lunas', 'bayar', 'ya', '1', 'true', 'yes', 'sudah'], true);
+                $isEligible = in_array($statusBayar, ['lunas', 'bayar', 'ya', '1', 'true', 'yes', 'sudah'], true);
 
                 EligibilityRecord::updateOrCreate(
                     ['student_id' => $student->id],

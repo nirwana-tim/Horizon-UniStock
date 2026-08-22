@@ -38,7 +38,7 @@ class ImportService
             $collection = Excel::toCollection(null, $filePath)->first() ?? collect();
             $totalRows = method_exists($importer, 'countRows')
                 ? $importer->countRows($collection)
-                : $collection->count();
+                : max(0, $collection->count() - ($importer->headingRow() ?? 1));
 
             $batch->update(['total_rows' => $totalRows]);
 
@@ -68,7 +68,7 @@ class ImportService
                 'total_rows' => method_exists($importer, 'getTotalRows') && $importer->getTotalRows() > 0
                     ? $importer->getTotalRows()
                     : $totalRows,
-                'failed_rows' => count($failures),
+                'failed_rows' => collect($failures)->pluck('row')->unique()->count(),
                 'success_rows' => 0,
                 'error_log' => $errorLog,
             ]);

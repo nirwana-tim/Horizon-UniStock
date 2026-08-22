@@ -174,7 +174,12 @@ class ReportController extends Controller
         $data = app(ReportService::class)->getDistributionRecap($period, $studyProgramId);
 
         if ($request->ajax()) {
-            $html = view('report.distribution-recap', compact('data'))->render();
+            $periods = cache()->remember('report-periods', 3600, fn () => DistributionSchedule::select('period')->whereNotNull('period')->groupBy('period')->orderBy('period', 'desc')->pluck('period', 'period')
+            );
+            $studyPrograms = cache()->remember('report-study-programs', 3600, fn () => StudyProgram::orderBy('name', 'asc')->get()
+            );
+
+            $html = view('report.distribution-recap', compact('data', 'periods', 'studyPrograms', 'period', 'studyProgramId'))->render();
 
             return response()->json(compact('html'));
         }
