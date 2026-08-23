@@ -6,10 +6,10 @@ use App\Models\Faculty;
 use App\Models\Item;
 use App\Models\Student;
 use App\Models\StudentGeneration;
-use App\Services\Master\GenerationResolverService;
 use App\Models\StudentSizeItem;
 use App\Models\StudentSizeProfile;
 use App\Models\StudyProgram;
+use App\Services\Master\GenerationResolverService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -27,6 +27,11 @@ class StudentImport implements ToCollection, WithMultipleSheets
 
     public function collection(Collection $rows): void
     {
+        $this->processRows($rows);
+    }
+
+    public function processRows(Collection $rows): void
+    {
         $records = $this->recordsFromRows($rows);
         $this->totalRows = count($records);
 
@@ -38,6 +43,8 @@ class StudentImport implements ToCollection, WithMultipleSheets
                 $failures
             );
         }
+
+        $items = Item::query()->get(['id', 'name', 'code']);
 
         foreach ($records as $record) {
             $student = Student::firstOrNew(
@@ -51,19 +58,18 @@ class StudentImport implements ToCollection, WithMultipleSheets
                 'generation_id' => $record['program_level']->id,
                 'student_level' => $record['student_level'],
                 'entitlement_code' => ($record['student_level'] ?? 'Y1S1')
-                    . ($record['study_program']->faculty->code ?? 'FHS')
-                    . $record['study_program']->code,
+                    .($record['study_program']->faculty->code ?? 'FHS')
+                    .$record['study_program']->code,
             ])->save();
 
             // Save shirt size & shoe size if provided
-            if (!empty($record['shirt_size']) || !empty($record['shoe_size'])) {
+            if (! empty($record['shirt_size']) || ! empty($record['shoe_size'])) {
                 $profile = StudentSizeProfile::firstOrCreate(
                     ['student_id' => $student->id],
                     ['is_filled' => true, 'filled_at' => now()]
                 );
 
-                $items = Item::all();
-                if (!empty($record['shirt_size'])) {
+                if (! empty($record['shirt_size'])) {
                     $shirtItem = $items->first(fn ($i) => str_contains(strtolower($i->name), 'uniform') || str_contains(strtolower($i->name), 'seragam') || str_contains(strtolower($i->code), 'unf')) ?? $items->first();
                     if ($shirtItem) {
                         StudentSizeItem::updateOrCreate(
@@ -73,7 +79,7 @@ class StudentImport implements ToCollection, WithMultipleSheets
                     }
                 }
 
-                if (!empty($record['shoe_size'])) {
+                if (! empty($record['shoe_size'])) {
                     $shoeItem = $items->first(fn ($i) => str_contains(strtolower($i->name), 'sepatu') || str_contains(strtolower($i->name), 'shoe') || str_contains(strtolower($i->code), 'sho'));
                     if ($shoeItem) {
                         StudentSizeItem::updateOrCreate(
@@ -91,7 +97,15 @@ class StudentImport implements ToCollection, WithMultipleSheets
     public function sheets(): array
     {
         return [
-            'Data' => $this,
+            'Data' => new class($this) implements ToCollection
+            {
+                public function __construct(private StudentImport $parent) {}
+
+                public function collection(Collection $rows): void
+                {
+                    $this->parent->processRows($rows);
+                }
+            },
         ];
     }
 
@@ -122,11 +136,11 @@ class StudentImport implements ToCollection, WithMultipleSheets
             }
 
             $nim = $this->clean($values[0] ?? null);
-            if (!$nim) {
+            if (! $nim) {
                 continue;
             }
 
-            $emailKampus = $this->clean($values[6] ?? null) ?? strtolower($nim) . '@krw.horizon.ac.id';
+            $emailKampus = $this->clean($values[6] ?? null) ?? strtolower($nim).'@krw.horizon.ac.id';
 
             $records[] = [
                 'row' => $index + 1,
@@ -188,8 +202,8 @@ class StudentImport implements ToCollection, WithMultipleSheets
                 default => 'Y1S1',
             };
 
-            if ($rawType && $record['student_level'] === 'Y1S1' && !str_contains($type, 'year 1 sem 1')
-                && !str_contains($type, 'y1s1') && !str_contains($type, 'freshman')) {
+            if ($rawType && $record['student_level'] === 'Y1S1' && ! str_contains($type, 'year 1 sem 1')
+                && ! str_contains($type, 'y1s1') && ! str_contains($type, 'freshman')) {
                 $failures[] = new Failure($record['row'], 'student_type_raw', ["Tipe mahasiswa '{$rawType}' tidak dikenali, default ke {$record['student_level']}."], $record);
             }
         }
@@ -217,7 +231,7 @@ class StudentImport implements ToCollection, WithMultipleSheets
 
     private function resolveStudyProgram(?string $value): StudyProgram
     {
-        if (!$value) {
+        if (! $value) {
             $value = 'Umum';
         }
 
@@ -228,6 +242,7 @@ class StudentImport implements ToCollection, WithMultipleSheets
             ->get()
             ->first(function (StudyProgram $program) use ($value, $normalized): bool {
                 $pNorm = $this->normalizeProgramName($program->name);
+
                 return Str::lower($program->code) === Str::lower($value)
                     || $pNorm === $normalized
                     || str_contains($pNorm, $normalized)
@@ -260,11 +275,14 @@ class StudentImport implements ToCollection, WithMultipleSheets
 
     private function normalizeGender(?string $gender): string
     {
-        if (!$gender) return 'L';
+        if (! $gender) {
+            return 'L';
+        }
         $g = Str::upper(trim($gender));
         if ($g === 'P' || str_contains($g, 'PEREMPUAN') || str_contains($g, 'FEMALE')) {
             return 'P';
         }
+
         return 'L';
     }
 
@@ -284,8 +302,8 @@ class StudentImport implements ToCollection, WithMultipleSheets
             return null;
         }
 
-        if (is_numeric($value) && (str_contains(strtolower((string)$value), 'e+') || is_float($value))) {
-            $value = number_format((float)$value, 0, '', '');
+        if (is_numeric($value) && (str_contains(strtolower((string) $value), 'e+') || is_float($value))) {
+            $value = number_format((float) $value, 0, '', '');
         }
 
         $value = ltrim(trim((string) $value), "'");
