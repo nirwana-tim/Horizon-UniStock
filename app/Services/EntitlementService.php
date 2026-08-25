@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\DistributionSchedule;
 use App\Models\Entitlement;
 use App\Models\EntitlementItem;
 use App\Models\Student;
@@ -9,17 +10,19 @@ use Illuminate\Support\Facades\DB;
 
 class EntitlementService
 {
-    public function getEntitlement(Student $student): ?Entitlement
+    public function getEntitlement(Student $student, ?DistributionSchedule $schedule = null): ?Entitlement
     {
-        if (! $student->entitlement_code) {
-            return null;
-        }
+        $targetLevel = $schedule?->student_level ?? $student->student_level;
 
-        return Entitlement::where('code', $student->entitlement_code)
+        $facultyCode = $student->studyProgram?->faculty?->code ?? '';
+        $prodiCode = $student->studyProgram?->code ?? '';
+        $entitlementCode = $targetLevel.$facultyCode.$prodiCode;
+
+        return Entitlement::where('code', $entitlementCode)
             ->where('is_active', true)
-            ->where(function ($q) use ($student) {
-                $q->where('student_level', $student->student_level)
-                  ->orWhereNull('student_level');
+            ->where(function ($q) use ($targetLevel) {
+                $q->where('student_level', $targetLevel)
+                    ->orWhereNull('student_level');
             })
             ->with('items.item')
             ->first();

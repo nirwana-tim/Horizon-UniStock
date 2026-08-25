@@ -45,9 +45,9 @@ class DistributionService
         return $eligibility && $eligibility->is_eligible;
     }
 
-    public function getEntitlementForStudent(Student $student): ?Entitlement
+    public function getEntitlementForStudent(Student $student, ?DistributionSchedule $schedule = null): ?Entitlement
     {
-        return $this->entitlementService->getEntitlement($student);
+        return $this->entitlementService->getEntitlement($student, $schedule);
     }
 
     /**
@@ -139,7 +139,7 @@ class DistributionService
                 'notes' => $manualNote,
             ]);
 
-            $entitlement = $this->getEntitlementForStudent($student);
+            $entitlement = $this->getEntitlementForStudent($student, $schedule);
             $entitlementMap = $entitlement ? $entitlement->items->keyBy('item_id') : collect();
             $entitlementByBaseCode = $entitlement
                 ? $entitlement->items->mapWithKeys(fn ($ei) => $ei->item?->base_code ? [$ei->item->base_code => $ei] : [])->all()
@@ -283,7 +283,7 @@ class DistributionService
                     }
                 }
             }
-            $entitlement = $this->getEntitlementForStudent($student);
+            $entitlement = $this->getEntitlementForStudent($student, $schedule);
             if ($entitlement) {
                 $entitlement->load('items.item');
             }

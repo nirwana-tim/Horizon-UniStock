@@ -188,7 +188,7 @@ class ScanController extends Controller
         $eligibility = null;
 
         if ($activeSchedule) {
-            $entitlement = $this->distributionService->getEntitlementForStudent($student);
+            $entitlement = $this->distributionService->getEntitlementForStudent($student, $activeSchedule);
             $activeSchedule->load('items.item.variants', 'items.item.category');
             $scheduleItems = $activeSchedule->items->pluck('item')->filter();
         }
