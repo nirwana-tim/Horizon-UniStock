@@ -3,20 +3,20 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Crypt;
 use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    protected $fillable = ['name', 'email', 'password', 'must_change_password', 'is_active', 'last_login_at'];
+    protected $fillable = ['name', 'email', 'password', 'must_change_password', 'is_active', 'last_login_at', 'plain_password'];
 
-    protected $hidden = ['password', 'remember_token'];
+    protected $hidden = ['password', 'remember_token', 'plain_password'];
 
-    use HasFactory, Notifiable, HasRoles;
+    use HasFactory, HasRoles, Notifiable;
 
     /**
      * Get the attributes that should be cast.
@@ -26,6 +26,19 @@ class User extends Authenticatable
     public function student(): HasOne
     {
         return $this->hasOne(Student::class);
+    }
+
+    public function getDecryptedPasswordAttribute(): ?string
+    {
+        if (! $this->plain_password) {
+            return null;
+        }
+
+        try {
+            return Crypt::decryptString($this->plain_password);
+        } catch (\Throwable) {
+            return null;
+        }
     }
 
     protected function casts(): array

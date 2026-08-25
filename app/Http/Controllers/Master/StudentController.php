@@ -17,7 +17,6 @@ use App\Services\NotificationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Crypt;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
@@ -214,7 +213,6 @@ class StudentController extends Controller
 
         foreach ($students as $student) {
             [$user, $password] = $this->studentService->generateAccount($student);
-            $this->setCredentialPassword($student->nim, $password);
             $generated[] = [
                 'name' => $student->name,
                 'nim' => $student->nim,
@@ -294,7 +292,6 @@ class StudentController extends Controller
 
         foreach ($students as $student) {
             [$user, $password] = $this->studentService->generateAccount($student);
-            $this->setCredentialPassword($student->nim, $password);
             $generated[] = [
                 'name' => $student->name,
                 'nim' => $student->nim,
@@ -322,7 +319,7 @@ class StudentController extends Controller
         $latestEmails = $notificationService->latestAccountNotificationsForStudents($students);
 
         $students = $students->map(function (Student $student) use ($latestEmails) {
-            $student->temp_password = $this->credentialPassword($student->nim);
+            $student->temp_password = $student->user?->decrypted_password;
             $student->latest_email = $latestEmails[$student->id] ?? null;
 
             return $student;
@@ -344,7 +341,7 @@ class StudentController extends Controller
     {
         abort_unless($this->canViewCredentials(), 403);
 
-        $password = $this->credentialPassword($student->nim);
+        $password = $student->user?->decrypted_password;
 
         AuditService::log(
             'get_password',
@@ -369,7 +366,7 @@ class StudentController extends Controller
 
         $passwords = [];
         foreach ($students as $student) {
-            $password = $this->credentialPassword($student->nim);
+            $password = $student->user?->decrypted_password;
             if ($password !== null) {
                 $passwords[$student->nim] = $password;
             }
@@ -388,8 +385,6 @@ class StudentController extends Controller
 
         [$user, $password] = $this->studentService->resetPassword($student);
 
-        $this->setCredentialPassword($student->nim, $password);
-
         AuditService::log('reset_password', Student::class, $student->id, null, ['nim' => $student->nim]);
 
         return redirect()->route('students.credentials')
@@ -403,7 +398,7 @@ class StudentController extends Controller
                 ->with('error', 'Mahasiswa belum memiliki akun.');
         }
 
-        $password = $this->credentialPassword($student->nim);
+        $password = $student->user?->decrypted_password;
 
         if (! $password) {
             return redirect()->route('students.credentials')
@@ -423,7 +418,7 @@ class StudentController extends Controller
         $students = Student::whereNotNull('user_id')
             ->whereHas('user', fn ($q) => $q->where('must_change_password', true))
             ->get()
-            ->filter(fn (Student $student) => $this->credentialPassword($student->nim) !== null);
+            ->filter(fn (Student $student) => $student->user?->decrypted_password !== null);
 
         if ($students->isEmpty()) {
             return redirect()->route('students.credentials')
@@ -434,7 +429,7 @@ class StudentController extends Controller
         $failed = 0;
 
         foreach ($students as $student) {
-            $ok = app(NotificationService::class)->resendStudentAccount($student, $this->credentialPassword($student->nim));
+            $ok = app(NotificationService::class)->resendStudentAccount($student, $student->user->decrypted_password);
             $ok ? $sent++ : $failed++;
         }
 
@@ -444,10 +439,8 @@ class StudentController extends Controller
 
     public function destroyCredentials(): RedirectResponse
     {
-        session()->forget('credentials.passwords');
-
         return redirect()->route('students.credentials')
-            ->with('success', 'Data kredensial sementara berhasil dibersihkan.');
+            ->with('success', 'Data kredensial berhasil diperbarui.');
     }
 
     private function canViewCredentials(): bool
@@ -455,31 +448,6 @@ class StudentController extends Controller
         $user = auth()->user();
 
         return $user && $user->hasAnyRole(['super_admin', 'admin']);
-    }
-
-    private function credentialPassword(string $nim): ?string
-    {
-        $encrypted = session('credentials.passwords.'.$nim);
-
-        if (! $encrypted) {
-            return null;
-        }
-
-        try {
-            return Crypt::decryptString($encrypted);
-        } catch (\Throwable) {
-            return null;
-        }
-    }
-
-    private function setCredentialPassword(string $nim, string $password): void
-    {
-        session(['credentials.passwords.'.$nim => Crypt::encryptString($password)]);
-    }
-
-    private function forgetCredentialPassword(string $nim): void
-    {
-        session()->forget('credentials.passwords.'.$nim);
     }
 
     public function toggleStatus(Student $student): RedirectResponse

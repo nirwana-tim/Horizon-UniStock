@@ -6,6 +6,7 @@ use App\Models\Student;
 use App\Models\User;
 use App\Services\AuditService;
 use App\Services\NotificationService;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -51,6 +52,7 @@ class StudentService
                 if (! empty($data['password'])) {
                     $userUpdates['password'] = Hash::make($data['password']);
                     $userUpdates['must_change_password'] = true;
+                    $userUpdates['plain_password'] = Crypt::encryptString($data['password']);
                 }
                 if (! empty($userUpdates)) {
                     $user->update($userUpdates);
@@ -88,6 +90,8 @@ class StudentService
                 'must_change_password' => true,
             ]);
 
+            $user->update(['plain_password' => Crypt::encryptString($password)]);
+
             $user->assignRole('student');
 
             $student->update([
@@ -116,6 +120,7 @@ class StudentService
             $user->update([
                 'password' => Hash::make($password),
                 'must_change_password' => true,
+                'plain_password' => Crypt::encryptString($password),
             ]);
 
             AuditService::log('reset_password', 'student_account', $user->id, null, [
