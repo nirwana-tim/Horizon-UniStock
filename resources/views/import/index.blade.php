@@ -35,7 +35,7 @@
                             <a href="{{ route('templates.download', 'mahasiswa') }}" class="flex-1 text-center px-3 py-2 border border-gray-300 rounded-lg text-xs font-medium text-gray-700 hover:bg-gray-50 transition">
                                 Download Template
                             </a>
-                            <button type="button" @click="$dispatch('open-modal', 'import-student')" class="flex-1 px-3 py-2 bg-primary-700 hover:bg-primary-800 text-white rounded-lg text-xs font-medium transition">
+                            <button type="button" x-data="" @click="$dispatch('open-modal', 'import-student')" class="flex-1 px-3 py-2 bg-primary-700 hover:bg-primary-800 text-white rounded-lg text-xs font-medium transition">
                                 Upload File
                             </button>
                         </div>
@@ -66,7 +66,7 @@
                             <a href="{{ route('templates.download', 'dp_lunas') }}" class="flex-1 text-center px-3 py-2 border border-gray-300 rounded-lg text-xs font-medium text-gray-700 hover:bg-gray-50 transition">
                                 Download Template
                             </a>
-                            <button type="button" @click="$dispatch('open-modal', 'import-eligibility')" class="flex-1 px-3 py-2 bg-primary-700 hover:bg-primary-800 text-white rounded-lg text-xs font-medium transition">
+                            <button type="button" x-data="" @click="$dispatch('open-modal', 'import-eligibility')" class="flex-1 px-3 py-2 bg-primary-700 hover:bg-primary-800 text-white rounded-lg text-xs font-medium transition">
                                 Upload File
                             </button>
                         </div>
@@ -97,7 +97,7 @@
                             <a href="{{ route('templates.download', 'katalog') }}" class="flex-1 text-center px-3 py-2 border border-gray-300 rounded-lg text-xs font-medium text-gray-700 hover:bg-gray-50 transition">
                                 Download Template
                             </a>
-                            <button type="button" @click="$dispatch('open-modal', 'import-item')" class="flex-1 px-3 py-2 bg-primary-700 hover:bg-primary-800 text-white rounded-lg text-xs font-medium transition">
+                            <button type="button" x-data="" @click="$dispatch('open-modal', 'import-item')" class="flex-1 px-3 py-2 bg-primary-700 hover:bg-primary-800 text-white rounded-lg text-xs font-medium transition">
                                 Upload File
                             </button>
                         </div>
@@ -128,7 +128,7 @@
                             <a href="{{ route('templates.download', 'harga') }}" class="flex-1 text-center px-3 py-2 border border-gray-300 rounded-lg text-xs font-medium text-gray-700 hover:bg-gray-50 transition">
                                 Download Template
                             </a>
-                            <button type="button" @click="$dispatch('open-modal', 'import-item-price')" class="flex-1 px-3 py-2 bg-primary-700 hover:bg-primary-800 text-white rounded-lg text-xs font-medium transition">
+                            <button type="button" x-data="" @click="$dispatch('open-modal', 'import-item-price')" class="flex-1 px-3 py-2 bg-primary-700 hover:bg-primary-800 text-white rounded-lg text-xs font-medium transition">
                                 Upload File
                             </button>
                         </div>
@@ -159,7 +159,7 @@
                             <a href="{{ route('templates.download', 'hak_barang') }}" class="flex-1 text-center px-3 py-2 border border-gray-300 rounded-lg text-xs font-medium text-gray-700 hover:bg-gray-50 transition">
                                 Download Template
                             </a>
-                            <button type="button" @click="$dispatch('open-modal', 'import-entitlement')" class="flex-1 px-3 py-2 bg-primary-700 hover:bg-primary-800 text-white rounded-lg text-xs font-medium transition">
+                            <button type="button" x-data="" @click="$dispatch('open-modal', 'import-entitlement')" class="flex-1 px-3 py-2 bg-primary-700 hover:bg-primary-800 text-white rounded-lg text-xs font-medium transition">
                                 Upload File
                             </button>
                         </div>
@@ -190,7 +190,7 @@
                             <a href="{{ route('templates.download', 'penerimaan') }}" class="flex-1 text-center px-3 py-2 border border-gray-300 rounded-lg text-xs font-medium text-gray-700 hover:bg-gray-50 transition">
                                 Download Template
                             </a>
-                            <button type="button" @click="$dispatch('open-modal', 'import-stock-receive')" class="flex-1 px-3 py-2 bg-primary-700 hover:bg-primary-800 text-white rounded-lg text-xs font-medium transition">
+                            <button type="button" x-data="" @click="$dispatch('open-modal', 'import-stock-receive')" class="flex-1 px-3 py-2 bg-primary-700 hover:bg-primary-800 text-white rounded-lg text-xs font-medium transition">
                                 Upload File
                             </button>
                         </div>

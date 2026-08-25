@@ -2,7 +2,7 @@
 
 namespace App\Exports;
 
-use App\Models\Student;
+use Illuminate\Support\Enumerable;
 use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
@@ -19,7 +19,7 @@ class CredentialsExport implements FromCollection, WithHeadings, WithMapping
         private array $passwords = [],
     ) {}
 
-    public function collection()
+    public function collection(): Enumerable
     {
         return collect($this->students);
     }

@@ -3,6 +3,7 @@
 namespace App\Exports;
 
 use App\Services\GpmService;
+use Illuminate\Support\Enumerable;
 use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithCustomStartCell;
@@ -28,7 +29,7 @@ class GpmReportExport extends BaseExport implements FromCollection, WithCustomSt
         return 'A4';
     }
 
-    public function collection()
+    public function collection(): Enumerable
     {
         $service = new GpmService;
 
