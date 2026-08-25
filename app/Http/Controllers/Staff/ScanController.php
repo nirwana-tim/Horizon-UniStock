@@ -46,23 +46,36 @@ class ScanController extends Controller
 
         $student = $this->distributionService->findStudent($request->input('query'));
 
+        $hasActiveSchedule = DistributionSchedule::activeNow()->exists();
+
         if ($request->ajax() || $request->wantsJson()) {
             if (! $student) {
-                // Uniform response — same structure regardless of existence
                 return response()->json([
                     'found' => false,
                     'message' => 'Mahasiswa tidak ditemukan.',
                 ]);
             }
 
+            if ($hasActiveSchedule) {
+                return response()->json([
+                    'found' => true,
+                    'redirect' => route('distribution.scan.student', $student->nim),
+                ]);
+            }
+
             return response()->json([
                 'found' => true,
-                'redirect' => route('distribution.scan.student', $student->nim),
+                'needs_schedule_selection' => true,
+                'redirect' => route('distribution.scan.select-schedule', $student->nim),
             ]);
         }
 
         if (! $student) {
             return back()->withErrors(['query' => 'Mahasiswa tidak ditemukan. Pastikan NIM valid.']);
+        }
+
+        if (! $hasActiveSchedule) {
+            return redirect()->route('distribution.scan.select-schedule', $student->nim);
         }
 
         return $this->showDistribution($student);
