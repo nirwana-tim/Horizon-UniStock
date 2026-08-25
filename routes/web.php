@@ -92,6 +92,7 @@ Route::middleware(['auth', 'password.changed', 'throttle:web'])->prefix('distrib
     Route::middleware('role:super_admin|admin|staff')->group(function () {
         Route::get('/scan', [ScanController::class, 'index'])->name('scan.index');
         Route::get('/student/{nim}', [ScanController::class, 'showByNim'])->name('scan.student');
+        Route::get('/student/{nim}/select-schedule', [ScanController::class, 'selectSchedule'])->name('scan.select-schedule');
         Route::post('/search', [ScanController::class, 'search'])->middleware('throttle:30,1')->name('search');
         Route::get('/search', [ScanController::class, 'searchByQuery'])->name('search.get');
         Route::post('/process', [ScanController::class, 'process'])->middleware('throttle:15,1')->name('process');

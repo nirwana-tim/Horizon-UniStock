@@ -142,10 +142,22 @@
                                 <x-text-input id="location" name="location" type="text" class="mt-1 block w-full" :value="old('location', $distributionSchedule->location)" required />
                                 <x-input-error :messages="$errors->get('location')" class="mt-2" />
                             </div>
-                            <div>
-                                <x-input-label for="session" :value="__('Session / Time')" />
-                                <x-text-input id="session" name="session" type="text" class="mt-1 block w-full" :value="old('session', $distributionSchedule->session)" required />
-                                <x-input-error :messages="$errors->get('session')" class="mt-2" />
+                            <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div>
+                                    <x-input-label for="start_time" :value="__('Start Time')" />
+                                    <x-text-input id="start_time" name="start_time" type="time" class="mt-1 block w-full" :value="old('start_time', $distributionSchedule->start_time?->format('H:i'))" />
+                                    <x-input-error :messages="$errors->get('start_time')" class="mt-2" />
+                                </div>
+                                <div>
+                                    <x-input-label for="end_time" :value="__('End Time (Deadline)')" />
+                                    <x-text-input id="end_time" name="end_time" type="time" class="mt-1 block w-full" :value="old('end_time', $distributionSchedule->end_time?->format('H:i'))" />
+                                    <x-input-error :messages="$errors->get('end_time')" class="mt-2" />
+                                </div>
+                                <div>
+                                    <x-input-label for="session" :value="__('Session Label (Optional)')" />
+                                    <x-text-input id="session" name="session" type="text" class="mt-1 block w-full" :value="old('session', $distributionSchedule->session)" placeholder="e.g. Pagi, Sesi 1" />
+                                    <x-input-error :messages="$errors->get('session')" class="mt-2" />
+                                </div>
                             </div>
                             
                             {{-- Items loaded via AJAX --}}

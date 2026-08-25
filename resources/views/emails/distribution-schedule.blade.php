@@ -36,6 +36,9 @@
             <div class="info-box">
                 <div class="row"><span class="label">Jadwal</span><span class="value">{{ $schedule->name }}</span></div>
                 <div class="row"><span class="label">Tanggal</span><span class="value">{{ \Carbon\Carbon::parse($schedule->date)->format('d M Y') }}</span></div>
+                @if($schedule->start_time && $schedule->end_time)
+                <div class="row"><span class="label">Waktu</span><span class="value">{{ $schedule->start_time->format('H:i') }} - {{ $schedule->end_time->format('H:i') }}</span></div>
+                @endif
                 @if($schedule->location)
                 <div class="row"><span class="label">Lokasi</span><span class="value">{{ $schedule->location }}</span></div>
                 @endif

@@ -60,6 +60,9 @@
                     <div class="flex-1 min-w-0">
                         <h4 class="font-headline-sm text-[15px] text-on-background">{{ $schedule->name }}</h4>
                         <p class="font-body-md text-[13px] text-secondary/60 mt-0.5">{{ $schedule->location }}</p>
+                        @if($schedule->start_time && $schedule->end_time)
+                            <p class="font-body-md text-[12px] text-secondary/50 mt-1">Waktu: {{ $schedule->start_time->format('H:i') }} - {{ $schedule->end_time->format('H:i') }}</p>
+                        @endif
                     </div>
                     <span class="material-symbols-outlined text-primary shrink-0">chevron_right</span>
                 </div>

@@ -36,17 +36,25 @@
                                 <dd class="mt-1 text-sm text-gray-900 font-semibold">{{ $distributionSchedule->date->format('d/m/Y') }}</dd>
                             </div>
                             <div class="bg-gray-50 p-4 rounded-lg">
+                                <dt class="text-sm font-medium text-gray-500">{{ __('Time Window') }}</dt>
+                                <dd class="mt-1 text-sm text-gray-900 font-semibold">{{ $distributionSchedule->timeWindowLabel() }}</dd>
+                            </div>
+                            <div class="bg-gray-50 p-4 rounded-lg">
                                 <dt class="text-sm font-medium text-gray-500">{{ __('Location') }}</dt>
                                 <dd class="mt-1 text-sm text-gray-900 font-semibold">{{ $distributionSchedule->location }}</dd>
                             </div>
                             <div class="bg-gray-50 p-4 rounded-lg">
-                                <dt class="text-sm font-medium text-gray-500">{{ __('Session') }}</dt>
-                                <dd class="mt-1 text-sm text-gray-900 font-semibold">{{ $distributionSchedule->session }}</dd>
-                            </div>
-                            <div class="bg-gray-50 p-4 rounded-lg">
                                 <dt class="text-sm font-medium text-gray-500">{{ __('Status') }}</dt>
                                 <dd class="mt-1">
-                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $distributionSchedule->is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' }}">{{ $distributionSchedule->is_active ? 'Active' : 'Inactive' }}</span>
+                                    @if($distributionSchedule->isActiveNow())
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Berlangsung</span>
+                                    @elseif($distributionSchedule->isExpired())
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">Selesai</span>
+                                    @elseif($distributionSchedule->is_active)
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">Akan Datang</span>
+                                    @else
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">Inactive</span>
+                                    @endif
                                 </dd>
                             </div>
                         </dl>

@@ -145,6 +145,9 @@
                                 <h3 class="text-lg font-medium text-gray-900">Entitled Items</h3>
                                 <div class="text-sm text-gray-500">
                                     {{ $activeSchedule->name }} | {{ $activeSchedule->date?->format('d M Y') ?? '-' }}
+                                    @if($activeSchedule->start_time && $activeSchedule->end_time)
+                                        | {{ $activeSchedule->start_time->format('H:i') }} - {{ $activeSchedule->end_time->format('H:i') }}
+                                    @endif
                                 </div>
                             </div>
 

@@ -101,18 +101,6 @@ class DistributionService
                 throw new \Exception('Jadwal distribusi sudah tidak aktif. Silakan hubungi admin.');
             }
 
-            if ($schedule->date && $schedule->date->lt(today())) {
-                throw new \Exception(
-                    'Jadwal distribusi "'.$schedule->name.'" sudah berakhir pada '.$schedule->date->format('d M Y').'. Tidak dapat melakukan scan melewati tanggal jadwal.'
-                );
-            }
-
-            if ($schedule->date && $schedule->date->gt(today())) {
-                throw new \Exception(
-                    'Jadwal distribusi "'.$schedule->name.'" belum dimulai (mulai '.$schedule->date->format('d M Y').'). Tidak dapat melakukan distribusi sebelum tanggal jadwal.'
-                );
-            }
-
             $isApplicable = DistributionSchedule::whereKey($schedule->id)
                 ->forStudent($student)
                 ->exists();

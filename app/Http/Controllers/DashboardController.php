@@ -36,10 +36,16 @@ class DashboardController extends Controller
     private function staffDashboard(): View
     {
         $activeSchedule = DistributionSchedule::with('generation', 'faculty')
-            ->where('is_active', true)
-            ->where('date', '>=', now()->format('Y-m-d'))
-            ->orderBy('date')
+            ->activeNow()
             ->first();
+
+        if (! $activeSchedule) {
+            $activeSchedule = DistributionSchedule::with('generation', 'faculty')
+                ->where('is_active', true)
+                ->where('date', '>=', now()->format('Y-m-d'))
+                ->orderBy('date')
+                ->first();
+        }
 
         $todayCount = DistributionTransaction::whereDate('created_at', today())->count();
 

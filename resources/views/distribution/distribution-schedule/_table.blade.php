@@ -11,9 +11,16 @@
             @endif
         </td>
         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $schedule->date?->format('d/m/Y') ?? '-' }}</td>
+        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $schedule->timeWindowLabel() }}</td>
         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $schedule->location }}</td>
         <td class="px-6 py-4 whitespace-nowrap">
-            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $schedule->is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' }}">{{ $schedule->is_active ? 'Active' : 'Inactive' }}</span>
+            @if($schedule->isActiveNow())
+                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Berlangsung</span>
+            @elseif($schedule->isExpired())
+                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">Selesai</span>
+            @else
+                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $schedule->is_active ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800' }}">{{ $schedule->is_active ? 'Akan Datang' : 'Inactive' }}</span>
+            @endif
         </td>
         <td class="px-6 py-4 whitespace-nowrap text-sm text-right space-x-1">
             <a href="{{ route('distribution.distribution-schedule.show', $schedule) }}" class="inline-flex items-center justify-center p-1.5 text-primary-600 hover:text-primary-800 hover:bg-primary-50 rounded-lg transition-colors" title="Lihat Detail">

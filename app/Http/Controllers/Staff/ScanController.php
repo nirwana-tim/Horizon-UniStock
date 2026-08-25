@@ -27,9 +27,7 @@ class ScanController extends Controller
 
     public function index(): View
     {
-        $activeSchedule = DistributionSchedule::where('is_active', true)
-            ->where('date', today())
-            ->first();
+        $activeSchedule = DistributionSchedule::activeNow()->first();
 
         $staff = auth()->user();
 
@@ -80,7 +78,7 @@ class ScanController extends Controller
         return redirect()->route('distribution.scan.index');
     }
 
-    public function showByNim(string $nim): View|RedirectResponse
+    public function showByNim(Request $request, string $nim): View|RedirectResponse
     {
         $student = $this->distributionService->findStudent($nim);
 
@@ -89,7 +87,34 @@ class ScanController extends Controller
                 ->with('error', 'Mahasiswa dengan NIM '.$nim.' tidak ditemukan.');
         }
 
-        return $this->showDistribution($student);
+        $scheduleId = $request->query('schedule_id');
+
+        return $this->showDistribution($student, $scheduleId);
+    }
+
+    public function selectSchedule(string $nim): View|RedirectResponse
+    {
+        $student = $this->distributionService->findStudent($nim);
+
+        if (! $student) {
+            return redirect()->route('distribution.scan.index')
+                ->with('error', 'Mahasiswa dengan NIM '.$nim.' tidak ditemukan.');
+        }
+
+        $expiredSchedules = DistributionSchedule::where('is_active', true)
+            ->where('date', '<=', today())
+            ->orderBy('date', 'desc')
+            ->get()
+            ->map(function ($schedule) use ($student) {
+                $hasTransaction = DistributionTransaction::where('schedule_id', $schedule->id)
+                    ->where('student_id', $student->id)
+                    ->exists();
+                $schedule->student_has_taken = $hasTransaction;
+
+                return $schedule;
+            });
+
+        return view('distribution.select-schedule', compact('student', 'expiredSchedules'));
     }
 
     public function process(Request $request): RedirectResponse
@@ -135,11 +160,13 @@ class ScanController extends Controller
             ->with('success', "Distribusi berhasil dicatat untuk {$student->nim} - {$student->name}.");
     }
 
-    private function showDistribution(Student $student): View
+    private function showDistribution(Student $student, ?string $scheduleId = null): View
     {
-        $activeSchedule = DistributionSchedule::where('is_active', true)
-            ->where('date', today())
-            ->first();
+        if ($scheduleId) {
+            $activeSchedule = DistributionSchedule::find($scheduleId);
+        } else {
+            $activeSchedule = DistributionSchedule::activeNow()->first();
+        }
 
         $entitlement = null;
         $scheduleItems = collect();
