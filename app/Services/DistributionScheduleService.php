@@ -7,6 +7,7 @@ use App\Models\Entitlement;
 use App\Models\Faculty;
 use App\Models\Item;
 use App\Models\Student;
+use App\Models\StudentLevel;
 use App\Models\StudyProgram;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
@@ -181,6 +182,7 @@ class DistributionScheduleService
             ),
             'studyPrograms' => cache()->remember('study-programs-faculty', 3600, fn () => StudyProgram::with('faculty')->orderBy('name')->get()
             ),
+            'studentLevels' => StudentLevel::orderBy('kode')->get(),
             'periods' => cache()->remember('schedule-periods', 3600, fn () => DistributionSchedule::whereNotNull('period')
                 ->distinct()
                 ->orderBy('period', 'desc')

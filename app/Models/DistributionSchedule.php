@@ -64,21 +64,37 @@ class DistributionSchedule extends Model
         return $query
             ->where('is_active', true)
             ->where('date', $now->toDateString())
-            ->where('start_time', '<=', $now->format('H:i:s'))
-            ->where('end_time', '>=', $now->format('H:i:s'));
+            ->where(function (Builder $q) use ($now) {
+                $q->whereNull('start_time')
+                    ->orWhere('start_time', '<=', $now->format('H:i:s'));
+            })
+            ->where(function (Builder $q) use ($now) {
+                $q->whereNull('end_time')
+                    ->orWhere('end_time', '>=', $now->format('H:i:s'));
+            });
     }
 
     public function isActiveNow(): bool
     {
-        if (! $this->is_active || ! $this->date || ! $this->start_time || ! $this->end_time) {
+        if (! $this->is_active || ! $this->date) {
             return false;
         }
 
         $now = Carbon::now();
 
-        return $this->date->toDateString() === $now->toDateString()
-            && $now->format('H:i:s') >= $this->start_time->format('H:i:s')
-            && $now->format('H:i:s') <= $this->end_time->format('H:i:s');
+        if ($this->date->toDateString() !== $now->toDateString()) {
+            return false;
+        }
+
+        if ($this->start_time && $now->format('H:i:s') < $this->start_time->format('H:i:s')) {
+            return false;
+        }
+
+        if ($this->end_time && $now->format('H:i:s') > $this->end_time->format('H:i:s')) {
+            return false;
+        }
+
+        return true;
     }
 
     public function isExpired(): bool

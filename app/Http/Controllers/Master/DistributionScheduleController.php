@@ -48,6 +48,7 @@ class DistributionScheduleController extends Controller
         return view('distribution.distribution-schedule.create', [
             'faculties' => $options['faculties'],
             'studyPrograms' => $options['studyPrograms'],
+            'studentLevels' => $options['studentLevels'],
         ]);
     }
 
@@ -107,12 +108,14 @@ class DistributionScheduleController extends Controller
     public function edit(DistributionSchedule $distributionSchedule): View
     {
         $distributionSchedule->load('items');
-        $faculties = $this->scheduleService->getFormOptions()['faculties'];
-        $studyPrograms = $this->scheduleService->getFormOptions()['studyPrograms'];
+        $options = $this->scheduleService->getFormOptions();
 
-        return view('distribution.distribution-schedule.edit', compact(
-            'distributionSchedule', 'faculties', 'studyPrograms'
-        ));
+        return view('distribution.distribution-schedule.edit', [
+            'distributionSchedule' => $distributionSchedule,
+            'faculties' => $options['faculties'],
+            'studyPrograms' => $options['studyPrograms'],
+            'studentLevels' => $options['studentLevels'],
+        ]);
     }
 
     public function update(DistributionScheduleRequest $request, DistributionSchedule $distributionSchedule): RedirectResponse

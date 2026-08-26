@@ -17,7 +17,7 @@
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                         <div>
                             <p class="text-gray-500">Nama</p>
-                            <p class="font-medium text-gray-900">{{ $student->full_name }}</p>
+                            <p class="font-medium text-gray-900">{{ $student->name }}</p>
                         </div>
                         <div>
                             <p class="text-gray-500">NIM</p>
@@ -25,11 +25,11 @@
                         </div>
                         <div>
                             <p class="text-gray-500">Fakultas</p>
-                            <p class="font-medium text-gray-900">{{ $student->faculty->name ?? '-' }}</p>
+                            <p class="font-medium text-gray-900">{{ $student->studyProgram?->faculty?->name ?? '-' }}</p>
                         </div>
                         <div>
                             <p class="text-gray-500">Angkatan</p>
-                            <p class="font-medium text-gray-900">{{ $student->generation->label ?? '-' }}</p>
+                            <p class="font-medium text-gray-900">{{ $student->generation?->label ?? '-' }}</p>
                         </div>
                     </div>
                 </div>

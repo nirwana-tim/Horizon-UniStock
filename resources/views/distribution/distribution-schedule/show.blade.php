@@ -109,15 +109,12 @@
                                  });
                              },
                              goToPage(p) {
-                                 let url = new URL(this.currentUrl);
+                                 let url = new URL(this.currentUrl, window.location.origin);
                                  url.searchParams.set('page', p);
                                  this.loadData(url.toString());
                              },
                              init() { this.loadData(this.currentUrl); }
                          }">
-                        <div class="flex items-center justify-between mb-4">
-                            <h3 class="text-lg font-semibold text-gray-800">{{ __('Transactions') }}</h3>
-                        </div>
                         <div x-html="tableHtml"><p class="text-sm text-gray-400 italic">Loading transactions...</p></div>
                         <div x-html="paginationHtml"></div>
                     </div>

@@ -116,6 +116,7 @@ class ScanController extends Controller
 
         $expiredSchedules = DistributionSchedule::where('is_active', true)
             ->where('date', '<=', today())
+            ->forStudent($student)
             ->orderBy('date', 'desc')
             ->get()
             ->map(function ($schedule) use ($student) {
