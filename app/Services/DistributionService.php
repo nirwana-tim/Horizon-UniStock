@@ -181,6 +181,12 @@ class DistributionService
                     continue;
                 }
 
+                if ($student->gender && $item->gender && $item->gender !== 'U' && $student->gender !== $item->gender) {
+                    throw new \Exception(
+                        "Item \"{$item->name}\" ({$item->gender}) tidak sesuai dengan gender mahasiswa ({$student->gender})."
+                    );
+                }
+
                 $entitlementItem = $entitlementMap->get($item->id)
                     ?? ($entitlementByBaseCode[$item->base_code ?? ''] ?? null);
                 if ($entitlementItem) {

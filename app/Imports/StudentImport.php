@@ -52,6 +52,7 @@ class StudentImport implements ToCollection, WithMultipleSheets
             );
             $student->fill([
                 'name' => $record['name'],
+                'gender' => $record['gender'],
                 'email_kampus' => $record['email_kampus'],
                 'email_pribadi' => $record['email_pribadi'],
                 'study_program_id' => $record['study_program']->id,
@@ -140,7 +141,7 @@ class StudentImport implements ToCollection, WithMultipleSheets
                 continue;
             }
 
-            $emailKampus = $this->clean($values[6] ?? null) ?? strtolower($nim).'@krw.horizon.ac.id';
+            $emailKampus = $this->clean($values[6] ?? null);
 
             $records[] = [
                 'row' => $index + 1,
@@ -273,17 +274,20 @@ class StudentImport implements ToCollection, WithMultipleSheets
             ?? StudentGeneration::create(['code' => '2526', 'name' => '2025/2026']);
     }
 
-    private function normalizeGender(?string $gender): string
+    private function normalizeGender(?string $gender): ?string
     {
         if (! $gender) {
-            return 'L';
+            return null;
         }
         $g = Str::upper(trim($gender));
         if ($g === 'P' || str_contains($g, 'PEREMPUAN') || str_contains($g, 'FEMALE')) {
             return 'P';
         }
+        if ($g === 'L' || str_contains($g, 'LAKI') || str_contains($g, 'MALE')) {
+            return 'L';
+        }
 
-        return 'L';
+        return null;
     }
 
     private function normalizeProgramName(string $value): string

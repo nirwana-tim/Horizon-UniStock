@@ -3,6 +3,7 @@
 namespace App\Exports;
 
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
+use PhpOffice\PhpSpreadsheet\Cell\DataValidation;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
@@ -11,13 +12,15 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 abstract class BaseExport
 {
     protected string $primaryColor = '980416';
+
     protected string $stripeColor = 'F9F0F0';
+
     protected string $totalColor = 'E8D5D5';
 
     protected function applyHeaderStyle(Worksheet $sheet, int $row = 1, int|string|null $colCount = null): void
     {
         $colCount = $this->resolveColCount($colCount, $sheet);
-        $range = 'A' . $row . ':' . $colCount . $row;
+        $range = 'A'.$row.':'.$colCount.$row;
 
         $sheet->getStyle($range)->applyFromArray([
             'font' => [
@@ -50,7 +53,7 @@ abstract class BaseExport
         $colLetter = $this->resolveColCount($colCount, $sheet);
 
         for ($i = $startRow; $i <= $endRow; $i++) {
-            $range = 'A' . $i . ':' . $colLetter . $i;
+            $range = 'A'.$i.':'.$colLetter.$i;
             $bgColor = ($i % 2 === 0) ? $this->stripeColor : 'FFFFFF';
 
             $sheet->getStyle($range)->applyFromArray([
@@ -76,7 +79,7 @@ abstract class BaseExport
     protected function applyTotalStyle(Worksheet $sheet, int $row, int|string|null $colCount = null): void
     {
         $colCount = $this->resolveColCount($colCount, $sheet);
-        $range = 'A' . $row . ':' . $colCount . $row;
+        $range = 'A'.$row.':'.$colCount.$row;
 
         $sheet->getStyle($range)->applyFromArray([
             'font' => [
@@ -103,7 +106,7 @@ abstract class BaseExport
     protected function setTitle(Worksheet $sheet, string $title, int $colCount = 10): void
     {
         $colLetter = Coordinate::stringFromColumnIndex($colCount);
-        $sheet->mergeCells('A1:' . $colLetter . '1');
+        $sheet->mergeCells('A1:'.$colLetter.'1');
         $sheet->setCellValue('A1', $title);
         $sheet->getStyle('A1')->applyFromArray([
             'font' => [
@@ -122,7 +125,7 @@ abstract class BaseExport
     protected function setSubtitle(Worksheet $sheet, string $subtitle, int $colCount = 10): void
     {
         $colLetter = Coordinate::stringFromColumnIndex($colCount);
-        $sheet->mergeCells('A2:' . $colLetter . '2');
+        $sheet->mergeCells('A2:'.$colLetter.'2');
         $sheet->setCellValue('A2', $subtitle);
         $sheet->getStyle('A2')->applyFromArray([
             'font' => [
@@ -146,25 +149,25 @@ abstract class BaseExport
 
     protected function setFormatRupiah(Worksheet $sheet, string $column, int $startRow, int $endRow): void
     {
-        $sheet->getStyle($column . $startRow . ':' . $column . $endRow)
+        $sheet->getStyle($column.$startRow.':'.$column.$endRow)
             ->getNumberFormat()->setFormatCode('#,##0');
     }
 
     protected function setFormatNumber(Worksheet $sheet, string $column, int $startRow, int $endRow): void
     {
-        $sheet->getStyle($column . $startRow . ':' . $column . $endRow)
+        $sheet->getStyle($column.$startRow.':'.$column.$endRow)
             ->getNumberFormat()->setFormatCode('#,##0');
     }
 
     protected function setFormatDate(Worksheet $sheet, string $column, int $startRow, int $endRow): void
     {
-        $sheet->getStyle($column . $startRow . ':' . $column . $endRow)
+        $sheet->getStyle($column.$startRow.':'.$column.$endRow)
             ->getNumberFormat()->setFormatCode('dd/mm/yyyy');
     }
 
     protected function setFormatPercentage(Worksheet $sheet, string $column, int $startRow, int $endRow): void
     {
-        $sheet->getStyle($column . $startRow . ':' . $column . $endRow)
+        $sheet->getStyle($column.$startRow.':'.$column.$endRow)
             ->getNumberFormat()->setFormatCode('0.00%');
     }
 
@@ -176,6 +179,23 @@ abstract class BaseExport
     protected function dataStartRow(): int
     {
         return 5;
+    }
+
+    protected function setDropdown(Worksheet $sheet, string $range, array $options): void
+    {
+        if (empty($options)) {
+            return;
+        }
+
+        $validation = new DataValidation;
+        $validation->setType(DataValidation::TYPE_LIST);
+        $validation->setAllowBlank(true);
+        $validation->setShowDropDown(true);
+        $validation->setShowInputMessage(true);
+        $validation->setShowErrorMessage(true);
+        $validation->setFormula1('"'.implode(',', $options).'"');
+
+        $sheet->setDataValidation($range, $validation);
     }
 
     private function resolveColCount(int|string|null $colCount, Worksheet $sheet): string

@@ -21,7 +21,16 @@ class HakBarangTemplateExport extends BaseExport implements FromArray, WithCusto
 
     public function array(): array
     {
-        return [];
+        $items = Item::whereHas('entitlementItems')->orWhere('is_active', true)->orderBy('name')->pluck('name');
+        $itemCols = array_fill(0, $items->count(), 0);
+
+        return [
+            array_merge(['Y1S1FTIK', 'Freshman'], $itemCols),
+            array_merge(['Y1S1FTIK', 'Freshman'], array_map(fn () => 1, $itemCols)),
+            array_merge(['Y2S1FTIK', 'Continuing'], $itemCols),
+            array_merge(['Y1S1FKES', 'Freshman'], array_map(fn () => 1, $itemCols)),
+            array_merge(['Y3S1FTIK', 'Continuing'], $itemCols),
+        ];
     }
 
     public function headings(): array
@@ -56,6 +65,8 @@ class HakBarangTemplateExport extends BaseExport implements FromArray, WithCusto
         $sheet->freezePane('A'.($headerRow + 1));
         $lastCol = Coordinate::stringFromColumnIndex($colCount);
         $sheet->setAutoFilter('A'.$headerRow.':'.$lastCol.$headerRow);
+
+        $this->setDropdown($sheet, 'B5:B500', ['Freshman', 'Continuing']);
 
         return null;
     }

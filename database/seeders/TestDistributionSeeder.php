@@ -92,6 +92,7 @@ class TestDistributionSeeder extends Seeder
             [
                 'user_id' => $studentUser->id,
                 'name' => 'Mahasiswa Uji',
+                'gender' => 'L',
                 'email_kampus' => 'student.test@horizon-unistock.test',
                 'email_pribadi' => null,
                 'study_program_id' => $program->id,

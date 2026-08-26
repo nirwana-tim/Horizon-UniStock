@@ -20,7 +20,13 @@ class HargaTemplateExport extends BaseExport implements FromArray, WithCustomSta
 
     public function array(): array
     {
-        return [];
+        return [
+            ['UNF-L-SCB-02', '', '25/26', 190000, 150000],
+            ['UNF-P-SCB-02', '', '25/26', 190000, 150000],
+            ['SHO-L-CLG-02', '', '25/26', 350000, 280000],
+            ['KTM-U-KTM-01', '', '25/26', 0, 0],
+            ['KIT-U-NUR-06', '', '25/26', 500000, 400000],
+        ];
     }
 
     public function headings(): array
@@ -68,6 +74,8 @@ class HargaTemplateExport extends BaseExport implements FromArray, WithCustomSta
 
         $sheet->freezePane('A'.($headerRow + 1));
         $sheet->setAutoFilter('A'.$headerRow.':E'.$headerRow);
+
+        $this->setDropdown($sheet, 'C5:C500', ['22/23', '23/24', '24/25', '25/26', '26/27']);
 
         return null;
     }

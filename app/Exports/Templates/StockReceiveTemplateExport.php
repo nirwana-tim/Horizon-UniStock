@@ -3,6 +3,8 @@
 namespace App\Exports\Templates;
 
 use App\Exports\BaseExport;
+use App\Models\Item;
+use App\Models\Vendor;
 use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Concerns\WithCustomStartCell;
 use Maatwebsite\Excel\Concerns\WithHeadings;
@@ -21,7 +23,13 @@ class StockReceiveTemplateExport extends BaseExport implements FromArray, WithCu
 
     public function array(): array
     {
-        return [];
+        return [
+            ['UNF-L-SCB-02', 'UNF-L-SCB-02-03', 100, 190000, 150000, 'CV Seragam Makmur', '2026-07-01', 'PO-001', ''],
+            ['UNF-P-SCB-02', 'UNF-P-SCB-02-05', 100, 190000, 150000, 'CV Seragam Makmur', '2026-07-01', 'PO-001', ''],
+            ['SHO-L-CLG-02', 'SHO-L-CLG-02-42', 50, 350000, 280000, 'PT Sepatu Jaya', '2026-07-02', 'PO-002', ''],
+            ['KTM-U-KTM-01', '', 200, 0, 0, 'PT Cetak Mandiri', '2026-07-03', 'PO-003', 'All Size'],
+            ['KIT-U-NUR-06', '', 80, 500000, 400000, 'CV Medika Supply', '2026-07-04', 'PO-004', ''],
+        ];
     }
 
     public function headings(): array
@@ -75,6 +83,9 @@ class StockReceiveTemplateExport extends BaseExport implements FromArray, WithCu
         $lastCol = Coordinate::stringFromColumnIndex($colCount);
         $sheet->freezePane('A'.($headerRow + 1));
         $sheet->setAutoFilter('A'.$headerRow.':'.$lastCol.$headerRow);
+
+        $this->setDropdown($sheet, 'A5:A500', Item::pluck('code')->toArray());
+        $this->setDropdown($sheet, 'F5:F500', Vendor::pluck('name')->toArray());
 
         return null;
     }

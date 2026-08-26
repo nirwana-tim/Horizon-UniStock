@@ -29,8 +29,18 @@
                             </div>
 
                             <div>
-                                <x-input-label for="email_kampus" :value="__('Campus Email')" :required="true" />
-                                <x-text-input id="email_kampus" name="email_kampus" type="email" class="mt-1 block w-full" :value="old('email_kampus')" placeholder="nim@krw.horizon.ac.id" required />
+                                <x-input-label for="gender" :value="__('Gender')" />
+                                <select id="gender" name="gender" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500">
+                                    <option value="">-- Pilih Gender --</option>
+                                    <option value="L" {{ old('gender') === 'L' ? 'selected' : '' }}>Laki-laki</option>
+                                    <option value="P" {{ old('gender') === 'P' ? 'selected' : '' }}>Perempuan</option>
+                                </select>
+                                <x-input-error :messages="$errors->get('gender')" class="mt-2" />
+                            </div>
+
+                            <div>
+                                <x-input-label for="email_kampus" :value="__('Campus Email')" />
+                                <x-text-input id="email_kampus" name="email_kampus" type="email" class="mt-1 block w-full" :value="old('email_kampus')" placeholder="nim@krw.horizon.ac.id" />
                                 <x-input-error :messages="$errors->get('email_kampus')" class="mt-2" />
                             </div>
 
@@ -38,6 +48,12 @@
                                 <x-input-label for="email_pribadi" :value="__('Personal Email')" />
                                 <x-text-input id="email_pribadi" name="email_pribadi" type="email" class="mt-1 block w-full" :value="old('email_pribadi')" />
                                 <x-input-error :messages="$errors->get('email_pribadi')" class="mt-2" />
+                            </div>
+
+                            <div class="md:col-span-2">
+                                <p class="mt-1 text-sm text-gray-500">
+                                    Minimal satu email harus diisi (Kampus atau Pribadi).
+                                </p>
                             </div>
 
                             <div>

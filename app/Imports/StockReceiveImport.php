@@ -3,20 +3,23 @@
 namespace App\Imports;
 
 use App\Models\Item;
+use App\Models\StockReceive;
 use App\Models\Vendor;
 use App\Services\StockService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException as IlluminateValidationException;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 use Maatwebsite\Excel\Validators\Failure;
 use Maatwebsite\Excel\Validators\ValidationException;
-use Illuminate\Validation\ValidationException as IlluminateValidationException;
 
 class StockReceiveImport implements ToCollection, WithHeadingRow, WithMultipleSheets
 {
     private int $importedCount = 0;
+
     private int $totalRows = 0;
 
     public function headingRow(): int
@@ -40,7 +43,7 @@ class StockReceiveImport implements ToCollection, WithHeadingRow, WithMultipleSh
         $groups = $this->groupRecords($records);
         $stockService = app(StockService::class);
 
-        $existingRefs = \App\Models\StockReceive::whereIn('reference_number', array_keys($groups))
+        $existingRefs = StockReceive::whereIn('reference_number', array_keys($groups))
             ->pluck('reference_number')
             ->flip();
 
@@ -80,18 +83,22 @@ class StockReceiveImport implements ToCollection, WithHeadingRow, WithMultipleSh
 
             foreach ($group['items'] as $itemData) {
                 $item = Item::where(function ($q) use ($itemData) {
-                        $q->where('code', $itemData['kode_barang'])
-                          ->orWhere('base_code', $itemData['kode_barang']);
-                    })
+                    $q->where('code', $itemData['kode_barang'])
+                        ->orWhere('base_code', $itemData['kode_barang']);
+                })
                     ->first();
 
-                if (!$item) continue;
+                if (! $item) {
+                    continue;
+                }
 
                 $variant = $itemData['sku']
                     ? $item->variants()->where('sku', $itemData['sku'])->first()
                     : $item->variants()->first();
 
-                if (!$variant) continue;
+                if (! $variant) {
+                    continue;
+                }
 
                 $data['items'][] = [
                     'item_id' => $item->id,
@@ -102,7 +109,7 @@ class StockReceiveImport implements ToCollection, WithHeadingRow, WithMultipleSh
                 ];
             }
 
-            if (!empty($data['items'])) {
+            if (! empty($data['items'])) {
                 $stockService->receiveStock($data);
                 $this->importedCount += count($data['items']);
             }
@@ -113,7 +120,8 @@ class StockReceiveImport implements ToCollection, WithHeadingRow, WithMultipleSh
     {
         $parent = $this;
 
-        return ['Data' => new class($parent) implements ToCollection, WithHeadingRow {
+        return ['Data' => new class($parent) implements ToCollection, WithHeadingRow
+        {
             private StockReceiveImport $parent;
 
             public function __construct(StockReceiveImport $parent)
@@ -155,7 +163,9 @@ class StockReceiveImport implements ToCollection, WithHeadingRow, WithMultipleSh
         foreach ($rows as $index => $row) {
             $values = $row instanceof Collection ? $row->toArray() : (array) $row;
 
-            if ($this->shouldSkipRow($values)) continue;
+            if ($this->shouldSkipRow($values)) {
+                continue;
+            }
 
             $records[] = [
                 'row' => $index + 1,
@@ -203,13 +213,13 @@ class StockReceiveImport implements ToCollection, WithHeadingRow, WithMultipleSh
 
         foreach ($records as $record) {
             $ref = $record['nomor_ref'];
-            if (!$ref) {
+            if (! $ref) {
                 $batchIndex++;
-                $ref = 'SR-' . date('Ymd') . '-' . str_pad($batchIndex, 4, '0', STR_PAD_LEFT);
+                $ref = 'SR-'.date('Ymd').'-'.str_pad($batchIndex, 4, '0', STR_PAD_LEFT);
             }
             $key = $ref;
 
-            if (!isset($groups[$key])) {
+            if (! isset($groups[$key])) {
                 $groups[$key] = [
                     'vendor_name' => $record['vendor'],
                     'receive_date' => $record['tanggal'],
@@ -231,31 +241,47 @@ class StockReceiveImport implements ToCollection, WithHeadingRow, WithMultipleSh
         if ($firstVal === null) {
             return collect($values)->filter(fn ($v) => $this->clean($v) !== null)->isEmpty();
         }
-        return false;
+
+        return Str::startsWith(Str::upper($firstVal), [
+            'TEMPLATE IMPORT', 'ISI DATA', 'URUTAN KOLOM',
+            'KODE BARANG', 'CONTOH FORMAT', 'CONTOH',
+        ]);
     }
 
     private function clean(mixed $value): ?string
     {
-        if ($value === null) return null;
-        if (is_numeric($value) && (str_contains(strtolower((string)$value), 'e+') || is_float($value))) {
-            $value = number_format((float)$value, 0, '', '');
+        if ($value === null) {
+            return null;
+        }
+        if (is_numeric($value) && (str_contains(strtolower((string) $value), 'e+') || is_float($value))) {
+            $value = number_format((float) $value, 0, '', '');
         }
         $value = ltrim(trim((string) $value), "'");
+
         return $value === '' ? null : $value;
     }
 
     private function parseNumeric(mixed $value): ?int
     {
-        if ($value === null || $value === '' || $value === '-') return null;
-        if (is_numeric($value)) return (int) $value;
+        if ($value === null || $value === '' || $value === '-') {
+            return null;
+        }
+        if (is_numeric($value)) {
+            return (int) $value;
+        }
         $cleaned = preg_replace('/[^0-9]/', '', (string) $value);
+
         return $cleaned !== '' ? (int) $cleaned : null;
     }
 
     private function parseDecimal(mixed $value): ?float
     {
-        if ($value === null || $value === '' || $value === '-') return null;
-        if (is_numeric($value)) return (float) $value;
+        if ($value === null || $value === '' || $value === '-') {
+            return null;
+        }
+        if (is_numeric($value)) {
+            return (float) $value;
+        }
 
         $text = trim((string) $value);
 
@@ -273,6 +299,7 @@ class StockReceiveImport implements ToCollection, WithHeadingRow, WithMultipleSh
         }
 
         $cleaned = preg_replace('/[^0-9.]/', '', $text);
+
         return $cleaned !== '' ? (float) $cleaned : null;
     }
 }

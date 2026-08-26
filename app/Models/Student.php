@@ -12,10 +12,12 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 class Student extends Authenticatable
 {
     use SoftDeletes;
+
     protected $fillable = [
         'user_id',
         'nim',
         'name',
+        'gender',
         'email_kampus',
         'email_pribadi',
 
@@ -51,10 +53,6 @@ class Student extends Authenticatable
 
     public function resolveNotificationEmail(): ?string
     {
-        if ($this->isFreshman()) {
-            return $this->email_pribadi ?: $this->email_kampus;
-        }
-
         return $this->email_kampus ?: $this->email_pribadi;
     }
 
@@ -66,6 +64,16 @@ class Student extends Authenticatable
         ];
     }
 
+    public function getGenderLabelAttribute(): string
+    {
+        return match ($this->gender) {
+            'L' => 'Laki-laki',
+            'P' => 'Perempuan',
+            'U' => 'Unisex',
+            default => '-',
+        };
+    }
+
     public function getStudentLevelLabelAttribute(): string
     {
         return $this->studentLevel?->deskripsi ?? $this->student_level ?? '-';
@@ -73,20 +81,23 @@ class Student extends Authenticatable
 
     public function getCurrentSemesterLabelAttribute(): string
     {
-        if (!$this->current_semester) return '-';
+        if (! $this->current_semester) {
+            return '-';
+        }
         $sem = strtoupper($this->current_semester);
-        return 'Year ' . substr($sem, 1, 1) . ' Sem ' . substr($sem, 2, 1);
+
+        return 'Year '.substr($sem, 1, 1).' Sem '.substr($sem, 2, 1);
     }
 
     public static function generateEntitlementCode(Model $student): ?string
     {
-        if (!$student->student_level || !$student->studyProgram?->faculty) {
+        if (! $student->student_level || ! $student->studyProgram?->faculty) {
             return null;
         }
 
         return $student->student_level
-            . $student->studyProgram->faculty->code
-            . $student->studyProgram->code;
+            .$student->studyProgram->faculty->code
+            .$student->studyProgram->code;
     }
 
     public function user(): BelongsTo

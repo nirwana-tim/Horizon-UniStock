@@ -3,6 +3,8 @@
 namespace App\Exports\Templates;
 
 use App\Exports\BaseExport;
+use App\Models\Item;
+use App\Models\ItemVariant;
 use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Concerns\WithCustomStartCell;
 use Maatwebsite\Excel\Concerns\WithHeadings;
@@ -21,7 +23,13 @@ class StockOpnameTemplateExport extends BaseExport implements FromArray, WithCus
 
     public function array(): array
     {
-        return [];
+        return [
+            ['UNF-L-SCB-02', 'M', 50],
+            ['UNF-P-SCB-02', 'L', 45],
+            ['SHO-L-CLG-02', '42', 30],
+            ['KTM-U-KTM-01', 'All Size', 200],
+            ['KIT-U-NUR-06', 'All Size', 80],
+        ];
     }
 
     public function headings(): array
@@ -67,6 +75,9 @@ class StockOpnameTemplateExport extends BaseExport implements FromArray, WithCus
         $lastCol = Coordinate::stringFromColumnIndex($colCount);
         $sheet->freezePane('A'.($headerRow + 1));
         $sheet->setAutoFilter('A'.$headerRow.':'.$lastCol.$headerRow);
+
+        $this->setDropdown($sheet, 'A5:A500', Item::pluck('code')->toArray());
+        $this->setDropdown($sheet, 'B5:B500', ItemVariant::pluck('size_label')->toArray());
 
         return null;
     }

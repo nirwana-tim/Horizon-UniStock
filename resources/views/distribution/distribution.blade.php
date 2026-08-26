@@ -14,7 +14,7 @@
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
                 <div class="p-6">
                     <h3 class="text-lg font-medium text-gray-900 mb-4">Student Information</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <p class="text-sm text-gray-500">Name</p>
                             <p class="font-medium text-gray-900">{{ $student->name }}</p>
@@ -22,6 +22,18 @@
                         <div>
                             <p class="text-sm text-gray-500">NIM</p>
                             <p class="font-medium text-gray-900">{{ $student->nim }}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Gender</p>
+                            <p class="font-medium text-gray-900">
+                                @if($student->gender === 'L')
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-700">Laki-laki</span>
+                                @elseif($student->gender === 'P')
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-pink-100 text-pink-700">Perempuan</span>
+                                @else
+                                    <span class="text-gray-400">-</span>
+                                @endif
+                            </p>
                         </div>
                         <div>
                             <p class="text-sm text-gray-500">Study Program</p>
@@ -165,6 +177,9 @@
                                                     Item
                                                 </th>
                                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                    Gender
+                                                </th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                                     Code
                                                 </th>
                                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -219,6 +234,17 @@
                                                             <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-700 mt-1">Already Taken</span>
                                                         @elseif($outOfStock)
                                                             <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-700 mt-1">Out of Stock</span>
+                                                        @endif
+                                                    </td>
+                                                    <td class="px-6 py-4 whitespace-nowrap">
+                                                        @if($item->gender === 'L')
+                                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-700">L</span>
+                                                        @elseif($item->gender === 'P')
+                                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-pink-100 text-pink-700">P</span>
+                                                        @elseif($item->gender === 'U')
+                                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700">U</span>
+                                                        @else
+                                                            <span class="text-gray-400">-</span>
                                                         @endif
                                                     </td>
                                                     <td class="px-6 py-4 whitespace-nowrap">
