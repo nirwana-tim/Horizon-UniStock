@@ -25,6 +25,15 @@
                        {{ $isChecked ? 'checked' : '' }}
                        class="rounded border-gray-300 text-primary-700 shadow-sm focus:ring-primary-500">
                 <span class="text-sm text-gray-700 font-semibold">{{ $item->name }} ({{ $item->code }})</span>
+                @if($item->gender)
+                    @if($item->gender === 'L')
+                        <span class="ml-1 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-blue-100 text-blue-700">L</span>
+                    @elseif($item->gender === 'P')
+                        <span class="ml-1 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-pink-100 text-pink-700">P</span>
+                    @elseif($item->gender === 'U')
+                        <span class="ml-1 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-gray-100 text-gray-700">U</span>
+                    @endif
+                @endif
             </label>
             
             <input type="hidden" name="items[{{ $idx }}][item_id]" value="{{ $item->id }}">
