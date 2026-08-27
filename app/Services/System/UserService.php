@@ -3,10 +3,9 @@
 namespace App\Services\System;
 
 use App\Models\User;
-use App\Services\AuditService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
-use Hash;
+use Illuminate\Support\Facades\Hash;
 
 class UserService
 {
@@ -39,20 +38,14 @@ class UserService
     public function store(array $data): User
     {
         $user = User::create([
-            'name'                => $data['name'],
-            'email'               => $data['email'],
+            'name' => $data['name'],
+            'email' => $data['email'],
             'password' => Hash::make($data['password']),
             'must_change_password' => true,
-            'is_active'           => true,
+            'is_active' => true,
         ]);
 
         $user->assignRole($data['role']);
-
-        AuditService::log('create', 'account', $user->id, null, [
-            'name'  => $user->name,
-            'email' => $user->email,
-            'role'  => $data['role'],
-        ]);
 
         return $user;
     }
@@ -62,15 +55,13 @@ class UserService
      */
     public function update(User $user, array $data): User
     {
-        $old = $user->fresh()->toArray();
-
         if (isset($data['name'])) {
             $user->name = $data['name'];
         }
         if (isset($data['email'])) {
             $user->email = $data['email'];
         }
-        if (!empty($data['password'])) {
+        if (! empty($data['password'])) {
             $user->password = $data['password'];
             $user->must_change_password = true;
         }
@@ -80,8 +71,6 @@ class UserService
         }
 
         $user->save();
-
-        AuditService::log('update', 'account', $user->id, $old, $user->fresh()->toArray());
 
         return $user;
     }
@@ -95,11 +84,8 @@ class UserService
             return $user;
         }
 
-        $old = $user->fresh()->toArray();
         $user->is_active = $active;
         $user->save();
-
-        AuditService::log($active ? 'activate' : 'deactivate', 'account', $user->id, $old, $user->fresh()->toArray());
 
         return $user;
     }

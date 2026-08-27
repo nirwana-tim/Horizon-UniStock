@@ -347,9 +347,6 @@ class StudentSizeService
                 );
             }
 
-            $oldBaju = $profile->baju_size;
-            $oldSepatu = $profile->sepatu_size;
-
             if (! empty($baju)) {
                 $profile->update(['baju_size' => $baju]);
                 $this->syncGenericSizeItems($profile, 'UNF', $baju);
@@ -372,16 +369,6 @@ class StudentSizeService
             $profile->update([
                 'is_filled' => true,
                 'filled_at' => $profile->filled_at ?? now(),
-            ]);
-
-            AuditService::log('save_sizes', StudentSizeProfile::class, $profile->id, [
-                'student_id' => $student->id,
-                'event_id' => $event->id,
-                'submission_count' => $submission->submission_count,
-                'baju_size' => $baju,
-                'sepatu_size' => $sepatu,
-                'old_baju_size' => $oldBaju,
-                'old_sepatu_size' => $oldSepatu,
             ]);
         });
     }

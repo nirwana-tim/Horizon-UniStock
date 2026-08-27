@@ -351,20 +351,6 @@ class DistributionService
                 ]);
             }
 
-            AuditService::log(
-                'distribution.created',
-                DistributionTransaction::class,
-                $transaction->id,
-                null,
-                [
-                    'student_id' => $student->id,
-                    'schedule_id' => $schedule->id,
-                    'staff_id' => $staff->id,
-                    'status' => $transaction->status,
-                    'item_count' => count($items),
-                ]
-            );
-
             DB::afterCommit(function () use ($transaction) {
                 app(NotificationService::class)->sendDistributionConfirmation($transaction);
 
@@ -454,13 +440,5 @@ class DistributionService
         } elseif ($catCode === 'SHO') {
             $sizeProfile->update(['sepatu_size' => $newLabel]);
         }
-
-        AuditService::log(
-            'size.updated',
-            StudentSizeItem::class,
-            $sizeItem?->id ?? $sizeProfile->id,
-            ['size' => $oldSize],
-            ['size' => $newCode, 'changed_by' => $staff->id, 'item_id' => $item->id]
-        );
     }
 }

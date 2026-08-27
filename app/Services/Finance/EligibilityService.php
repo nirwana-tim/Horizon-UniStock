@@ -4,7 +4,6 @@ namespace App\Services\Finance;
 
 use App\Models\EligibilityRecord;
 use App\Models\Student;
-use App\Services\AuditService;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 
@@ -32,8 +31,8 @@ class EligibilityService
                 ->first();
 
             if ($record) {
-                AuditService::log('delete', 'eligibility_record', $record->id, $record->toArray(), null);
                 $record->delete();
+
                 return "Status kelayakan untuk mahasiswa {$student->name} berhasil dihapus (Set Belum Lunas).";
             }
 
@@ -42,7 +41,7 @@ class EligibilityService
                 'is_eligible' => true,
                 'payment_status' => 'Paid',
             ]);
-            AuditService::log('create', 'eligibility_record', $newRecord->id, null, $newRecord->toArray());
+
             return "Mahasiswa {$student->name} berhasil di-set Layak (Lunas).";
         });
     }

@@ -5,8 +5,8 @@ namespace App\Http\Controllers\Profile;
 use App\Http\Controllers\Controller;
 use App\Models\OtpCode;
 use App\Models\Student;
-use App\Services\AuditService;
 use App\Services\Master\StudentService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -25,7 +25,7 @@ class EmailController extends Controller
         return view('profile.email.verify-password');
     }
 
-    public function verifyPassword(Request $request): RedirectResponse|\Illuminate\Http\JsonResponse
+    public function verifyPassword(Request $request): RedirectResponse|JsonResponse
     {
         $request->validate([
             'password' => ['required', 'current_password'],
@@ -109,7 +109,7 @@ class EmailController extends Controller
         $student = Student::where('user_id', $user->id)->firstOrFail();
         $pendingEmail = session('pending_email_pribadi');
 
-        if (!$pendingEmail) {
+        if (! $pendingEmail) {
             return redirect()->route('profile.email.change')
                 ->withErrors(['error' => 'Sesi tidak valid. Silakan mulai ulang.']);
         }
@@ -118,6 +118,7 @@ class EmailController extends Controller
         if ($attempts >= 5) {
             session()->forget(['pending_email_pribadi', 'otp_attempts_change']);
             OtpCode::where('user_id', $user->id)->whereNull('used_at')->update(['used_at' => now()]);
+
             return redirect()->route('profile.email.change')
                 ->withErrors(['error' => 'Terlalu banyak percobaan. Silakan kirim ulang OTP.']);
         }
@@ -131,8 +132,9 @@ class EmailController extends Controller
             ->latest()
             ->first();
 
-        if (!$otp) {
+        if (! $otp) {
             session(['otp_attempts_change' => $attempts + 1]);
+
             return back()->withErrors(['code' => 'Kode OTP tidak valid atau sudah kedaluwarsa.']);
         }
 

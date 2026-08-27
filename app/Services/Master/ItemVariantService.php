@@ -3,8 +3,8 @@
 namespace App\Services\Master;
 
 use App\Models\Item;
+use App\Models\ItemSize;
 use App\Models\ItemVariant;
-use App\Services\AuditService;
 
 class ItemVariantService
 {
@@ -17,11 +17,11 @@ class ItemVariantService
                 array_pop($parts);
                 $baseCode = implode('-', $parts);
             }
-            $data['sku'] = $baseCode . '-' . $data['size'];
+            $data['sku'] = $baseCode.'-'.$data['size'];
         }
 
         if (empty($data['size_label'])) {
-            $itemSize = \App\Models\ItemSize::find($data['size_id']);
+            $itemSize = ItemSize::find($data['size_id']);
             if ($itemSize) {
                 $data['size_label'] = $itemSize->label;
             }
@@ -29,16 +29,11 @@ class ItemVariantService
 
         $variant = $item->variants()->create($data);
 
-        AuditService::log('create', ItemVariant::class, $variant->id, null, $variant->toArray());
-
         return $variant;
     }
 
     public function destroy(Item $item, ItemVariant $variant): void
     {
-        $oldValues = $variant->toArray();
         $variant->delete();
-
-        AuditService::log('delete', ItemVariant::class, $variant->id, $oldValues, null);
     }
 }

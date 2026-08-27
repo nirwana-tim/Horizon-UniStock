@@ -37,7 +37,7 @@ Solusi yang dirancang adalah sistem terintegrasi yang mencakup: Student Data →
 | Admin | Pengguna utama sistem | Import data, atur entitlement, buat jadwal, export report, stock opname, GPM |
 | Staff Distribusi | Operator lapangan | Scan QR, distribusi barang, validasi stok, partial pickup |
 | Mahasiswa | Penerima barang | Input ukuran, lihat jadwal, lihat QR, lupa password |
-| Super Admin | IT/Monitoring | Kelola user, monitoring, SMTP, audit log |
+| Super Admin | IT/Monitoring | Kelola user, monitoring, SMTP |
 
 ---
 
@@ -125,7 +125,6 @@ Solusi yang dirancang adalah sistem terintegrasi yang mencakup: Student Data →
 |----|-------|-----------|-----------|
 | FR-34 | Kelola user, role | CRUD + toggle aktif (Spatie) | High |
 | FR-35 | System config — SMTP | Atur & test SMTP dari database | Medium |
-| FR-36 | Audit log | Semua perubahan tercatat di `audit_logs` | Medium |
 | FR-37 | Monitoring semua modul | Dashboard | Low |
 
 ### 5.5 Stock Opname
@@ -191,7 +190,7 @@ Solusi yang dirancang adalah sistem terintegrasi yang mencakup: Student Data →
 **Supporting:**
 - Import Batches, Document Sequences
 - Email Notifications, SMTP Settings, OTP Codes
-- Audit Logs, Student Summaries
+- Student Summaries
 
 ---
 

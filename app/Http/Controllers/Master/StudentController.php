@@ -11,7 +11,6 @@ use App\Models\Entitlement;
 use App\Models\Student;
 use App\Models\StudentGeneration;
 use App\Models\StudyProgram;
-use App\Services\AuditService;
 use App\Services\Master\StudentService;
 use App\Services\NotificationService;
 use Illuminate\Http\JsonResponse;
@@ -225,8 +224,6 @@ class StudentController extends Controller
                 ->with('info', 'Tidak ada akun baru yang digenerate.');
         }
 
-        AuditService::log('generate_accounts', Student::class, implode(',', collect($students)->pluck('id')->all()), null, ['count' => count($generated)]);
-
         $message = 'Berhasil membuat '.count($generated).' akun mahasiswa. Distributed kredensial di halaman berikut.';
 
         return redirect()->route('students.credentials')
@@ -299,8 +296,6 @@ class StudentController extends Controller
             ];
         }
 
-        AuditService::log('generate_all_accounts', Student::class, implode(',', collect($students)->pluck('id')->all()), null, ['count' => count($generated)]);
-
         $message = 'Berhasil membuat '.count($generated).' akun mahasiswa. Distributed kredensial di halaman berikut.';
 
         return redirect()->route('students.credentials')
@@ -343,14 +338,6 @@ class StudentController extends Controller
 
         $password = $student->user?->decrypted_password;
 
-        AuditService::log(
-            'get_password',
-            Student::class,
-            $student->id,
-            null,
-            ['nim' => $student->nim, 'revealed' => $password !== null],
-        );
-
         return response()->json([
             'password' => $password,
         ]);
@@ -384,8 +371,6 @@ class StudentController extends Controller
         }
 
         [$user, $password] = $this->studentService->resetPassword($student);
-
-        AuditService::log('reset_password', Student::class, $student->id, null, ['nim' => $student->nim]);
 
         return redirect()->route('students.credentials')
             ->with('success', "Password untuk {$student->name} ({$student->nim}) berhasil di-reset.");

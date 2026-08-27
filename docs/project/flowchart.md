@@ -274,17 +274,13 @@ flowchart TD
     A4 --> A7[System Config SMTP]
     A7 --> A8[Atur & Test Koneksi SMTP]
 
-    A4 --> A9[Audit Log]
-    A9 --> A10[Pantau Aktivitas]
-
     A4 --> A13[Monitoring Semua Modul]
 
     A6 --> E4([Logout])
     A8 --> E4
-    A10 --> E4
     A13 --> E4
 
-    class A1,A4,A5,A6,A7,A8,A9,A10,A13 superAdmin
+    class A1,A4,A5,A6,A7,A8,A13 superAdmin
     class A2 decision
     class A3 error
     class E4 startEnd
@@ -362,5 +358,4 @@ flowchart LR
 |---------|--------|
 | Manage User | CRUD user, role & status aktif |
 | System Config | Atur SMTP |
-| Audit Log | Pantau aktivitas |
 | Monitoring | Pantau semua modul |

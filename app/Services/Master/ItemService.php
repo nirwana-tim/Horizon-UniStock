@@ -7,7 +7,6 @@ use App\Models\ItemCategory;
 use App\Models\ItemDepartment;
 use App\Models\ItemSize;
 use App\Models\ItemType;
-use App\Services\AuditService;
 use Illuminate\Validation\ValidationException;
 
 class ItemService
@@ -15,14 +14,14 @@ class ItemService
     public function store(array $data): Item
     {
         $category = ItemCategory::findOrFail($data['category_id']);
-        $type = !empty($data['type_id']) ? ItemType::findOrFail($data['type_id']) : null;
-        $department = !empty($data['department_id']) ? ItemDepartment::findOrFail($data['department_id']) : null;
+        $type = ! empty($data['type_id']) ? ItemType::findOrFail($data['type_id']) : null;
+        $department = ! empty($data['department_id']) ? ItemDepartment::findOrFail($data['department_id']) : null;
         $sizes = ItemSize::whereIn('id', $data['size_ids'])->get();
 
         $genderLabels = ['L' => 'Laki - Laki', 'P' => 'Perempuan', 'U' => 'Unisex'];
 
-        $code = $category->code . '-' . $data['gender'] . '-' . ($type?->code ?? 'XX') . '-' . ($department?->code ?? '00');
-        $name = $category->label . ' ' . ($genderLabels[$data['gender']] ?? '') . ' ' . ($type?->label ?? '') . ' ' . ($department?->label ?? '');
+        $code = $category->code.'-'.$data['gender'].'-'.($type?->code ?? 'XX').'-'.($department?->code ?? '00');
+        $name = $category->label.' '.($genderLabels[$data['gender']] ?? '').' '.($type?->label ?? '').' '.($department?->label ?? '');
 
         if (Item::where('code', $code)->exists()) {
             throw ValidationException::withMessages([
@@ -49,14 +48,10 @@ class ItemService
                 [
                     'size' => $size->code,
                     'size_label' => $size->label,
-                    'sku' => $code . '-' . $size->code,
+                    'sku' => $code.'-'.$size->code,
                 ]
             );
         }
-
-        $auditData = $data;
-        unset($auditData['size_ids']);
-        AuditService::log('create', 'item', $item->id, null, $auditData);
 
         return $item;
     }
@@ -66,14 +61,14 @@ class ItemService
         $old = $item->toArray();
 
         $category = ItemCategory::findOrFail($data['category_id']);
-        $type = !empty($data['type_id']) ? ItemType::findOrFail($data['type_id']) : null;
-        $department = !empty($data['department_id']) ? ItemDepartment::findOrFail($data['department_id']) : null;
+        $type = ! empty($data['type_id']) ? ItemType::findOrFail($data['type_id']) : null;
+        $department = ! empty($data['department_id']) ? ItemDepartment::findOrFail($data['department_id']) : null;
         $sizes = ItemSize::whereIn('id', $data['size_ids'])->get();
 
         $genderLabels = ['L' => 'Laki - Laki', 'P' => 'Perempuan', 'U' => 'Unisex'];
 
-        $newCode = $category->code . '-' . $data['gender'] . '-' . ($type?->code ?? 'XX') . '-' . ($department?->code ?? '00');
-        $newName = trim($category->label . ' ' . ($genderLabels[$data['gender']] ?? '') . ' ' . ($type?->label ?? '') . ' ' . ($department?->label ?? ''));
+        $newCode = $category->code.'-'.$data['gender'].'-'.($type?->code ?? 'XX').'-'.($department?->code ?? '00');
+        $newName = trim($category->label.' '.($genderLabels[$data['gender']] ?? '').' '.($type?->label ?? '').' '.($department?->label ?? ''));
 
         if ($newCode !== $item->code && Item::where('code', $newCode)->exists()) {
             throw ValidationException::withMessages([
@@ -93,7 +88,7 @@ class ItemService
             $item->load('variants');
             foreach ($item->variants as $var) {
                 $var->update([
-                    'sku' => $newCode . '-' . $var->size,
+                    'sku' => $newCode.'-'.$var->size,
                 ]);
             }
         }
@@ -104,19 +99,16 @@ class ItemService
                 [
                     'size' => $size->code,
                     'size_label' => $size->label,
-                    'sku' => $newCode . '-' . $size->code,
+                    'sku' => $newCode.'-'.$size->code,
                 ]
             );
         }
-
-        AuditService::log('update', 'item', $item->id, $old, $updateData);
 
         return $item;
     }
 
     public function destroy(Item $item): void
     {
-        AuditService::log('delete', 'item', $item->id, $item->toArray(), null);
         $item->delete();
     }
 }

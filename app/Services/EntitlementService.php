@@ -57,14 +57,6 @@ class EntitlementService
                 }
             }
 
-            AuditService::log(
-                'entitlement.created',
-                Entitlement::class,
-                $entitlement->id,
-                null,
-                $entitlement->toArray()
-            );
-
             return $entitlement->fresh(['items.item']);
         });
     }
@@ -72,8 +64,6 @@ class EntitlementService
     public function updateEntitlement(Entitlement $entitlement, array $data): Entitlement
     {
         return DB::transaction(function () use ($entitlement, $data) {
-            $oldValues = $entitlement->toArray();
-
             $entitlement->update([
                 'code' => $data['code'] ?? $entitlement->code,
                 'student_level' => $data['student_level'] ?? $entitlement->student_level,
@@ -93,14 +83,6 @@ class EntitlementService
                 }
             }
 
-            AuditService::log(
-                'entitlement.updated',
-                Entitlement::class,
-                $entitlement->id,
-                $oldValues,
-                $entitlement->fresh()->toArray()
-            );
-
             return $entitlement->fresh(['items.item']);
         });
     }
@@ -108,14 +90,6 @@ class EntitlementService
     public function deleteEntitlement(Entitlement $entitlement): void
     {
         DB::transaction(function () use ($entitlement) {
-            AuditService::log(
-                'entitlement.deleted',
-                Entitlement::class,
-                $entitlement->id,
-                $entitlement->toArray(),
-                null
-            );
-
             $entitlement->items()->delete();
             $entitlement->delete();
         });

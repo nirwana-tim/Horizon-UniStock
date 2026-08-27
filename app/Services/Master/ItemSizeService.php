@@ -3,7 +3,6 @@
 namespace App\Services\Master;
 
 use App\Models\ItemSize;
-use App\Services\AuditService;
 use Illuminate\Validation\ValidationException;
 
 class ItemSizeService
@@ -41,14 +40,11 @@ class ItemSizeService
         $size = ItemSize::create($data);
         $size->categories()->sync($categoryIds);
 
-        AuditService::log('create', 'item_size', $size->id, null, $data);
-
         return $size;
     }
 
     public function update(ItemSize $itemSize, array $data): ItemSize
     {
-        $old = $itemSize->toArray();
         $categoryIds = $data['categories'] ?? [];
         unset($data['categories']);
         unset($data['code']); // Protect code from modification
@@ -56,25 +52,17 @@ class ItemSizeService
         $itemSize->update($data);
         $itemSize->categories()->sync($categoryIds);
 
-        AuditService::log('update', 'item_size', $itemSize->id, $old, $data);
-
         return $itemSize;
     }
 
     public function destroy(ItemSize $itemSize): void
     {
-        AuditService::log('delete', 'item_size', $itemSize->id, $itemSize->toArray(), null);
         $itemSize->delete();
     }
 
     public function toggleTag(ItemSize $itemSize, string $field, bool $value): ItemSize
     {
         $itemSize->update([$field => $value]);
-
-        $old = $itemSize->toArray();
-        $new = $itemSize->fresh()->toArray();
-
-        AuditService::log('toggle', 'item_size', $itemSize->id, $old, $new);
 
         return $itemSize;
     }

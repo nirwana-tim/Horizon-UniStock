@@ -49,7 +49,6 @@ Sebelum mengerjakan **task apa pun**, AI WAJIB mengikuti urutan ini:
 
 - **Laravel 12** style (PHP 8 attributes, Enums, typed properties)
 - Logic bisnis di **Service Layer**, bukan Controller
-- Setiap perubahan data tercatat di **Audit Log**
 - Migration **idempotent**, Seeder pake `firstOrCreate`
 - **Spatie Permission** untuk RBAC
 - Format kode barang: `KATEGORI-GENDER-TIPE-VARIANT` (contoh: `UNF-L-SCB-02`); SKU varian = `code-SIZE`
@@ -136,7 +135,6 @@ Sebelum mengerjakan **task apa pun**, AI WAJIB mengikuti urutan ini:
 - `otp_codes` — Kode OTP (hash)
 - `smtp_settings` — Setting SMTP (dinamis, dari UI)
 - `document_sequences` — Sequence nomor dokumen
-- `audit_logs` — Audit Log
 
 ## Prioritas Pengerjaan
 

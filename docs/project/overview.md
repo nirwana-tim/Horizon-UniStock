@@ -90,7 +90,6 @@ Perbedaan hanya pada onboarding, email, ukuran, eligible. Flow distribusi tetap 
 |-------|-----------|
 | Kelola User & Role | CRUD user, atur role & status aktif (`/admin/users`) |
 | System Config — SMTP | Atur & test koneksi SMTP dari database (`/system/smtp`) |
-| Audit Log | Lihat seluruh aktivitas pengguna |
 | Monitoring | Pantau semua modul |
 
 ### Admin

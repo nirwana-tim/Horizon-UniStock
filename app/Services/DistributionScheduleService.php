@@ -30,14 +30,6 @@ class DistributionScheduleService
                 $schedule->items()->create(['item_id' => $itemId]);
             }
 
-            AuditService::log(
-                'create',
-                DistributionSchedule::class,
-                $schedule->id,
-                null,
-                array_merge($schedule->fresh()->toArray(), ['item_ids' => $itemIds])
-            );
-
             DB::afterCommit(function () use ($schedule) {
                 app(NotificationService::class)->notifyScheduleCreated($schedule);
             });
@@ -56,10 +48,6 @@ class DistributionScheduleService
                 $data['study_program_id'] = null;
             }
 
-            $oldValues = array_merge($schedule->toArray(), [
-                'item_ids' => $schedule->items()->pluck('item_id')->toArray(),
-            ]);
-
             $schedule->update($data);
 
             $schedule->items()->delete();
@@ -68,14 +56,6 @@ class DistributionScheduleService
                 $schedule->items()->create(['item_id' => $itemId]);
             }
 
-            AuditService::log(
-                'update',
-                DistributionSchedule::class,
-                $schedule->id,
-                $oldValues,
-                array_merge($schedule->fresh()->toArray(), ['item_ids' => $itemIds])
-            );
-
             return $schedule;
         });
     }
@@ -83,14 +63,8 @@ class DistributionScheduleService
     public function destroy(DistributionSchedule $schedule): void
     {
         DB::transaction(function () use ($schedule) {
-            $oldValues = array_merge($schedule->toArray(), [
-                'item_ids' => $schedule->items()->pluck('item_id')->toArray(),
-            ]);
-
             $schedule->items()->delete();
             $schedule->delete();
-
-            AuditService::log('delete', DistributionSchedule::class, $schedule->id, $oldValues, null);
         });
     }
 

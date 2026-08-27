@@ -6,7 +6,6 @@ Implementasi keamanan:
 - [x] Role middleware (Spatie Permission)
 - [x] CSRF protection
 - [x] Server-side validation (Form Request)
-- [x] Audit log setiap perubahan data
 - [x] QR berisi NIM (identitas permanen), bukan token random
 - [x] Mahasiswa hanya melihat data sendiri
 - [x] Staff tidak melihat data sensitif Admin
@@ -37,8 +36,6 @@ Implementasi keamanan:
 - QR tidak mengandung data sensitif lain selain NIM
 
 ### Audit
-- Semua perubahan data tercatat di `audit_logs`
-- Log: siapa, aksi, model, data sebelum/sesudah, IP address
 - Import activity tercatat di `import_batches`
 
 ### Lupa Password

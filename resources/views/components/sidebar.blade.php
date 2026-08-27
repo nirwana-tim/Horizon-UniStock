@@ -27,7 +27,7 @@
     ];
     $inventoryRoutes = ['inventory.stock-receive.*', 'inventory.stock-opname.*', 'inventory.stock-balance.*', 'inventory.stock-movement.*'];
     $reportsRoutes = ['report.gpm-cost', 'report.gpm-cost.*', 'report.*'];
-    $systemRoutes = ['admin.user.*', 'admin.audit-log.*', 'admin.system-config.*'];
+    $systemRoutes = ['admin.user.*', 'admin.system-config.*'];
 
     $masterOpen = request()->routeIs($masterDataRoutes) ? 'true' : 'false';
     $distributionOpen = request()->routeIs($distributionRoutes) ? 'true' : 'false';

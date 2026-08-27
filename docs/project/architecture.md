@@ -59,7 +59,6 @@ routes
 | `StudentSizeService` | Profil ukuran mahasiswa & resolve size value |
 | `NotificationService` | Notifikasi email |
 | `MailSettingsService` | Kelola setting SMTP dari database |
-| `AuditService` | Pencatatan audit log |
 | `Master\*Service` | Logika bisnis per master data (ItemService, StudentService, dll) |
 | `Finance\EligibilityService` | Status kelayakan mahasiswa |
 
@@ -128,7 +127,6 @@ resources/views
 - Gunakan **Laravel 13** style (PHP 8 attributes, Enums, typed properties)
 - Blade views menggunakan **Tailwind CSS**
 - Semua logic bisnis di **Service Layer** (bukan di Controller)
-- Setiap perubahan data tercatat di **Audit Log**
 - Migration harus **idempotent**
 - Seeder harus bisa dijalankan berulang (`firstOrCreate`)
 - Gunakan **Spatie Permission** untuk role-based access control

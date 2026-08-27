@@ -15,7 +15,9 @@ class DistributionConfirmationMail extends Mailable
 
     public function __construct(
         public readonly DistributionTransaction $transaction,
-    ) {}
+    ) {
+        $this->transaction->load(['student', 'schedule', 'items.item']);
+    }
 
     public function envelope(): Envelope
     {
@@ -30,6 +32,11 @@ class DistributionConfirmationMail extends Mailable
     {
         return new Content(
             view: 'emails.distribution-confirmation',
+            with: [
+                'student' => $this->transaction->student,
+                'schedule' => $this->transaction->schedule,
+                'items' => $this->transaction->items,
+            ],
         );
     }
 }

@@ -42,7 +42,7 @@
 | **Student** | Mobile HP (320-428px) | Bottom nav, full-width card, QR besar, tap-friendly |
 | **Staff** | Mobile HP (360-428px) | Scanner kamera fullscreen, checklist centang besar, tombol aksi dominan |
 | **Admin** | Desktop/Laptop (1024-1920px) | Sidebar, tabel data, multi-step wizard, export |
-| **Super Admin** | Desktop/Laptop (1280-1920px) | Sidebar, tabel CRUD, filter panel, audit log |
+| **Super Admin** | Desktop/Laptop (1280-1920px) | Sidebar, tabel CRUD, filter panel |
 
 ---
 

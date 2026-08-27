@@ -32,8 +32,6 @@ class StockOpnameService
             'created_by' => Auth::id(),
         ]);
 
-        AuditService::log('create', StockOpname::class, $batch->id, null, $batch->toArray());
-
         return $batch;
     }
 
@@ -162,8 +160,6 @@ class StockOpnameService
             $batch->update([
                 'status' => 'approved',
             ]);
-
-            AuditService::log('approve', StockOpname::class, $batch->id, ['status' => 'counted'], ['status' => 'approved']);
         }, attempts: 5);
     }
 }

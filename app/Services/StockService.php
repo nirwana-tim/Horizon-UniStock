@@ -9,6 +9,7 @@ use App\Models\StockBatch;
 use App\Models\StockMovement;
 use App\Models\StockReceive;
 use App\Models\StockReceiveItem;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -74,8 +75,6 @@ class StockService
                 );
             }
 
-            AuditService::log('create', StockReceive::class, $receive->id, null, $receive->toArray());
-
             $this->forgetDashboardStockCache();
 
             return $receive->fresh(['items.item', 'items.variant', 'vendor']);
@@ -110,7 +109,7 @@ class StockService
                         'quantity' => $addedQty,
                         'last_hpp' => round($newHpp, 2),
                     ]);
-                } catch (\Illuminate\Database\QueryException $e) {
+                } catch (QueryException $e) {
                     if ((int) $e->getCode() !== 23000) {
                         throw $e;
                     }
@@ -318,7 +317,7 @@ class StockService
             ->join('items', 'student_size_items.item_id', '=', 'items.id')
             ->leftJoin('item_variants', function ($join) {
                 $join->on('student_size_items.item_id', '=', 'item_variants.item_id')
-                     ->on('student_size_items.size', '=', 'item_variants.size');
+                    ->on('student_size_items.size', '=', 'item_variants.size');
             })
             ->leftJoin('stock_balances', function ($join) {
                 $join->on('item_variants.id', '=', 'stock_balances.variant_id');
@@ -350,6 +349,7 @@ class StockService
             ->map(function ($row) {
                 $row->shortage = $row->demand - $row->stock;
                 $row->status = $row->stock <= 0 ? 'out_of_stock' : 'shortage';
+
                 return $row;
             });
     }
@@ -361,7 +361,7 @@ class StockService
             ->join('items', 'student_size_items.item_id', '=', 'items.id')
             ->leftJoin('item_variants', function ($join) {
                 $join->on('student_size_items.item_id', '=', 'item_variants.item_id')
-                     ->on('student_size_items.size', '=', 'item_variants.size');
+                    ->on('student_size_items.size', '=', 'item_variants.size');
             })
             ->leftJoin('stock_balances', function ($join) {
                 $join->on('item_variants.id', '=', 'stock_balances.variant_id');
@@ -400,6 +400,7 @@ class StockService
                 } else {
                     $row->status = 'excess';
                 }
+
                 return $row;
             });
     }
@@ -496,9 +497,7 @@ class StockService
                     ->delete();
             }
             $receive->items()->delete();
-            $old = $receive->toArray();
             $receive->delete();
-            AuditService::log('delete', StockReceive::class, $receive->id, $old, null);
 
             $this->forgetDashboardStockCache();
         }, attempts: 5);
@@ -549,8 +548,6 @@ class StockService
             }
 
             $this->increaseBalance($itemId, $variantId, $quantity);
-
-            AuditService::log('return_stock', StockMovement::class, $referenceId, ['quantity' => $quantity], ['item_id' => $itemId, 'variant_id' => $variantId, 'reference' => $referenceType]);
         }, attempts: 5);
     }
 

@@ -346,17 +346,6 @@ erDiagram
         text error_message
     }
 
-    AUDIT_LOGS {
-        bigint id PK
-        bigint user_id FK
-        string action
-        string model_type
-        bigint model_id
-        json old_values
-        json new_values
-        string ip_address
-    }
-
     OTP_CODES {
         bigint id PK
         bigint user_id FK
@@ -496,7 +485,6 @@ erDiagram
     STOCK_OPNAME_ADJUSTMENTS }o--o| STOCK_MOVEMENTS : "fk.stock_movement_id -> id"
 
     IMPORT_BATCHES }o--|| USERS : "fk.imported_by -> id"
-    AUDIT_LOGS }o--o| USERS : "fk.user_id -> id"
     OTP_CODES }o--o| USERS : "fk.user_id -> id"
     SMTP_SETTINGS }o--o| USERS : "fk.created_by -> id"
     STUDENT_SUMMARIES ||--|| STUDENTS : "fk.student_id -> id"
@@ -950,19 +938,6 @@ Pivot (M : M) antara `item_categories` dan `item_sizes` — ukuran yang tersedia
 | `status` | string | pending / sent / failed |
 | `sent_at` | datetime | Waktu terkirim |
 | `error_message` | text | Error jika gagal |
-
-### `audit_logs`
-
-| Kolom | Tipe | Keterangan |
-|-------|------|-----------|
-| `id` | bigint (PK) | Identifier unik |
-| `user_id` | bigint (FK, nullable) | User pelaku |
-| `action` | string | create / update / delete / activate / get_password / dll |
-| `model_type` | string | Model terpengaruh |
-| `model_id` | bigint | ID model |
-| `old_values` | json | Data sebelum |
-| `new_values` | json | Data setelah |
-| `ip_address` | string(45) | IP address |
 
 ### `otp_codes`
 

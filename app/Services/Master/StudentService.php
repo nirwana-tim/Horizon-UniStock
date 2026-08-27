@@ -4,7 +4,6 @@ namespace App\Services\Master;
 
 use App\Models\Student;
 use App\Models\User;
-use App\Services\AuditService;
 use App\Services\NotificationService;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
@@ -24,8 +23,6 @@ class StudentService
 
         $this->refreshEntitlementCode($student);
 
-        AuditService::log('create', 'student', $student->id, null, $student->toArray());
-
         return $student;
     }
 
@@ -36,7 +33,6 @@ class StudentService
                 ->resolveFromNim($data['nim'])?->id;
         }
 
-        $old = $student->toArray();
         $student->update($data);
 
         if ($student->user_id) {
@@ -67,14 +63,11 @@ class StudentService
             $this->refreshEntitlementCode($student);
         }
 
-        AuditService::log('update', 'student', $student->id, $old, $student->fresh()->toArray());
-
         return $student;
     }
 
     public function destroy(Student $student): void
     {
-        AuditService::log('delete', 'student', $student->id, $student->toArray(), null);
         $student->delete();
     }
 
@@ -98,12 +91,6 @@ class StudentService
                 'user_id' => $user->id,
             ]);
 
-            AuditService::log('create', 'student_account', $user->id, null, [
-                'student_id' => $student->id,
-                'nim' => $student->nim,
-                'name' => $student->name,
-            ]);
-
             app(NotificationService::class)->sendStudentAccount($student, $password);
 
             return [$user, $password];
@@ -121,11 +108,6 @@ class StudentService
                 'password' => Hash::make($password),
                 'must_change_password' => true,
                 'plain_password' => Crypt::encryptString($password),
-            ]);
-
-            AuditService::log('reset_password', 'student_account', $user->id, null, [
-                'student_id' => $student->id,
-                'nim' => $student->nim,
             ]);
 
             return [$user, $password];
@@ -216,7 +198,6 @@ class StudentService
                     $this->refreshEntitlementCode($student);
                 }
 
-                AuditService::log('promote', Student::class, $student->id, $oldValues, $student->fresh()->toArray());
                 $count++;
             }
 
@@ -226,7 +207,6 @@ class StudentService
 
     public function verifyEmailKampus(Student $student, string $email): void
     {
-        $old = $student->toArray();
         $student->update([
             'email_kampus' => $email,
             'email_verified_at' => now(),
@@ -238,16 +218,11 @@ class StudentService
                 $user->update(['email' => $email]);
             }
         }
-
-        AuditService::log('email_kampus.verified', Student::class, $student->id, $old, $student->fresh()->toArray());
     }
 
     public function updateEmailPribadi(Student $student, string $email): void
     {
-        $old = $student->toArray();
         $student->update(['email_pribadi' => $email]);
-
-        AuditService::log('email_pribadi.updated', Student::class, $student->id, $old, $student->fresh()->toArray());
     }
 
     public function refreshEntitlementCode(Student $student): void

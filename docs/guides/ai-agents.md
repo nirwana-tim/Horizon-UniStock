@@ -48,7 +48,6 @@ Sebelum mengerjakan **task apa pun**, AI WAJIB mengikuti urutan ini:
 - Gunakan **Laravel 13** style (PHP 8 attributes, Enums, typed properties)
 - Blade views menggunakan **Tailwind CSS** (warna brand: `primary-700` = `#980416` maroon)
 - Semua logic bisnis di **Service Layer** (bukan di Controller)
-- Setiap perubahan data tercatat di **Audit Log**
 - Migration harus **idempotent** (bisa dijalankan ulang tanpa error)
 - Seeder harus bisa dijalankan berulang (gunakan `firstOrCreate`)
 - Gunakan **Spatie Permission** untuk role-based access control
@@ -119,7 +118,6 @@ Sebelum mengerjakan **task apa pun**, AI WAJIB mengikuti urutan ini:
 - `otp_codes` — Kode OTP (hash)
 - `smtp_settings` — Setting SMTP (dinamis, dari UI)
 - `document_sequences` — Sequence nomor dokumen
-- `audit_logs` — Audit Log
 
 ## Prioritas Pengerjaan
 
