@@ -115,7 +115,7 @@
             } else {
                 greeting = 'Selamat Malam';
             }
-            var fullName = '{{ $student->name }}';
+            var fullName = @json($student->name);
             var firstName = fullName.trim().split(/\s+/)[0];
             document.getElementById('greeting').textContent = greeting + ', ' + firstName + '!';
         })();

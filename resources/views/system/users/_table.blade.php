@@ -1,3 +1,4 @@
+@php use App\Enums\Role; @endphp
 @forelse($users as $user)
     <tr class="hover:bg-gray-50">
         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800">
@@ -5,11 +6,11 @@
         </td>
         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $user->email }}</td>
         <td class="px-6 py-4 whitespace-nowrap">
-@if ($user->hasRole('super_admin'))
+@if ($user->hasRole(Role::SuperAdmin))
                 <x-badge type="danger">Super Admin</x-badge>
-            @elseif ($user->hasRole('admin'))
+            @elseif ($user->hasRole(Role::Admin))
                 <x-badge type="primary">Admin Finance</x-badge>
-            @elseif ($user->hasRole('staff'))
+            @elseif ($user->hasRole(Role::Staff))
                 <x-badge type="neutral">Staff</x-badge>
             @else
                 <x-badge type="neutral">{{ ucfirst($user->roles->first()->name ?? 'Mahasiswa') }}</x-badge>

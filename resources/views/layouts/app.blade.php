@@ -31,8 +31,9 @@
 
     @stack('styles')
 @php
-    $isSidebarLayout = auth()->check() && auth()->user()->hasAnyRole(['super_admin', 'admin', 'staff']);
-    $isBottomNavLayout = auth()->check() && auth()->user()->hasRole('student');
+    use App\Enums\Role;
+    $isSidebarLayout = auth()->check() && auth()->user()->hasAnyRole([Role::SuperAdmin, Role::Admin, Role::Staff]);
+    $isBottomNavLayout = auth()->check() && auth()->user()->hasRole(Role::Student);
 @endphp
 </head>
 <body class="font-sans antialiased bg-gray-50 text-gray-800 {{ $isSidebarLayout ? 'h-screen overflow-hidden' : '' }}" style="touch-action: manipulation">
