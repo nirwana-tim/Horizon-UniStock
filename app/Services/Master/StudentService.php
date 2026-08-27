@@ -5,10 +5,7 @@ namespace App\Services\Master;
 use App\Models\Student;
 use App\Models\User;
 use App\Services\NotificationService;
-use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 
 class StudentService
 {
@@ -46,9 +43,8 @@ class StudentService
                     $userUpdates['email'] = $data['email_kampus'];
                 }
                 if (! empty($data['password'])) {
-                    $userUpdates['password'] = Hash::make($data['password']);
+                    $userUpdates['password'] = $data['password'];
                     $userUpdates['must_change_password'] = true;
-                    $userUpdates['plain_password'] = Crypt::encryptString($data['password']);
                 }
                 if (! empty($userUpdates)) {
                     $user->update($userUpdates);
@@ -74,16 +70,14 @@ class StudentService
     public function generateAccount(Student $student): array
     {
         return DB::transaction(function () use ($student) {
-            $password = Str::random(12);
+            $password = "Uniform@{$student->nim}";
 
             $user = User::create([
                 'name' => $student->name,
                 'email' => $student->email_kampus ?? "{$student->nim}@temp.horizon.ac.id",
-                'password' => Hash::make($password),
+                'password' => $password,
                 'must_change_password' => true,
             ]);
-
-            $user->update(['plain_password' => Crypt::encryptString($password)]);
 
             $user->assignRole('student');
 
@@ -100,14 +94,13 @@ class StudentService
     public function resetPassword(Student $student): array
     {
         return DB::transaction(function () use ($student) {
-            $password = Str::random(12);
+            $password = "Uniform@{$student->nim}";
 
             $user = User::findOrFail($student->user_id);
 
             $user->update([
-                'password' => Hash::make($password),
+                'password' => $password,
                 'must_change_password' => true,
-                'plain_password' => Crypt::encryptString($password),
             ]);
 
             return [$user, $password];

@@ -1,4 +1,5 @@
 <x-guest-layout>
+    <div x-data="{ showSmtpModal: false }">
     {{-- Page title --}}
     <div class="mb-6">
         <h2 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface">Masuk</h2>
@@ -96,13 +97,40 @@
         {{-- Lupa Password --}}
         @if (Route::has('password.request'))
             <div class="text-center pt-2">
-                <p class="font-body-md text-body-md text-secondary/50">
-                    Lupa password?
-                    <a href="{{ route('password.request') }}" class="text-primary font-semibold hover:underline">Klik di sini</a>
-                </p>
+                @if (\App\Models\SmtpSetting::isActiveConfigured())
+                    <p class="font-body-md text-body-md text-secondary/50">
+                        Lupa password?
+                        <a href="{{ route('password.request') }}" class="text-primary font-semibold hover:underline">Klik di sini</a>
+                    </p>
+                @else
+                    <p class="font-body-md text-body-md text-secondary/50">
+                        Lupa password?
+                        <button type="button" @click="showSmtpModal = true" class="text-primary font-semibold hover:underline">Klik di sini</button>
+                    </p>
+                @endif
             </div>
         @endif
     </form>
+
+    {{-- SMTP Warning Modal --}}
+    <div x-show="showSmtpModal" x-cloak
+         class="fixed inset-0 z-50 flex items-center justify-center bg-black/50" @click.self="showSmtpModal = false">
+        <div class="bg-white rounded-2xl p-6 max-w-sm mx-4 shadow-xl">
+            <div class="text-center">
+                <span class="material-symbols-outlined text-5xl text-primary mb-3">mail</span>
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">Lupa Password?</h3>
+                <p class="text-sm text-gray-600 mb-4">
+                    Fitur reset password via email belum tersedia saat ini.<br>
+                    Silakan hubungi bagian <strong>Finance</strong> untuk mendapatkan password baru Anda.
+                </p>
+                <button type="button" @click="showSmtpModal = false"
+                        class="inline-flex items-center px-4 py-2 bg-primary-700 text-white rounded-lg text-sm font-medium hover:bg-primary-800">
+                    Mengerti
+                </button>
+            </div>
+        </div>
+    </div>
+    </div>
 
 @push('scripts')
 <script>

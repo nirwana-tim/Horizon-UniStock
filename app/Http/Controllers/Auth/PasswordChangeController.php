@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\View\View;
 
@@ -26,9 +25,8 @@ class PasswordChangeController extends Controller
 
         $user = Auth::user();
         $user->update([
-            'password' => Hash::make($validated['password']),
+            'password' => $validated['password'],
             'must_change_password' => false,
-            'plain_password' => null,
         ]);
 
         return redirect()->route('dashboard')

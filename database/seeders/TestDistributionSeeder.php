@@ -22,13 +22,12 @@ use App\Services\EntitlementService;
 use App\Services\Master\ItemService;
 use App\Services\StockService;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
 
 class TestDistributionSeeder extends Seeder
 {
     private const STUDENT_NIM = '4112757201240008';
 
-    private const STUDENT_PASSWORD = 'password';
+    private const STUDENT_PASSWORD = 'Uniform@4112757201240008';
 
     public function run(): void
     {
@@ -78,7 +77,7 @@ class TestDistributionSeeder extends Seeder
             ['email' => 'student.test@horizon-unistock.test'],
             [
                 'name' => 'Mahasiswa Uji',
-                'password' => Hash::make(self::STUDENT_PASSWORD),
+                'password' => self::STUDENT_PASSWORD,
                 'must_change_password' => false,
                 'is_active' => true,
             ]

@@ -12,11 +12,8 @@ class CredentialsExport implements FromCollection, WithHeadings, WithMapping
 {
     use Exportable;
 
-    private int $row = 0;
-
     public function __construct(
         private array $students,
-        private array $passwords = [],
     ) {}
 
     public function collection(): Enumerable
@@ -26,29 +23,19 @@ class CredentialsExport implements FromCollection, WithHeadings, WithMapping
 
     public function headings(): array
     {
-        return [
-            'No',
-            'NIM',
-            'Name',
-            'Study Program',
-            'Campus Email',
-            'Log In',
-            'Password',
-        ];
+        return ['NIM', 'Name', 'Email', 'Password'];
     }
 
     public function map($student): array
     {
-        $this->row++;
+        $email = $student->resolveNotificationEmail() ?? $student->email_kampus ?? $student->email_pribadi ?? '-';
+        $password = "Uniform@{$student->nim}";
 
         return [
-            $this->row,
             $student->nim,
             $student->name,
-            $student->studyProgram?->name ?? '-',
-            $student->email_kampus ?? '-',
-            $student->user?->last_login_at ? 'Sudah Login' : 'Belum Login',
-            $this->passwords[$student->nim] ?? '-',
+            $email,
+            $password,
         ];
     }
 }

@@ -43,8 +43,9 @@
             <p>Langkah selanjutnya:</p>
             <ol class="steps">
                 <li>Buka <strong>{{ url('/login') }}</strong></li>
-                <li>Login menggunakan NIM dan password di atas</li>
-                <li>Ubah password Anda menjadi password baru</li>
+                <li>Login menggunakan NIM: <strong>{{ $student->nim }}</strong></li>
+                <li>Password: <strong>{{ $password }}</strong></li>
+                <li>Anda akan diminta mengganti password setelah login pertama kali</li>
                 <li>Isi ukuran seragam di menu <strong>Ukuran</strong></li>
             </ol>
 

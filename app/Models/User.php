@@ -7,14 +7,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Support\Facades\Crypt;
 use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    protected $fillable = ['name', 'email', 'password', 'must_change_password', 'is_active', 'last_login_at', 'plain_password'];
+    protected $fillable = ['name', 'email', 'password', 'must_change_password', 'is_active', 'last_login_at'];
 
-    protected $hidden = ['password', 'remember_token', 'plain_password'];
+    protected $hidden = ['password', 'remember_token'];
 
     use HasFactory, HasRoles, Notifiable;
 
@@ -30,15 +29,11 @@ class User extends Authenticatable
 
     public function getDecryptedPasswordAttribute(): ?string
     {
-        if (! $this->plain_password) {
+        if (! $this->student) {
             return null;
         }
 
-        try {
-            return Crypt::decryptString($this->plain_password);
-        } catch (\Throwable) {
-            return null;
-        }
+        return "Uniform@{$this->student->nim}";
     }
 
     protected function casts(): array

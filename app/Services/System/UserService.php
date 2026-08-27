@@ -5,7 +5,6 @@ namespace App\Services\System;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 
 class UserService
 {
@@ -40,7 +39,7 @@ class UserService
         $user = User::create([
             'name' => $data['name'],
             'email' => $data['email'],
-            'password' => Hash::make($data['password']),
+            'password' => $data['password'],
             'must_change_password' => true,
             'is_active' => true,
         ]);

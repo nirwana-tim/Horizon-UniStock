@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use App\Models\User;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -28,7 +27,7 @@ class SuperadminSeeder extends Seeder
             ['email' => $email],
             [
                 'name' => 'Super Admin',
-                'password' => Hash::make($password),
+                'password' => $password,
                 'must_change_password' => true,
                 'is_active' => true,
             ]
@@ -39,10 +38,10 @@ class SuperadminSeeder extends Seeder
         }
 
         $this->command->info('Super admin siap digunakan!');
-        $this->command->info('Email    : ' . $email);
+        $this->command->info('Email    : '.$email);
 
         if (! config('superadmin.password')) {
-            $this->command->warn('Password sementara: ' . $password . ' — ganti segera setelah login.');
+            $this->command->warn('Password sementara: '.$password.' — ganti segera setelah login.');
         }
     }
 }

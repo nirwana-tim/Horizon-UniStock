@@ -314,7 +314,6 @@ class StudentController extends Controller
         $latestEmails = $notificationService->latestAccountNotificationsForStudents($students);
 
         $students = $students->map(function (Student $student) use ($latestEmails) {
-            $student->temp_password = $student->user?->decrypted_password;
             $student->latest_email = $latestEmails[$student->id] ?? null;
 
             return $student;
@@ -336,7 +335,7 @@ class StudentController extends Controller
     {
         abort_unless($this->canViewCredentials(), 403);
 
-        $password = $student->user?->decrypted_password;
+        $password = $student->user_id ? "Uniform@{$student->nim}" : null;
 
         return response()->json([
             'password' => $password,
@@ -346,20 +345,11 @@ class StudentController extends Controller
     public function exportCredentials(): BinaryFileResponse
     {
         $students = Student::whereNotNull('user_id')
-            ->whereHas('user', fn ($q) => $q->where('must_change_password', true))
             ->with(['studyProgram', 'user'])
             ->orderBy('nim')
             ->get();
 
-        $passwords = [];
-        foreach ($students as $student) {
-            $password = $student->user?->decrypted_password;
-            if ($password !== null) {
-                $passwords[$student->nim] = $password;
-            }
-        }
-
-        return (new CredentialsExport($students->all(), $passwords))
+        return (new CredentialsExport($students->all()))
             ->download('kredensial-'.now()->format('Ymdhis').'.xlsx');
     }
 
@@ -383,12 +373,7 @@ class StudentController extends Controller
                 ->with('error', 'Mahasiswa belum memiliki akun.');
         }
 
-        $password = $student->user?->decrypted_password;
-
-        if (! $password) {
-            return redirect()->route('students.credentials')
-                ->with('warning', "Password sementara untuk {$student->nim} tidak tersedia. Reset password terlebih dahulu.");
-        }
+        $password = "Uniform@{$student->nim}";
 
         $sent = app(NotificationService::class)->resendStudentAccount($student, $password);
 
@@ -402,8 +387,7 @@ class StudentController extends Controller
     {
         $students = Student::whereNotNull('user_id')
             ->whereHas('user', fn ($q) => $q->where('must_change_password', true))
-            ->get()
-            ->filter(fn (Student $student) => $student->user?->decrypted_password !== null);
+            ->get();
 
         if ($students->isEmpty()) {
             return redirect()->route('students.credentials')
@@ -414,7 +398,8 @@ class StudentController extends Controller
         $failed = 0;
 
         foreach ($students as $student) {
-            $ok = app(NotificationService::class)->resendStudentAccount($student, $student->user->decrypted_password);
+            $password = "Uniform@{$student->nim}";
+            $ok = app(NotificationService::class)->resendStudentAccount($student, $password);
             $ok ? $sent++ : $failed++;
         }
 

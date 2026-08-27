@@ -117,7 +117,7 @@
                                             @endif
                                         </td>
                                         <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-700">
-                                            @if ($student->temp_password)
+                                            @if ($student->user?->must_change_password)
                                                 <span class="font-mono" data-password="{{ $student->nim }}">••••••••••••</span>
                                                 <button type="button" onclick="revealPassword(this, '{{ $student->nim }}')"
                                                         class="ml-1 p-1 text-gray-400 hover:text-primary-700" title="Lihat">
@@ -172,7 +172,7 @@
                                                     </button>
                                                 </form>
 
-                                                @if (\App\Models\SmtpSetting::isActiveConfigured() && $student->temp_password)
+                                                @if (\App\Models\SmtpSetting::isActiveConfigured() && $student->user_id)
                                                     <form action="{{ route('students.credentials.resend-email', $student) }}" method="POST">
                                                         @csrf
                                                         <button type="submit"
