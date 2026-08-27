@@ -16,6 +16,8 @@ return new class extends Migration
             $table->date('date');
             $table->string('location');
             $table->string('session');
+            $table->time('start_time')->nullable();
+            $table->time('end_time')->nullable();
             $table->foreignId('generation_id')->nullable()->constrained('student_generations')->nullOnDelete();
             $table->foreignId('faculty_id')->nullable()->constrained('faculties')->nullOnDelete();
             $table->foreignId('study_program_id')->nullable()->constrained('study_programs')->nullOnDelete();

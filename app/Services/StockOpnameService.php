@@ -37,15 +37,17 @@ class StockOpnameService
 
     public function calculateVariance(StockOpname $batch): void
     {
-        $batch->load('items');
+        DB::transaction(function () use ($batch) {
+            $batch->load('items');
 
-        foreach ($batch->items as $item) {
-            $item->update([
-                'notes' => $item->variance != 0
-                    ? ($item->variance > 0 ? 'Surplus: +'.$item->variance : 'Shortage: '.$item->variance)
-                    : 'Sesuai',
-            ]);
-        }
+            foreach ($batch->items as $item) {
+                $item->update([
+                    'notes' => $item->variance != 0
+                        ? ($item->variance > 0 ? 'Surplus: +'.$item->variance : 'Shortage: '.$item->variance)
+                        : 'Sesuai',
+                ]);
+            }
+        });
     }
 
     public function createAdjustments(StockOpname $batch, User $approver): void

@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('stock_opname_id')->constrained('stock_opnames');
             $table->foreignId('stock_movement_id')->nullable()->constrained('stock_movements')->nullOnDelete();
-            $table->enum('type', ['surplus', 'shortage']);
+            $table->string('type', 20);
             $table->integer('quantity');
             $table->text('reason')->nullable();
             $table->foreignId('approved_by')->nullable()->constrained('users')->nullOnDelete();

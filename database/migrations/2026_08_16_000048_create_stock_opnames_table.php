@@ -14,7 +14,7 @@ return new class extends Migration
             $table->date('opname_date');
             $table->string('period');
             $table->text('notes')->nullable();
-            $table->enum('status', ['draft', 'counted', 'approved'])->default('draft');
+            $table->string('status', 20)->default('draft');
             $table->foreignId('created_by')->constrained('users');
             $table->index('opname_date');
             $table->index('period');

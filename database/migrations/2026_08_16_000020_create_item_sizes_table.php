@@ -12,6 +12,8 @@ return new class extends Migration
             $table->id();
             $table->string('code', 10)->unique();
             $table->string('label');
+            $table->boolean('is_baju')->default(false);
+            $table->boolean('is_sepatu')->default(false);
             $table->timestamps();
             $table->softDeletes();
         });

@@ -13,6 +13,7 @@ class OtpCode extends Model
         'email',
         'code',
         'type',
+        'attempts',
         'expires_at',
         'used_at',
     ];
@@ -20,6 +21,7 @@ class OtpCode extends Model
     protected function casts(): array
     {
         return [
+            'attempts' => 'integer',
             'expires_at' => 'datetime',
             'used_at' => 'datetime',
         ];
@@ -32,6 +34,6 @@ class OtpCode extends Model
 
     public function isValid(): bool
     {
-        return !$this->used_at && $this->expires_at->isFuture();
+        return ! $this->used_at && $this->expires_at->isFuture();
     }
 }

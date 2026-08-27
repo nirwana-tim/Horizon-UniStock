@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('smtp_settings', function (Blueprint $table) {
             $table->id();
             $table->string('mailer')->default('smtp');
-            $table->enum('scheme', ['tls', 'ssl', 'null'])->default('tls');
+            $table->string('scheme', 5)->default('tls');
             $table->string('host')->nullable();
             $table->integer('port')->nullable();
             $table->string('username')->nullable();

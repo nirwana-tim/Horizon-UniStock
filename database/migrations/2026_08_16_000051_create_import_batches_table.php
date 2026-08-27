@@ -15,7 +15,7 @@ return new class extends Migration
             $table->integer('total_rows');
             $table->integer('success_rows')->default(0);
             $table->integer('failed_rows')->default(0);
-            $table->enum('status', ['processing', 'completed', 'failed'])->default('processing');
+            $table->string('status', 20)->default('processing');
             $table->json('error_log')->nullable();
             $table->foreignId('imported_by')->constrained('users');
             $table->timestamps();

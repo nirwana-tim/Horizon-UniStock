@@ -244,6 +244,7 @@ class StudentController extends Controller
         $query = Student::with(['studyProgram.faculty', 'generation', 'studentLevel']);
 
         if ($search = $request->input('q')) {
+            $search = $this->escapeLike($search);
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                     ->orWhere('nim', 'like', "%{$search}%");

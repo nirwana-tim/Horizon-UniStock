@@ -13,7 +13,7 @@ return new class extends Migration
             $table->string('reference_number')->unique();
             $table->foreignId('vendor_id')->constrained('vendors');
             $table->date('receive_date');
-            $table->enum('status', ['pending', 'received', 'cancelled'])->default('pending');
+            $table->string('status', 20)->default('pending');
             $table->text('notes')->nullable();
             $table->index('receive_date');
             $table->index('status');

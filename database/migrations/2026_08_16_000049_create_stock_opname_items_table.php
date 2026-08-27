@@ -15,7 +15,6 @@ return new class extends Migration
             $table->foreignId('variant_id')->constrained('item_variants');
             $table->integer('system_quantity');
             $table->integer('physical_quantity');
-            $table->integer('computed_variance')->storedAs('physical_quantity - system_quantity');
             $table->text('notes')->nullable();
             $table->unique(['stock_opname_id', 'item_id', 'variant_id']);
             $table->timestamps();

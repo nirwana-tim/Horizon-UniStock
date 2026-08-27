@@ -289,10 +289,6 @@ class DistributionService
                     }
                 }
             }
-            $entitlement = $this->getEntitlementForStudent($student, $schedule);
-            if ($entitlement) {
-                $entitlement->load('items.item');
-            }
 
             $studentSizesByBaseCode = [];
             $sizeProfile = $student->activeSizeProfile;

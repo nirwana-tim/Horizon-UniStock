@@ -13,10 +13,9 @@ return new class extends Migration
             $table->foreignId('student_id')->constrained('students');
             $table->foreignId('schedule_id')->constrained('distribution_schedules');
             $table->foreignId('staff_id')->constrained('users');
-            $table->enum('status', ['completed', 'partial', 'cancelled'])->default('completed');
+            $table->string('status', 20)->default('completed');
             $table->timestamp('pickup_time');
             $table->text('notes')->nullable();
-            $table->unique(['student_id', 'schedule_id']);
             $table->index('status');
             $table->index('pickup_time');
             $table->index('staff_id');

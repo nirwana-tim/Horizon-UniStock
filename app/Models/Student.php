@@ -135,6 +135,11 @@ class Student extends Authenticatable
         return $this->hasMany(EmailNotification::class);
     }
 
+    public function sizeEventSubmissions(): HasMany
+    {
+        return $this->hasMany(SizeEventSubmission::class);
+    }
+
     public function activeSizeProfile(): HasOne
     {
         return $this->hasOne(StudentSizeProfile::class)->where('is_filled', true)->latest();

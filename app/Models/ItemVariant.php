@@ -3,13 +3,14 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class ItemVariant extends Model
 {
     use SoftDeletes;
+
     protected $fillable = ['item_id', 'size_id', 'size', 'size_label', 'sku', 'weight'];
 
     protected function casts(): array
@@ -52,5 +53,10 @@ class ItemVariant extends Model
     public function stockOpnameItems(): HasMany
     {
         return $this->hasMany(StockOpnameItem::class, 'variant_id');
+    }
+
+    public function distributionItems(): HasMany
+    {
+        return $this->hasMany(DistributionItem::class, 'variant_id');
     }
 }

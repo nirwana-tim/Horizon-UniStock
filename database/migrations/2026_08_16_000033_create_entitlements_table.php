@@ -17,7 +17,6 @@ return new class extends Migration
             $table->unique(['code', 'student_level']);
             $table->index('is_active');
             $table->timestamps();
-            $table->softDeletes();
         });
     }
 

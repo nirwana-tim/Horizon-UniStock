@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('item_id')->constrained('items');
             $table->foreignId('variant_id')->constrained('item_variants');
-            $table->enum('type', ['IN', 'OUT']);
+            $table->string('type', 3);
             $table->integer('quantity');
             $table->decimal('hpp', 15, 2)->default(0);
             $table->foreignId('stock_batch_id')->nullable()->constrained('stock_batches')->nullOnDelete();

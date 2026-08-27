@@ -9,7 +9,6 @@ use App\Services\StockOpnameService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 use Maatwebsite\Excel\Facades\Excel;
@@ -95,7 +94,7 @@ class StockOpnameController extends Controller
 
     public function approve(Request $request, StockOpname $stockOpname): RedirectResponse
     {
-        $this->service->createAdjustments($stockOpname, Auth::user());
+        $this->service->createAdjustments($stockOpname, $request->user());
 
         return redirect()->route('inventory.stock-opname.show', $stockOpname)
             ->with('success', 'Stock opname berhasil disetujui dan adjustment telah dibuat.');

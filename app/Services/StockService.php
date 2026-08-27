@@ -143,21 +143,33 @@ class StockService
 
     public function increaseBalance(int $itemId, ?int $variantId, int $quantity, float $unitHpp = 0): void
     {
-        $balance = StockBalance::where('item_id', $itemId)
-            ->where('variant_id', $variantId)
-            ->lockForUpdate()
-            ->first();
+        DB::transaction(function () use ($itemId, $variantId, $quantity, $unitHpp) {
+            $balance = StockBalance::where('item_id', $itemId)
+                ->where('variant_id', $variantId)
+                ->lockForUpdate()
+                ->first();
 
-        if ($balance) {
-            $balance->increment('quantity', $quantity);
-        } else {
-            StockBalance::create([
-                'item_id' => $itemId,
-                'variant_id' => $variantId,
-                'quantity' => $quantity,
-                'last_hpp' => round($unitHpp, 2),
-            ]);
-        }
+            if ($balance) {
+                $oldQty = $balance->quantity;
+                $oldHpp = (float) $balance->last_hpp;
+                $totalQty = $oldQty + $quantity;
+                $avgHpp = $totalQty > 0
+                    ? (($oldQty * $oldHpp) + ($quantity * $unitHpp)) / $totalQty
+                    : $unitHpp;
+
+                $balance->update([
+                    'quantity' => $totalQty,
+                    'last_hpp' => round($avgHpp, 2),
+                ]);
+            } else {
+                StockBalance::create([
+                    'item_id' => $itemId,
+                    'variant_id' => $variantId,
+                    'quantity' => $quantity,
+                    'last_hpp' => round($unitHpp, 2),
+                ]);
+            }
+        });
 
         $this->forgetDashboardStockCache();
     }
@@ -482,6 +494,10 @@ class StockService
                 }
             }
 
+            StockMovement::where('reference_type', StockReceive::class)
+                ->where('reference_id', $receive->id)
+                ->delete();
+
             foreach ($receive->items as $item) {
                 StockBatch::where('stock_receive_item_id', $item->id)->forceDelete();
 
@@ -492,9 +508,6 @@ class StockService
                 if ($balance) {
                     $balance->decrement('quantity', $item->quantity);
                 }
-                StockMovement::where('reference_type', StockReceive::class)
-                    ->where('reference_id', $receive->id)
-                    ->delete();
             }
             $receive->items()->delete();
             $receive->delete();
@@ -515,6 +528,7 @@ class StockService
                 ->get();
 
             $returnQty = $quantity;
+            $returnedHpp = 0;
 
             foreach ($outMovements as $movement) {
                 if ($returnQty <= 0) {
@@ -527,6 +541,7 @@ class StockService
 
                 $returnToBatch = min($returnQty, $movement->quantity);
                 $batch->increment('quantity_remaining', $returnToBatch);
+                $returnedHpp = $batch->unit_hpp;
 
                 StockMovement::create([
                     'item_id' => $itemId,
@@ -547,7 +562,7 @@ class StockService
                 throw new \Exception("Tidak dapat mengembalikan {$returnQty} unit: batch asal tidak ditemukan.");
             }
 
-            $this->increaseBalance($itemId, $variantId, $quantity);
+            $this->increaseBalance($itemId, $variantId, $quantity, $returnedHpp);
         }, attempts: 5);
     }
 
