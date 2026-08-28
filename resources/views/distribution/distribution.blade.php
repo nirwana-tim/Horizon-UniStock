@@ -151,33 +151,6 @@
                     <input type="hidden" name="student_id" value="{{ $student->id }}">
                     <input type="hidden" name="schedule_id" value="{{ $activeSchedule->id }}">
 
-                    @if($scheduleItems->isNotEmpty() && $student->gender)
-                        @php
-                            $mismatchedCount = $scheduleItems->filter(fn($item) =>
-                                $item->gender && $item->gender !== 'U' && $student->gender !== $item->gender
-                            )->count();
-                        @endphp
-                        @if($mismatchedCount > 0)
-                            <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-4">
-                                <div class="flex items-start gap-3">
-                                    <div class="flex-shrink-0 w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center">
-                                        <svg class="w-4 h-4 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/>
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <p class="text-sm font-medium text-amber-800">
-                                            {{ $mismatchedCount }} item tidak dapat diambil karena gender tidak cocok
-                                        </p>
-                                        <p class="text-xs text-amber-600 mt-1">
-                                            Mahasiswa berjenis kelamin {{ $student->gender === 'L' ? 'Laki-laki' : 'Perempuan' }} hanya dapat mengambil item Unisex atau yang sesuai gender.
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        @endif
-                    @endif
-
                     <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
                         <div class="p-6">
                             <div class="flex items-center justify-between mb-4">
@@ -240,11 +213,7 @@
                                                     $takenQty       = $distributedItems[$baseCode] ?? 0;
                                                     $entitledQty    = $entitledQuantities[$baseCode] ?? 0;
                                                     $alreadyTaken   = $entitledQty > 0 && $takenQty >= $entitledQty;
-                                                    $genderMismatch = $student->gender
-                                                        && $item->gender
-                                                        && $item->gender !== 'U'
-                                                        && $student->gender !== $item->gender;
-                                                    $isDisabled     = $outOfStock || $alreadyTaken || $genderMismatch;
+                                                    $isDisabled     = $outOfStock || $alreadyTaken;
                                                 @endphp
                                                 <tr class="{{ $isDisabled ? 'bg-gray-50 opacity-60' : '' }}">
                                                     <td class="px-6 py-4 whitespace-nowrap">
@@ -261,11 +230,7 @@
                                                     </td>
                                                     <td class="px-6 py-4 whitespace-nowrap">
                                                         <div class="text-sm font-medium text-gray-900">{{ $item->name }}</div>
-                                                        @if($genderMismatch)
-                                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-700 mt-1">
-                                                                Gender Tidak Cocok
-                                                            </span>
-                                                        @elseif($alreadyTaken)
+                                                        @if($alreadyTaken)
                                                             <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-700 mt-1">Already Taken</span>
                                                         @elseif($outOfStock)
                                                             <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-700 mt-1">Out of Stock</span>
