@@ -11,8 +11,8 @@ return new class extends Migration
         Schema::create('stock_receive_items', function (Blueprint $table) {
             $table->id();
             $table->foreignId('stock_receive_id')->constrained('stock_receives')->cascadeOnDelete();
-            $table->foreignId('item_id')->constrained('items');
-            $table->foreignId('variant_id')->constrained('item_variants');
+            $table->foreignId('item_id')->nullable()->constrained('items')->nullOnDelete();
+            $table->foreignId('variant_id')->nullable()->constrained('item_variants')->nullOnDelete();
             $table->integer('quantity');
             $table->decimal('unit_price', 15, 2)->default(0);
             $table->decimal('hpp', 15, 2)->default(0);

@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('dist_schedule_items', function (Blueprint $table) {
             $table->id();
             $table->foreignId('schedule_id')->constrained('distribution_schedules')->cascadeOnDelete();
-            $table->foreignId('item_id')->constrained('items');
+            $table->foreignId('item_id')->nullable()->constrained('items')->nullOnDelete();
             $table->unique(['schedule_id', 'item_id']);
             $table->timestamps();
         });

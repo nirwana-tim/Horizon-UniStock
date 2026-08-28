@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('distribution_items', function (Blueprint $table) {
             $table->id();
             $table->foreignId('transaction_id')->constrained('distribution_transactions')->cascadeOnDelete();
-            $table->foreignId('item_id')->constrained('items');
+            $table->foreignId('item_id')->nullable()->constrained('items')->nullOnDelete();
             $table->foreignId('variant_id')->nullable()->constrained('item_variants')->nullOnDelete();
             $table->string('expected_size');
             $table->string('actual_size')->nullable();

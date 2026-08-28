@@ -12,9 +12,8 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('code')->unique();
-            $table->foreignId('faculty_id')->constrained('faculties');
+            $table->foreignId('faculty_id')->nullable()->constrained('faculties')->nullOnDelete();
             $table->timestamps();
-            $table->softDeletes();
         });
     }
 

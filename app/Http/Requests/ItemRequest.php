@@ -3,7 +3,6 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 class ItemRequest extends FormRequest
 {
@@ -17,7 +16,7 @@ class ItemRequest extends FormRequest
         $itemId = $this->route('item')?->id;
 
         return [
-            'code' => ['nullable', 'string', 'max:50', Rule::unique('items', 'code')->ignore($itemId)->withoutTrashed()],
+            'code' => ['nullable', 'string', 'max:50', "unique:items,code,{$itemId}"],
             'name' => 'nullable|string|max:255',
             'category_id' => 'required|exists:item_categories,id',
             'type_id' => 'nullable|exists:item_types,id',

@@ -15,7 +15,6 @@ return new class extends Migration
             $table->string('contact')->nullable();
             $table->string('phone')->nullable();
             $table->timestamps();
-            $table->softDeletes();
         });
     }
 

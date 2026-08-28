@@ -10,9 +10,9 @@ return new class extends Migration
     {
         Schema::create('distribution_transactions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('student_id')->constrained('students');
-            $table->foreignId('schedule_id')->constrained('distribution_schedules');
-            $table->foreignId('staff_id')->constrained('users');
+            $table->foreignId('student_id')->nullable()->constrained('students')->nullOnDelete();
+            $table->foreignId('schedule_id')->nullable()->constrained('distribution_schedules')->nullOnDelete();
+            $table->foreignId('staff_id')->nullable()->constrained('users')->nullOnDelete();
             $table->string('status', 20)->default('completed');
             $table->timestamp('pickup_time');
             $table->text('notes')->nullable();

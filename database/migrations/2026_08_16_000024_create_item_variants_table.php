@@ -10,14 +10,13 @@ return new class extends Migration
     {
         Schema::create('item_variants', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('item_id')->constrained('items')->cascadeOnDelete();
+            $table->foreignId('item_id')->nullable()->constrained('items')->nullOnDelete();
             $table->foreignId('size_id')->nullable()->constrained('item_sizes')->nullOnDelete();
             $table->string('size');
             $table->string('size_label')->nullable();
             $table->string('sku')->unique();
             $table->decimal('weight', 8, 2)->nullable();
             $table->timestamps();
-            $table->softDeletes();
             $table->index(['item_id', 'size']);
         });
     }

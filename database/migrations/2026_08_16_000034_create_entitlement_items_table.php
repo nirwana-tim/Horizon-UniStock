@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('entitlement_items', function (Blueprint $table) {
             $table->id();
             $table->foreignId('entitlement_id')->constrained('entitlements')->cascadeOnDelete();
-            $table->foreignId('item_id')->constrained('items');
+            $table->foreignId('item_id')->nullable()->constrained('items')->nullOnDelete();
             $table->integer('quantity')->default(1);
             $table->unique(['entitlement_id', 'item_id']);
             $table->timestamps();

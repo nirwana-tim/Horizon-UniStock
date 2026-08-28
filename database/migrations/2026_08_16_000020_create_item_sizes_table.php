@@ -15,7 +15,6 @@ return new class extends Migration
             $table->boolean('is_baju')->default(false);
             $table->boolean('is_sepatu')->default(false);
             $table->timestamps();
-            $table->softDeletes();
         });
     }
 

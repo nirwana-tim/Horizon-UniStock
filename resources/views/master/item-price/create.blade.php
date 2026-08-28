@@ -22,7 +22,7 @@
                                     $itemOptions = $items->map(fn($item) => [
                                         'value' => $item->id,
                                         'label' => $item->code . ' - ' . $item->name,
-                                        'group' => $item->category->name ?? '',
+                                        'group' => $item->category->label ?? '',
                                     ])->toArray();
                                 @endphp
                                 <x-searchable-select name="item_id" :options="$itemOptions" :value="old('item_id')" placeholder="-- Select Item --" :required="true" />

@@ -10,8 +10,8 @@ return new class extends Migration
     {
         Schema::create('stock_movements', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('item_id')->constrained('items');
-            $table->foreignId('variant_id')->constrained('item_variants');
+            $table->foreignId('item_id')->nullable()->constrained('items')->nullOnDelete();
+            $table->foreignId('variant_id')->nullable()->constrained('item_variants')->nullOnDelete();
             $table->string('type', 3);
             $table->integer('quantity');
             $table->decimal('hpp', 15, 2)->default(0);

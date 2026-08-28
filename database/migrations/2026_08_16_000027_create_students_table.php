@@ -16,8 +16,8 @@ return new class extends Migration
             $table->char('gender', 1)->nullable();
             $table->string('email_kampus')->nullable()->unique();
             $table->string('email_pribadi')->nullable();
-            $table->foreignId('study_program_id')->constrained('study_programs');
-            $table->foreignId('generation_id')->constrained('student_generations');
+            $table->foreignId('study_program_id')->nullable()->constrained('study_programs')->nullOnDelete();
+            $table->foreignId('generation_id')->nullable()->constrained('student_generations')->nullOnDelete();
             $table->string('student_level', 50)->default('Y1S1');
             $table->string('status', 20)->default('active');
             $table->string('current_semester', 20)->default('Y1S1');

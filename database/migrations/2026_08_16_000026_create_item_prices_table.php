@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('item_prices', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('item_id')->constrained('items')->cascadeOnDelete();
+            $table->foreignId('item_id')->nullable()->constrained('items')->nullOnDelete();
             $table->decimal('selling_price', 15, 2)->default(0);
             $table->decimal('hpp', 15, 2)->default(0);
             $table->date('effective_date')->nullable();

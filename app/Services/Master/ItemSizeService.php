@@ -3,6 +3,7 @@
 namespace App\Services\Master;
 
 use App\Models\ItemSize;
+use Illuminate\Database\QueryException;
 use Illuminate\Validation\ValidationException;
 
 class ItemSizeService
@@ -19,7 +20,7 @@ class ItemSizeService
             $code = null;
             for ($i = 1; $i <= 99; $i++) {
                 $candidate = str_pad($i, 2, '0', STR_PAD_LEFT);
-                if (! ItemSize::where('code', '=', $candidate, 'and')->exists()) {
+                if (! ItemSize::where('code', $candidate)->exists()) {
                     $code = $candidate;
                     break;
                 }
@@ -29,7 +30,7 @@ class ItemSizeService
             }
         }
 
-        if (ItemSize::where('code', '=', $code, 'and')->exists()) {
+        if (ItemSize::where('code', $code)->exists()) {
             throw ValidationException::withMessages([
                 'label' => "Kode ukuran '{$code}' untuk label '{$label}' sudah terpakai. Harap gunakan label lain.",
             ]);
@@ -37,7 +38,16 @@ class ItemSizeService
 
         $data['code'] = $code;
 
-        $size = ItemSize::create($data);
+        try {
+            $size = ItemSize::create($data);
+        } catch (QueryException $e) {
+            if (str_contains($e->getMessage(), 'Duplicate entry')) {
+                throw ValidationException::withMessages([
+                    'label' => "Kode ukuran '{$code}' sudah terpakai. Silakan coba lagi.",
+                ]);
+            }
+            throw $e;
+        }
         $size->categories()->sync($categoryIds);
 
         return $size;

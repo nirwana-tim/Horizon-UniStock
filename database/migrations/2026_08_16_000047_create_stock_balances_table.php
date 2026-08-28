@@ -10,8 +10,8 @@ return new class extends Migration
     {
         Schema::create('stock_balances', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('item_id')->constrained('items');
-            $table->foreignId('variant_id')->constrained('item_variants');
+            $table->foreignId('item_id')->nullable()->constrained('items')->nullOnDelete();
+            $table->foreignId('variant_id')->nullable()->constrained('item_variants')->nullOnDelete();
             $table->integer('quantity')->default(0);
             $table->integer('reserved')->default(0);
             $table->decimal('last_hpp', 15, 2)->default(0);

@@ -34,6 +34,8 @@ class ItemVariantService
 
     public function destroy(Item $item, ItemVariant $variant): void
     {
+        abort_if($variant->item_id !== $item->id, 404);
+
         $variant->delete();
     }
 }

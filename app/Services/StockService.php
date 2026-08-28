@@ -499,7 +499,7 @@ class StockService
                 ->delete();
 
             foreach ($receive->items as $item) {
-                StockBatch::where('stock_receive_item_id', $item->id)->forceDelete();
+                StockBatch::where('stock_receive_item_id', $item->id)->delete();
 
                 $balance = StockBalance::where('item_id', $item->item_id)
                     ->where('variant_id', $item->variant_id)

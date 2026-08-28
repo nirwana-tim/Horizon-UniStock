@@ -11,8 +11,8 @@ return new class extends Migration
         Schema::create('stock_opname_items', function (Blueprint $table) {
             $table->id();
             $table->foreignId('stock_opname_id')->constrained('stock_opnames')->cascadeOnDelete();
-            $table->foreignId('item_id')->constrained('items');
-            $table->foreignId('variant_id')->constrained('item_variants');
+            $table->foreignId('item_id')->nullable()->constrained('items')->nullOnDelete();
+            $table->foreignId('variant_id')->nullable()->constrained('item_variants')->nullOnDelete();
             $table->integer('system_quantity');
             $table->integer('physical_quantity');
             $table->text('notes')->nullable();

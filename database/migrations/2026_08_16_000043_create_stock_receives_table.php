@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('stock_receives', function (Blueprint $table) {
             $table->id();
             $table->string('reference_number')->unique();
-            $table->foreignId('vendor_id')->constrained('vendors');
+            $table->foreignId('vendor_id')->nullable()->constrained('vendors')->nullOnDelete();
             $table->date('receive_date');
             $table->string('status', 20)->default('pending');
             $table->text('notes')->nullable();

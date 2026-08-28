@@ -14,14 +14,13 @@ return new class extends Migration
             $table->string('code')->unique();
             $table->string('base_code', 50)->nullable();
             $table->char('gender', 1)->nullable();
-            $table->foreignId('category_id')->constrained('item_categories');
+            $table->foreignId('category_id')->nullable()->constrained('item_categories')->nullOnDelete();
             $table->foreignId('type_id')->nullable()->constrained('item_types')->nullOnDelete();
             $table->foreignId('department_id')->nullable()->constrained('item_departments')->nullOnDelete();
             $table->string('unit')->default('pcs');
             $table->decimal('selling_price', 15, 2)->default(0);
             $table->decimal('hpp', 15, 2)->default(0);
             $table->timestamps();
-            $table->softDeletes();
             $table->boolean('is_active')->default(true);
             $table->index('name');
             $table->index('base_code');

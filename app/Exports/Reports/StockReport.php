@@ -37,7 +37,6 @@ class StockReport extends BaseExport implements FromQuery, WithChunkReading, Wit
                 DB::raw("COALESCE(SUM(CASE WHEN type = 'IN' THEN quantity ELSE 0 END), 0) as total_in"),
                 DB::raw("COALESCE(SUM(CASE WHEN type = 'OUT' THEN quantity ELSE 0 END), 0) as total_out")
             )
-            ->whereNull('deleted_at')
             ->groupBy('item_id', 'variant_id');
 
         $query = StockBalance::with('item.category', 'item.variants', 'variant')

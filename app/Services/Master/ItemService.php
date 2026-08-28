@@ -7,6 +7,7 @@ use App\Models\ItemCategory;
 use App\Models\ItemDepartment;
 use App\Models\ItemSize;
 use App\Models\ItemType;
+use Illuminate\Database\QueryException;
 use Illuminate\Validation\ValidationException;
 
 class ItemService
@@ -29,18 +30,27 @@ class ItemService
             ]);
         }
 
-        $item = Item::create([
-            'base_code' => $code,
-            'code' => $code,
-            'name' => trim($name),
-            'gender' => $data['gender'],
-            'category_id' => $data['category_id'],
-            'type_id' => $data['type_id'] ?? null,
-            'department_id' => $data['department_id'] ?? null,
-            'unit' => $data['unit'] ?? 'pcs',
-            'selling_price' => $data['selling_price'] ?? 0,
-            'hpp' => $data['hpp'] ?? 0,
-        ]);
+        try {
+            $item = Item::create([
+                'base_code' => $code,
+                'code' => $code,
+                'name' => trim($name),
+                'gender' => $data['gender'],
+                'category_id' => $data['category_id'],
+                'type_id' => $data['type_id'] ?? null,
+                'department_id' => $data['department_id'] ?? null,
+                'unit' => $data['unit'] ?? 'pcs',
+                'selling_price' => $data['selling_price'] ?? 0,
+                'hpp' => $data['hpp'] ?? 0,
+            ]);
+        } catch (QueryException $e) {
+            if (str_contains($e->getMessage(), 'Duplicate entry')) {
+                throw ValidationException::withMessages([
+                    'category_id' => "Item dengan kode {$code} sudah ada. Silakan coba lagi.",
+                ]);
+            }
+            throw $e;
+        }
 
         foreach ($sizes as $size) {
             $item->variants()->firstOrCreate(

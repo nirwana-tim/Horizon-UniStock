@@ -19,7 +19,7 @@ class ItemCategoryRequest extends FormRequest
 
         return [
             'label' => 'required|string|max:255',
-            'code' => [$isCreate ? 'required' : 'nullable', 'string', 'max:3', Rule::unique('item_categories', 'code')->ignore($categoryId)->withoutTrashed()],
+            'code' => [$isCreate ? 'required' : 'nullable', 'string', 'max:3', Rule::unique('item_categories', 'code')->ignore($categoryId)],
         ];
     }
 }

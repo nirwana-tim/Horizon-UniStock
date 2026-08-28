@@ -10,8 +10,8 @@ return new class extends Migration
     {
         Schema::create('stock_batches', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('item_id')->constrained('items')->cascadeOnDelete();
-            $table->foreignId('variant_id')->constrained('item_variants')->cascadeOnDelete();
+            $table->foreignId('item_id')->nullable()->constrained('items')->nullOnDelete();
+            $table->foreignId('variant_id')->nullable()->constrained('item_variants')->nullOnDelete();
             $table->integer('quantity_remaining')->default(0);
             $table->decimal('unit_hpp', 15, 2)->default(0);
             $table->date('received_date');

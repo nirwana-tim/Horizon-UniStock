@@ -18,7 +18,7 @@ class ItemDepartmentRequest extends FormRequest
 
         return [
             'label' => 'required|string|max:255',
-            'code' => ['nullable', 'string', 'max:2', Rule::unique('item_departments', 'code')->ignore($deptId)->withoutTrashed()],
+            'code' => ['nullable', 'string', 'max:2', Rule::unique('item_departments', 'code')->ignore($deptId)],
         ];
     }
 }

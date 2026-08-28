@@ -125,6 +125,7 @@
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
                             </div>
+                        </div>
 
                         <div class="mt-6">
                             <label class="block text-sm font-medium text-gray-700 font-semibold mb-1">Sizes <span class="text-red-500">*</span></label>
