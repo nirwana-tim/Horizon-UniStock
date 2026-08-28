@@ -86,6 +86,10 @@ class ItemImport implements ToCollection, WithHeadingRow, WithMultipleSheets
                 );
             }
 
+            $skusToCreate = collect($this->sizeCodes)->map(fn ($code) => $item->code.'-'.$code)->values()->toArray();
+            $skusToCreate[] = $item->code.'-01';
+            ItemVariant::whereNull('item_id')->whereIn('sku', array_unique($skusToCreate))->delete();
+
             $variantCreated = false;
             foreach ($this->sizeCodes as $sizeLabel => $sizeCode) {
                 $qty = $record['sizes'][$sizeLabel] ?? null;

@@ -7,6 +7,7 @@ use App\Models\ItemCategory;
 use App\Models\ItemDepartment;
 use App\Models\ItemSize;
 use App\Models\ItemType;
+use App\Models\ItemVariant;
 use Illuminate\Database\QueryException;
 use Illuminate\Validation\ValidationException;
 
@@ -51,6 +52,9 @@ class ItemService
             }
             throw $e;
         }
+
+        $skusToCreate = $sizes->map(fn ($size) => $code.'-'.$size->code)->toArray();
+        ItemVariant::whereNull('item_id')->whereIn('sku', $skusToCreate)->delete();
 
         foreach ($sizes as $size) {
             $item->variants()->firstOrCreate(
@@ -102,6 +106,9 @@ class ItemService
                 ]);
             }
         }
+
+        $skusToCreate = $sizes->map(fn ($size) => $newCode.'-'.$size->code)->toArray();
+        ItemVariant::whereNull('item_id')->whereIn('sku', $skusToCreate)->delete();
 
         foreach ($sizes as $size) {
             $item->variants()->firstOrCreate(
