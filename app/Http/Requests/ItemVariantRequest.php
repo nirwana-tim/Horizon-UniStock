@@ -19,7 +19,7 @@ class ItemVariantRequest extends FormRequest
         return [
             'size_id' => ['required', 'integer', 'exists:item_sizes,id'],
             'size' => ['required', 'string', 'max:10'],
-            'sku' => ['required', 'string', 'max:50', Rule::unique('item_variants', 'sku')->ignore($variantId)],
+            'sku' => ['required', 'string', 'max:50', Rule::unique('item_variants', 'sku')->ignore($variantId)->withoutTrashed()],
             'weight' => ['nullable', 'numeric', 'min:0'],
         ];
     }

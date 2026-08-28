@@ -15,11 +15,11 @@ class ItemCategoryRequest extends FormRequest
     public function rules(): array
     {
         $categoryId = $this->route('item_category')?->id;
-        $isCreate = !$categoryId;
+        $isCreate = ! $categoryId;
 
         return [
             'label' => 'required|string|max:255',
-            'code' => [$isCreate ? 'required' : 'nullable', 'string', 'max:3', Rule::unique('item_categories', 'code')->ignore($categoryId)],
+            'code' => [$isCreate ? 'required' : 'nullable', 'string', 'max:3', Rule::unique('item_categories', 'code')->ignore($categoryId)->withoutTrashed()],
         ];
     }
 }

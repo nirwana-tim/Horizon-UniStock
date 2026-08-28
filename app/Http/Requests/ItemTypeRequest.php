@@ -15,11 +15,11 @@ class ItemTypeRequest extends FormRequest
     public function rules(): array
     {
         $typeId = $this->route('item_type')?->id;
-        $isCreate = !$typeId;
+        $isCreate = ! $typeId;
 
         return [
             'label' => 'required|string|max:255',
-            'code' => [$isCreate ? 'required' : 'nullable', 'string', 'max:3', Rule::unique('item_types', 'code')->ignore($typeId)],
+            'code' => [$isCreate ? 'required' : 'nullable', 'string', 'max:3', Rule::unique('item_types', 'code')->ignore($typeId)->withoutTrashed()],
         ];
     }
 }

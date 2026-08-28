@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StudentGenerationRequest extends FormRequest
 {
@@ -17,7 +18,7 @@ class StudentGenerationRequest extends FormRequest
 
         return [
             'name' => 'required|string|max:255',
-            'code' => 'required|string|max:50|unique:student_generations,code,' . $generationId,
+            'code' => ['required', 'string', 'max:50', Rule::unique('student_generations', 'code')->ignore($generationId)->withoutTrashed()],
         ];
     }
 }

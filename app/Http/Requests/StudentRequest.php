@@ -17,10 +17,10 @@ class StudentRequest extends FormRequest
         $studentId = $this->route('student')?->id;
 
         return [
-            'nim' => ['required', 'string', 'max:20', Rule::unique('students', 'nim')->ignore($studentId)],
+            'nim' => ['required', 'string', 'max:20', Rule::unique('students', 'nim')->ignore($studentId)->withoutTrashed()],
             'name' => ['required', 'string', 'max:255'],
             'gender' => ['nullable', 'string', 'in:L,P'],
-            'email_kampus' => ['nullable', 'email', 'max:255', 'ends_with:@krw.horizon.ac.id', Rule::unique('students', 'email_kampus')->ignore($studentId), 'required_without_all:email_pribadi'],
+            'email_kampus' => ['nullable', 'email', 'max:255', 'ends_with:@krw.horizon.ac.id', Rule::unique('students', 'email_kampus')->ignore($studentId)->withoutTrashed(), 'required_without_all:email_pribadi'],
             'email_pribadi' => ['nullable', 'email', 'max:255', 'required_without_all:email_kampus'],
             'study_program_id' => ['required', 'integer', 'exists:study_programs,id'],
             'generation_id' => ['nullable', 'integer', 'exists:student_generations,id'],
